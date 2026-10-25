@@ -4,6 +4,10 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.93.1 · minor · 26 Oct 2026
+- GRAVITAS for EDMC (in testing) draws with its own overlay: nothing else to install. Cards like the site's combat screen, with columns, bars and the game's orange, placed as a percent of the game window so they stay in place at any resolution
+- Asked by CMDR Hongark
+
 ### v0.93 · major · 26 Oct 2026
 - GRAVITAS for EDMC, in testing: Combat Mode on top of the game, for CMDRs who play on one screen. A plugin for E:D Market Connector. It works out the fight on your computer, with the same Combat Mode code as this site, and sends nothing anywhere. Asked for by many CMDRs
 - Sync card: the Plugin button tells what it is and what it needs. It takes the place of Show me, which is on the map already (Find me)

@@ -1,6 +1,10 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.93.1", k: "minor", d: "26 Oct 2026", t: [
+      "GRAVITAS for EDMC (in testing) draws with its own overlay: nothing else to install. Cards like the site's combat screen, with columns, bars and the game's orange, placed as a percent of the game window so they stay in place at any resolution",
+      "Asked by CMDR Hongark",
+    ] },
     { v: "v0.93", k: "major", d: "26 Oct 2026", t: [
       "GRAVITAS for EDMC, in testing: Combat Mode on top of the game, for CMDRs who play on one screen. A plugin for E:D Market Connector. It works out the fight on your computer, with the same Combat Mode code as this site, and sends nothing anywhere. Asked for by many CMDRs",
       "Sync card: the Plugin button tells what it is and what it needs. It takes the place of Show me, which is on the map already (Find me)",

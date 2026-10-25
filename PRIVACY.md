@@ -46,9 +46,9 @@ The server side is in this repository too:
 
 The plugin (`plugin/GRAVITAS/`, in testing) runs inside E:D Market Connector on your computer. It reads the Journal and
 Status.json that EDMC gives it, works out the fight with the same code as the site (`plugin/GRAVITAS/engine/`, a copy of
-`src/js/42-combat-engine.js`) and draws it with an overlay plugin. It opens no network connection: its own code imports no `socket`, `urllib`, `http.client` or
-`requests` (search `plugin/GRAVITAS/` for `import`). (The overlay plugin it draws
-with talks to its own helper on your computer, 127.0.0.1.)
+`src/js/42-combat-engine.js`) and shows it on top of the game. It opens no network connection: its own code imports no `socket`, `urllib`, `http.client` or
+`requests` (search `plugin/GRAVITAS/` for `import`). It draws with its own see-through window
+over the game (`plugin/GRAVITAS/gravitas_edmc/hud.py`) and never touches the game itself.
 
 ## What we cannot see or control
 
