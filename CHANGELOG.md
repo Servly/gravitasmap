@@ -4,6 +4,14 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.92.6 · minor · 25 Oct 2026
+- GRAVITAS MODES holds only the modes: Combat, Thargoid and On Foot. Combat glows red in a fight and amber when hostiles are near. A small blue dot means a team board is open
+- Combat Mode's window has three parts: Overview, Past combats and Team board. Past combats and the team board open there, in a window, not over the whole screen
+- Past combats: ✕ deletes a report from this browser, with Undo for a few seconds. The totals follow
+- A combat report opens as a window too. The live fight stays full screen
+- Team board: what it is and how to start one, step by step, in its own part of the window
+- Asked by CMDR Hongark
+
 ### v0.92.5 · minor · 25 Oct 2026
 - GRAVITAS's source code is public on GitHub, under the MIT licence: github.com/Servly/gravitasmap
 - How GRAVITAS reads your journal, step by step in the code, and how to check it yourself: linked from the Privacy tab and the Sync window

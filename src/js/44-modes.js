@@ -1,62 +1,91 @@
 // ------------------------------------------------------------ v0.92.4 GRAVITAS MODES
-// One panel on the left, between Bodies and Sync, for everything about fights: Combat Mode now, Thargoid and On Foot
-// later. Each mode opens in the About window's frame, with its own tab. The panel's last line shows what is live
-// (a fight, a team board) and opens it. Before, these buttons sat in the Sync card and the board floated over the map.
-var MODES = { tab: "Combat", html: "", live: "", st: "" };
+// One panel on the left, between Bodies and Sync: Combat now, Thargoid and On Foot later (Thargoid is a fight too, kept
+// apart on purpose: it will show different things). Each mode opens in the About window's frame, with its own tab.
+// v0.92.6: the panel holds only the three modes. Combat has three parts in its window: Overview, Past combats and
+// Team board, so the list of fights and the board are a window now, not the whole screen.
+var MODES = { tab: "Combat", sub: "home", html: "", nav: "", btn: "", undo: null };
 const mBtn = (a, label, cls) => `<button type="button" ${a}${cls ? ` class="${cls}"` : ""}>${label}</button>`;
-// the live part of the Combat tab: what you can open right now
-function modesCbHTML() {
-  const sy = typeof SYNC !== "undefined" && SYNC.on, rem = sy && SYNC.remote, V = typeof cbLiveView === "function" ? cbLiveView() : null;
-  const n = (typeof cbHistory === "function" ? cbHistory() : []).length;
+function modesShown() { return $("news").style.display === "flex" && NEWS_SET === "modes"; }
+// open the modes window on a part of Combat ("home", "past", "board"). A report or a board on the full screen gives way
+function modesOpen(sub) {
+  if (sub) MODES.sub = sub;
+  if (CB.el && CB.el.classList.contains("show") && !(CB.on && !CB.soft && !CB.past && !CB.hist)) { CB.full = false; CB.hist = false; CB.past = null; cbRender(); }
+  else if (CB.el && CB.el.classList.contains("show")) { CB.full = false; cbRender(); }   // a live fight goes to its chip at the top
+  if (typeof OP !== "undefined" && OP.show) { OP.show = false; opRender(); }
+  openNews("Combat", "modes");
+}
+// Overview: what Combat Mode is doing now
+function modesHomeHTML() {
+  const sy = typeof SYNC !== "undefined" && SYNC.on, V = typeof cbLiveView === "function" ? cbLiveView() : null;
   const st = CB.on ? (CB.soft ? `<b class="mHot soft">● HOSTILES NEAR</b> no fire yet` : `<b class="mHot">● IN COMBAT</b> ${V && V.ep ? V.ep.n : 0} kills`)
     : CB.report ? "Your last fight's report is ready." : sy ? `<b class="mOk">● READY</b> Combat Mode starts by itself when a fight starts.` : "Turn on <b>Sync with the game</b> (the panel below) to use Combat Mode.";
-  const b = [];
-  if (CB.on || CB.report) b.push(mBtn(`data-mcb="open"`, CB.on ? "Open the combat screen" : "Open the report", "pri"));
-  b.push(mBtn(`data-cbhist`, `Past combats${n ? ` (${n})` : ""}`));
-  if (typeof OP !== "undefined" && OP.id) b.push(mBtn(`data-mcb="board"`, `Team board · ${opCount()}`));
-  else if (sy && !rem) b.push(mBtn(`data-opnew`, "Start a team board"));
-  return `<p class="mSt">${st}</p><div class="mBtns">${b.join("")}</div>`;
+  return `<p class="mSt">${st}</p>${CB.on || CB.report ? `<div class="mBtns">${mBtn(`data-mcb="open"`, CB.on ? "Open the combat screen" : "Open the report", "pri")}</div>` : ""}`;
 }
-const MODES_TABS = {
-  "Combat": () => `<div class="q">GRAVITAS: COMBAT MODE</div><div id="mCb">${modesCbHTML()}</div>
-    <div class="q">WHEN IT OPENS</div><p>By itself, when a fight starts: when you are attacked, when you destroy a ship, when your shields or hull take damage, when you are interdicted, or when the game's combat music starts. If a ship only scans you, or you lock a wanted ship, a small <b>HOSTILES NEAR</b> chip lights up at the top and the map stays as it is. Click <b>Map</b> on the combat screen to go back to the map. The chip at the top brings the screen back.</p>
+const MODES_HOME_TEXT = `<div class="q">WHEN IT OPENS</div><p>By itself, when a fight starts: when you are attacked, when you destroy a ship, when your shields or hull take damage, when you are interdicted, or when the game's combat music starts. If a ship only scans you, or you lock a wanted ship, a small <b>HOSTILES NEAR</b> chip lights up at the top and the map stays as it is. Click <b>Map</b> on the combat screen to go back to the map. The chip at the top brings the screen back.</p>
     <div class="q">WHAT IT SHOWS</div><p>The ships you scanned, by value (their bounty), or in your own ship order. Your kills and credits, the attacks on you, your shields and hull, the active Operation and its phase. After the fight: a report you can copy as text or as an image for Discord. The last 30 reports stay in this browser under <b>Past combats</b>.</p>
-    <div class="q">TEAM BOARD</div><p>One link, everyone's fight on one screen. Each CMDR opens the link on the computer where they play, with Sync on, and adds their own totals from their own game: CMDR name, ship, kills, credits, top kill. Anyone with the link can watch, so share it only with your team. GRAVITAS's server keeps nothing: a row lives only on that CMDR's open connection.</p>
-    <div class="q">HOW IT WORKS</div><p>Combat Mode reads only your game's Journal and Status.json, in your browser, the same files as Sync. Nothing is uploaded. The game does not list the ships around you, so "seen" and some totals are estimates, and the screen says so. A shared kill counts for everyone who hit it, as in the game.</p>`,
+    <div class="q">HOW IT WORKS</div><p>Combat Mode reads only your game's Journal and Status.json, in your browser, the same files as Sync. Nothing is uploaded. The game does not list the ships around you, so "seen" and some totals are estimates, and the screen says so. A shared kill counts for everyone who hit it, as in the game.</p>`;
+// Team board: the board itself, or what it is and how to start one
+function modesBoardHTML() {
+  if (typeof OP !== "undefined" && OP.id) return opHTML(true);
+  const sy = typeof SYNC !== "undefined" && SYNC.on && !SYNC.remote;
+  return `<p>For flying together, for example an Operation with your squadron. Everyone's fight on one screen, live, and the results as one card for Discord.</p>
+    <ol class="mSteps"><li>One of you starts a board here. Its link is copied.</li><li>Share the link with your team, on Discord for example.</li><li>Each CMDR opens the link on the computer where they play, with Sync on, and clicks <b>Add my fight</b>.</li><li>Everyone sees each CMDR's kills, credits and top kill as they happen. When the fight is over: <b>Copy image</b>.</li></ol>
+    <div class="mBtns">${sy ? mBtn(`data-opnew`, "Start a team board", "pri") : `<span class="cbNote">Turn on Sync with the game first: the board shows your fight from your own game.</span>`}</div>
+    <p class="cbNote">What the others see: your CMDR name, ship, kills, credits and top kill. Never your journal. Anyone with the link can watch, so share it only with your team. GRAVITAS's server keeps nothing: your row lives only on your open connection.</p>`;
+}
+function modesPastHTML() {
+  const u = MODES.undo && Date.now() < MODES.undo.until ? `<div class="mUndo">Report deleted. <button type="button" data-cbundo>Undo</button></div>` : "";
+  return u + cbHistHTML(true);
+}
+function modesNavHTML() {
+  const n = cbHistory().length, ob = typeof OP !== "undefined" && OP.id;
+  const b = (k, l) => `<button type="button" data-msub="${k}" class="${MODES.sub === k ? "on" : ""}">${l}</button>`;
+  return b("home", "Overview") + b("past", `Past combats${n ? ` <small>${n}</small>` : ""}`) + b("board", `Team board${ob ? ` <i class="mdot" aria-label="open"></i>` : ""}`);
+}
+function modesCbBody() { return MODES.sub === "past" ? modesPastHTML() : MODES.sub === "board" ? modesBoardHTML() : modesHomeHTML(); }
+var MODES_TABS = {   // (var: other parts may ask for it while the page is still loading)
+  "Combat": () => { MODES.nav = modesNavHTML(); MODES.html = modesCbBody();
+    return `<div class="q">GRAVITAS: COMBAT MODE</div><div class="mSub" id="mNav" role="tablist">${MODES.nav}</div><div id="mCb">${MODES.html}</div><div id="mText"${MODES.sub === "home" ? "" : ` style="display:none"`}>${MODES_HOME_TEXT}</div>`; },
   "Thargoid": () => `<div class="q">GRAVITAS: THARGOID MODE</div><p class="note">Planned. Not started yet.</p>
-    <p>A mode of its own for fights with Thargoids. Combat Mode comes first: once it is stable, Thargoid Mode starts from the same base.</p>
+    <p>A mode of its own for fights with Thargoids. It is a fight too, but it needs different things on screen than Combat Mode, so it is kept apart. Combat Mode comes first: once it is stable, Thargoid Mode starts from the same base.</p>
     <p>Ideas are welcome. <button class="repOpen">Report a problem or an idea</button></p>`,
   "On Foot": () => `<div class="q">GRAVITAS: ON FOOT MODE</div><p class="note">Planned. Not started yet.</p>
     <p>A mode of its own for missions on foot, such as a map of the settlement you are in. An idea from CMDR Cyanidex.</p>
     <p>Ideas are welcome. <button class="repOpen">Report a problem or an idea</button></p>`,
 };
-// the panel's own lines
+// redraw the open Combat window: only what changed (so a click or a hover is not lost)
+function modesRefresh() {
+  if (!MODES || !MODES_TABS || !modesShown() || MODES.tab !== "Combat") return;
+  const nav = document.getElementById("mNav"), body = document.getElementById("mCb"); if (!nav || !body) return;
+  const n = modesNavHTML(); if (n !== MODES.nav) { MODES.nav = n; nav.innerHTML = n; }
+  const h = modesCbBody(); if (h !== MODES.html) { MODES.html = h; body.innerHTML = h; }
+  const tx = document.getElementById("mText"); if (tx) tx.style.display = MODES.sub === "home" ? "" : "none";
+}
+// the panel: three buttons. Combat glows red in a fight, amber when hostiles are near; a dot while a team board is open
 function modesPanel() {
   const el = $("modes"); if (!el) return;
-  const sy = typeof SYNC !== "undefined" && SYNC.on, V = CB.on && typeof cbLiveView === "function" ? cbLiveView() : null, L = [];
-  if (CB.on) L.push(CB.soft ? `<button type="button" data-mcb="open" class="mHot soft">● HOSTILES NEAR <span>no fire yet</span></button>` : `<button type="button" data-mcb="open" class="mHot">● IN COMBAT <span>${V && V.ep ? V.ep.n : 0} kills</span></button>`);
-  if (typeof OP !== "undefined" && OP.id) L.push(`<button type="button" data-mcb="board" class="mOp">● TEAM BOARD <span>${opCount()}</span></button>`);
-  const live = L.join(""), st = sy ? "" : "needs Sync";
-  if (live !== MODES.live) { MODES.live = live; $("modesLive").innerHTML = live; $("modesLive").style.display = live ? "flex" : "none"; if (typeof layoutLeft === "function") layoutLeft(); }
-  if (st !== MODES.st) { MODES.st = st; $("modesSt").textContent = st; }
-  el.classList.toggle("hot", CB.on && !CB.soft);
-  // the Combat tab, while it is open: only its live part is redrawn
-  const box = $("news"), cb = document.getElementById("mCb");
-  if (cb && box.style.display === "flex" && NEWS_SET === "modes") { const h = modesCbHTML(); if (h !== MODES.html) { MODES.html = h; cb.innerHTML = h; } }
+  const k = (CB.on ? (CB.soft ? "s" : "h") : "") + (typeof OP !== "undefined" && OP.id ? "b" : "") + (typeof SYNC !== "undefined" && SYNC.on ? "" : "n");
+  if (k !== MODES.btn) { MODES.btn = k; const b = el.querySelector('[data-mode="Combat"]');
+    b.classList.toggle("hot", k.includes("h")); b.classList.toggle("soft", k.includes("s")); b.classList.toggle("ob", k.includes("b"));
+    b.title = k.includes("h") ? "In combat: open Combat Mode" : k.includes("s") ? "Hostiles near: open Combat Mode" : "GRAVITAS: Combat Mode";
+    $("modesSt").textContent = k.includes("n") ? "needs Sync" : ""; }
+  if (MODES.undo && Date.now() >= MODES.undo.until) MODES.undo = null;
+  modesRefresh();
 }
 function modesAct(a) {
-  if (a === "open") { if (CB.on || CB.report) { CB.hist = false; CB.past = null; CB.full = true; cbRender(); } }
-  else if (a === "board") { OP.show = true; opRender(); }
+  if (a === "open") { if (CB.on || CB.report) { $("news").style.display = "none"; CB.hist = false; CB.past = null; CB.full = true; cbRender(); } }
 }
-$("modes").addEventListener("click", e => {
-  const m = e.target.closest("[data-mode]"); if (m) { openNews(m.dataset.mode, "modes"); return; }
-  const b = e.target.closest("[data-mcb]"); if (b) modesAct(b.dataset.mcb);
-});
-// a button in the Combat tab opens its screen: the window closes first (Past combats and Team board have their own handlers)
+$("modes").addEventListener("click", e => { const m = e.target.closest("[data-mode]"); if (m) { if (m.dataset.mode === "Combat") modesOpen(); else openNews(m.dataset.mode, "modes"); } });
+// the buttons inside the Combat window
 $("newsBody").addEventListener("click", e => {
   if (NEWS_SET !== "modes") return;
-  const b = e.target.closest("[data-mcb], [data-cbhist], [data-opnew]"); if (!b) return;
-  $("news").style.display = "none"; if (b.dataset.mcb) modesAct(b.dataset.mcb);
+  const s = e.target.closest("[data-msub]"); if (s) { MODES.sub = s.dataset.msub; modesRefresh(); return; }
+  const d = e.target.closest("[data-cbdel]"); if (d) { e.stopPropagation(); const r = cbHistDel(d.dataset.cbdel); if (r) MODES.undo = Object.assign(r, { until: Date.now() + 8000 }); modesRefresh(); return; }
+  const u = e.target.closest("[data-cbundo]"); if (u) { if (MODES.undo) cbHistPut(MODES.undo); MODES.undo = null; modesRefresh(); return; }
+  const r = e.target.closest("[data-cbt0]"); if (r && MODES.sub === "past") { $("news").style.display = "none"; cbPastOpen(r.dataset.cbt0); return; }
+  if (e.target.closest("[data-ob]")) { opClick(e); return; }
+  const b = e.target.closest("[data-mcb]"); if (b) modesAct(b.dataset.mcb);
 });
+$("newsBody").addEventListener("keydown", e => { if (NEWS_SET === "modes" && e.key === "Enter") { const r = e.target.closest && e.target.closest("[data-cbt0]"); if (r && !e.target.closest("[data-cbdel]")) { $("news").style.display = "none"; cbPastOpen(r.dataset.cbt0); } } });
 TICK.add(modesPanel);
 modesPanel();

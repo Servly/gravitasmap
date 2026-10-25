@@ -52,10 +52,15 @@ function opPush(force) {
 async function opStart() {
   if (!opCan()) { toast("Turn on Sync with the game first: the board shows your fight from your own game."); return; }
   if (!OP.id) { OP.id = opRid(); OP.role = "crew"; OP.key = ""; OP.rows.clear(); opSave(); opOpen(); }
-  OP.show = true; opRender();
+  opShow();
   try { await navigator.clipboard.writeText(opLink()); toast("Board link copied: share it with your team"); } catch (e) {}
 }
-function opJoin(id, role) { if (OP.id !== id) OP.key = ""; OP.id = id; OP.role = role; OP.rows.clear(); OP.show = true; opSave(); opOpen(); opRender(); }
+function opJoin(id, role) { if (OP.id !== id) OP.key = ""; OP.id = id; OP.role = role; OP.rows.clear(); opSave(); opOpen(); opRender();
+  const go = () => typeof MODES !== "undefined" && MODES && MODES_TABS ? opShow() : setTimeout(go, 150); setTimeout(go, 0); }   // (once GRAVITAS MODES has loaded)
+// v0.92.6: on wide screens the board opens in GRAVITAS MODES › Combat › Team board, a window. Phones keep the full screen
+// (the same rule as the CSS that hides the panel on phones, so it holds while the page is still loading)
+const opWin = () => typeof MODES !== "undefined" && !!MODES && !document.body.classList.contains("pfull") && !matchMedia("(max-width: 760px), (max-height: 520px) and (pointer: coarse)").matches;
+function opShow() { if (opWin()) { OP.show = false; opRender(); modesOpen("board"); } else { OP.show = true; opRender(); } }
 function opLeave() { const ws = OP.ws; OP.id = ""; OP.role = ""; OP.key = ""; OP.err = ""; OP.ws = null; OP.rows.clear(); OP.show = false; clearTimeout(OP.timer); opSave(); try { ws && ws.close(1000, "bye"); } catch (e) {} opRender(); }
 // the board: CMDRs by kills, then credits. Live while anyone is still fighting, results when everyone is done
 function opRows() { const all = [...OP.rows.values()], live = new Set(all.filter(r => !r.gone).map(r => r.c));
@@ -68,7 +73,7 @@ function opText() {
     ...L.map((r, i) => `${i + 1}. CMDR ${r.c}${r.sh ? ` (${r.sh})` : ""}: ${r.n || 0} kills · ${cbNum(r.cr)} cr${r.d ? " · ship lost" : ""}`),
     `Team: ${cbNum(tot)} cr · a shared kill counts for everyone who hit it`, "gravitasmap.com"].join("\n");
 }
-function opHTML() {
+function opHTML(inWin) {
   const L = opRows(), st = opState(L), mine = L.find(r => r.id === OP.me), tot = L.reduce((a, r) => a + (r.cr || 0), 0), kills = L.reduce((a, r) => a + (r.n || 0), 0);
   const lead = st === "done" && L[0] && L[0].n ? L[0].id : "";
   const rows = L.map((r, i) => `<li class="${r.id === OP.me ? "me" : ""}${r.gone ? " gone" : ""}${r.id === lead ? " lead" : ""}"><span class="or">${i + 1}</span>
@@ -78,6 +83,10 @@ function opHTML() {
     <span class="otp">${r.top ? `Top: ${esc(r.top.p)} · ${esc(r.top.s)} · ${cbNum(r.top.cr)} cr` : ""}${r.d ? ` <i class="bad">ship lost</i>` : r.sd ? ` <i>shields fell ${r.sd}×</i>` : ""}</span></li>`).join("");
   const join = OP.role !== "crew" ? (opCan() ? `<div class="obJoin"><p>Add your own fight to this board? Everyone with the link will see your CMDR name, ship, kills and credits while GRAVITAS is open.</p><button data-ob="join">Add my fight</button></div>`
     : `<p class="cbNote">To add your own fight, open this link on the computer where you play, with Sync with the game on.</p>`) : "";
+  const tools = `<button data-ob="link">Copy link</button>${L.length ? `<button data-ob="img">Copy image</button><button data-ob="text">Copy text</button>` : ""}<button data-ob="leave">Leave</button>`;
+  if (inWin) return `<div class="mBar"><b class="obSt ${st}">${st === "live" ? "LIVE" : st === "done" ? "RESULTS" : "WAITING"}</b><span class="mWhere">${esc(opWhere(L))}</span>${tools}</div>
+    <div class="obBody inWin">${L.length ? `<p class="obTot"><b>${L.length}</b> CMDR${L.length > 1 ? "s" : ""} · <b>${kills}</b> kills · <b>${cbNum(tot)}</b> cr</p><ol class="obRows">${rows}</ol>` : `<p class="obEmpty">${OP.err ? "Paused." : OP.ws ? "Nobody has added a fight yet. Copy the link and share it with your team: each CMDR opens it on the computer where they play, with Sync on." : "Connecting…"}</p>`}
+    ${OP.err ? `<p class="obErr">${esc(OP.err)} <button data-ob="re">Reconnect</button></p>` : ""}${join}<p class="cbNote">Each row comes from that CMDR's own game. A kill shared by the team counts for everyone who hit it, as in the game, so the team total is not a sum of different ships. GRAVITAS's server keeps nothing: when a CMDR closes GRAVITAS, their row is gone from the server. Leave closes the board on this computer.</p></div>`;
   return `<div class="cbHead rep"><b class="cbTag">TEAM BOARD</b><span class="cbWhere">${esc(opWhere(L))}</span><b class="obSt ${st}">${st === "live" ? "LIVE" : st === "done" ? "RESULTS" : "WAITING"}</b>
     <button data-ob="link">Copy link</button>${L.length ? `<button data-ob="img">Copy image</button><button data-ob="text">Copy text</button>` : ""}<button data-ob="leave">Leave</button><button data-ob="min">Close</button></div>
     <div class="obBody">${L.length ? `<p class="obTot"><b>${L.length}</b> CMDR${L.length > 1 ? "s" : ""} · <b>${kills}</b> kills · <b>${cbNum(tot)}</b> cr</p><ol class="obRows">${rows}</ol>` : `<p class="obEmpty">${OP.err ? "Paused." : OP.ws ? "Nobody has added a fight yet. Share the link: each CMDR opens it on the computer where they play." : "Connecting…"}</p>`}
@@ -88,8 +97,12 @@ function opInit() {
   OP.el = document.createElement("div"); OP.el.id = "opBoard"; OP.el.setAttribute("role", "region"); OP.el.setAttribute("aria-label", "Team board");
   OP.pill = document.createElement("button"); OP.pill.id = "opPill"; OP.pill.type = "button";
   document.body.append(OP.el, OP.pill);
-  OP.pill.onclick = () => { OP.show = true; opRender(); };
-  OP.el.addEventListener("click", async e => {
+  OP.pill.onclick = () => opShow();
+  OP.el.addEventListener("click", opClick);
+  addEventListener("keydown", e => { if (e.key === "Escape" && OP.show) { OP.show = false; opRender(); } });
+}
+// the board's buttons, on the full screen (phones) and in GRAVITAS MODES
+async function opClick(e) {
     const b = e.target.closest("[data-ob]"); if (!b) return; const a = b.dataset.ob;
     if (a === "min") { OP.show = false; opRender(); }
     else if (a === "leave") opLeave();
@@ -100,18 +113,17 @@ function opInit() {
     else if (a === "img") { const blob = await new Promise(r => opCard().toBlob(r, "image/png"));
       try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); b.textContent = "Copied: paste in Discord"; }
       catch (x) { const u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = "gravitas-team-board.png"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); } }
-  });
-  addEventListener("keydown", e => { if (e.key === "Escape" && OP.show) { OP.show = false; opRender(); } });
 }
 function opRender() {
   opInit();
   const show = !!OP.id && OP.show, L = opRows();
   OP.el.classList.toggle("show", show);
-  const mp = document.getElementById("modes"), inPanel = mp && getComputedStyle(mp).display !== "none";   // v0.92.4: on wide screens the board lives in GRAVITAS MODES
+  const inPanel = opWin();   // v0.92.4: on wide screens the board lives in GRAVITAS MODES
   OP.pill.style.display = OP.id && !show && !inPanel ? "block" : "none";
   if (OP.id && !show) OP.pill.innerHTML = `<b>● TEAM BOARD</b> ${opCount()}`;
   if (show) { const h = opHTML(); if (h !== OP.html) { OP.html = h; OP.el.innerHTML = h; } } else OP.html = "";
   document.body.classList.toggle("opOn", !!OP.id);
+  if (typeof modesRefresh === "function") modesRefresh();   // the board in the window follows too
 }
 // the results as an image card for Discord (drawn here, never uploaded anywhere)
 function opCard() {

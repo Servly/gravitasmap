@@ -196,14 +196,23 @@ function cbSave(v) {
   const a = cbHistory().filter(x => x.ep.t0 !== r.ep.t0); a.unshift(r); while (a.length > 30) a.pop();
   try { localStorage.setItem(CB_HIST_KEY, JSON.stringify(a)); } catch (e) { try { localStorage.setItem(CB_HIST_KEY, JSON.stringify(a.slice(0, 10))); } catch (x) {} }
 }
-function cbHistOpen() { CB.hist = true; CB.past = null; CB.full = true; cbRender(); }
-function cbHistHTML() {
+// v0.92.6: Past combats live in GRAVITAS MODES › Combat (a window, not the whole screen). A report opens from there
+function cbHistOpen() { if (typeof modesOpen === "function") { modesOpen("past"); return; } CB.hist = true; CB.past = null; CB.full = true; cbRender(); }
+function cbPastOpen(t0) { const v = cbHistory().find(x => String(x.ep.t0) === String(t0)); if (!v) return; CB.past = v; CB.hist = true; CB.full = true; cbRender(); }
+// delete one report (Undo puts it back where it was)
+function cbHistDel(t0) { const a = cbHistory(), i = a.findIndex(x => String(x.ep.t0) === String(t0)); if (i < 0) return null; const [v] = a.splice(i, 1);
+  try { localStorage.setItem(CB_HIST_KEY, JSON.stringify(a)); } catch (e) {} return { v, i }; }
+function cbHistPut(d) { if (!d || !d.v) return; const a = cbHistory().filter(x => x.ep.t0 !== d.v.ep.t0); a.splice(Math.min(d.i, a.length), 0, d.v); while (a.length > 30) a.pop();
+  try { localStorage.setItem(CB_HIST_KEY, JSON.stringify(a)); } catch (e) {} }
+function cbHistHTML(inWin) {
   const a = cbHistory();
   const tot = a.reduce((o, v) => { o.n += v.ep.n || 0; o.cr += v.ep.cr || 0; o.ms += Math.max(0, v.ep.t1 - v.ep.t0); return o; }, { n: 0, cr: 0, ms: 0 });
   const rows = a.map((v, i) => { const ep = v.ep, d = new Date(ep.t1 || ep.t0);
-    return `<li data-cbh="${i}" role="button" tabindex="0"><span class="hd">${d.toISOString().slice(0, 10)} <small>${d.toISOString().slice(11, 16)} UTC</small></span><span class="hw">${esc(cbWhere(v) || "Unknown place")}${ep.phases > 1 ? ` <em>${ep.phases} phases</em>` : ""}${ep.op ? ` <em>Operation</em>` : ""}</span>
-      <span class="hn"><b>${ep.n || 0}</b>${ep.seenN ? `<small>/${Math.max(ep.seenN, ep.n || 0)}</small>` : ""} kills</span><span class="hc">${cbNum(ep.cr)} cr</span><span class="ht">${cbDurLong(ep.t1 - ep.t0)}</span><span class="hr ${ep.died ? "bad" : ""}">${ep.died ? "ship lost" : ep.shDown ? "shields fell" : "shields held"}</span></li>`; }).join("");
+    return `<li data-cbh="${i}" data-cbt0="${ep.t0}" role="button" tabindex="0"><span class="hd">${d.toISOString().slice(0, 10)} <small>${d.toISOString().slice(11, 16)} UTC</small></span><span class="hw">${esc(cbWhere(v) || "Unknown place")}${ep.phases > 1 ? ` <em>${ep.phases} phases</em>` : ""}${ep.op ? ` <em>Operation</em>` : ""}</span>
+      <span class="hn"><b>${ep.n || 0}</b>${ep.seenN ? `<small>/${Math.max(ep.seenN, ep.n || 0)}</small>` : ""} kills</span><span class="hc">${cbNum(ep.cr)} cr</span><span class="ht">${cbDurLong(ep.t1 - ep.t0)}</span><span class="hr ${ep.died ? "bad" : ""}">${ep.died ? "ship lost" : ep.shDown ? "shields fell" : "shields held"}</span>${inWin ? `<button type="button" class="hx" data-cbdel="${ep.t0}" title="Delete this report" aria-label="Delete this report">✕</button>` : ""}</li>`; }).join("");
   const c = CB.career, car = c ? `<p class="cbCareer">Your career, from the game: <b>${cbNum(c.b)}</b> bounties claimed (${cbNum(c.bcr)} cr) · <b>${cbNum(c.cb)}</b> combat bonds (${cbNum(c.cbcr)} cr) · highest single reward ${cbNum(c.top)} cr</p>` : "";
+  if (inWin) return `<p class="mTot">${a.length ? `<b>${a.length}</b> kept in this browser · <b>${tot.n}</b> kills · <b>${cbNum(tot.cr)}</b> cr · ${cbDurLong(tot.ms)}` : ""}</p>
+    <div class="cbHist inWin">${car}${a.length ? `<ol>${rows}</ol><p class="cbNote">Click a fight to open its report. ✕ deletes a report from this browser.</p>` : `<p class="cbNote">No combats yet. With Sync on, every fight leaves its report here.</p>`}</div>`;
   return `<div class="cbHead rep"><b class="cbTag">PAST COMBATS</b><span class="cbWhere">${a.length ? `${a.length} kept in this browser · ${tot.n} kills · ${cbNum(tot.cr)} cr · ${cbDurLong(tot.ms)}` : ""}</span><button data-cb="hclose">Close</button></div>
     <div class="cbHist">${car}${a.length ? `<ol>${rows}</ol>` : `<p class="cbNote">No combats yet. With Sync on, every fight leaves its report here.</p>`}</div>`;
 }
@@ -404,7 +413,7 @@ function cbInit() {
     if (b.dataset.cb === "min") { CB.full = false; cbRender(); }
     else if (b.dataset.cb === "hist") { cbHistOpen(); }
     else if (b.dataset.cb === "hclose") { CB.hist = false; CB.past = null; CB.full = false; cbRender(); }
-    else if (b.dataset.cb === "close" && CB.past) { CB.past = null; cbRender(); }
+    else if (b.dataset.cb === "close" && CB.past) { CB.past = null; CB.hist = false; CB.full = false; cbRender(); if (typeof modesOpen === "function") modesOpen("past"); }   // Back: to the list in GRAVITAS MODES
     else if (b.dataset.cb === "close") { if (CB.remote) CB.remote = Object.assign({}, CB.remote, { closed: true }); else { CB.report = null; CB.rev++; } CB.full = false; cbRender(); try { syncShow(); } catch (x) {} }
     else if (b.dataset.cb === "copy") { const V = cbView(); try { await navigator.clipboard.writeText(cbReportText(V)); b.textContent = "Copied"; } catch (x) { prompt("Copy:", cbReportText(V)); } }
     else if (b.dataset.cb === "solo" || b.dataset.cb === "team") { CB.tab = b.dataset.cb; cbRender(); }

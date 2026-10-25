@@ -1,6 +1,14 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.92.6", k: "minor", d: "25 Oct 2026", t: [
+      "GRAVITAS MODES holds only the modes: Combat, Thargoid and On Foot. Combat glows red in a fight and amber when hostiles are near. A small blue dot means a team board is open",
+      "Combat Mode's window has three parts: Overview, Past combats and Team board. Past combats and the team board open there, in a window, not over the whole screen",
+      "Past combats: ✕ deletes a report from this browser, with Undo for a few seconds. The totals follow",
+      "A combat report opens as a window too. The live fight stays full screen",
+      "Team board: what it is and how to start one, step by step, in its own part of the window",
+      "Asked by CMDR Hongark",
+    ] },
     { v: "v0.92.5", k: "minor", d: "25 Oct 2026", t: [
       "GRAVITAS's source code is public on GitHub, under the MIT licence: github.com/Servly/gravitasmap",
       "How GRAVITAS reads your journal, step by step in the code, and how to check it yourself: linked from the Privacy tab and the Sync window",
@@ -683,7 +691,7 @@ function openNews(tab, set) {
   if (NEWS_SET === "modes") { if (tab && T[tab]) MODES.tab = tab; tab = MODES.tab; } else { if (tab) newsTab = tab; tab = newsTab; }
   $("newsH3").textContent = NEWS_SET === "modes" ? "GRAVITAS MODES" : "ABOUT GRAVITAS"; $("news").setAttribute("aria-label", $("newsH3").textContent);
   $("newsTabs").innerHTML = Object.keys(T).map(t => `<button data-t="${t}" class="${t === tab ? "on" : ""}">${t}</button>`).join("");
-  $("newsBody").innerHTML = T[tab](); $("newsBody").scrollTop = 0; MODES.html = "";
+  $("newsBody").innerHTML = T[tab](); $("newsBody").scrollTop = 0;
   $("newsTabs").querySelectorAll("button").forEach(b => b.onclick = () => openNews(b.dataset.t, NEWS_SET));
   $("newsBody").querySelectorAll(".repOpen").forEach(b => b.onclick = () => { $("news").style.display = "none"; openReport(); });
   $("news").style.display = "flex";

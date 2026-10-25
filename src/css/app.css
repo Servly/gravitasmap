@@ -1236,15 +1236,34 @@ body.combat #opPill { top:96px; }
 #modes .mrow button svg { width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; flex:none; }
 #modes .mrow button[data-mode="Combat"] { color:#ff8f9a; border-color:rgba(255,90,106,.45); } #modes .mrow button[data-mode="Combat"]:hover { background:rgba(255,60,80,.12); }
 #modes .mrow button.soon { color:var(--dim); border-style:dashed; }   /* planned: the dashed edge says "not yet", the window says the rest */
-#modes .mlive { display:none; flex-direction:column; gap:4px; margin-top:6px; }
-#modes .mlive button { display:flex; align-items:center; gap:6px; width:100%; padding:4px 8px; font-size:10.5px; font-weight:700; letter-spacing:.06em; border-radius:8px; text-align:left; background:rgba(255,60,80,.08); border:1px solid rgba(255,90,106,.4); color:#ff8f9a; }
-#modes .mlive button span { font-weight:500; letter-spacing:0; color:var(--text); }
-#modes .mlive button.mHot:not(.soft) { background:rgba(255,40,60,.2); border-color:#ff5a6a; color:#ffb3ba; }
-#modes .mlive button:hover { background:rgba(255,60,80,.18); }
-#modes.hot { border-color:#ff5a6a88; box-shadow:0 0 18px -6px #ff3b4e66; }
 @media (max-width: 760px), (max-height: 520px) and (pointer: coarse) { #modes { display:none !important; } }
 body.pfull #modes { display:none !important; }
 /* the Combat tab in the modes window */
 #news .mSt { margin:0 0 8px; } #news .mSt b { letter-spacing:.06em; margin-right:6px; } #news .mHot { color:#ff6b78; } #news .mHot.soft { color:#ff9da6; } #news .mOk { color:#3ddc84; }
 #news .mBtns { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 6px; } #news .mBtns button { padding:5px 11px; border-radius:8px; }
 .obErr { color:#ffc857; font-size:13px; } .obErr button { margin-left:6px; }
+/* v0.92.6: Combat glows in a fight; a dot while a team board is open. Past combats and the board are a window now */
+#modes .mrow button[data-mode="Combat"] { position:relative; }
+#modes .mrow button[data-mode="Combat"].hot { background:rgba(255,40,60,.25); border-color:#ff5a6a; color:#ffd0d4; box-shadow:0 0 14px -4px #ff3b4e; animation:mHot 1.6s ease-in-out infinite; }
+#modes .mrow button[data-mode="Combat"].soft { border-color:#ffb84d; color:#ffd59a; }
+#modes .mrow button[data-mode="Combat"].ob::after { content:""; position:absolute; top:3px; right:4px; width:6px; height:6px; border-radius:50%; background:#6eb4ff; box-shadow:0 0 6px #6eb4ff; }
+@keyframes mHot { 50% { box-shadow:0 0 22px -2px #ff3b4e; } }
+@media (prefers-reduced-motion: reduce) { #modes .mrow button[data-mode="Combat"].hot { animation:none; } }
+#news .mSub { display:flex; gap:4px; margin:4px 0 14px; border-bottom:1px solid rgba(255,90,106,.25); }
+#news .mSub button { border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--dim); padding:6px 12px; font-size:12.5px; position:relative; }
+#news .mSub button.on { color:#ff8f9a; border-bottom-color:#ff5a6a; } #news .mSub button small { font-size:10px; color:var(--dim); margin-left:3px; }
+#news .mSub .mdot { display:inline-block; width:6px; height:6px; border-radius:50%; background:#6eb4ff; margin-left:5px; vertical-align:2px; }
+#news .mTot { margin:0 0 8px; color:#e9c3c7; } #news .mTot b { color:#fff; }
+#news .mUndo { display:flex; align-items:center; gap:10px; margin:0 0 10px; padding:7px 12px; border-radius:8px; background:rgba(255,200,87,.1); border:1px solid rgba(255,200,87,.45); color:#ffe2a8; }
+#news .mSteps { margin:6px 0 12px; padding-left:22px; } #news .mSteps li { margin:4px 0; }
+#news .mBar { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:0 0 6px; } #news .mBar .mWhere { flex:1; min-width:0; color:#e9c3c7; }
+#news .obBody.inWin { padding:4px 0 0; max-width:none; overflow:visible; }
+#news .cbHist.inWin { padding:0; overflow:visible; } #news .cbHist.inWin ol { max-width:none; }
+#news .cbHist.inWin li { grid-template-columns:120px minmax(0,1fr) 80px 110px 90px 92px 26px; padding:9px 10px; text-align:left; }
+#news .cbHist .hx { width:26px; height:26px; padding:0; border-radius:6px; background:none; border:1px solid transparent; color:#b9939a; font-size:13px; cursor:pointer; }
+#news .cbHist .hx:hover, #news .cbHist .hx:focus-visible { border-color:#ff5466; color:#ff8f9a; background:rgba(255,60,80,.12); }
+@media (max-width:900px) { #news .cbHist.inWin li { grid-template-columns:1fr auto 26px; } #news .cbHist.inWin .hw { grid-column:1 / -1; } }
+/* a report (end of a fight, or from Past combats) is a window, not the whole screen; the live fight stays full screen */
+#combat.report { inset:5vh max(24px, calc(50vw - 640px)); border:1px solid rgba(255,90,106,.4); border-radius:12px; overflow:hidden;
+  box-shadow:0 0 0 100vmax rgba(5,3,10,.62), inset 0 0 90px rgba(255,80,90,.15); }
+@media (max-width: 760px), (max-height: 520px) and (pointer: coarse) { #combat.report { inset:0; border:0; border-radius:0; box-shadow:inset 0 0 90px rgba(255,80,90,.15); } }
