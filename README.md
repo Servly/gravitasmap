@@ -34,6 +34,7 @@ src/            the app's source
 functions/      the site's server on Cloudflare Pages: /api/system, /api/autocomplete, /api/room, /api/report
 lib/            helpers shared by the functions (Spansh calls)
 worker/         the small pairing and team-board server (a Cloudflare Durable Object)
+plugin/GRAVITAS GRAVITAS for EDMC: Combat Mode on top of the game (tools/plugin_build.py makes its zip)
 tools/          build and publish scripts
 ```
 

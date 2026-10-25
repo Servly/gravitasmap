@@ -4,6 +4,11 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.93 · major · 26 Oct 2026
+- GRAVITAS for EDMC, in testing: Combat Mode on top of the game, for CMDRs who play on one screen. A plugin for E:D Market Connector. It works out the fight on your computer, with the same Combat Mode code as this site, and sends nothing anywhere. Asked for by many CMDRs
+- Sync card: the Plugin button tells what it is and what it needs. It takes the place of Show me, which is on the map already (Find me)
+- Combat Mode's code is now in two parts: the fight itself (one file, the same on the site and in the plugin) and the screen. Nothing changes on the site: every combat test and CMDR Hongark's own journals give the same results as before
+
 ### v0.92.6 · minor · 25 Oct 2026
 - GRAVITAS MODES holds only the modes: Combat, Thargoid and On Foot. Combat glows red in a fight and amber when hostiles are near. A small blue dot means a team board is open
 - Combat Mode's window has three parts: Overview, Past combats and Team board. Past combats and the team board open there, in a window, not over the whole screen

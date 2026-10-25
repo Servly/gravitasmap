@@ -500,7 +500,7 @@ function tgtMapTick() {
     $("syncGo").onclick = () => { if (SYNC.pend) syncFollow(SYNC.pend, false); };
     $("syncAuto").onchange = e => { SYNC.auto = e.target.checked; syncLS("auto", SYNC.auto ? "1" : "0"); if (SYNC.auto && SYNC.pend && !S) syncFollow(SYNC.pend, false); };
     $("syncDir").onclick = () => syncDialog(true);
-    $("syncMe").onclick = () => findMe();                             // v0.72.2: one click to where you are (v0.79.9: the same as Find me)
+    $("syncPlug").onclick = () => openNews("GRAVITAS for EDMC", "plugin");   // v0.93: Show me is on the map (Find me); here: the plugin
     syncShow();
     // last visit had it on: resume quietly when the browser still allows reading the folder, else wait for a click
     if (SYNC.ok && syncLS("on") === "1") syncLoadDir().then(async h => {

@@ -1,6 +1,11 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.93", k: "major", d: "26 Oct 2026", t: [
+      "GRAVITAS for EDMC, in testing: Combat Mode on top of the game, for CMDRs who play on one screen. A plugin for E:D Market Connector. It works out the fight on your computer, with the same Combat Mode code as this site, and sends nothing anywhere. Asked for by many CMDRs",
+      "Sync card: the Plugin button tells what it is and what it needs. It takes the place of Show me, which is on the map already (Find me)",
+      "Combat Mode's code is now in two parts: the fight itself (one file, the same on the site and in the plugin) and the screen. Nothing changes on the site: every combat test and CMDR Hongark's own journals give the same results as before",
+    ] },
     { v: "v0.92.6", k: "minor", d: "25 Oct 2026", t: [
       "GRAVITAS MODES holds only the modes: Combat, Thargoid and On Foot. Combat glows red in a fight and amber when hostiles are near. A small blue dot means a team board is open",
       "Combat Mode's window has three parts: Overview, Past combats and Team board. Past combats and the team board open there, in a window, not over the whole screen",
@@ -686,10 +691,10 @@ const NEWS_TABS = {
 let newsTab = "What's new", NEWS_SET = "about";
 // v0.92.4: the same window shows ABOUT GRAVITAS and GRAVITAS MODES (43-modes.js), each with its own tabs
 function openNews(tab, set) {
-  NEWS_SET = set === "modes" && typeof MODES_TABS !== "undefined" ? "modes" : "about";
-  const T = NEWS_SET === "modes" ? MODES_TABS : NEWS_TABS;
-  if (NEWS_SET === "modes") { if (tab && T[tab]) MODES.tab = tab; tab = MODES.tab; } else { if (tab) newsTab = tab; tab = newsTab; }
-  $("newsH3").textContent = NEWS_SET === "modes" ? "GRAVITAS MODES" : "ABOUT GRAVITAS"; $("news").setAttribute("aria-label", $("newsH3").textContent);
+  NEWS_SET = set === "modes" && typeof MODES_TABS !== "undefined" ? "modes" : set === "plugin" && typeof PLUGIN_TABS !== "undefined" ? "plugin" : "about";   // v0.93: and the plugin
+  const T = NEWS_SET === "modes" ? MODES_TABS : NEWS_SET === "plugin" ? PLUGIN_TABS : NEWS_TABS;
+  if (NEWS_SET === "modes") { if (tab && T[tab]) MODES.tab = tab; tab = MODES.tab; } else if (NEWS_SET === "plugin") { tab = tab && T[tab] ? tab : Object.keys(T)[0]; } else { if (tab) newsTab = tab; tab = newsTab; }
+  $("newsH3").textContent = NEWS_SET === "modes" ? "GRAVITAS MODES" : NEWS_SET === "plugin" ? "GRAVITAS PLUGIN" : "ABOUT GRAVITAS"; $("news").setAttribute("aria-label", $("newsH3").textContent);
   $("newsTabs").innerHTML = Object.keys(T).map(t => `<button data-t="${t}" class="${t === tab ? "on" : ""}">${t}</button>`).join("");
   $("newsBody").innerHTML = T[tab](); $("newsBody").scrollTop = 0;
   $("newsTabs").querySelectorAll("button").forEach(b => b.onclick = () => openNews(b.dataset.t, NEWS_SET));

@@ -16,9 +16,10 @@ OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parent / "gravitasmap-git
 # what goes public: the app's source, the server code, the build tools and the papers
 KEEP = ["src", "functions", "lib", "worker/src", "worker/wrangler.toml",
         "tools/build.py", "tools/deploy.bat", "tools/_headers", "tools/github_export.py", "tools/github_publish.py", "tools/changelog.py",
+        "tools/plugin_build.py", "plugin/GRAVITAS", "plugin/.gitignore",   # v0.93: GRAVITAS for EDMC
         "README.md", "PRIVACY.md", "CHANGELOG.md", "LICENSE", "NOTICE.md", ".gitignore"]
 # never, wherever they are
-NEVER = re.compile(r"(report_mail\.json$|private_words\.txt$|\.env|node_modules|__pycache__|\.wrangler|problem-reports|\.pyc$|\.log$)", re.I)
+NEVER = re.compile(r"(report_mail\.json$|private_words\.txt$|\.env|node_modules|__pycache__|\.wrangler|problem-reports|\.pyc$|\.log$|plugin/dist/)", re.I)
 # private things that must not be in any public file
 BAD = [(re.compile(r"[A-Za-z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|icloud|proton)\.[a-z.]+", re.I), "a personal e-mail address"),
        (re.compile(r"\bre_[A-Za-z0-9]{16,}"), "a Resend API key"),

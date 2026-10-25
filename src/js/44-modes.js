@@ -89,3 +89,12 @@ $("newsBody").addEventListener("click", e => {
 $("newsBody").addEventListener("keydown", e => { if (NEWS_SET === "modes" && e.key === "Enter") { const r = e.target.closest && e.target.closest("[data-cbt0]"); if (r && !e.target.closest("[data-cbdel]")) { $("news").style.display = "none"; cbPastOpen(r.dataset.cbt0); } } });
 TICK.add(modesPanel);
 modesPanel();
+// ------------------------------------------------------------ v0.93 GRAVITAS for EDMC (the Plugin button in the Sync card)
+var PLUGIN_TABS = {
+  "GRAVITAS for EDMC": () => `<div class="q">GRAVITAS FOR EDMC</div><p><span class="plSt">IN TESTING</span> Not released yet.</p>
+    <p>A plugin for <b>E:D Market Connector</b> (EDMC) that shows Combat Mode on top of the game, for CMDRs who play on one screen. Each window (targets by value, kill feed, this fight and more) can be switched on or off, moved and coloured from the plugin's settings in EDMC. By default in the game's orange.</p>
+    <div class="q">ON YOUR COMPUTER ONLY</div><p>The plugin reads the Journal that EDMC already reads, and works out the fight on your computer. It sends nothing anywhere and needs no browser: GRAVITAS does not have to be open. It runs the same Combat Mode code as this site, so the numbers are the same.</p>
+    <div class="q">WHAT IT NEEDS</div><ul><li><a href="https://github.com/EDCD/EDMarketConnector" target="_blank" rel="noopener">E:D Market Connector</a> on Windows</li><li><b>EDMCModernOverlay</b>, the plugin that draws on top of the game (in fullscreen too)</li></ul>
+    <div class="q">PLANNED</div><p>Combat Mode first. Then Thargoid Mode and a Route Mode (the next jump, star class, fuel), each one switched on or off in the plugin.</p>
+    <p class="note">It will be free and open, under the MIT licence, like GRAVITAS. When it is ready, the download and the steps to install it will be here.</p>`,
+};

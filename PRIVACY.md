@@ -42,6 +42,14 @@ The server side is in this repository too:
 
 **A note on earlier versions.** From v0.91 to v0.91.7, with a phone or tablet paired, the combat screen was kept in the pairing room together with the "where am I" summary, for up to 12 hours after the last device left. It held your CMDR name, your kills and your team's names. It was not your journal, but our privacy text did not say so. We found it ourselves and changed it in v0.92: since then the combat screen is only passed on.
 
+## GRAVITAS for EDMC (the plugin)
+
+The plugin (`plugin/GRAVITAS/`, in testing) runs inside E:D Market Connector on your computer. It reads the Journal and
+Status.json that EDMC gives it, works out the fight with the same code as the site (`plugin/GRAVITAS/engine/`, a copy of
+`src/js/42-combat-engine.js`) and draws it with an overlay plugin. It opens no network connection: its own code imports no `socket`, `urllib`, `http.client` or
+`requests` (search `plugin/GRAVITAS/` for `import`). (The overlay plugin it draws
+with talks to its own helper on your computer, 127.0.0.1.)
+
 ## What we cannot see or control
 
 - **Hosting.** GRAVITAS runs on Cloudflare. Like any host, Cloudflare handles your IP address to deliver the pages and keeps short technical logs of the requests. Those requests include the names of the systems your map asks for, so in Cloudflare's logs a series of them could show where you travelled. GRAVITAS itself does not keep these, and does not read them to follow anyone.
