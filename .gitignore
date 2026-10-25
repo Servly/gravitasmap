@@ -1,0 +1,16 @@
+# built site (made by tools/build.py)
+site/
+# private: never on GitHub
+tools/report_mail.json
+tools/private_words.txt
+problem-reports/
+.env
+.env.*
+.dev.vars
+# local tools and caches
+node_modules/
+.wrangler/
+__pycache__/
+*.pyc
+*.log
+data/cache/

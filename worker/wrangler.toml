@@ -1,0 +1,15 @@
+# v0.76 "Sync with GRAVITAS": the small server that links a computer running Sync with phones and tablets.
+# deploy.bat publishes it before the site. The site reaches it through a Durable Object binding named ROOMS
+# (Cloudflare dashboard -> Workers & Pages -> gravitas -> Settings -> Bindings -> Durable Object: ROOMS -> gravitas-rooms / Room).
+name = "gravitas-rooms"
+main = "src/room.js"
+compatibility_date = "2025-09-01"
+workers_dev = false
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GRAVITAS · live system map and eclipse calendar for Elite Dangerous</title>
+<meta name="description" content="GRAVITAS is a free, live map of any Elite Dangerous star system, in 3D and as a flat system map like the game's: where every planet and moon is right now, eclipse times and starlight, rings, stations, fleet carriers and the sky from a moon's surface. Built from Spansh data and checked against the game.">
+<meta name="theme-color" content="#0b0716">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GRAVITAS · live system map and eclipse calendar for Elite Dangerous">
+<meta property="og:description" content="Live system map and eclipse calendar for Elite Dangerous: planet and moon positions, eclipse times, stations, carriers and the sky from any surface. Free and fan-made.">
+<meta property="og:image" content="assets/gravitas-logo-large.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"GRAVITAS","alternateName":"GRAVITAS – live system map and eclipse calendar for Elite Dangerous","applicationCategory":"GameApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"description":"Free live system map for Elite Dangerous, in 3D and flat like the game's: positions of planets and moons, an eclipse calendar, rings, stations, fleet carriers and the sky from a moon's surface, built from Spansh data and checked against the game.","author":[{"@type":"Person","name":"CMDR Hongark"}],"isAccessibleForFree":true}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%20viewBox%3D%220%200%2064%2064%22%20aria-label%3D%22GRAVITAS%20logo%22%3E%0A%20%20%20%20%3Cdefs%3E%3CradialGradient%20id%3D%22glbg%22%20cx%3D%22.5%22%20cy%3D%22.42%22%20r%3D%22.6%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232a1748%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230b0716%22/%3E%3C/radialGradient%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22glw%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff6ad5%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%236ae8ff%22/%3E%3C/linearGradient%3E%0A%20%20%20%20%20%20%3CradialGradient%20id%3D%22glst%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22/%3E%3Cstop%20offset%3D%22.4%22%20stop-color%3D%22%23ffd27a%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9a3a%22%20stop-opacity%3D%220%22/%3E%3C/radialGradient%3E%3C/defs%3E%0A%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2262%22%20height%3D%2262%22%20rx%3D%2214%22%20fill%3D%22url%28%23glbg%29%22%20stroke%3D%22%23ff6ad5%22%20stroke-opacity%3D%22.45%22/%3E%0A%20%20%20%20%3Cg%20fill%3D%22none%22%20stroke%3D%22url%28%23glw%29%22%20stroke-width%3D%221.1%22%3E%0A%20%20%20%20%20%20%3Cellipse%20cx%3D%2232%22%20cy%3D%2227%22%20rx%3D%2227%22%20ry%3D%228%22%20opacity%3D%22.35%22/%3E%3Cellipse%20cx%3D%2232%22%20cy%3D%2231%22%20rx%3D%2219%22%20ry%3D%225.6%22%20opacity%3D%22.5%22/%3E%0A%20%20%20%20%20%20%3Cellipse%20cx%3D%2232%22%20cy%3D%2236%22%20rx%3D%2212%22%20ry%3D%223.6%22%20opacity%3D%22.7%22/%3E%3Cellipse%20cx%3D%2232%22%20cy%3D%2241%22%20rx%3D%226.5%22%20ry%3D%222%22%20opacity%3D%22.9%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M5%2027%20Q22%2030%2029%2044%20M59%2027%20Q42%2030%2035%2044%20M14%2033.2%20Q26%2034%2030.5%2044%20M50%2033.2%20Q38%2034%2033.5%2044%20M32%2035%20V45%22%20opacity%3D%22.55%22/%3E%0A%20%20%20%20%3C/g%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2232%22%20cy%3D%2246%22%20r%3D%226%22%20fill%3D%22url%28%23glst%29%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2246%22%20r%3D%222.2%22%20fill%3D%22%23fff%22/%3E%0A%20%20%20%20%3Cpath%20id%3D%22glorb%22%20d%3D%22M7%2022%20A25%208%20-8%201%201%2057%2015%20A25%208%20-8%201%201%207%2022%22%20fill%3D%22none%22%20stroke%3D%22%236ae8ff%22%20stroke-width%3D%22.9%22%20stroke-dasharray%3D%222%202.5%22%20opacity%3D%22.8%22/%3E%0A%20%20%20%20%3Ccircle%20r%3D%223%22%20fill%3D%22%23ff6ad5%22%3E%3CanimateMotion%20dur%3D%227s%22%20repeatCount%3D%22indefinite%22%3E%3Cmpath%20xlink%3Ahref%3D%22%23glorb%22/%3E%3C/animateMotion%3E%3C/circle%3E%0A%20%20%3C/svg%3E">
+<!--CSS-->
+</head>
+<body>
+<noscript><div style="padding:24px;font-family:sans-serif;color:#eee;background:#0b0716"><h1>GRAVITAS · live system map and eclipse calendar for Elite Dangerous</h1><p>A free, live 3D map of any Elite Dangerous star system: where every planet and moon is right now, eclipse times and starlight, rings, the sky from a moon's surface and fleet carriers. Built from Spansh data and checked against the game. Please enable JavaScript to use the map.</p></div></noscript>
+<div id="scene" role="main" aria-label="3D system view"></div>
+<section id="smap" class="panel" aria-label="System map"><div class="smh"><b>SYSTEM MAP</b><span class="smn">Drag to move · scroll or pinch to zoom · hover a body or icon for details · double-click for 3D</span></div>
+  <div class="smf" id="smapF"></div><div class="smf smf2" id="smapF2"></div>
+  <div class="smv" id="smapView" tabindex="0" aria-label="System map picture. Arrow keys move it, plus and minus zoom, 0 fits it."><div id="smapBody"></div>
+    <div class="smz"><button id="smZin" title="Zoom in">+</button><button id="smZout" title="Zoom out">−</button><button id="smZfit" title="Show the whole system">⤢</button><button id="smNames" title="Show or hide names">Aa</button></div>
+    <div class="smlg"><span><svg width="30" height="12" viewBox="0 0 30 12"><rect x=".5" y=".5" width="29" height="11" rx="5.5" fill="#1d0f24" stroke="#ff9ad8"/><circle cx="6.5" cy="6" r="3.4" fill="#ffe9a8"/><circle cx="8.3" cy="5" r="2.8" fill="#1d0f24" stroke="#ff9ad8" stroke-width=".7"/></svg>eclipse within 24 h</span><span><svg width="30" height="12" viewBox="0 0 30 12"><rect x=".5" y=".5" width="29" height="11" rx="5.5" fill="#241a08" stroke="#ffcf7a"/><circle cx="6.5" cy="6" r="3.4" fill="#3a2c10" stroke="#ffcf7a"/></svg>in shadow now</span><span><svg width="14" height="14" viewBox="-7 -7 14 14"><circle r="4.2" fill="#7a8aa0"/><circle r="6" fill="none" stroke="#7fe8ff" stroke-opacity=".7" stroke-width="1.6"/></svg>coloured haze: atmosphere</span><span><svg width="16" height="12" viewBox="-8 -11 16 12"><path d="M-6 0A6 6 0 0 1 6 0Z" fill="#8fe3a0"/></svg>on the surface</span><span><svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2" fill="none" stroke="#cfd6e4"/></svg>in orbit</span><span><i class="lgh"></i>matches the filters</span></div>
+    <div id="smapNote"></div><div id="smapTip" class="smtip" role="tooltip"></div></div></section>
+<div id="ofilt" class="panel" aria-label="Filters"><div class="smf" id="ofiltF"></div><div class="smf smf2" id="ofiltF2"></div></div>
+<div id="scaleMode" class="panel" role="radiogroup" aria-label="Scale"><div class="seg"><div class="thumb"></div><button class="opt ov" data-sc="0" role="radio" title="Every body enlarged and distances compressed, so the whole system fits on screen">◎ OVERVIEW</button><button class="opt ts" data-sc="1" role="radio" title="Real sizes and real distances, as in space. Small moons become dots: double-click a body or its name to fly to it.">⤢ TRUE SCALE</button></div></div>
+<div id="otip" class="smtip" role="tooltip"></div>
+<div id="top" class="panel">
+  <div class="ph"><h1 id="sysname">—</h1><span id="yahSys" style="display:none" title="Sync with the game: your ship is in this system">● You are here</span><span style="white-space:nowrap"><button id="shareBtn" title="Copy a link to this exact view: system, selected body, time and tab">🔗 Share</button></span></div>
+  <div class="sub" id="sysmeta"></div><div id="modeTag"></div>
+  <div class="pb">
+    <div id="search"><input id="q" placeholder="Search system… (e.g. Sol, Jackson's Lighthouse)" autocomplete="off"><div id="sugg"></div></div>
+    <label class="nojump" title="Load the next system at once, without the hyperspace jump"><input type="checkbox" id="noJump"> Skip the jump animation</label>
+  </div>
+</div>
+<div id="sys" class="panel">
+  <div class="ph"><span class="ttl">System</span><button class="coll" data-target="sys" title="Collapse">–</button></div>
+  <div class="pb" id="sysBody"></div>
+</div>
+<button id="newsBtn" class="panel" title="About GRAVITAS: news, plans, accuracy, how it works, contact"><b>ABOUT GRAVITAS</b><span>news · accuracy · contact</span><i>›</i></button>
+<div id="news" role="dialog" aria-modal="true" aria-label="About GRAVITAS"><div class="box"><div class="hd"><h3 id="newsH3">ABOUT GRAVITAS</h3><button id="newsX" title="Close (Esc)">✕</button></div>
+  <div class="tb" id="newsTabs"></div><div class="bd" id="newsBody"></div></div></div>
+<div id="sync" class="panel" data-st="off" data-k="off"><div class="srow"><span class="sdot" aria-hidden="true"></span><b title="Sync with the game">SYNC WITH THE GAME</b><span id="syncSt">off</span><button id="syncSw" role="switch" aria-checked="false" aria-label="Sync with the game"><i></i></button></div>
+  <div class="scard" id="syncCard" aria-live="polite"></div>
+  <div class="sx"><span class="sdot sdot2" aria-hidden="true"></span><span id="syncMsg"></span><button id="syncGo" style="display:none">Go</button></div>
+  <div class="so"><label class="stg" title="On: the map jumps with you while you look at your own system. Off: you get a note and a Go button."><input type="checkbox" id="syncAuto"><i aria-hidden="true"></i><span>Auto-jump</span></label><button id="syncMe" title="Fly to where you are (on the map: show it)"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.6"/><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3"/><circle cx="8" cy="8" r=".9" class="f"/></svg>Show me</button><button id="syncDir" title="Choose another Journal folder"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.8 4.2c0-.7.5-1.2 1.2-1.2h3l1.5 1.6h5.5c.7 0 1.2.5 1.2 1.2v6.4c0 .7-.5 1.2-1.2 1.2H3c-.7 0-1.2-.5-1.2-1.2Z"/></svg><span class="vh">Folder</span></button></div>
+  <div class="sphone" id="syncPhone"></div></div>
+<div id="modes" class="panel" role="group" aria-label="GRAVITAS modes"><div class="mh"><b>GRAVITAS MODES</b><span id="modesSt"></span></div>
+  <div class="mrow"><button type="button" data-mode="Combat" title="GRAVITAS: Combat Mode"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13 13 3M10 3h3v3M13 13 3 3M3 6V3h3"/></svg>Combat</button><button type="button" data-mode="Thargoid" class="soon" title="GRAVITAS: Thargoid Mode (planned, not started yet)">Thargoid</button><button type="button" data-mode="On Foot" class="soon" title="GRAVITAS: On Foot Mode (planned, not started yet)">On Foot</button></div>
+  <div class="mlive" id="modesLive"></div></div>
+<div id="credits" class="panel">
+  <div class="crow"><svg class="glogo" viewBox="0 0 64 64" aria-label="GRAVITAS logo">
+    <defs><radialGradient id="glbg" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#2a1748"/><stop offset="1" stop-color="#0b0716"/></radialGradient>
+      <linearGradient id="glw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6ad5"/><stop offset="1" stop-color="#6ae8ff"/></linearGradient>
+      <radialGradient id="glst"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#ffd27a"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient></defs>
+    <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#glbg)" stroke="#ff6ad5" stroke-opacity=".45"/>
+    <g fill="none" stroke="url(#glw)" stroke-width="1.1">
+      <ellipse cx="32" cy="27" rx="27" ry="8" opacity=".35"/><ellipse cx="32" cy="31" rx="19" ry="5.6" opacity=".5"/>
+      <ellipse cx="32" cy="36" rx="12" ry="3.6" opacity=".7"/><ellipse cx="32" cy="41" rx="6.5" ry="2" opacity=".9"/>
+      <path d="M5 27 Q22 30 29 44 M59 27 Q42 30 35 44 M14 33.2 Q26 34 30.5 44 M50 33.2 Q38 34 33.5 44 M32 35 V45" opacity=".55"/>
+    </g>
+    <circle cx="32" cy="46" r="6" fill="url(#glst)"/><circle cx="32" cy="46" r="2.2" fill="#fff"/>
+    <path id="glorb" d="M7 22 A25 8 -8 1 1 57 15 A25 8 -8 1 1 7 22" fill="none" stroke="#6ae8ff" stroke-width=".9" stroke-dasharray="2 2.5" opacity=".8"/>
+    <circle r="3" fill="#ff6ad5"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#glorb"/></animateMotion></circle>
+  </svg><div><div class="app">GRAVITAS <span id="appVer"></span><span class="beta" title="Public beta: some results are still being checked against the game">BETA</span></div><div class="tagl">every orbit, every shadow, every eclipse</div></div></div>
+  <div class="dev">Developed by <b>CMDR Hongark</b> &amp; <b>Claude</b></div>
+  <button class="newsIn">About GRAVITAS · news · accuracy · contact</button>
+  <button class="repIn">⚑ Report a problem</button>
+  <div class="src">Data: <a href="https://spansh.co.uk" target="_blank" rel="noopener">Spansh</a> · Fan-made. Elite Dangerous © Frontier Developments plc. · <a href="#" class="privIn">Privacy</a></div>
+  <div class="thx">Thank you for using GRAVITAS</div>
+</div>
+<div id="surf" class="panel"><div class="sh"><b>SURFACE VIEW</b><span>true scale</span><button id="surfDef" title="Height, spot and field of view back to their defaults">↺ Default</button><button id="surfX">✕ Exit</button></div>
+  <label><span>Look at</span><select id="surfT"></select></label>
+  <label><span>Height above horizon</span><input type="range" id="surfEl" min="0" max="85" value="15"><b id="surfElV">15°</b></label>
+  <label><span>Your spot (around it)</span><input type="range" id="surfAz" min="0" max="359" value="0"><b id="surfAzV">0°</b></label>
+  <label><span>Field of view</span><input type="range" id="surfFov" min="10" max="100" value="60"><b id="surfFovV">60°</b></label>
+  <label class="chk"><span>Asteroid belts</span><input type="checkbox" id="surfBelts"><em>in the game they show clearly only up close</em></label>
+  <div class="note">Real sizes and real distances: nothing is enlarged or compressed here. The data does not say where you are standing, so you are placed where the chosen body sits at this height above your horizon, 2 km up. Moving your spot around changes how a ring or crescent is tilted against your horizon. Match it to your game view with these two sliders. Drag to look around, scroll to zoom. The ground pattern is illustrative.</div></div>
+<div id="mapMode" class="panel" role="switch" aria-checked="false" aria-label="System map view" tabindex="0" title="Switch between the 3D orrery and a flat system map like the game's"><div class="vml">VIEW</div><div class="seg" id="mmSeg"><div class="thumb"></div><div class="opt om" data-v="1"><span>▤<span class="lg"> SYSTEM</span> MAP</span></div><div class="opt o3" data-v="0"><span>◎ 3D<span class="lg"> ORRERY</span></span></div></div></div>
+<div id="list" class="panel">
+  <div class="ph"><span class="ttl">Bodies</span><button class="coll" data-target="list" title="Collapse">–</button></div>
+  <div class="pb" id="listBody"></div>
+</div>
+<div id="info" class="panel">
+  <div class="ph"><span class="ttl">Body</span><span><button class="coll" data-target="info" title="Collapse">–</button> <button id="infoClose" class="coll" title="Close">×</button></span></div>
+  <div class="pb" id="infoBody"></div>
+</div>
+<nav id="mnav" class="panel"><button data-sheet="list">☰ Bodies</button><button data-sheet="info">◉ Body</button><button data-sheet="sys">⚑ System</button><button data-sheet="view">⚙ View</button><button data-sheet="about">ⓘ</button></nav>
+<div id="status" class="panel"></div><div id="toast" class="panel"></div>
+<div id="time" class="panel">
+  <div class="clock"><b id="gametime">—</b><span id="liveflag" class="live">LIVE</span><div>Game time (UTC)</div></div>
+  <div class="clock"><b id="localtime">—</b><div><span id="tzName" title="Your time zone, detected by the browser. Click to change.">—</span><select id="tz" style="display:none"></select></div></div>
+  <div>
+    <select id="speed" title="Playback speed (negative = backwards)">
+<option value="-86400">◀◀ 1 day/s</option><option value="-3600">◀◀ 1 hour/s</option>
+      <option value="-60">◀ 1 min/s</option><option value="0">❚❚ Paused</option><option value="1" selected>▶ Real time</option>
+      <option value="60">▶ 1 min/s</option><option value="3600">▶▶ 1 hour/s</option><option value="86400">▶▶ 1 day/s</option>
+    </select>
+    <input id="jump" type="datetime-local" title="Jump to game date/time (UTC)">
+    <button id="now">Now</button>
+  </div>
+  <button id="resetBig" title="Reset camera (Home)">⟲ Reset view</button>
+  <div id="snd"><button id="sndBtn" title="Sound on/off">🔊</button><canvas id="sndViz" width="96" height="26" title="Live sound spectrum"></canvas><input id="sndVol" type="range" min="0" max="100" title="Volume"></div>
+</div>
+<details id="view" class="panel">
+  <summary>View</summary>
+  <label title="Graphics quality: resolution, anti-aliasing, glow and texture detail">Quality <select id="vQuality"><option value="auto">Auto (recommended)</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="ultra">Ultra</option></select></label>
+  <label><input type="checkbox" id="vNames" checked> Names</label>
+  <label><input type="checkbox" id="vMoonLabels" checked> Moon markers (when close)</label>
+  <label><input type="checkbox" id="vBadges" checked> Badges</label>
+  <label><input type="checkbox" id="vDetails"> Gravity / temp on all markers</label>
+  <label>Marker size <input type="range" id="vLblSize" min="8" max="18" value="11"><button class="rst" data-for="vLblSize" data-def="11" title="Default">↺</button></label>
+  <label title="Real sizes and real distances, as in space"><input type="checkbox" id="vTrue"> True scale</label>
+  <label>Body size <input type="range" id="vBody" min="30" max="300" value="100"><button class="rst" data-for="vBody" data-def="100" title="Default">↺</button></label>
+  <label><input type="checkbox" id="vOrbits" checked> Orbits</label>
+  <label title="Lay all orbits, rings and spin axes on one plane. True tilt (off) is the accurate view"><input type="checkbox" id="vFlat"> Flat orbits (simplified)</label>
+  <label><input type="checkbox" id="vGrid" checked> Gravity well grid</label>
+  <label title="Off: every body and orbit stays on one flat plane and only the grid shows the wells"><input type="checkbox" id="vWell" checked> Bodies sit in the wells</label>
+  <label><input type="checkbox" id="vRings" checked> Rings &amp; belts</label>
+  <label><input type="checkbox" id="vCarriers" checked> Fleet carriers</label>
+  <label><input type="checkbox" id="vStations" checked> Stations</label>
+  <label><input type="checkbox" id="vShadows" checked> Eclipse &amp; ring shadows</label>
+  <label><input type="checkbox" id="vAtm" checked> Atmosphere glow</label>
+  <label><input type="checkbox" id="vGlow" checked> Star glow / bloom</label>
+  <label title="The Milky Way drawn from where this system really is in the galaxy. Orientation is approximate"><input type="checkbox" id="vSky" checked> Milky Way</label>
+  <label><input type="checkbox" id="vSpin" checked> Body rotation</label>
+  <label>Night side <input type="range" id="vNight" min="0" max="30" value="3"><button class="rst" data-for="vNight" data-def="3" title="Default">↺</button></label>
+  <label><input type="checkbox" id="vLand" checked> Landable markers</label>
+  <label><input type="checkbox" id="vWB"> Neutral starlight (white balance)</label>
+  <label title="A short sound when your ship jumps (with Sync). The background hum plays in the 3D view only."><input type="checkbox" id="vJumpSnd" checked> Jump sound (with Sync)</label>
+  <label>Temperature <select id="vTemp"><option value="K">Kelvin (K)</option><option value="C">Celsius (°C)</option></select></label>
+  <div class="legend"><span class="bdg l"><svg viewBox="0 0 10 14" width="8" height="11" style="vertical-align:-2px"><path fill="currentColor" d="M5.2 0C7.6 0 9 2.4 8.6 5.1 8.2 7.6 6.6 9 4.8 9 2.8 9 1.6 7.4 1.6 5 1.6 2.4 3 0 5.2 0zM4.6 10c1.3 0 2.2.8 2.2 1.9S5.9 14 4.6 14 2.4 13.1 2.4 12 3.3 10 4.6 10z"/></svg></span> landable <span class="bdg a">A</span> atmosphere <span class="bdg s">S</span> stations
+    <span class="bdg b">B</span> biological <span class="bdg g">G</span> geological</div>
+  <button id="viewReset" title="Your view settings are remembered in this browser">↺ Default view settings</button>
+  <div id="keys"><b>W</b><b>A</b><b>S</b><b>D</b> move · <b>Q</b><b>E</b> rotate · <b>R</b><b>F</b> up/down · <b>Home</b> reset<br>Click marker: select · Double-click: fly to</div>
+</details>
+<div id="fps" class="panel" title="Frames per second: how smoothly the map is drawn"><span>FPS</span><b id="fpsV">–</b></div>
+<button id="repBtn" class="panel" title="Report a problem with the map">⚑ Report</button>
+<div id="tutBtn" class="panel" role="button" tabindex="0" title="A guided tour of GRAVITAS"><b>TUTORIAL</b><div class="hint">take the tour</div></div>
+<div id="fade"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "/vendor/three@0.160.0/build/three.module.min.js",
+  "three/addons/controls/OrbitControls.js": "/vendor/gravitas-patches/OrbitControls-0.160.0-p1.js",
+  "three/addons/": "/vendor/three@0.160.0/examples/jsm/"
+} }
+</script>
+<!--JS-->
+</body>
+</html>
+

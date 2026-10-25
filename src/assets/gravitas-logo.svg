@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-label="GRAVITAS logo">
+    <defs><radialGradient id="glbg" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#2a1748"/><stop offset="1" stop-color="#0b0716"/></radialGradient>
+      <linearGradient id="glw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6ad5"/><stop offset="1" stop-color="#6ae8ff"/></linearGradient>
+      <radialGradient id="glst"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#ffd27a"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient></defs>
+    <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#glbg)" stroke="#ff6ad5" stroke-opacity=".45"/>
+    <g fill="none" stroke="url(#glw)" stroke-width="1.1">
+      <ellipse cx="32" cy="27" rx="27" ry="8" opacity=".35"/><ellipse cx="32" cy="31" rx="19" ry="5.6" opacity=".5"/>
+      <ellipse cx="32" cy="36" rx="12" ry="3.6" opacity=".7"/><ellipse cx="32" cy="41" rx="6.5" ry="2" opacity=".9"/>
+      <path d="M5 27 Q22 30 29 44 M59 27 Q42 30 35 44 M14 33.2 Q26 34 30.5 44 M50 33.2 Q38 34 33.5 44 M32 35 V45" opacity=".55"/>
+    </g>
+    <circle cx="32" cy="46" r="6" fill="url(#glst)"/><circle cx="32" cy="46" r="2.2" fill="#fff"/>
+    <path id="glorb" d="M7 22 A25 8 -8 1 1 57 15 A25 8 -8 1 1 7 22" fill="none" stroke="#6ae8ff" stroke-width=".9" stroke-dasharray="2 2.5" opacity=".8"/>
+    <circle r="3" fill="#ff6ad5"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#glorb"/></animateMotion></circle>
+  </svg>
