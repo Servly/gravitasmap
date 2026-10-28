@@ -27,7 +27,7 @@ Where you are and where you jump, your route and jump range, your carriers, your
 | Combat reports | `src/js/42-combat.js` · `cbSave` | `localStorage` in your browser, the last 30. Not sent |
 
 The server side is in this repository too:
-- `functions/api/system.js`: takes a system name, asks Spansh, answers. Spansh's answer for that system is kept in Cloudflare's cache for an hour, shared by everyone. Nothing about who asked is kept with it.
+- `functions/api/system.js`: takes a system name, asks Spansh, answers. Spansh's answer for that system is kept in Cloudflare's cache for 15 minutes, shared by everyone. Nothing about who asked is kept with it.
 - `functions/api/autocomplete.js`: the search box's suggestions, cached the same way by the text typed.
 - `functions/api/room.js` and `worker/src/room.js`: the phone pairing and the team board (see below).
 - `functions/api/report.js`: problem reports, only when you send one.
@@ -36,7 +36,7 @@ The server side is in this repository too:
 
 | Feature | What goes out | Kept? |
 |---|---|---|
-| A phone or tablet as a second screen (`src/js/33-pair.js`) | The short "where am I" summary the Sync card shows, and in a fight the combat screen, to **your** paired devices | The server keeps the latest "where am I" summary for up to 12 hours after the last device leaves. The combat screen is passed on and not kept (see the note below) |
+| A phone or tablet as a second screen (`src/js/33-pair.js`) | The short "where am I" summary the Sync card shows, and in a fight the combat screen, to **your** paired devices. Each device tells your computer what kind it is ("Android phone · Chrome"), so you can stop one; that is passed on, not kept | The server keeps the latest "where am I" summary for up to 12 hours after the last device leaves. The combat screen is passed on and not kept (see the note below) |
 | Team board (`src/js/43-opboard.js`) | Your CMDR name, ship, kills, credits and top kill, to the people who have the board's link | Not kept: your row lives only on your open connection |
 | Report a problem (`src/js/27-report.js`) | What you write, your screenshots, and the details shown in the report window | Sent by e-mail to the developers |
 

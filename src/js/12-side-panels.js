@@ -35,7 +35,10 @@ function powerBadge(name, size = 40) {
     <text x="${r}" y="${r + size * 0.13}" text-anchor="middle" font-size="${size * 0.34}" font-weight="700" fill="#fff" font-family="Segoe UI,system-ui,sans-serif">${ini}</text></svg>`;
 }
 // v0.56: when the Spansh data was last updated, always visible under the system name (also when the System panel is folded)
-function sysUpdated() { const s = S && S.sys; if (!s) return null; const m = s.summary || {}, v = m.updated_at || s.date || s.updateTime; const t = v ? Date.parse(v) : NaN; return isFinite(t) ? t : null; }
+// v0.94: the newest of Spansh's dates. Its search record (updated_at) can be days behind the system's own data
+function sysUpdated() { const s = S && S.sys; if (!s) return null; const m = s.summary || {};
+  const ts = [m.updated_at, s.date, s.updateTime, ...(s.bodies || []).map(b => b && b.updateTime), ...(s.stations || []).map(x => x && x.updateTime)].map(v => v ? Date.parse(v) : NaN).filter(isFinite);
+  return ts.length ? Math.max(...ts) : null; }
 function agoText(ms) {
   if (ms < 0) ms = 0; const m = Math.round(ms / 60000), h = Math.round(ms / 3600000), d = Math.round(ms / 86400000);
   return m < 1 ? "just now" : m < 60 ? `${m} min ago` : h < 48 ? `${h} h ago` : d < 60 ? `${d} days ago` : `${Math.round(d / 30.4)} months ago`;
@@ -71,7 +74,7 @@ function renderSystemInfo() {
   row("Scan value (est.)", m.estimated_scan_value ? fmt(m.estimated_scan_value, 0) + " cr" : null);
   row("Mapping value (est.)", m.estimated_mapping_value ? fmt(m.estimated_mapping_value, 0) + " cr" : null);
   row("Coordinates", s.coords ? `${fmt(s.coords.x, 2)}, ${fmt(s.coords.y, 2)}, ${fmt(s.coords.z, 2)}` : null);
-  row("Data updated", (m.updated_at || s.date || s.updateTime || "").toString().slice(0, 16).replace("T", " ") || null);
+  { const u = sysUpdated(); row("Data updated", u ? new Date(u).toISOString().slice(0, 16).replace("T", " ") + " UTC" : null); }
   h += `<table>${rows.join("")}</table>`;
   h += `<div id="collBox">${typeof collHtml === "function" ? collHtml() : ""}</div>`;     // v0.58
   if (S.orbitals && S.orbitals.length) h += `<div class="sec">Stations in orbit <span style="color:var(--dim);font-weight:400">· last reported to Spansh</span></div>` + stationRows(S.orbitals);

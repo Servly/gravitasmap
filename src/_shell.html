@@ -29,10 +29,10 @@
 <div id="scaleMode" class="panel" role="radiogroup" aria-label="Scale"><div class="seg"><div class="thumb"></div><button class="opt ov" data-sc="0" role="radio" title="Every body enlarged and distances compressed, so the whole system fits on screen">◎ OVERVIEW</button><button class="opt ts" data-sc="1" role="radio" title="Real sizes and real distances, as in space. Small moons become dots: double-click a body or its name to fly to it.">⤢ TRUE SCALE</button></div></div>
 <div id="otip" class="smtip" role="tooltip"></div>
 <div id="top" class="panel">
-  <div class="ph"><h1 id="sysname">—</h1><span id="yahSys" style="display:none" title="Sync with the game: your ship is in this system">● You are here</span><span style="white-space:nowrap"><button id="shareBtn" title="Copy a link to this exact view: system, selected body, time and tab">🔗 Share</button></span></div>
+  <div class="ph"><h1 id="sysname">—</h1><span id="yahSys" style="display:none" title="Sync with the game: your ship is in this system">● You are here</span><span style="white-space:nowrap"><button id="copyName" title="Copy the system name" aria-label="Copy the system name"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M3.5 10.5h-.5A1.5 1.5 0 0 1 1.5 9V3A1.5 1.5 0 0 1 3 1.5h6A1.5 1.5 0 0 1 10.5 3v.5"/></svg></button><button id="shareBtn" title="Copy a link to this exact view: system, selected body, time and tab">🔗 Share</button></span></div>
   <div class="sub" id="sysmeta"></div><div id="modeTag"></div>
   <div class="pb">
-    <div id="search"><input id="q" placeholder="Search system… (e.g. Sol, Jackson's Lighthouse)" autocomplete="off"><div id="sugg"></div></div>
+    <div id="search"><input id="q" placeholder="Search system… (e.g. Sol, Jackson's Lighthouse)" autocomplete="off"><button id="bmBtn" type="button" title="Bookmark this system" aria-label="Bookmark this system" aria-pressed="false">☆</button><div id="sugg"></div></div>
     <label class="nojump" title="Load the next system at once, without the hyperspace jump"><input type="checkbox" id="noJump"> Skip the jump animation</label>
   </div>
 </div>
@@ -94,10 +94,12 @@
   <div class="clock"><b id="localtime">—</b><div><span id="tzName" title="Your time zone, detected by the browser. Click to change.">—</span><select id="tz" style="display:none"></select></div></div>
   <div>
     <select id="speed" title="Playback speed (negative = backwards)">
-<option value="-86400">◀◀ 1 day/s</option><option value="-3600">◀◀ 1 hour/s</option>
+<option value="-86400">◀◀ 1 day/s</option><option value="-3600">◀◀ 1 hour/s</option><option value="-1800">◀◀ 30 min/s</option><option value="-900">◀ 15 min/s</option>
       <option value="-60">◀ 1 min/s</option><option value="0">❚❚ Paused</option><option value="1" selected>▶ Real time</option>
-      <option value="60">▶ 1 min/s</option><option value="3600">▶▶ 1 hour/s</option><option value="86400">▶▶ 1 day/s</option>
+      <option value="60">▶ 1 min/s</option><option value="900">▶ 15 min/s</option><option value="1800">▶▶ 30 min/s</option><option value="3600">▶▶ 1 hour/s</option><option value="86400">▶▶ 1 day/s</option>
     </select>
+    <span id="spCust" title="Any speed: game minutes per second. ◀ backwards, ▶ forwards"><button id="spBk" type="button" aria-label="Backwards at this speed">◀</button><input id="spMin" type="number" min="1" max="99999" step="1" value="5" aria-label="Minutes per second"><span class="u">min/s</span><button id="spFw" type="button" aria-label="Forwards at this speed">▶</button></span>
+    <button id="keysBtn" type="button" title="Keyboard: Space play or pause · ← → slower or faster · hold ← or → to wind back or forward" aria-label="Keyboard shortcuts">⌨</button>
     <input id="jump" type="datetime-local" title="Jump to game date/time (UTC)">
     <button id="now">Now</button>
   </div>

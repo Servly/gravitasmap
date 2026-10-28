@@ -98,6 +98,7 @@ async function runSelfTest(names) {
     let last = ""; try { if (localStorage.getItem("gravitas.sync.on") === "1") last = localStorage.getItem("gravitas.sync.last") || ""; } catch (e) {}
     // v0.90.8: a link someone opened is the visitor's choice; a reload (or Chrome restoring a tab it put to sleep) is not
     let nav = ""; try { nav = (performance.getEntriesByType("navigation")[0] || {}).type || ""; } catch (e) {}
-    loadSystem(P.get("system") || last || "Sol", { user: !!P.get("system") && !document.wasDiscarded && nav !== "reload" && nav !== "back_forward" });
+    const id = /^\d{1,20}$/.test(P.get("id64") || "") ? P.get("id64") : "";   // v0.94: ?id64=… opens a system by Spansh's number
+    loadSystem(P.get("system") || (id ? `system ${id}` : "") || last || "Sol", { id64: id || undefined, idLink: !!id, user: !!(P.get("system") || id) && !document.wasDiscarded && nav !== "reload" && nav !== "back_forward" });
   } }
 requestAnimationFrame(frame);

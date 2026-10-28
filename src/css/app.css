@@ -1269,3 +1269,21 @@ body.pfull #modes { display:none !important; }
 @media (max-width: 760px), (max-height: 520px) and (pointer: coarse) { #combat.report { inset:0; border:0; border-radius:0; box-shadow:inset 0 0 90px rgba(255,80,90,.15); } }
 #sync.remote #syncPlug { display:none !important; }   /* v0.93: the plugin is for the computer that plays */
 #news .plSt { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em; padding:2px 8px; border-radius:4px; background:rgba(255,200,87,.15); color:#ffc857; border:1px solid rgba(255,200,87,.45); }
+/* v0.94: copy the name, bookmarks, × on recent systems */
+#copyName { margin-left:6px; padding:2px 6px; line-height:0; vertical-align:middle; } #copyName svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.4; }
+#search { position:relative; } #search #q { padding-right:30px; box-sizing:border-box; }
+#bmBtn { position:absolute; right:3px; top:50%; transform:translateY(-50%); width:24px; height:24px; padding:0; border:0; background:none; color:var(--dim); font-size:16px; line-height:24px; cursor:pointer; }
+#bmBtn:hover { color:#ffd27a; } #bmBtn.on { color:#ffd27a; }
+#sugg div { display:flex; align-items:center; gap:6px; } #sugg div span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#sugg .rx { flex:none; width:20px; height:20px; line-height:20px; text-align:center; border-radius:4px; color:var(--dim); font-weight:400; font-size:15px; }
+#sugg .rx:hover { color:#ff8f9a; background:rgba(255,60,80,.15); }
+/* v0.94: a speed of your own, and the keyboard */
+#spCust { display:inline-flex; align-items:center; gap:2px; margin-left:4px; } #spCust button { padding:2px 6px; font-size:11px; }
+#spMin { width:52px; padding:3px 4px; text-align:right; font:inherit; font-size:12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--line); border-radius:6px; } #spCust .u { color:var(--dim); font-size:11px; margin:0 3px 0 2px; }
+#keysBtn { padding:2px 6px; margin-left:2px; font-size:13px; }
+@media (max-width: 760px), (max-height: 520px) and (pointer: coarse) { #spCust, #keysBtn { display:none; } }
+/* v0.94: the devices that follow, each with × */
+#pairDlg .devs { list-style:none; margin:4px 0 10px; padding:0; } #pairDlg .devs:empty { display:none; }
+#pairDlg .devs li { display:flex; align-items:center; gap:10px; padding:6px 10px; margin:4px 0; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid var(--line); }
+#pairDlg .devs li.zz { opacity:.6; } #pairDlg .devs .dn { font-weight:600; } #pairDlg .devs .dm { flex:1; color:var(--dim); font-size:11.5px; }
+#pairDlg .devs button { width:26px; height:26px; padding:0; border-radius:6px; font-size:15px; } #pairDlg .devs button:hover { border-color:#ff5466; color:#ff8f9a; }

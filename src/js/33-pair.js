@@ -26,7 +26,9 @@ function pairOpen() {
   PAIR.ws = ws;
   ws.onopen = () => { PAIR.retry = 0; PAIR.wsT = Date.now(); pairUi(); syncShow(); if (PAIR.role === "host") { PAIR.sent = ""; pairPush(true); } };
   ws.onmessage = e => { PAIR.wsT = Date.now(); let m; try { m = JSON.parse(e.data); } catch (x) { return; } pairMsg(m); };
-  ws.onclose = ev => { if (PAIR.ws !== ws) return; PAIR.ws = null; pairUi(); syncShow(); if (ev.code === 4000) return; if (PAIR.role) pairRetry(); };
+  ws.onclose = ev => { if (PAIR.ws !== ws) return; PAIR.ws = null; pairUi(); syncShow(); if (ev.code === 4000) return;
+    if (ev.code === 4003) { if (PAIR.role === "view") pairRemoved(); return; }   // v0.94: the computer stopped this device following
+    if (PAIR.role) pairRetry(); };
 }
 // v0.78: give up on a socket without waiting for its goodbye, and build a new one
 function pairDropWs() {
@@ -43,7 +45,8 @@ const pairSend = m => { try { if (PAIR.ws && PAIR.ws.readyState === 1) { PAIR.ws
 function pairMsg(m) {
   if (m.t === "hb") return;
   if (PAIR.role === "host") {
-    if (m.t === "join") { if (m.on) { const p = PAIR.peers.get(m.id) || { mode: "server" }; p.seenT = Date.now(); PAIR.peers.set(m.id, p); } else pairDropPeer(m.id); pairUi(); if (m.on) pairPush(true); return; }
+    if (m.t === "hi") { const p = PAIR.peers.get(m.id) || { mode: "server", seenT: Date.now() }; p.n = String(m.n || "").slice(0, 40); p.t0 = p.t0 || Date.now(); PAIR.peers.set(m.id, p); pairUi(); return; }   // v0.94
+    if (m.t === "join") { if (m.on) { const p = PAIR.peers.get(m.id) || { mode: "server" }; p.seenT = Date.now(); p.t0 = p.t0 || Date.now(); PAIR.peers.set(m.id, p); } else pairDropPeer(m.id); pairUi(); if (m.on) pairPush(true); return; }
     if (m.t === "ping") {
       { const p = PAIR.peers.get(m.from); if (p) { const was = pairAwake(p); p.seenT = Date.now(); if (!was) pairUi(); } }   // v0.91.4: a device that checks in is awake
       const d = m.d || {};
@@ -56,7 +59,8 @@ function pairMsg(m) {
     return;
   }
   // viewer
-  if (m.t === "hello") { PAIR.hostOn = !!m.host; if (m.s) pairApply(m.s); pairUi(); pairRtcStart(); PAIR.chk = null; PAIR.nextChk = Date.now() + 1500; return; }   // v0.82: check soon after (re)joining
+  if (m.t === "kicked") { pairRemoved(); return; }
+  if (m.t === "hello") { pairSend({ t: "hi", n: pairDevName() }); PAIR.hostOn = !!m.host; if (m.s) pairApply(m.s); pairUi(); pairRtcStart(); PAIR.chk = null; PAIR.nextChk = Date.now() + 1500; return; }   // v0.82: check soon after (re)joining
   if (m.t === "host") { PAIR.hostOn = !!m.on; pairUi(); syncShow(); if (m.on && PAIR.mode !== "server") pairRtcStart(); if (m.on) { PAIR.chk = null; PAIR.miss = 0; PAIR.nextChk = Date.now() + 1500; } return; }
   if (m.t === "state") { pairApply(m.s); return; }
   if (m.t === "cb") { if (PAIR.role === "view" && !(m.at && m.at < (PAIR.cbT || 0))) { PAIR.cbT = m.at || Date.now(); try { cbRemote(m.c && typeof m.c === "object" ? m.c : null); } catch (e) {} } return; }   // v0.92: passed on by the server, never kept there
@@ -148,6 +152,30 @@ async function pairJoinCode(code) {
   let r, j; try { r = await fetch(`${API}/room?code=${code}`); j = await r.json(); } catch (e) { j = null; }
   if (!r || !r.ok || !j || !j.room) { toast((j && j.error) || "That code did not work. Check it on your computer."); return; }
   pairJoin(j.room);
+}
+// v0.94: what kind of device this is, so the computer can tell its devices apart (only the kind, never a name or an id)
+function pairDevName() {
+  const u = navigator.userAgent || "";
+  const os = /iPhone/.test(u) ? "iPhone" : /iPad/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1) ? "iPad" : /Android/.test(u) ? (/Mobile/.test(u) ? "Android phone" : "Android tablet")
+    : /Windows/.test(u) ? "Windows PC" : /Mac/.test(u) ? "Mac" : /CrOS/.test(u) ? "Chromebook" : /Linux/.test(u) ? "Linux" : "Device";
+  const br = /Edg\//.test(u) ? "Edge" : /SamsungBrowser/.test(u) ? "Samsung Internet" : /Firefox|FxiOS/.test(u) ? "Firefox" : /CriOS|Chrome/.test(u) ? "Chrome" : /Safari/.test(u) ? "Safari" : "";
+  return br ? `${os} · ${br}` : os;
+}
+// this device was removed by the computer it followed: it leaves and forgets the link (opening it again starts over)
+function pairRemoved() {
+  if (PAIR.role !== "view") return;
+  PAIR.retry = 0; clearTimeout(PAIR.timer); pairLeave();
+  status("The computer you followed stopped sharing with this device.", true); setTimeout(() => status(""), 8000);
+}
+// the computer: stop one device following (×), or every device and a fresh link, so the old link no longer works
+function pairKick(id) { pairSend({ t: "kick", to: id }); pairDropPeer(id); pairUi(); }
+async function pairNewLink() {
+  pairSend({ t: "kick", to: "*" });
+  for (const id of [...PAIR.peers.keys()]) pairDropPeer(id);
+  const ws = PAIR.ws; PAIR.ws = null; setTimeout(() => { try { ws && ws.close(1000, "new link"); } catch (e) {} }, 400);
+  PAIR.room = ""; PAIR.code = ""; pairSet(PAIR_LS.host, null);
+  await pairHostStart(false);
+  toast("New link and code: the old ones no longer work");
 }
 function pairLeave() {
   pairSet(PAIR_LS.view, null);
@@ -268,13 +296,14 @@ function pairDialog() {
     d.innerHTML = `<div class="box"><div class="hd"><h3>SHOW ON A PHONE OR TABLET <small>· up to ${PAIR_MAX} devices</small></h3><button class="x" title="Close (Esc)">✕</button></div><div class="bd">
       <p>Your phone or tablet becomes a second screen: it follows your ship like this computer does. Up to ${PAIR_MAX} devices can follow at once.</p>
       <div class="pq"><div class="qr" aria-label="QR code for the pairing link"></div><div class="pc"><span>Scan with the phone's camera, or open <b>gravitasmap.com</b> on it, tap <b>About</b> and type this code:</span><b class="code"></b><em class="exp"></em><button class="new">New code</button></div></div>
-      <p class="who"></p>
+      <p class="who"></p><ul class="devs"></ul>
       <p class="note">Shared: only the summary Sync shows here (system, body, station, landed or docked, your target, game closed). Your Journal stays on this computer. Keep this tab open: it keeps reading the Journal even behind the game.</p>
-      <div class="act"><button class="stop">Stop sharing</button><button class="no">Close</button></div></div></div>`;
+      <div class="act"><button class="newlink" title="Every device stops following, and the old link and code no longer work">New link</button><button class="stop">Stop sharing</button><button class="no">Close</button></div></div></div>`;
     document.body.appendChild(d);
     const close = () => { d.style.display = "none"; };
     d.querySelector(".x").onclick = close; d.querySelector(".no").onclick = close;
-    d.addEventListener("click", e => { if (e.target === d) close(); });
+    d.addEventListener("click", e => { if (e.target === d) close(); const k = e.target.closest && e.target.closest("[data-kick]"); if (k) pairKick(k.dataset.kick); });
+    d.querySelector(".newlink").onclick = pairNewLink;
     addEventListener("keydown", e => { if (e.key === "Escape" && d.style.display === "flex") close(); });
     d.querySelector(".stop").onclick = pairHostStop;
     d.querySelector(".new").onclick = () => pairHostStart(true);
@@ -288,6 +317,10 @@ function pairDialogFill() {
   d.querySelector(".exp").textContent = PAIR.code ? (left > 0 ? `valid for ${Math.ceil(left / 60000)} more min (the QR code keeps working)` : "this code has expired · the QR code still works") : "";
   const c = pairCounts(), ways = [...PAIR.peers.values()].filter(pairAwake).map(p => p.mode === "direct" ? "direct" : "via server");
   d.querySelector(".who").textContent = !PAIR.ws ? "Connecting to the GRAVITAS server…" : c.n ? `${c.a ? `Following now: ${c.a} of ${PAIR_MAX} device${c.a > 1 ? "s" : ""} (${ways.join(", ")})` : "No device is awake"}${c.s ? `. Asleep: ${c.s} (screen off or app in the background: it catches up when it wakes)` : ""}` : `No device follows yet (up to ${PAIR_MAX}).`;
+  // v0.94: each device, with × to stop it following
+  const hm = t => { const x = new Date(t); return `${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`; };
+  const list = [...PAIR.peers.entries()].map(([id, p]) => `<li class="${pairAwake(p) ? "" : "zz"}"><span class="dn">${esc(p.n || "A device")}</span><span class="dm">${pairAwake(p) ? (p.mode === "direct" ? "direct" : "via server") : "asleep"}${p.t0 ? ` · since ${hm(p.t0)}` : ""}</span><button type="button" data-kick="${esc(id)}" title="Stop this device following" aria-label="Stop this device following">×</button></li>`).join("");
+  const ul = d.querySelector(".devs"); if (ul.innerHTML !== list) ul.innerHTML = list;
 }
 function pairLink() { return `${location.origin}/?pair=${PAIR.room}`; }
 let _qrLoad = null;

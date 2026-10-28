@@ -20,7 +20,7 @@ import tkinter as tk
 from config import appname
 
 PLUGIN_NAME = "GRAVITAS"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
@@ -38,6 +38,7 @@ FRESH_S = 60            # a Journal line older than this sets the scene but star
 class State:
     engine = None
     hud = None
+    hud_failed = False
     prefs = None
     settings = None
     label = None
@@ -79,10 +80,6 @@ def status_text():
 def plugin_app(parent):
     """A short line in EDMC's main window, and the once-a-second loop (on EDMC's own thread)."""
     S.root = parent
-    try:
-        S.hud = Hud(parent, logger)
-    except Exception as e:
-        logger.error(f"GRAVITAS HUD could not start: {e}")
     S.label = tk.Label(parent, text=status_text(), anchor=tk.W, justify=tk.LEFT)
     S.after_id = parent.after(1000, loop)
     return S.label
@@ -135,7 +132,20 @@ def loop():
         S.after_id = S.root.after(1000, loop)
 
 
+def make_hud():
+    """The HUD's window belongs to EDMC's main window, not to the plugin's area in it: EDMC styles every widget in
+    that area and a separate window there stops it (v0.1.1). It is made on the first tick, after EDMC has started."""
+    if S.hud is None and S.root is not None and not S.hud_failed:
+        try:
+            S.hud = Hud(S.root.winfo_toplevel(), logger)
+        except Exception as e:
+            S.hud_failed = True
+            logger.error(f"GRAVITAS HUD could not start: {e}")
+    return S.hud
+
+
 def draw():
+    make_hud()
     s, h, e = S.settings, S.hud, S.engine
     now = combat.now_ms()
     preview = time.time() < S.preview_until

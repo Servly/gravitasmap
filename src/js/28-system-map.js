@@ -702,8 +702,12 @@ $("mapMode").addEventListener("keydown", e => { if (e.key === "Enter" || e.key =
   const zc = f => { smapZoomAt(V.clientWidth / 2, V.clientHeight / 2, f); };
   $("smZin").onclick = () => zc(1.35); $("smZout").onclick = () => zc(1 / 1.35); $("smZfit").onclick = () => smapFit();
   $("smNames").onclick = () => { SMAP.names = !SMAP.names; try { localStorage.setItem("gravitas.mapNames", SMAP.names ? "1" : "0"); } catch (e) {} smapNames(); };
+  // v0.94: was the map reached with the mouse (the arrows are for the time) or with Tab (the arrows move the map)?
+  V.addEventListener("pointerdown", () => { V.dataset.mouse = "1"; });
+  V.addEventListener("blur", () => { delete V.dataset.mouse; });
   V.addEventListener("keydown", e => {
     if (e.target !== V) return;
+    if (/^Arrow(Left|Right)$/.test(e.key) && V.dataset.mouse) return;   // v0.94: clicked with the mouse, ← → are the time keys
     const step = 60, k = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
     if (k) { e.preventDefault(); if (typeof FOLLOW !== "undefined" && FOLLOW.on) followSet(false); SMAP.v = { ...SMAP.v, tx: SMAP.v.tx + k[0], ty: SMAP.v.ty + k[1], auto: false }; smapApply(); }
     else if (e.key === "+" || e.key === "=") zc(1.25); else if (e.key === "-") zc(0.8); else if (e.key === "0") smapFit();

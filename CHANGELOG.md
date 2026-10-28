@@ -4,6 +4,17 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.94 · major · 29 Oct 2026
+- Bookmarks: the star beside the search box keeps the system you are looking at. Your bookmarks and recent systems open from the search box, and × removes one
+- A button beside the system's name copies it, exactly as the game writes it (for the galaxy map or a message)
+- Time: 15 and 30 minutes a second, and any speed of your own (minutes a second, ◀ backwards or ▶ forwards)
+- Keyboard, like a media player: Space plays and pauses, ← and → go slower or faster, held down they wind back or forward fast. On the system map, ← and → move the map only when you reach it with Tab
+- Sync with GRAVITAS: the devices that follow you are listed (for example "Android phone · Chrome"), and × stops one. New link stops every device and makes a fresh link and code, so a link you shared no longer works
+- Data updated now shows Spansh's newest date. Its search could show a date days behind the system's own data
+- Spansh's data is kept on GRAVITAS's server for 15 minutes instead of an hour, so new scans show sooner
+- A new system that Spansh's search does not know yet opens anyway: paste its Spansh link, or its number, into the search box. A link with ?id64= opens it too
+- Asked by CMDR Hongark and the squadron
+
 ### v0.93.1 · minor · 26 Oct 2026
 - GRAVITAS for EDMC (in testing) draws with its own overlay: nothing else to install. Cards like the site's combat screen, with columns, bars and the game's orange, placed as a percent of the game window so they stay in place at any resolution
 - Asked by CMDR Hongark

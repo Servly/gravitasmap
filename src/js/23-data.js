@@ -33,14 +33,16 @@ async function loadSystem(name, opts = {}) {
   if (warp) status("");
   if (!warp) status(`Loading ${name} from Spansh…`);
   try {
-    const req = opts.pre || (typeof sysFetch === "function" ? sysFetch(name) : fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(apiJSON));   // v0.80: the next stop may be here already   // v0.70: Sync may have asked already, during the jump
+    const req = opts.pre || (opts.id64 ? fetch(`${API}/system?id64=${encodeURIComponent(opts.id64)}`).then(apiJSON)   // v0.94: by Spansh's number (a system Spansh's search does not know yet)
+      : typeof sysFetch === "function" ? sysFetch(name) : fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(apiJSON));   // v0.80: the next stop may be here already   // v0.70: Sync may have asked already, during the jump
     // a target that cannot be reached stops the countdown at once instead of after the jump
     if (warp) { await Promise.race([warp.done, req.then(() => warp.done)]); if (warp.cancelled) return false; }
     const j = await req;
     if (my !== LOAD.gen) { if (warp) warp.abort(); return null; }     // a newer request came since: this answer is dropped
     try { if (typeof jrnBefore === "function") jrnBefore(); } catch (e) {}    // v0.81: the old map is lifted out for the jump motion
     build(j); LOAD.by = opts.sync ? "sync" : opts.countdown || opts.user ? "user" : "auto"; status(j.stale || "", !!j.stale); if (j.stale) setTimeout(() => status(""), 9000);
-    try { recentAdd(S.sys.name); } catch (e) {}
+    S.byId64 = opts.idLink && opts.id64 ? String(opts.id64) : "";     // v0.94: opened by its number: a link to it says the number too
+    try { recentAdd(S.sys.name); sysIdKeep(S.sys.name, S.sys.id64); bmUi(); } catch (e) {}
     try { if (typeof jrnBuilt === "function") jrnBuilt(); } catch (e) {}     // v0.80: the journey bars
     applyLinkState(); updateUrl();
     if (skip && opts.countdown) fadeFlash();
@@ -75,7 +77,7 @@ function applyLinkState() {
   else if (b && b._obj) setTimeout(() => select(b, !MAPMODE), 300);
 }
 function shareUrl(withTime) {
-  const p = new URLSearchParams(); p.set("system", S ? S.sys.name : "Sol");
+  const p = new URLSearchParams(); p.set("system", S ? S.sys.name : "Sol"); if (S && S.byId64) p.set("id64", S.byId64);
   if (selected) { p.set("body", selected.bodyId); p.set("tab", infoTab); }
   else if (typeof SELB !== "undefined" && SELB) { p.set("body", SELB.b.bodyId); p.set("belt", SELB.bl.name || ""); }   // v0.63: a link can open a belt
   p.set("view", MAPMODE ? "map" : "3d");                            // v0.71: the map is the default now, so a 3D link says so
@@ -89,22 +91,48 @@ $("shareBtn").onclick = async () => {
   try { await navigator.clipboard.writeText(url); toast("Link copied: this system, body, tab and moment"); }
   catch (e) { prompt("Copy this link:", url); }
 };
+// v0.94: copy the system's name, exactly as the game writes it (for the galaxy map, a route, a message)
+$("copyName").onclick = async () => { if (!S) return; const n = S.sys.name;
+  try { await navigator.clipboard.writeText(n); toast(`Copied: ${n}`); } catch (e) { prompt("Copy the system name:", n); } };
 const q = $("q"), sugg = $("sugg"); let acTimer = null, acItems = [], acIdx = -1, acSeq = 0;
 // v0.56: recent searches, kept only in this browser (never sent anywhere)
 const RECENT_KEY = "gravitas.recent", RECENT_MAX = 8;
 function recentGet() { try { const a = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); return Array.isArray(a) ? a.filter(x => typeof x === "string" && x).slice(0, RECENT_MAX) : []; } catch (e) { return []; } }
 function recentAdd(name) { if (!name) return; const a = recentGet().filter(x => x.toLowerCase() !== name.toLowerCase()); a.unshift(name); try { localStorage.setItem(RECENT_KEY, JSON.stringify(a.slice(0, RECENT_MAX))); } catch (e) {} }
+function recentDel(name) { const a = recentGet().filter(x => x !== name); try { localStorage.setItem(RECENT_KEY, JSON.stringify(a)); } catch (e) {} }
+// v0.94: bookmarks, in this browser only (the last 30). The star beside the search box keeps the system you are looking at
+const BM_KEY = "gravitas.bookmarks", BM_MAX = 30;
+function bmGet() { try { const a = JSON.parse(localStorage.getItem(BM_KEY) || "[]"); return Array.isArray(a) ? a.filter(x => typeof x === "string" && x).slice(0, BM_MAX) : []; } catch (e) { return []; } }
+function bmSet(a) { try { localStorage.setItem(BM_KEY, JSON.stringify(a.slice(0, BM_MAX))); } catch (e) {} bmUi(); }
+const bmHas = n => !!n && bmGet().some(x => x.toLowerCase() === n.toLowerCase());
+function bmToggle() { if (!S) return; const n = S.sys.name;
+  if (bmHas(n)) { bmSet(bmGet().filter(x => x.toLowerCase() !== n.toLowerCase())); toast(`Bookmark removed: ${n}`); }
+  else { if (bmGet().length >= BM_MAX) { toast(`Up to ${BM_MAX} bookmarks: remove one first (×)`); return; } bmSet([n, ...bmGet()]); toast(`Bookmarked: ${n}. Find it in the search box`); } }
+function bmUi() { const b = $("bmBtn"), on = !!S && bmHas(S.sys.name); if (!b) return; b.textContent = on ? "★" : "☆"; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
+  b.title = on ? "Bookmarked: click to remove" : "Bookmark this system"; }
+$("bmBtn").onclick = e => { e.preventDefault(); bmToggle(); };
+// v0.94: each system's number on Spansh, so a bookmark or a recent one opens even before Spansh's search knows it
+const IDS_KEY = "gravitas.sysIds";
+function sysIds() { try { return JSON.parse(localStorage.getItem(IDS_KEY) || "{}") || {}; } catch (e) { return {}; } }
+function sysIdKeep(name, id) { if (!name || !/^\d{1,20}$/.test(String(id || ""))) return; const o = sysIds(), k = name.toLowerCase(); if (o[k] === String(id)) return; delete o[k]; o[k] = String(id);
+  const ks = Object.keys(o); for (const x of ks.slice(0, Math.max(0, ks.length - 80))) delete o[x]; try { localStorage.setItem(IDS_KEY, JSON.stringify(o)); } catch (e) {} }
+const sysIdOf = name => sysIds()[String(name || "").toLowerCase()] || "";
 function showRecent() {
-  const r = recentGet(); if (!r.length || document.activeElement !== q) return showSugg([]);
-  acItems = r; acIdx = -1;
-  sugg.innerHTML = `<p class="note rc">Recent systems</p>` + r.map((v, i) => `<div data-i="${i}">${esc(v)}</div>`).join("") + `<button class="rclr" data-clear="1" title="Forget the recent systems in this browser">Clear recent</button>`;
+  const r = recentGet(), bm = bmGet(); if ((!r.length && !bm.length) || document.activeElement !== q) return showSugg([]);
+  acItems = [...bm, ...r]; acIdx = -1;
+  const row = (v, i, kind) => `<div data-i="${i}"><span>${kind === "b" ? "★ " : ""}${esc(v)}</span><b class="rx" data-x="${kind}" data-n="${esc(v)}" title="${kind === "b" ? "Remove this bookmark" : "Remove from recent"}" role="button" aria-label="Remove">×</b></div>`;
+  sugg.innerHTML = (bm.length ? `<p class="note rc">Bookmarks</p>` + bm.map((v, i) => row(v, i, "b")).join("") : "")
+    + (r.length ? `<p class="note rc">Recent systems</p>` + r.map((v, i) => row(v, bm.length + i, "r")).join("") + `<button class="rclr" data-clear="1" title="Forget the recent systems in this browser">Clear recent</button>` : "");
   sugg.style.display = "block";
 }
 function showSugg(vals, note) { if (document.activeElement !== q) { vals = []; note = ""; } acItems = vals; acIdx = -1;
   sugg.innerHTML = (note ? `<p class="note">${esc(note)}</p>` : "") + vals.map((v, i) => `<div data-i="${i}">${v.replace(/</g, "&lt;")}</div>`).join(""); sugg.style.display = vals.length || note ? "block" : "none"; }
-function goSystem(v) { q.value = v; showSugg([]); q.blur(); loadSystem(v, { countdown: true }); }
+function goSystem(v) { q.value = v; showSugg([]); q.blur(); loadSystem(v, { countdown: true, id64: sysIdOf(v) || undefined }); }
+// v0.94: a Spansh link (spansh.co.uk/system/123…) or a system's number pasted in the search box opens that system
+const spanshId = t => { const m = /spansh\.co\.uk\/(?:system|dumps?)\/(\d{1,20})/i.exec(t) || /^(\d{6,20})$/.exec(t); return m ? m[1] : ""; };
 async function submitSearch() {            // only an exact system name is loaded; anything else gets suggestions, never a jump
   clearTimeout(acTimer); acSeq++; const t = q.value.trim(); if (!t) return;
+  const sid = spanshId(t); if (sid) { q.value = ""; showSugg([]); q.blur(); return loadSystem(`system ${sid}`, { id64: sid, idLink: true, user: true }); }
   const same = list => list.find(v => v.toLowerCase() === t.toLowerCase());
   if (same(acItems)) return goSystem(same(acItems));
   let vals = []; try { vals = await fetchSuggestions(t); } catch (e) {}
@@ -112,8 +140,9 @@ async function submitSearch() {            // only an exact system name is loade
   showSugg(vals.slice(0, 8), vals.length ? `No system is called “${t}”. Did you mean one of these?` : `No system is called “${t}” on Spansh. Check the spelling.`);
 }
 sugg.addEventListener("mousedown", e => {
-  if (e.target.dataset.clear) { e.preventDefault(); try { localStorage.removeItem(RECENT_KEY); } catch (er) {} return showSugg([]); }
-  const i = e.target.dataset.i; if (i != null) goSystem(acItems[i]); else e.preventDefault(); });
+  if (e.target.dataset.clear) { e.preventDefault(); try { localStorage.removeItem(RECENT_KEY); } catch (er) {} return showRecent(); }
+  const x = e.target.closest("[data-x]"); if (x) { e.preventDefault(); if (x.dataset.x === "b") bmSet(bmGet().filter(v => v !== x.dataset.n)); else recentDel(x.dataset.n); return showRecent(); }   // v0.94: × removes one
+  const d = e.target.closest("[data-i]"), i = d && d.dataset.i; if (i != null) goSystem(acItems[i]); else e.preventDefault(); });
 q.addEventListener("focus", () => { const v = q.value.trim(); if (v.length < 2 || (S && S.sys && v === S.sys.name)) showRecent(); });
 q.addEventListener("input", () => {
   clearTimeout(acTimer); acSeq++; if (q.value.trim().length < 2) return showRecent(); if (!API) return showSugg([]);

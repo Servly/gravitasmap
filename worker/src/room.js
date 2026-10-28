@@ -78,6 +78,13 @@ export class Room {
     } else if (m.t === "cb" && me.role === "host") {
       // v0.92: the combat screen: passed on to the paired devices as it comes, never written to storage
       this.toRole("view", { t: "cb", c: m.c && typeof m.c === "object" ? m.c : null, at: +m.at || 0 });
+    } else if (m.t === "hi" && me.role === "view") {
+      // v0.94: a device says what kind it is ("Android phone · Chrome"), so the computer can list its devices. Passed on, not kept
+      this.toRole("host", { t: "hi", id: me.id, n: String(m.n || "").slice(0, 40) });
+    } else if (m.t === "kick" && me.role === "host" && typeof m.to === "string") {
+      // v0.94: the computer stops a device following (or all of them, "*", before it makes a new link)
+      for (const w of this.ctx.getWebSockets("view")) { const a = w.deserializeAttachment() || {};
+        if (m.to === "*" || a.id === m.to) { try { w.send(JSON.stringify({ t: "kicked" })); w.close(4003, "removed"); } catch (e) {} } }
     } else if ((m.t === "sig" || m.t === "ping" || m.t === "pong") && typeof m.to === "string") {
       // WebRTC set-up messages and the timing pings between the two ends, passed on to the one they are for
       const to = m.to === "host" ? this.ctx.getWebSockets("host")[0] : this.ctx.getWebSockets("view").find(w => (w.deserializeAttachment() || {}).id === m.to);

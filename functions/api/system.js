@@ -3,9 +3,9 @@ import { getJSON, getRaw, json, spanshError } from "../../lib/spansh.js";
 // Only an exact name is loaded, never a "closest" system.
 // v0.50: the dump is streamed straight through, never read as a whole, so a large system costs almost no CPU
 // (Cloudflare's free plan allows 10 ms of CPU per request). Only its first bytes are looked at, to put the
-// summary in front. Dumps are kept in Cloudflare's cache for an hour. Positions are computed in the browser
+// summary in front. Dumps are kept in Cloudflare's cache for 15 minutes. Positions are computed in the browser
 // from the orbits, so a cached dump never shows old positions.
-const CACHE_S = 3600;
+const CACHE_S = 900;                                                   // v0.94: 15 minutes (was an hour): new scans show sooner
 export async function onRequestGet({ request, env, waitUntil }) {
   const u = new URL(request.url), name = (u.searchParams.get("name") || "").trim();
   let id64 = u.searchParams.get("id64"), summary = null;
@@ -13,7 +13,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (!id64) {
       if (!name) return json({ error: "No system name given." }, 400);
       if (name.length > 80) return json({ error: "System name too long." }, 400);
-      // v0.75.5: which system a name means (and its summary) is kept in Cloudflare's cache for an hour too, like the dump
+      // v0.75.5: which system a name means (and its summary) is kept in Cloudflare's cache too, like the dump
       const nk = new Request(`${u.origin}/api/_name/${encodeURIComponent(name.toLowerCase())}`);
       try { const c = await caches.default.match(nk); if (c) ({ id64, summary } = await c.json()); } catch (e) {}
     }
