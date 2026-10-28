@@ -1,6 +1,11 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.94.1", k: "minor", d: "29 Oct 2026", t: [
+      "Search: a system added to Spansh today opens with its full name and Enter, even before it shows in the suggestions (they can be hours behind)",
+      "Data updated: a wrong date in the future (one station in Sol said 2198) is no longer shown as the newest",
+      "Found by CMDR Hongark",
+    ] },
     { v: "v0.94", k: "major", d: "29 Oct 2026", t: [
       "Bookmarks: the star beside the search box keeps the system you are looking at. Your bookmarks and recent systems open from the search box, and × removes one",
       "A button beside the system's name copies it, exactly as the game writes it (for the galaxy map or a message)",

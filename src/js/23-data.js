@@ -137,6 +137,10 @@ async function submitSearch() {            // only an exact system name is loade
   if (same(acItems)) return goSystem(same(acItems));
   let vals = []; try { vals = await fetchSuggestions(t); } catch (e) {}
   if (same(vals)) return goSystem(same(vals));
+  // v0.94.1: the suggestions can be hours behind Spansh's own search (a system added today): ask for the exact name before saying no
+  { const my = acSeq; let j = null; try { j = await fetch(`${API}/system?name=${encodeURIComponent(t)}`).then(apiJSON); } catch (e) {}
+    if (my !== acSeq) return;
+    if (j && j.system && j.system.name) { q.value = j.system.name; showSugg([]); q.blur(); return loadSystem(j.system.name, { countdown: true, pre: Promise.resolve(j) }); } }
   showSugg(vals.slice(0, 8), vals.length ? `No system is called “${t}”. Did you mean one of these?` : `No system is called “${t}” on Spansh. Check the spelling.`);
 }
 sugg.addEventListener("mousedown", e => {

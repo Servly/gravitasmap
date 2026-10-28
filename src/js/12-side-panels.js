@@ -37,7 +37,7 @@ function powerBadge(name, size = 40) {
 // v0.56: when the Spansh data was last updated, always visible under the system name (also when the System panel is folded)
 // v0.94: the newest of Spansh's dates. Its search record (updated_at) can be days behind the system's own data
 function sysUpdated() { const s = S && S.sys; if (!s) return null; const m = s.summary || {};
-  const ts = [m.updated_at, s.date, s.updateTime, ...(s.bodies || []).map(b => b && b.updateTime), ...(s.stations || []).map(x => x && x.updateTime)].map(v => v ? Date.parse(v) : NaN).filter(isFinite);
+  const ts = [m.updated_at, s.date, s.updateTime, ...(s.bodies || []).map(b => b && b.updateTime), ...(s.stations || []).map(x => x && x.updateTime)].map(v => v ? Date.parse(v) : NaN).filter(x => isFinite(x) && x <= Date.now() + 864e5);   // v0.94.1: a wrong date in the future (one station said 2198) is not news
   return ts.length ? Math.max(...ts) : null; }
 function agoText(ms) {
   if (ms < 0) ms = 0; const m = Math.round(ms / 60000), h = Math.round(ms / 3600000), d = Math.round(ms / 86400000);

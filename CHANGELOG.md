@@ -4,6 +4,11 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.94.1 · minor · 29 Oct 2026
+- Search: a system added to Spansh today opens with its full name and Enter, even before it shows in the suggestions (they can be hours behind)
+- Data updated: a wrong date in the future (one station in Sol said 2198) is no longer shown as the newest
+- Found by CMDR Hongark
+
 ### v0.94 · major · 29 Oct 2026
 - Bookmarks: the star beside the search box keeps the system you are looking at. Your bookmarks and recent systems open from the search box, and × removes one
 - A button beside the system's name copies it, exactly as the game writes it (for the galaxy map or a message)
