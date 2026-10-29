@@ -11,7 +11,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   el.innerHTML = `<b>COLLISIONS LAB</b> <small>private, not linked anywhere</small><div id="cxLs">Loading the list…</div>
     <label><input type="checkbox" id="cxLall"> also pairs without phase data (much longer)</label>
     <label>Canonn's times (private file): <input type="file" id="cxLf" accept=".json"></label>
-    <div class="cxLb"><button id="cxLgo">Start</button><button id="cxLnext" disabled>Download coll-next.json</button><button id="cxLrep" disabled>Download report</button><button id="cxLx">Close</button></div><pre id="cxLlog"></pre>`;
+    <div class="cxLb"><button id="cxLgo">Start</button><button id="cxLnext" disabled>Download coll-next.json</button><button id="cxLrep" disabled>Download report</button><button id="cxLre" disabled>Try the failed ones again</button><button id="cxLx">Close</button></div><pre id="cxLlog"></pre>`;
   document.body.appendChild(el);
   const st = $("cxLs"), log = m => { L.log.push(m); $("cxLlog").textContent = L.log.slice(-8).join("\n"); };
   const save = (name, text) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "application/json" })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
@@ -25,15 +25,21 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   cxLoad().then(() => { if (CX.pairs) plan(); });
   $("cxLall").onchange = e => { L.all = e.target.checked; if (CX.pairs && !L.run) { L.i = 0; plan(); } };
   $("cxLx").onclick = () => { L.run = false; el.remove(); };
+  $("cxLre").onclick = () => {                     // v0.96: only the systems Spansh did not answer for
+    if (L.run) return;
+    const bad = new Set(CX.pairs.filter(p => (L.res.get(cxKey(p.id, p.a, p.b)) || {}).why === "fail").map(p => p.id));
+    if (!bad.size) { log("Nothing failed"); return; }
+    L.sys = L.sys.filter(([id]) => bad.has(id)); L.i = 0; L.obs = []; log(`Trying ${L.sys.length} systems again`); L.run = true; $("cxLgo").textContent = "Pause"; step();
+  };
   $("cxLf").onchange = async e => { try { L.priv = JSON.parse(await e.target.files[0].text()); log(`Canonn's file: ${L.priv.pairs.length} pairs, ${L.priv.observatory.length} sightings`); } catch (x) { log("That file could not be read"); } };
   function one(M, p) {                            // our next passes, and (with the private file) ours near Canonn's time
     const P = cxPair(M, cxFind(M, p.a), cxFind(M, p.b));
     let r = { why: P.why && P.why !== "epoch" ? P.why : null, ev: [] };
-    if (P.gap && P.why !== "phase") { const n = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); r = { why: n.events.length ? P.why || null : P.why || "none", ev: n.events, how: n.how, map: P.map }; }
+    if (P.gap && P.why !== "phase") { const n = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); r = { why: n.events.length || n.close.length ? P.why || null : P.why || "none", ev: n.events, close: n.close, how: n.how, map: P.map, ep0: P.ep0 }; }
     L.res.set(cxKey(p.id, p.a, p.b), r);
     const c = L.priv && L.privMap.get(key(p.sys, p.a, p.b));
     if (c) {
-      const o = { sys: p.sys, a: p.a, b: p.b, canonn: c.verdict, canonnNext: c.next, ours: r.ev.length ? "collides" : r.why, oursNext: r.ev[0] ? new Date(r.ev[0].start).toISOString() : null, epoch: P.ep ? new Date(P.ep).toISOString() : null };
+      const o = { sys: p.sys, a: p.a, b: p.b, canonn: c.verdict, canonnNext: c.next, ours: r.ev.length ? "collides" : r.close && r.close.length ? "close" : r.why, close: r.close && r.close[0] ? { t: new Date(r.close[0].start).toISOString(), missKm: Math.round(r.close[0].miss) } : null, oursNext: r.ev[0] ? new Date(r.ev[0].start).toISOString() : null, epoch: P.ep ? new Date(P.ep).toISOString() : null };
       if (c.next && P.gap && P.why !== "phase") {
         const t = Date.parse(c.next), w = Math.max(2 * 86400e3, (P.syn && isFinite(P.syn) ? Math.min(P.syn * 0.3, 30 * 86400e3) : 0));
         const n = cxNext(P, t - w, (2 * w) / 86400e3, 6).events.sort((x, y) => Math.abs(x.start - t) - Math.abs(y.start - t))[0];
@@ -50,7 +56,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
     catch (e) { log(`${ps[0].sys}: ${e.message}, trying again in 20 s`); await new Promise(r => setTimeout(r, 20000));
       try { const M = cxPrep(await fetch(`${API}/system?id64=${id}`).then(apiJSON)); for (const p of ps) one(M, p); } catch (x) { for (const p of ps) L.res.set(cxKey(p.id, p.a, p.b), { why: "fail", ev: [] }); } }
     L.i++; st.textContent = `${L.i} / ${L.sys.length} systems · ${[...L.res.values()].filter(r => r.ev.length).length} pairs with a pass`;
-    $("cxLnext").disabled = false; $("cxLrep").disabled = !L.priv;
+    $("cxLnext").disabled = false; $("cxLrep").disabled = !L.priv; $("cxLre").disabled = false;
     setTimeout(step, L.gap);
   }
   async function sightings() {                     // the Observatory: Canonn's estimate, what was seen, and ours
@@ -81,7 +87,8 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   };
   $("cxLnext").onclick = () => {
     const rows = [];
-    for (const p of CX.pairs) { const r = L.res.get(cxKey(p.id, p.a, p.b)); if (r && r.why !== "fail") rows.push([p.id, p.a, p.b, r.why || 0, r.ev.map(e => [Math.round(e.start / 1000), e.end ? Math.round(e.end / 1000) : 0, Math.round(e.depth)]), r.map === false ? 0 : 1]); }
+    for (const p of CX.pairs) { const r = L.res.get(cxKey(p.id, p.a, p.b)); if (r && r.why !== "fail") rows.push([p.id, p.a, p.b, r.why || 0, r.ev.map(e => [Math.round(e.start / 1000), e.end ? Math.round(e.end / 1000) : 0, Math.round(e.depth)]), r.map === false ? 0 : 1,
+      (r.close || []).map(e => [Math.round(e.start / 1000), Math.round(e.miss)]), r.ep0 ? Math.round(r.ep0 / 1000) : 0]); }
     save("coll-next.json", JSON.stringify({ made: new Date().toISOString(), years: CX_YEARS, by: "GRAVITAS", pairs: rows }));
   };
   $("cxLrep").onclick = () => {
@@ -91,6 +98,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
       pairs_compared: C.length,
       both_collide: n(c => c.canonn === "Y" && c.ours === "collides"),
       canonn_yes_ours_no: n(c => c.canonn === "Y" && c.ours !== "collides"),
+      canonn_yes_ours_close: n(c => c.canonn === "Y" && c.ours === "close"),
       canonn_no_ours_yes: n(c => c.canonn === "N" && c.ours === "collides"),
       canonn_unknown_ours_yes: n(c => c.canonn !== "Y" && c.canonn !== "N" && c.ours === "collides"),
       times_compared: d.length, median_minutes_apart: med, within_5_min: d.filter(x => x <= 5).length, over_60_min: d.filter(x => x > 60).length,

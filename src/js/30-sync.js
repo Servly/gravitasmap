@@ -10,7 +10,7 @@ const SYNC = {
 const SYNC_LINKED = new URLSearchParams(location.search).has("system");   // v0.75.6: read at once (the page rewrites its address later)
 const SYNC_ARRIVE_MS = 60000;                                         // v0.76: how long the arrival star keeps "You are here"
 const SYNC_PATH = "%USERPROFILE%\\Saved Games\\Frontier Developments\\Elite Dangerous";
-const SYNC_EV = /"event":"(Shutdown|LoadGame|Location|FSDJump|CarrierJump|StartJump|ApproachBody|SupercruiseExit|Touchdown|Docked|LeaveBody|Undocked|ApproachSettlement|Liftoff|Disembark|Embark|NavRoute|NavRouteClear|Loadout|CarrierLocation|CarrierJumpRequest|CarrierJumpCancelled|CarrierStats|Music|ShipTargeted|UnderAttack|Bounty|FactionKillBond|CapShipBond|HeatWarning|HeatDamage|ShieldState|HullDamage|Interdicted|Interdiction|EscapeInterdiction|Died|Resurrect|GameModeChange|WingJoin|WingAdd|WingLeave|SupercruiseDestinationDrop|FighterDestroyed|LaunchFighter|SupercruiseEntry|Missions|Statistics|ReceiveText|CommitCrime|Rank|Progress)"/;   // v0.91: and the fight   // v0.78: the route and the jump range too
+const SYNC_EV = /"event":"(Scan|Shutdown|LoadGame|Location|FSDJump|CarrierJump|StartJump|ApproachBody|SupercruiseExit|Touchdown|Docked|LeaveBody|Undocked|ApproachSettlement|Liftoff|Disembark|Embark|NavRoute|NavRouteClear|Loadout|CarrierLocation|CarrierJumpRequest|CarrierJumpCancelled|CarrierStats|Music|ShipTargeted|UnderAttack|Bounty|FactionKillBond|CapShipBond|HeatWarning|HeatDamage|ShieldState|HullDamage|Interdicted|Interdiction|EscapeInterdiction|Died|Resurrect|GameModeChange|WingJoin|WingAdd|WingLeave|SupercruiseDestinationDrop|FighterDestroyed|LaunchFighter|SupercruiseEntry|Missions|Statistics|ReceiveText|CommitCrime|Rank|Progress)"/;   // v0.91: and the fight   // v0.78: the route and the jump range too
 try { SYNC.auto = localStorage.getItem("gravitas.sync.auto") !== "0"; } catch (e) {}
 
 // the folder handle is kept in this browser's own storage (IndexedDB), so the folder is chosen only once
@@ -244,6 +244,7 @@ function syncLine(ln, replay) {
   if (!SYNC_EV.test(ln)) return;
   let j; try { j = JSON.parse(ln); } catch (e) { return; }
   const ev = j.event;
+  if (ev === "Scan") { try { scanSeen(j, replay); } catch (e) {} return; }   // v0.96: where a body is on its orbit, from your own scan
   if (CB_EV.test(ev)) try { cbEvent(j, replay); } catch (e) {}           // v0.91: Combat Mode
   if (/^(Music|ShipTargeted|UnderAttack|Bounty|FactionKillBond|CapShipBond|HeatWarning|HeatDamage|ShieldState|HullDamage|Interdicted|Interdiction|EscapeInterdiction|Died|Resurrect|GameModeChange|WingJoin|WingAdd|WingLeave|SupercruiseDestinationDrop|FighterDestroyed|LaunchFighter|SupercruiseEntry|Missions|Statistics|ReceiveText|CommitCrime|Rank|Progress)$/.test(ev)) return;   // nothing else to do with these
   SYNC.newsT = replay ? Date.parse(j.timestamp) || SYNC.newsT || 0 : Date.now();   // v0.78: "updated … ago"
@@ -267,6 +268,7 @@ function syncLine(ln, replay) {
     if (!j.StarSystem) return;
     const moved = j.StarSystem !== SYNC.here;
     SYNC.prev = SYNC.here; SYNC.here = j.StarSystem; SYNC.jumping = "";
+    if (Array.isArray(j.StarPos) && j.StarPos.length === 3) SYNC.starPos = { x: +j.StarPos[0], y: +j.StarPos[1], z: +j.StarPos[2], n: j.StarSystem };   // v0.96: Collisions, near you
     const onBody = j.BodyID != null && (j.BodyType === "Planet" || j.BodyType === "Star" || (ev !== "FSDJump" && !j.BodyType));
     SYNC.at = j.Docked && j.MarketID ? { market: j.MarketID, name: jl(j, "StationName"), docked: true, bodyId: onBody ? j.BodyID : undefined }
       : onBody ? { bodyId: j.BodyID, name: j.Body, landed: j.Latitude != null && !j.OnFoot, foot: !!j.OnFoot, lat: j.Latitude, lon: j.Longitude } : null;
@@ -563,3 +565,15 @@ function followTick() {
   TICK.add(followTick);
 }
 
+
+// v0.96: a Scan with the body's place on its orbit. It is kept for this tab only and used at once if that system is open
+function scanSeen(j, replay) {
+  if (j.MeanAnomaly == null || j.BodyID == null || !j.SystemAddress || !(j.OrbitalPeriod > 0)) return;
+  const t = Date.parse(j.timestamp); if (!isFinite(t)) return;
+  MY_SCANS.set(`${j.SystemAddress}|${j.BodyID}`, { ma: +j.MeanAnomaly, t });
+  if (!S || String(S.sys.id64) !== String(j.SystemAddress)) return;
+  const b = S.byId.get(j.BodyID); if (!b || !(b.orbitalPeriod > 0)) return;
+  scanFix(S.sys.id64, [b]);
+  clearTimeout(scanSeen._t); scanSeen._t = setTimeout(() => { try { collStart(); } catch (e) {} }, 300);   // the collision times again, once after a burst of scans
+  if (!replay && scanSeen._sys !== S.sys.id64) { scanSeen._sys = S.sys.id64; toast("Your scans now set where these bodies are on their orbits"); }   // once per system, not for every body
+}

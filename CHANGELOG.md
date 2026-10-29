@@ -4,6 +4,17 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.96 · major · 29 Oct 2026
+- Collisions: Card. A picture for Discord with the two bodies drawn true to size at their deepest moment, the date and time, how long it lasts and how deep it goes. Copy image, Save image, Copy text, Copy link and Add to calendar
+- The card's link opens the system at that moment and watches the pair in true size
+- Add to calendar: an .ics file for your phone or computer, with a reminder an hour before
+- Upcoming in groups: happening now, the next 24 hours, 7 days, 30 days and later, with the next pass on top
+- How old the orbit data is: "older data" or "old data, be there early" on each pass. After many orbits a time can be off by an hour or more
+- Close passes: two bodies that miss by only a few hundred km with the current data. Newer data may show them touching. Some pairs only meet in some years, when they line up at the right place on their orbits
+- With Sync on, your own scans set where the bodies are on their orbits, on the map and in every collision time, at once. Kept only while the page is open
+- Near you: from where you are in the game when Sync is on
+- The Collisions button shows a dot when a pass starts within the hour
+
 ### v0.95.2 · minor · 29 Oct 2026
 - Collisions: Watch is shown only when the map can show the two bodies. In many pairs part of what the bodies orbit (their planet, or the centre of a pair of planets) is not on Spansh yet, so the map cannot place them. Those rows now say so, and what to scan, instead of opening an empty view
 - Collisions: a pass that lasts days or weeks shows its end date and how long it lasts (some moons stay inside each other for weeks)

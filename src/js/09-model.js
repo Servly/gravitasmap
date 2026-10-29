@@ -50,6 +50,7 @@ function build(data) {
     if (!t) { t = sys.date || sys.updateTime || new Date().toISOString(); how = "none"; }
     b._t0 = Date.parse(t); b._epochHow = how;
   }
+  try { if (typeof scanFix === "function") scanFix(sys.id64, list); } catch (e) {}   // v0.96: where your own scans put the bodies on their orbits
   orbitFrames(byId, parentOf);
   const placeable = id => { for (let n = id; ;) { if (n === 0) return true; if (!byId.has(n)) return false; const p = parentOf.get(n); if (p === undefined) return !!byId.get(n).mainStar; n = p; } };
 

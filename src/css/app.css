@@ -1305,3 +1305,16 @@ body.pfull #modes { display:none !important; }
 #cxLab { position:fixed; right:12px; bottom:12px; z-index:60; width:380px; max-width:calc(100vw - 24px); padding:10px 12px; border-radius:12px; border:1px solid #ffb84d; background:rgba(12,8,24,.96); font-size:12px; display:flex; flex-direction:column; gap:6px; }
 #cxLab small { color:var(--dim); } #cxLab .cxLb { display:flex; flex-wrap:wrap; gap:5px; } #cxLab pre { margin:0; max-height:130px; overflow:auto; white-space:pre-wrap; color:var(--dim); font-size:11px; }
 #newsBody .cxOff { color:#ffb84d; font-size:11.5px; }
+/* v0.96 Collisions: time groups, the next pass, data age, close passes, the card */
+#newsBody .cxG { color:#ffb84d; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; margin:12px 0 5px; }
+#newsBody .cxTop { border-color:rgba(255,184,77,.55); background:rgba(255,184,77,.07); margin-bottom:4px; }
+#newsBody .cxNx { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.08em; color:#1a0f00; background:#ffb84d; border-radius:4px; padding:1px 6px; vertical-align:1px; }
+#newsBody .cxAge { font-size:10.5px; border-radius:4px; padding:0 5px; margin-left:4px; border:1px solid rgba(255,210,122,.4); color:#ffd27a; white-space:nowrap; }
+#newsBody .cxAge.old { border-color:rgba(255,140,60,.55); color:#ffb07a; } #newsBody .cxAge.mine { border-color:rgba(126,226,168,.5); color:#7ee2a8; }
+#newsBody .cxClose { color:#6ae8ff; font-weight:600; }
+#cxCard { position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:rgba(4,2,10,.72); padding:16px; box-sizing:border-box; }
+#cxCard .cxCw { max-width:min(920px, 100%); display:flex; flex-direction:column; gap:10px; }
+#cxCard img { width:100%; height:auto; border-radius:12px; border:1px solid rgba(255,184,77,.45); box-shadow:0 10px 40px rgba(0,0,0,.5); }
+#cxCard .cxCb { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+#modes .mrow button[data-mode="Collisions"].soon::after { content:""; position:absolute; top:3px; right:4px; width:6px; height:6px; border-radius:50%; background:#ffb84d; box-shadow:0 0 6px #ffb84d; }
+#modes .mrow button[data-mode="Collisions"] { position:relative; }

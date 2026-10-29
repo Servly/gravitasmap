@@ -12,7 +12,7 @@ GRAVITAS's code does not upload or store your Elite Dangerous journal. This page
 
 ## What Sync and Combat Mode read
 
-Where you are and where you jump, your route and jump range, your carriers, your target, and for Combat Mode the fight: the ships you scan and their bounty, your kills, the attacks on you, your loadout, your combat rank, your team's names, the active Operation, and what NPCs say to you. Of your team's chat, only how many lines each one wrote is counted, never the words. All of it is read and kept in your browser's memory.
+Where you are and where you jump, your route and jump range, your carriers, your target, where the bodies you scan are on their orbits (for Collisions, kept only while the page is open), and for Combat Mode the fight: the ships you scan and their bounty, your kills, the attacks on you, your loadout, your combat rank, your team's names, the active Operation, and what NPCs say to you. Of your team's chat, only how many lines each one wrote is counted, never the words. All of it is read and kept in your browser's memory.
 
 ## Where it happens in the code
 
@@ -24,6 +24,7 @@ Where you are and where you jump, your route and jump range, your carriers, your
 | New lines are read every second | `src/js/30-sync.js` · `syncTick` | `file.slice(...).text()`: reads only the new part of the file, in memory |
 | Each line is understood | `src/js/30-sync.js` · `syncLine`, `src/js/42-combat.js` · `cbEvent`, `src/js/41-own-carrier.js` · `fcEvent` | Picks out the things listed above. The rest of the line is ignored |
 | The map follows you | `src/js/30-sync.js` · `syncFollow` → `src/js/23-data.js` · `loadSystem` | Asks `/api/system?name=<system>`. Only the system's name |
+| Your scans set the orbits | `src/js/30-sync.js` · `scanSeen`, `src/js/29-coll-engine.js` · `scanFix` | From a Scan line: the body's number and its place on its orbit (MeanAnomaly), in memory for this tab only. Not stored, not sent |
 | Combat reports | `src/js/42-combat.js` · `cbSave` | `localStorage` in your browser, the last 30. Not sent |
 
 The server side is in this repository too:

@@ -28,11 +28,22 @@ function cxPrep(data) {                         // a light version of build(): b
     const nm = String(b.name || "");
     byName.set((nm.toLowerCase().startsWith(String(sys.name || "").toLowerCase()) ? nm.slice(String(sys.name).length) : nm).replace(/\s+/g, "").toLowerCase(), b);
   }
+  scanFix(sys.id64, list);
   orbitFrames(byId, parentOf);
   return { name: sys.name, id64: sys.id64, byId, parentOf, byName, bodies: list };
 }
 // can the map draw this body? Only if every parent up to the star is on Spansh (the same rule as build() in 09-model.js)
 function cxOnMap(M, b) { for (let n = b.bodyId; ;) { if (n === 0) return true; if (!M.byId.has(n)) return false; const p = M.parentOf.get(n); if (p === undefined) return !!M.byId.get(n).mainStar; n = p; } }
+// v0.96: your own scans. With Sync on, each Scan in the journal says where the body is on its orbit at that moment
+// (MeanAnomaly). That is fresher than Spansh's copy, so it replaces it for the map and for every collision time.
+// Kept in this browser tab only, never sent anywhere.
+var MY_SCANS = new Map();
+function scanFix(id64, list) {
+  if (typeof MY_SCANS === "undefined" || !MY_SCANS.size || id64 == null) return 0;
+  let n = 0;
+  for (const b of list) { const s = MY_SCANS.get(`${id64}|${b.bodyId}`); if (s && b.orbitalPeriod > 0) { b.meanAnomaly = s.ma; b._t0 = s.t; b._epochHow = "own"; b._mine = s.t; n++; } }
+  return n;
+}
 function cxFind(M, label) { return M.byName.get(String(label).replace(/\s+/g, "").toLowerCase()) || null; }
 function cxChain(M, id) { const o = []; let p = M.parentOf.get(id); while (p !== undefined && p !== null) { o.push(p); p = M.parentOf.get(p); } return o; }
 function cxPos(M, b, top, t) {
@@ -58,7 +69,8 @@ function cxPair(M, A, B) {
   const why = all.some(n => n.meanAnomaly == null) ? "phase" : all.some(n => n._epochHow !== "own") ? "epoch" : null;
   const per = all.map(n => n.orbitalPeriod * 86400e3);
   const P = { M, A, B, top, why, sure: !why, map: cxOnMap(M, A) && cxOnMap(M, B), same: pa.length === 1 && pb.length === 1,
-    dt: Math.min(7200e3, Math.max(20e3, Math.min(...per) / 240)), ep: Math.max(...all.map(n => n._t0)) };
+    dt: Math.min(7200e3, Math.max(20e3, Math.min(...per) / 240)), ep: Math.max(...all.map(n => n._t0)), ep0: Math.min(...all.map(n => n._t0)),
+    near: 0.1 * (A._r + B._r), mine: all.some(n => n._mine) };            // v0.96: a pass that misses by less than a tenth of their sizes is a "close pass"
   P.gap = t => { const a = cxPos(M, A, top, t), b = cxPos(M, B, top, t); return Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) - A._r - B._r; };
   P.ang = t => { const a = cxPos(M, A, top, t), b = cxPos(M, B, top, t);                     // angle between the two, seen from the parent
     return Math.acos(Math.max(-1, Math.min(1, (a.x * b.x + a.y * b.y + a.z * b.z) / (Math.hypot(a.x, a.y, a.z) * Math.hypot(b.x, b.y, b.z) || 1)))); };
@@ -88,6 +100,7 @@ function cxScan(P, t0, t1, out) {
     else if (h >= 0 && g >= 0 && gp !== null && g < gp && g <= h && g < P.A._r + P.B._r) {   // a short pass between two samples
       const d = cxMin(P, P.gap, t - P.dt, u);
       if (d.v < 0) out.push(cxEvent(P, cxEdge(P, t - P.dt, d.t), cxEdge(P, u, d.t)));
+      else if (d.v < P.near) out.push({ close: true, start: d.t, end: null, deep: d.t, miss: d.v * 1000 });   // v0.96: they miss, but only just: newer data may make them touch
     }
     gp = g; g = h; t = u;
   }
@@ -101,16 +114,16 @@ function cxEvent(P, a, b) { const d = cxMin(P, P.gap, a, b === null ? a + P.dt *
 // "synodic" (windows around each conjunction), "locked" (the same period: they stay as they are) or "step" (every step)
 function cxNext(P, from, days, max) {
   max = max || 3; const t1 = from + days * 86400e3, out = [];
-  const done = () => out.filter(e => (e.end === null ? e.start + 1 : e.end) > from).length >= max;
+  const done = () => out.filter(e => !e.close && (e.end === null ? e.start + 1 : e.end) > from).length >= max;
   if (P.same && P.syn > 2e5 * 86400e3) {          // the same period: the gap only repeats each orbit
     const pr = Math.min(P.A.orbitalPeriod, P.B.orbitalPeriod) * 86400e3;
     cxScan(P, from, from + pr * 1.02, out);
-    return { events: cxKeep(out, from, max), how: "locked" };
+    const ev = cxKeep(out, from, max); return { events: ev, close: ev.close, how: "locked" };
   }
   if (!P.same || P.half >= 0.5 || P.syn < P.dt * 400) {     // nested orbits, very eccentric, or conjunctions every few steps: step through all of it
     const cap = Math.min(t1, from + 1.5e5 * P.dt);
     for (let a = from; a < cap && !done(); a += 2e4 * P.dt) cxScan(P, a, Math.min(cap, a + 2e4 * P.dt), out);
-    return { events: cxKeep(out, from, max), how: "step" };
+    const ev = cxKeep(out, from, max); return { events: ev, close: ev.close, how: "step" };
   }
   // the first true conjunction after `from - half a synodic period`: the smallest angle, from the real positions
   const s0 = from - P.syn / 2, n = 720, st = P.syn / n;
@@ -121,20 +134,20 @@ function cxNext(P, from, days, max) {
   if (nx.v > P.ang(c) + 0.35) {                   // the next conjunction is not one synodic period later (a retrograde orbit): step through
     const cap = Math.min(t1, from + 1.5e5 * P.dt);
     for (let a = from; a < cap && !done(); a += 2e4 * P.dt) cxScan(P, a, Math.min(cap, a + 2e4 * P.dt), out);
-    return { events: cxKeep(out, from, max), how: "step" };
+    const ev = cxKeep(out, from, max); return { events: ev, close: ev.close, how: "step" };
   }
   for (let k = 0; c - W < t1 && k < 5000 && !done(); k++, c += P.syn) {
     const a = c - W, b = c + W;
     const loc = cxMin(P, P.ang, a, b, 1000).t;     // this conjunction's true time, so the window follows the eccentric orbits
     cxScan(P, Math.min(a, loc - P.dt * 40), Math.max(b, loc + P.dt * 40), out);
   }
-  return { events: cxKeep(out, from, max), how: "synodic" };
+  const ev = cxKeep(out, from, max); return { events: ev, close: ev.close, how: "synodic" };
 }
-function cxKeep(ev, from, max) {                  // one event per pass, in time order, not yet over
+function cxKeep(ev, from, max) {                  // one event per pass, in time order, not yet over (v0.96: close passes kept apart, in .close)
   ev.sort((x, y) => x.start - y.start);
-  const o = [];
-  for (const e of ev) { const l = o[o.length - 1]; if (l && Math.abs(l.start - e.start) < 60e3) continue; if ((e.end === null ? e.start + 1 : e.end) > from) o.push(e); }
-  return o.slice(0, max);
+  const o = [], c = [];
+  for (const e of ev) { const L = e.close ? c : o, l = L[L.length - 1]; if (l && Math.abs(l.start - e.start) < 60e3) continue; if ((e.close ? e.start : e.end === null ? e.start + 1 : e.end) > from) L.push(e); }
+  const r = o.slice(0, max); r.close = c.filter(e => !r.length || e.start < r[0].start).slice(0, 2); return r;
 }
 // v0.95.1: how far ahead to look: at least `years`, and two synodic periods for a slow pair (up to 15 years), so a pair that
 // meets once every few years is not called "none"
