@@ -4,6 +4,14 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.95 · major · 29 Oct 2026
+- GRAVITAS MODES: Collisions. Bodies whose orbits cross pass through each other in the game. The window lists such pairs across the galaxy, the habitable worlds among them, the pairs near the system you are looking at, and the next time each pair meets
+- Every time is worked out by GRAVITAS from the latest Spansh data: first where the two bodies can line up (once every synodic period), then their true positions and true sizes decide when they touch, how deep they go and when they part. Years ahead, in a moment
+- Watch opens the system at that moment, in true size
+- Needs data: the pairs whose bodies Spansh cannot place on their orbits yet, and what to scan so they can be timed
+- The list of pairs is from Canonn Research, who shared it openly. Thank you, Canonn and LCU
+- GRAVITAS MODES is two by two, so Bodies is a little shorter
+
 ### v0.94.1 · minor · 29 Oct 2026
 - Search: a system added to Spansh today opens with its full name and Enter, even before it shows in the suggestions (they can be hours behind)
 - Data updated: a wrong date in the future (one station in Sol said 2198) is no longer shown as the newest

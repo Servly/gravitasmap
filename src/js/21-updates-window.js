@@ -1,6 +1,14 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.95", k: "major", d: "29 Oct 2026", t: [
+      "GRAVITAS MODES: Collisions. Bodies whose orbits cross pass through each other in the game. The window lists such pairs across the galaxy, the habitable worlds among them, the pairs near the system you are looking at, and the next time each pair meets",
+      "Every time is worked out by GRAVITAS from the latest Spansh data: first where the two bodies can line up (once every synodic period), then their true positions and true sizes decide when they touch, how deep they go and when they part. Years ahead, in a moment",
+      "Watch opens the system at that moment, in true size",
+      "Needs data: the pairs whose bodies Spansh cannot place on their orbits yet, and what to scan so they can be timed",
+      "The list of pairs is from Canonn Research, who shared it openly. Thank you, Canonn and LCU",
+      "GRAVITAS MODES is two by two, so Bodies is a little shorter",
+    ] },
     { v: "v0.94.1", k: "minor", d: "29 Oct 2026", t: [
       "Search: a system added to Spansh today opens with its full name and Enter, even before it shows in the suggestions (they can be hours behind)",
       "Data updated: a wrong date in the future (one station in Sol said 2198) is no longer shown as the newest",
@@ -686,7 +694,7 @@ const NEWS_TABS = {
       <li><b>CMDR Cyanidex</b>, leader of TRGE. One of the first to test GRAVITAS, and the source of many Combat Mode ideas: the targets by value, the team board and more.</li>
       <li><b>Taha Koçer</b>, for his support.</li>
       <li><b>CMDR Nermesos</b>, a close friend, for his support.</li>
-      <li><b>The Canonn community</b>, for the first feedback from players outside the squadron.</li>
+      <li><b>The Canonn community</b>, for the first feedback from players outside the squadron. And <b>Canonn Research</b> and <b>LCU</b>, for the list of colliding orbits behind Collisions, shared openly.</li>
       <li><b>Frontier Developments</b>, for Elite Dangerous.</li>
     </ul>
     <div class="sqd big"><img src="assets/trge-banner.png" alt="Turkish Galactic Empire squadron emblem" width="250" height="75" loading="lazy"><p>And the whole <b>Turkish Galactic Empire [TRGE]</b> squadron: for testing, for every report and idea, and for supporting GRAVITAS from the first day.</p></div>`,

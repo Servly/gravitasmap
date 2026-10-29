@@ -68,7 +68,7 @@ function modesPanel() {
   if (k !== MODES.btn) { MODES.btn = k; const b = el.querySelector('[data-mode="Combat"]');
     b.classList.toggle("hot", k.includes("h")); b.classList.toggle("soft", k.includes("s")); b.classList.toggle("ob", k.includes("b"));
     b.title = k.includes("h") ? "In combat: open Combat Mode" : k.includes("s") ? "Hostiles near: open Combat Mode" : "GRAVITAS: Combat Mode";
-    $("modesSt").textContent = k.includes("n") ? "needs Sync" : ""; }
+    $("modesSt").textContent = k.includes("n") ? "Combat needs Sync" : ""; }
   if (MODES.undo && Date.now() >= MODES.undo.until) MODES.undo = null;
   modesRefresh();
 }
