@@ -120,6 +120,8 @@ def main():
         if i64 is None:
             continue
         a, b = suffix(r[hi["bodyName1"]], s), suffix(r[hi["bodyName2"]], s)
+        if a == b:                      # a star and its planet, both named like the system (Rasmussen, Tethlon): not a pair
+            continue
         f = F_HAB | (F_MEAN if len(r) > hi["hasPhaseData"] and r[hi["hasPhaseData"]] else 0)
         if k in colony: f |= F_COLONY
         if k in notable: f |= F_NOTABLE

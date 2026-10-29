@@ -22,7 +22,7 @@ function bodyFlat(b, mesh = b._mesh) {                         // the body's bas
   u.uKind.value = isGiant(b) ? 0 : 1; u.uLS.value = /Icy/i.test(b.subType || "") ? 0.3 : 0.55;
   u.uDry.value = /Earth-like|Water world/i.test(b.subType || "") ? 0 : 1; b._lib = null;
 }
-function shortName(b, sys) { return b.name.toLowerCase().startsWith(sys.toLowerCase()) ? (b.name.slice(sys.length).trim() || "★ Primary") : b.name; }
+function shortName(b, sys) { return b.name.toLowerCase().startsWith(sys.toLowerCase()) ? (b.name.slice(sys.length).trim() || (b.type === "Star" ? "★ Primary" : b.name)) : b.name; }   // v0.96.1: a planet named like its system keeps its name
 
 function build(data) {
   const sys = data.system || data, list = sys.bodies || [];
@@ -33,10 +33,12 @@ function build(data) {
   const byId = new Map(), parentOf = new Map(), children = new Map();
   for (const b of list) byId.set(b.bodyId, b);
   for (const b of list) {
-    const chain = (b.parents || []).map(p => Object.values(p)[0]);
+    if (b.bodyId === 0) continue;                                     // v0.96.1: the main star has no parent (Spansh once gave Rasmussen's star its own planet's orbit and itself as parent)
+    const chain = (b.parents || []).map(p => Object.values(p)[0]).filter(x => x !== b.bodyId);
     if (chain.length && !parentOf.has(b.bodyId)) parentOf.set(b.bodyId, chain[0]);
-    for (let k = 0; k + 1 < chain.length; k++) if (!parentOf.has(chain[k])) parentOf.set(chain[k], chain[k + 1]);
+    for (let k = 0; k + 1 < chain.length; k++) if (chain[k] !== 0 && chain[k] !== chain[k + 1] && !parentOf.has(chain[k])) parentOf.set(chain[k], chain[k + 1]);
   }
+  for (const id of [...parentOf.keys()]) { const seen = new Set([id]); for (let n = parentOf.get(id); n !== undefined && n !== null; n = parentOf.get(n)) { if (seen.has(n)) { parentOf.delete(id); break; } seen.add(n); } }   // never a loop
   for (const [c, p] of parentOf) { if (!children.has(p)) children.set(p, []); children.get(p).push(c); }
   // epoch of each meanAnomaly. If a body has no timestamp of its own, borrow one from its siblings or the system
   // (never "now": that would make positions drift with the time the page was opened)

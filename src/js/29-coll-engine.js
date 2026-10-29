@@ -12,10 +12,12 @@ function cxPrep(data) {                         // a light version of build(): b
   const byId = new Map(), parentOf = new Map(), byName = new Map();
   for (const b of list) byId.set(b.bodyId, b);
   for (const b of list) {
-    const chain = (b.parents || []).map(p => Object.values(p)[0]);
+    if (b.bodyId === 0) continue;                                     // v0.96.1: the main star has no parent (Spansh once gave Rasmussen's star its own planet's orbit and itself as parent)
+    const chain = (b.parents || []).map(p => Object.values(p)[0]).filter(x => x !== b.bodyId);
     if (chain.length && !parentOf.has(b.bodyId)) parentOf.set(b.bodyId, chain[0]);
-    for (let k = 0; k + 1 < chain.length; k++) if (!parentOf.has(chain[k])) parentOf.set(chain[k], chain[k + 1]);
+    for (let k = 0; k + 1 < chain.length; k++) if (chain[k] !== 0 && chain[k] !== chain[k + 1] && !parentOf.has(chain[k])) parentOf.set(chain[k], chain[k + 1]);
   }
+  for (const id of [...parentOf.keys()]) { const seen = new Set([id]); for (let n = parentOf.get(id); n !== undefined && n !== null; n = parentOf.get(n)) { if (seen.has(n)) { parentOf.delete(id); break; } seen.add(n); } }   // never a loop
   const ts = b => b.timestamps && b.timestamps.meanAnomaly, allTs = list.map(ts).filter(Boolean).sort();
   for (const b of list) {                       // the same epoch rule as the map (09-model.js)
     let t = ts(b), how = "own";

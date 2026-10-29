@@ -4,6 +4,12 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.96.1 · minor · 29 Oct 2026
+- Rasmussen (and any system like it) did not open: Spansh gives its star the orbit of its planet and the star itself as its parent. A body is never its own parent now, and no chain of parents can loop
+- A planet with the same name as its system keeps its name in the list (Rasmussen's Earth-like world was shown as a second Primary)
+- Collisions: two rows of the list named a star and its own planet as a pair. They are left out
+- Found by CMDR Hongark
+
 ### v0.96 · major · 29 Oct 2026
 - Collisions: Card. A picture for Discord with the two bodies drawn true to size at their deepest moment, the date and time, how long it lasts and how deep it goes. Copy image, Save image, Copy text, Copy link and Add to calendar
 - The card's link opens the system at that moment and watches the pair in true size

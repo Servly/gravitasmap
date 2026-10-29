@@ -22,7 +22,7 @@ function cxLoadNext() {
 function cxLoad() {
   if (CX.load) return CX.load;
   CX.load = Promise.all([fetch("assets/coll-pairs.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }), cxLoadNext()]).then(([p]) => {
-    CX.meta = p; CX.pairs = p.pairs.map(r => ({ id: String(r[0]), sys: r[1], a: r[2], b: r[3], x: r[4], y: r[5], z: r[6], ta: p.types[r[7]], tb: p.types[r[8]], f: r[9] }));
+    CX.meta = p; CX.pairs = p.pairs.filter(r => r[2] !== r[3]).map(r => ({ id: String(r[0]), sys: r[1], a: r[2], b: r[3], x: r[4], y: r[5], z: r[6], ta: p.types[r[7]], tb: p.types[r[8]], f: r[9] }));   // v0.96.1: two rows name the same body twice (a star and its planet, both called like the system): not a pair
     CX.byKey = new Map(CX.pairs.map(p => [cxKey(p.id, p.a, p.b), p]));
     cxRefresh(); cxSoon();
   }).catch(e => { CX.err = "The list could not be loaded. Try again later."; CX.load = null; cxRefresh(); });
