@@ -1,6 +1,10 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.95.1", k: "minor", d: "29 Oct 2026", t: [
+      "Collisions: passes between bodies on eccentric orbits could be missed. Each window around a conjunction is now wide enough, checked against a step-by-step search of the same orbits",
+      "Collisions: a pair that meets only once every few years is now followed far enough ahead (up to 15 years) to find its next pass",
+    ] },
     { v: "v0.95", k: "major", d: "29 Oct 2026", t: [
       "GRAVITAS MODES: Collisions. Bodies whose orbits cross pass through each other in the game. The window lists such pairs across the galaxy, the habitable worlds among them, the pairs near the system you are looking at, and the next time each pair meets",
       "Every time is worked out by GRAVITAS from the latest Spansh data: first where the two bodies can line up (once every synodic period), then their true positions and true sizes decide when they touch, how deep they go and when they part. Years ahead, in a moment",

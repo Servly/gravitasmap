@@ -63,7 +63,7 @@ function cxPair(M, A, B) {
   if (P.same) {
     const pA = A.orbitalPeriod * 86400e3, pB = B.orbitalPeriod * 86400e3, d = Math.abs(1 / pA - 1 / pB);
     P.syn = d > 0 ? 1 / d : Infinity;
-    P.half = Math.min(0.5, (2 * ((A.orbitalEccentricity || 0) + (B.orbitalEccentricity || 0)) + 0.06) / (2 * Math.PI));   // how far from the mean conjunction a true one can fall
+    P.half = Math.min(0.5, (4 * ((A.orbitalEccentricity || 0) + (B.orbitalEccentricity || 0)) + 0.1) / (2 * Math.PI));   // how far a true conjunction can fall from the first one found, one synodic period on (v0.95.1: was half as wide, too narrow for eccentric orbits)
   }
   return P;
 }
@@ -134,3 +134,6 @@ function cxKeep(ev, from, max) {                  // one event per pass, in time
   for (const e of ev) { const l = o[o.length - 1]; if (l && Math.abs(l.start - e.start) < 60e3) continue; if ((e.end === null ? e.start + 1 : e.end) > from) o.push(e); }
   return o.slice(0, max);
 }
+// v0.95.1: how far ahead to look: at least `years`, and two synodic periods for a slow pair (up to 15 years), so a pair that
+// meets once every few years is not called "none"
+function cxDays(P, years) { const y = years * 365.25, s = P.syn && isFinite(P.syn) ? P.syn / 86400e3 : 0; return Math.max(y, Math.min(15 * 365.25, 2.2 * s)); }

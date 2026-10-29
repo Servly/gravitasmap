@@ -29,7 +29,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   function one(M, p) {                            // our next passes, and (with the private file) ours near Canonn's time
     const P = cxPair(M, cxFind(M, p.a), cxFind(M, p.b));
     let r = { why: P.why && P.why !== "epoch" ? P.why : null, ev: [] };
-    if (P.gap && P.why !== "phase") { const n = cxNext(P, Date.now() - 6 * 3600e3, CX_YEARS * 365.25, 3); r = { why: n.events.length ? P.why || null : P.why || "none", ev: n.events, how: n.how }; }
+    if (P.gap && P.why !== "phase") { const n = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); r = { why: n.events.length ? P.why || null : P.why || "none", ev: n.events, how: n.how }; }
     L.res.set(cxKey(p.id, p.a, p.b), r);
     const c = L.priv && L.privMap.get(key(p.sys, p.a, p.b));
     if (c) {
@@ -55,7 +55,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   }
   async function sightings() {                     // the Observatory: Canonn's estimate, what was seen, and ours
     const off = s => { s = String(s || "").toLowerCase(); if (/spot on/.test(s)) return 0; const m = /(\d+)\s*(minute|min|hour|day|year)s?\s*(early|late)/.exec(s);
-      if (!m) return null; const u = { minute: 1, min: 1, hour: 60, day: 1440, year: 525960 }[m[2]]; return (m[3] === "early" ? -1 : 1) * m[1] * u; };
+      if (!m) return null; const u = { minute: 1, min: 1, hour: 60, day: 1440, year: 525960 }[m[2]]; const v = (m[3] === "early" ? -1 : 1) * m[1] * u; return Math.abs(v) > 1440 ? null : v; };   // "2 Years early" was another pass: not a timing
     for (const o of L.priv.observatory) {
       const r = { ...o, seenOffsetMin: off(o.observed) };
       try {

@@ -27,7 +27,7 @@ function cxWhen(e) {
 }
 const CX_WHY = { phase: "Spansh does not know where these bodies are on their orbits yet",
   epoch: "the orbit data has no time of its own, so the time cannot be trusted", missing: "a body or its orbit is missing on Spansh",
-  apart: "with the current orbit data these orbits never come close enough", moon: "one of them orbits the other", none: `none in the next ${CX_YEARS} years`, fail: "Spansh did not answer. Try again" };
+  apart: "with the current orbit data these orbits never come close enough", moon: "one of them orbits the other", none: "no pass found in the years ahead", fail: "Spansh did not answer. Try again" };
 function cxNeeds(p) { const r = cxResult(p); return r ? r.why === "phase" || r.why === "epoch" : !(p.f & 1); }
 function cxList() {
   if (!CX.pairs) return [];
@@ -90,7 +90,7 @@ async function cxCalc(p, keep) {
   try {
     const j = await cxFetch(p), M = cxPrep(j), P = cxPair(M, cxFind(M, p.a), cxFind(M, p.b));
     let res = { why: P.why && P.why !== "epoch" ? P.why : null, ev: [] };
-    if (P.gap && P.why !== "phase") { const r = cxNext(P, Date.now() - 6 * 3600e3, CX_YEARS * 365.25, 3); res = { why: r.events.length ? (P.why || null) : P.why || "none", ev: r.events }; }
+    if (P.gap && P.why !== "phase") { const r = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); res = { why: r.events.length ? (P.why || null) : P.why || "none", ev: r.events }; }
     CX.live.set(k, res); if (keep) keep.j = j;
     return res;
   } catch (e) { CX.live.set(k, { why: "fail", ev: [] }); return null; }

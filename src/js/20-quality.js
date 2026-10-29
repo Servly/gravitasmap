@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------- quality
-const APP_VERSION = "v0.95";
+const APP_VERSION = "v0.95.1";
 const PRESETS = {
   // v0.70: Low is truly light (works on any computer and browser): small surfaces, no Milky Way, no glow, no live map
   low:    { pr: 0.75, msaa: 0, bloom: false, tex: 256,  sky: 0,    bakeBudget: 0.12e6, panel: 600, note: "light: works on any computer" },
