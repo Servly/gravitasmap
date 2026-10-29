@@ -1,6 +1,10 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.96.2", k: "minor", d: "29 Oct 2026", t: [
+      "Collisions: each pair says how far it is from Sol, and from you (where you are in the game with Sync on, or the system on the screen). The card and its text say the distance from Sol too",
+      "Collisions: new times show at once after they are worked out again. The browser used to keep the old list for up to a day",
+    ] },
     { v: "v0.96.1", k: "minor", d: "29 Oct 2026", t: [
       "Rasmussen (and any system like it) did not open: Spansh gives its star the orbit of its planet and the star itself as its parent. A body is never its own parent now, and no chain of parents can loop",
       "A planet with the same name as its system keeps its name in the list (Rasmussen's Earth-like world was shown as a second Primary)",

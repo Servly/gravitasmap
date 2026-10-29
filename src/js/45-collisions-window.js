@@ -10,7 +10,7 @@ const cxKey = (id, a, b) => `${id}|${a}|${b}`;
 // coll-next.json: [id64, body, body, why, [[start s, end s, depth km]], on the map 1/0, [[close pass s, miss km]], oldest orbit data s]
 function cxLoadNext() {
   if (CX.nload) return CX.nload;
-  CX.nload = fetch("assets/coll-next.json").then(r => r.ok ? r.json() : null).catch(() => null).then(n => {
+  CX.nload = fetch("assets/coll-next.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(n => {
     CX.next = new Map(); if (n && n.pairs) { CX.made = n.made;
       for (const r of n.pairs) CX.next.set(cxKey(r[0], r[1], r[2]), { why: r[3] || null, map: r[5] === 0 ? false : r[5] === 1 ? true : undefined,
         ev: (r[4] || []).map(e => ({ start: e[0] * 1000, end: e[1] ? e[1] * 1000 : null, depth: e[2] })),
@@ -21,7 +21,7 @@ function cxLoadNext() {
 }
 function cxLoad() {
   if (CX.load) return CX.load;
-  CX.load = Promise.all([fetch("assets/coll-pairs.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }), cxLoadNext()]).then(([p]) => {
+  CX.load = Promise.all([fetch("assets/coll-pairs.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }), cxLoadNext()]).then(([p]) => {
     CX.meta = p; CX.pairs = p.pairs.filter(r => r[2] !== r[3]).map(r => ({ id: String(r[0]), sys: r[1], a: r[2], b: r[3], x: r[4], y: r[5], z: r[6], ta: p.types[r[7]], tb: p.types[r[8]], f: r[9] }));   // v0.96.1: two rows name the same body twice (a star and its planet, both called like the system): not a pair
     CX.byKey = new Map(CX.pairs.map(p => [cxKey(p.id, p.a, p.b), p]));
     cxRefresh(); cxSoon();
@@ -79,9 +79,10 @@ function cxRow(p, top) {
     : (c && (!e || c.start < e.start) ? cl + (e ? "<br>" : "") : "") + (e ? cxWhen(e) + (e.depth > 0 ? ` · ${fmt(e.depth, 0)} km deep` : "") + (r.why === "epoch" ? ` · <span class="cxDim" title="${esc(CX_WHY.epoch)}">less sure</span>` : "") : "")
       || (r ? `<span class="cxDim">${esc(CX_WHY[r.why] || CX_WHY.none)}</span>` : `<span class="cxDim">not worked out yet</span>`);
   const off = r && r.map === false;                                    // v0.95.2: part of what they orbit is not on Spansh: the map cannot draw them
-  const d = p._d == null ? "" : p._d < 1 ? " · here" : ` · ${fmt(p._d, p._d < 100 ? 1 : 0)} ly`, ev = e || c;
-  return `<div class="cxR${top ? " cxTop" : ""}" data-cx="${esc(k)}"><div class="cxT">${top ? `<span class="cxNx">NEXT</span> ` : ""}<b>${esc(p.sys)}</b> <span class="cxB">${esc(p.a)} &amp; ${esc(p.b)}</span><span class="cxDim">${d}</span>${age ? ` <span class="cxAge ${age.k}" title="${esc(age.tip)}">${age.t}</span>` : ""}<br>
-    <span class="cxTy">${esc(p.ta)} &amp; ${esc(p.tb)}${tags.length ? " · " + tags.join(" · ") : ""}</span><br><span class="cxSt">${st}</span>${off ? `<br><span class="cxOff" title="The map places a body only when everything it orbits is on Spansh: its planet, and the centre of a pair of planets if there is one. Scanning the bodies around them (the FSS is enough) usually adds what is missing.">not on the map yet: part of what they orbit is missing on Spansh</span>` : ""}</div>
+  const ev = e || c, ly = v => `${fmt(v, v < 100 ? 1 : 0)} ly`, sol = Math.hypot(p.x, p.y, p.z), h = cxHere();   // v0.96.2: how far from you and from Sol
+  const dist = `<br><span class="cxLy">${p._d != null && h ? (p._d < 1 ? `here, in ${esc(h.n || "this system")} · ` : `${ly(p._d)} from ${esc(h.n || "you")} · `) : ""}${sol < 1 ? "in Sol" : ly(sol) + " from Sol"}</span>`;
+  return `<div class="cxR${top ? " cxTop" : ""}" data-cx="${esc(k)}"><div class="cxT">${top ? `<span class="cxNx">NEXT</span> ` : ""}<b>${esc(p.sys)}</b> <span class="cxB">${esc(p.a)} &amp; ${esc(p.b)}</span>${age ? ` <span class="cxAge ${age.k}" title="${esc(age.tip)}">${age.t}</span>` : ""}<br>
+    <span class="cxTy">${esc(p.ta)} &amp; ${esc(p.tb)}${tags.length ? " · " + tags.join(" · ") : ""}</span><br><span class="cxSt">${st}</span>${off ? `<br><span class="cxOff" title="The map places a body only when everything it orbits is on Spansh: its planet, and the centre of a pair of planets if there is one. Scanning the bodies around them (the FSS is enough) usually adds what is missing.">not on the map yet: part of what they orbit is missing on Spansh</span>` : ""}${dist}</div>
     <div class="cxA">${busy ? "" : `<button type="button" data-cxgo="calc" title="Work out the next times now, from the latest Spansh data">${r && !CX.live.has(k) ? "Update" : r ? "Again" : "Work it out"}</button>`}${ev && !busy ? `<button type="button" data-cxgo="card" title="A card for Discord: picture, text, link and calendar">Card</button>` : ""}<button type="button" data-cxgo="open" class="${ev && !off ? "pri" : ""}" title="${ev && !off ? "Open the system at this moment, in true size" : "Open the system"}">${ev && !off ? "Watch" : "Open"}</button></div></div>`;
 }
 function cxNavHTML() {
@@ -170,7 +171,7 @@ function cxLink(p, e) {
 }
 function cxText(p, e) {
   const r = cxResult(p), age = cxAge(r);
-  return [`${e.close ? "Close pass" : "Collision"}: ${p.sys} · ${p.a} & ${p.b} (${p.ta} & ${p.tb})`,
+  return [`${e.close ? "Close pass" : "Collision"}: ${p.sys} · ${p.a} & ${p.b} (${p.ta} & ${p.tb}) · ${fmt(Math.hypot(p.x, p.y, p.z), 0)} ly from Sol`,
     e.close ? `${cxDay(e.start)} ${cxHM(e.start)} UTC · they miss by ${fmt(e.miss, 0)} km with the current data`
       : `${cxDay(e.start)} ${cxHM(e.start)}${e.end ? ` to ${cxDay(e.end) !== cxDay(e.start) ? cxDay(e.end) + " " : ""}${cxHM(e.end)}` : ""} UTC${cxLasts(e) ? ` · ${cxLasts(e)}` : ""}${e.depth > 0 ? ` · ${fmt(e.depth, 0)} km deep` : ""}`,
     age ? `Orbit data: ${age.k === "mine" ? "your own scan" : age.tip.replace(/^The orbit data is from /, "").replace(/\. .*$/, "")}${age.k !== "mine" ? ", be there early" : ""}` : "",
@@ -195,7 +196,7 @@ function cxCard(p, e) {
   g.fillStyle = "#fff"; g.font = F(800, 54); g.fillText(e.close ? "CLOSE PASS" : "COLLISION", 56, 128);
   g.fillStyle = "#ffe1b0"; g.font = F(700, 30); g.fillText(p.sys, 56, 178, 640);
   g.fillStyle = "#ffd27a"; g.font = F(600, 24); g.fillText(`${p.a}  &  ${p.b}`, 56, 216, 640);
-  g.fillStyle = "#cbbfdc"; g.font = F(500, 19); g.fillText(`${p.ta} & ${p.tb}`, 56, 246, 640);
+  g.fillStyle = "#cbbfdc"; g.font = F(500, 19); g.fillText(`${p.ta} & ${p.tb} · ${fmt(Math.hypot(p.x, p.y, p.z), 0)} ly from Sol`, 56, 246, 640);
   const boxes = e.close ? [[`${cxDay(e.start)}`, "DATE (UTC)"], [cxHM(e.start), "CLOSEST (UTC)"], [`${fmt(e.miss, 0)} km`, "MISSES BY"]]
     : [[cxDay(e.start), "DATE (UTC)"], [`${cxHM(e.start)}${e.end && e.end - e.start < 86400e3 ? "–" + cxHM(e.end) : ""}`, "TIME (UTC)"], [cxLasts(e).replace("lasts ", "") || "—", "LASTS"], [e.depth > 0 ? `${fmt(e.depth, 0)} km` : "—", "DEEPEST"]];
   const bw = e.close ? 205 : 152; boxes.forEach(([v, l], i) => { const x = 56 + i * (bw + 10), y = 280; g.fillStyle = "rgba(255,255,255,.06)"; g.beginPath(); g.roundRect(x, y, bw, 100, 12); g.fill();

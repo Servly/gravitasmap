@@ -5,11 +5,12 @@
 //  2. with our private file of Canonn's own times (coll-canonn-private.json, from tools/canonn_import.py, never on the site)
 //     it compares them with ours and with the Observatory sightings, and gives a report to download. Nothing is shown on the site.
 if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
-  const L = { run: false, i: 0, sys: [], res: new Map(), priv: null, cmp: new Map(), obs: [], log: [], t0: 0, all: false, gap: 1500 };
+  const L = { some: true, run: false, i: 0, sys: [], res: new Map(), priv: null, cmp: new Map(), obs: [], log: [], t0: 0, all: false, gap: 5000 };
   const lim = +new URLSearchParams(location.search).get("n") || 0;
   const el = document.createElement("div"); el.id = "cxLab";
   el.innerHTML = `<b>COLLISIONS LAB</b> <small>private, not linked anywhere</small><div id="cxLs">Loading the list…</div>
     <label><input type="checkbox" id="cxLall"> also pairs without phase data (much longer)</label>
+    <label><input type="checkbox" id="cxLsome" checked> only the pairs that had a pass or a close pass last time (kinder to Spansh)</label>
     <label>Canonn's times (private file): <input type="file" id="cxLf" accept=".json"></label>
     <div class="cxLb"><button id="cxLgo">Start</button><button id="cxLnext" disabled>Download coll-next.json</button><button id="cxLrep" disabled>Download report</button><button id="cxLre" disabled>Try the failed ones again</button><button id="cxLx">Close</button></div><pre id="cxLlog"></pre>`;
   document.body.appendChild(el);
@@ -18,11 +19,13 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   const key = (s, a, b) => [s, a, b].map(x => String(x).replace(/\s+/g, "").toLowerCase()).join("|");
   function plan() {
     const by = new Map();
-    for (const p of CX.pairs) if (L.all || (p.f & CX.meta.flags.mean)) { if (!by.has(p.id)) by.set(p.id, []); by.get(p.id).push(p); }
+    const had = p => { const r = CX.next && CX.next.get(cxKey(p.id, p.a, p.b)); return !L.some || !CX.next || !CX.next.size || (r && ((r.ev && r.ev.length) || (r.close && r.close.length))); };
+    for (const p of CX.pairs) if ((L.all || (p.f & CX.meta.flags.mean)) && had(p)) { if (!by.has(p.id)) by.set(p.id, []); by.get(p.id).push(p); }
     L.sys = [...by.entries()]; if (lim) L.sys = L.sys.slice(0, lim);
     st.textContent = `${L.sys.length} systems, ${L.sys.reduce((s, x) => s + x[1].length, 0)} pairs. About ${Math.round(L.sys.length * (L.gap + 900) / 60000)} minutes.`;
   }
   cxLoad().then(() => { if (CX.pairs) plan(); });
+  $("cxLsome").onchange = e => { L.some = e.target.checked; if (CX.pairs && !L.run) { L.i = 0; plan(); } };
   $("cxLall").onchange = e => { L.all = e.target.checked; if (CX.pairs && !L.run) { L.i = 0; plan(); } };
   $("cxLx").onclick = () => { L.run = false; el.remove(); };
   $("cxLre").onclick = () => {                     // v0.96: only the systems Spansh did not answer for
@@ -87,7 +90,8 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   };
   $("cxLnext").onclick = () => {
     const rows = [];
-    for (const p of CX.pairs) { const r = L.res.get(cxKey(p.id, p.a, p.b)); if (r && r.why !== "fail") rows.push([p.id, p.a, p.b, r.why || 0, r.ev.map(e => [Math.round(e.start / 1000), e.end ? Math.round(e.end / 1000) : 0, Math.round(e.depth)]), r.map === false ? 0 : 1,
+    for (const p of CX.pairs) { const k = cxKey(p.id, p.a, p.b), r = (L.res.get(k) && L.res.get(k).why !== "fail" ? L.res.get(k) : null) || (CX.next && CX.next.get(k));   // v0.96.2: a pair not looked at again keeps last time's result
+      if (r && r.why !== "fail") rows.push([p.id, p.a, p.b, r.why || 0, r.ev.map(e => [Math.round(e.start / 1000), e.end ? Math.round(e.end / 1000) : 0, Math.round(e.depth)]), r.map === false ? 0 : 1,
       (r.close || []).map(e => [Math.round(e.start / 1000), Math.round(e.miss)]), r.ep0 ? Math.round(r.ep0 / 1000) : 0]); }
     save("coll-next.json", JSON.stringify({ made: new Date().toISOString(), years: CX_YEARS, by: "GRAVITAS", pairs: rows }));
   };
