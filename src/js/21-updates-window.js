@@ -1,6 +1,11 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.95.2", k: "minor", d: "29 Oct 2026", t: [
+      "Collisions: Watch is shown only when the map can show the two bodies. In many pairs part of what the bodies orbit (their planet, or the centre of a pair of planets) is not on Spansh yet, so the map cannot place them. Those rows now say so, and what to scan, instead of opening an empty view",
+      "Collisions: a pass that lasts days or weeks shows its end date and how long it lasts (some moons stay inside each other for weeks)",
+      "Found by CMDR Hongark",
+    ] },
     { v: "v0.95.1", k: "minor", d: "29 Oct 2026", t: [
       "Collisions: passes between bodies on eccentric orbits could be missed. Each window around a conjunction is now wide enough, checked against a step-by-step search of the same orbits",
       "Collisions: a pair that meets only once every few years is now followed far enough ahead (up to 15 years) to find its next pass",

@@ -29,7 +29,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   function one(M, p) {                            // our next passes, and (with the private file) ours near Canonn's time
     const P = cxPair(M, cxFind(M, p.a), cxFind(M, p.b));
     let r = { why: P.why && P.why !== "epoch" ? P.why : null, ev: [] };
-    if (P.gap && P.why !== "phase") { const n = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); r = { why: n.events.length ? P.why || null : P.why || "none", ev: n.events, how: n.how }; }
+    if (P.gap && P.why !== "phase") { const n = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); r = { why: n.events.length ? P.why || null : P.why || "none", ev: n.events, how: n.how, map: P.map }; }
     L.res.set(cxKey(p.id, p.a, p.b), r);
     const c = L.priv && L.privMap.get(key(p.sys, p.a, p.b));
     if (c) {
@@ -81,7 +81,7 @@ if (new URLSearchParams(location.search).get("lab") === "coll") (() => {
   };
   $("cxLnext").onclick = () => {
     const rows = [];
-    for (const p of CX.pairs) { const r = L.res.get(cxKey(p.id, p.a, p.b)); if (r && r.why !== "fail") rows.push([p.id, p.a, p.b, r.why || 0, r.ev.map(e => [Math.round(e.start / 1000), e.end ? Math.round(e.end / 1000) : 0, Math.round(e.depth)])]); }
+    for (const p of CX.pairs) { const r = L.res.get(cxKey(p.id, p.a, p.b)); if (r && r.why !== "fail") rows.push([p.id, p.a, p.b, r.why || 0, r.ev.map(e => [Math.round(e.start / 1000), e.end ? Math.round(e.end / 1000) : 0, Math.round(e.depth)]), r.map === false ? 0 : 1]); }
     save("coll-next.json", JSON.stringify({ made: new Date().toISOString(), years: CX_YEARS, by: "GRAVITAS", pairs: rows }));
   };
   $("cxLrep").onclick = () => {

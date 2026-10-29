@@ -31,6 +31,8 @@ function cxPrep(data) {                         // a light version of build(): b
   orbitFrames(byId, parentOf);
   return { name: sys.name, id64: sys.id64, byId, parentOf, byName, bodies: list };
 }
+// can the map draw this body? Only if every parent up to the star is on Spansh (the same rule as build() in 09-model.js)
+function cxOnMap(M, b) { for (let n = b.bodyId; ;) { if (n === 0) return true; if (!M.byId.has(n)) return false; const p = M.parentOf.get(n); if (p === undefined) return !!M.byId.get(n).mainStar; n = p; } }
 function cxFind(M, label) { return M.byName.get(String(label).replace(/\s+/g, "").toLowerCase()) || null; }
 function cxChain(M, id) { const o = []; let p = M.parentOf.get(id); while (p !== undefined && p !== null) { o.push(p); p = M.parentOf.get(p); } return o; }
 function cxPos(M, b, top, t) {
@@ -55,7 +57,7 @@ function cxPair(M, A, B) {
   if (Math.max(ra[0] - A._r, rb[0] - B._r) > Math.min(ra[1] + A._r, rb[1] + B._r)) return { why: "apart" };   // their distances from the parent never overlap
   const why = all.some(n => n.meanAnomaly == null) ? "phase" : all.some(n => n._epochHow !== "own") ? "epoch" : null;
   const per = all.map(n => n.orbitalPeriod * 86400e3);
-  const P = { M, A, B, top, why, sure: !why, same: pa.length === 1 && pb.length === 1,
+  const P = { M, A, B, top, why, sure: !why, map: cxOnMap(M, A) && cxOnMap(M, B), same: pa.length === 1 && pb.length === 1,
     dt: Math.min(7200e3, Math.max(20e3, Math.min(...per) / 240)), ep: Math.max(...all.map(n => n._t0)) };
   P.gap = t => { const a = cxPos(M, A, top, t), b = cxPos(M, B, top, t); return Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) - A._r - B._r; };
   P.ang = t => { const a = cxPos(M, A, top, t), b = cxPos(M, B, top, t);                     // angle between the two, seen from the parent

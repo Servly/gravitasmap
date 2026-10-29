@@ -12,7 +12,7 @@ function cxLoad() {
     fetch("assets/coll-next.json").then(r => r.ok ? r.json() : null).catch(() => null),   // GRAVITAS's own times, worked out ahead
   ]).then(([p, n]) => {
     CX.meta = p; CX.pairs = p.pairs.map(r => ({ id: String(r[0]), sys: r[1], a: r[2], b: r[3], x: r[4], y: r[5], z: r[6], ta: p.types[r[7]], tb: p.types[r[8]], f: r[9] }));
-    CX.next = new Map(); if (n && n.pairs) { CX.made = n.made; for (const r of n.pairs) CX.next.set(cxKey(r[0], r[1], r[2]), { why: r[3] || null, ev: (r[4] || []).map(e => ({ start: e[0] * 1000, end: e[1] ? e[1] * 1000 : null, depth: e[2] })), at: n.made }); }
+    CX.next = new Map(); if (n && n.pairs) { CX.made = n.made; for (const r of n.pairs) CX.next.set(cxKey(r[0], r[1], r[2]), { why: r[3] || null, map: r[5] === 0 ? false : r[5] === 1 ? true : undefined, ev: (r[4] || []).map(e => ({ start: e[0] * 1000, end: e[1] ? e[1] * 1000 : null, depth: e[2] })), at: n.made }); }
     cxRefresh();
   }).catch(e => { CX.err = "The list could not be loaded. Try again later."; CX.load = null; cxRefresh(); });
   return CX.load;
@@ -23,7 +23,11 @@ function cxWhen(e) {
   const now = Date.now(), d = new Date(e.start), on = e.start <= now && (e.end === null || e.end > now);
   const day = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }), hm = t => new Date(t).toISOString().slice(11, 16);
   const left = e.start - now, inT = left > 2 * 86400e3 ? `in ${Math.round(left / 86400e3)} days` : left > 3600e3 ? `in ${Math.round(left / 3600e3)} h` : left > 0 ? `in ${Math.max(1, Math.round(left / 60e3))} min` : "";
-  return `${on ? `<b class="cxNow">happening now</b> · ` : ""}${day} · ${hm(e.start)}–${e.end ? hm(e.end) : "…"} UTC${inT && !on ? ` · <span class="cxIn">${inT}</span>` : ""}`;
+  const dd = t => new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  const span = e.end ? e.end - e.start : 0, long = span > 86400e3;      // v0.95.2: a pass of days or weeks says its end date and how long it lasts
+  const to = !e.end ? "…" : dd(e.end) !== day ? `${dd(e.end)} ${hm(e.end)}` : hm(e.end);
+  const lasts = !span ? "" : span >= 2 * 86400e3 ? `lasts ${Math.round(span / 86400e3)} days` : span >= 3600e3 ? `lasts ${Math.round(span / 3600e3)} h` : `lasts ${Math.max(1, Math.round(span / 60e3))} min`;
+  return `${on ? `<b class="cxNow">happening now</b> · ` : ""}${day} ${hm(e.start)} ${long ? "→" : "–"} ${to} UTC${lasts ? ` · ${lasts}` : ""}${inT && !on ? ` · <span class="cxIn">${inT}</span>` : ""}`;
 }
 const CX_WHY = { phase: "Spansh does not know where these bodies are on their orbits yet",
   epoch: "the orbit data has no time of its own, so the time cannot be trusted", missing: "a body or its orbit is missing on Spansh",
@@ -45,10 +49,11 @@ function cxRow(p) {
   const tags = [p.f & F.habitable ? "habitable" : "", p.f & F.water_earth_ammonia ? "water, earth-like or ammonia" : "", p.f & F.colony ? "colonisation target" : "", p.f & F.landable ? "landable" : "", p.f & F.atmosphere ? "atmosphere" : "", p.f & F.populated ? "populated" : ""].filter(Boolean);
   const st = busy ? `<span class="cxDim">Working it out…</span>` : e ? cxWhen(e) + (e.depth > 0 ? ` · ${fmt(e.depth, 0)} km deep` : "") + (r.why === "epoch" ? ` · <span class="cxDim" title="${esc(CX_WHY.epoch)}">less sure</span>` : "")
     : r ? `<span class="cxDim">${esc(CX_WHY[r.why] || CX_WHY.none)}</span>` : `<span class="cxDim">not worked out yet</span>`;
+  const off = r && r.map === false;                                    // v0.95.2: the planet they orbit is not on Spansh: the map cannot draw them
   const d = p._d != null && cxHere() ? ` · ${fmt(p._d, p._d < 100 ? 1 : 0)} ly` : "";
   return `<div class="cxR" data-cx="${esc(k)}"><div class="cxT"><b>${esc(p.sys)}</b> <span class="cxB">${esc(p.a)} &amp; ${esc(p.b)}</span><span class="cxDim">${d}</span><br>
-    <span class="cxTy">${esc(p.ta)} &amp; ${esc(p.tb)}${tags.length ? " · " + tags.join(" · ") : ""}</span><br><span class="cxSt">${st}</span></div>
-    <div class="cxA">${busy ? "" : `<button type="button" data-cxgo="calc" title="Work out the next times now, from the latest Spansh data">${r && !CX.live.has(k) ? "Update" : r ? "Again" : "Work it out"}</button>`}<button type="button" data-cxgo="open" class="pri" title="${e ? "Open the system at this moment, in true size" : "Open the system"}">${e ? "Watch" : "Open"}</button></div></div>`;
+    <span class="cxTy">${esc(p.ta)} &amp; ${esc(p.tb)}${tags.length ? " · " + tags.join(" · ") : ""}</span><br><span class="cxSt">${st}</span>${off ? `<br><span class="cxOff" title="The map places a body only when everything it orbits is on Spansh: its planet, and the centre of a pair of planets if there is one. Scanning the bodies around them (the FSS is enough) usually adds what is missing.">not on the map yet: part of what they orbit is missing on Spansh</span>` : ""}</div>
+    <div class="cxA">${busy ? "" : `<button type="button" data-cxgo="calc" title="Work out the next times now, from the latest Spansh data">${r && !CX.live.has(k) ? "Update" : r ? "Again" : "Work it out"}</button>`}<button type="button" data-cxgo="open" class="${e && !off ? "pri" : ""}" title="${e && !off ? "Open the system at this moment, in true size" : "Open the system"}">${e && !off ? "Watch" : "Open"}</button></div></div>`;
 }
 function cxNavHTML() {
   const b = (k, l) => `<button type="button" data-cxsub="${k}" class="${CX.sub === k ? "on" : ""}">${l}</button>`;
@@ -90,7 +95,7 @@ async function cxCalc(p, keep) {
   try {
     const j = await cxFetch(p), M = cxPrep(j), P = cxPair(M, cxFind(M, p.a), cxFind(M, p.b));
     let res = { why: P.why && P.why !== "epoch" ? P.why : null, ev: [] };
-    if (P.gap && P.why !== "phase") { const r = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); res = { why: r.events.length ? (P.why || null) : P.why || "none", ev: r.events }; }
+    if (P.gap && P.why !== "phase") { const r = cxNext(P, Date.now() - 6 * 3600e3, cxDays(P, CX_YEARS), 3); res = { why: r.events.length ? (P.why || null) : P.why || "none", ev: r.events, map: P.map }; }
     CX.live.set(k, res); if (keep) keep.j = j;
     return res;
   } catch (e) { CX.live.set(k, { why: "fail", ev: [] }); return null; }
@@ -99,12 +104,14 @@ async function cxCalc(p, keep) {
 async function cxWatch(p) {
   const keep = {}; let r = cxResult(p);
   if (!CX.live.has(cxKey(p.id, p.a, p.b))) r = await cxCalc(p, keep);        // fresh data for the moment that is shown
+  if (r && r.map === false && cxUpcoming(r)) { toast("These two cannot be shown yet: part of what they orbit is missing on Spansh"); cxRefresh(); return; }   // nothing to watch: say so, do not open an empty view
   const e = cxUpcoming(r);
   $("news").style.display = "none";
   const ok = await loadSystem(p.sys, keep.j ? { pre: Promise.resolve(keep.j), id64: p.id } : { id64: p.id });
   if (!ok || !S || !e) return;
   const nm = l => String(l).replace(/\s+/g, "").toLowerCase(), A = S.bodies.find(b => nm(shortName(b, S.sys.name)) === nm(p.a)), B = S.bodies.find(b => nm(shortName(b, S.sys.name)) === nm(p.b));
-  if (A && B) collWatch({ bodies: new Set([A, B]), list: [{ A, B, start: e.start, end: e.end }], start: e.start, end: e.end, all: null });
+  if (!A || !B) { toast("These two cannot be shown yet: part of what they orbit is missing on Spansh"); return; }
+  collWatch({ bodies: new Set([A, B]), list: [{ A, B, start: e.start, end: e.end }], start: e.start, end: e.end, all: null });
 }
 $("newsBody").addEventListener("click", e => {
   if (NEWS_SET !== "modes" || MODES.tab !== "Collisions") return;
