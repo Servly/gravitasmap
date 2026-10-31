@@ -5,6 +5,7 @@
 src/_shell.html      page markup (head with search-engine info, panels)
 src/css/app.css      all styles
 src/js/NN-*.js       the app, in numbered parts; they are joined in order into one module
+src/lazy/*.js        v0.97: parts loaded only when they are opened (the Lenses): app.<name>.<hash>.js, named in the app as __LAZY_<NAME>__
 
 Output goes to site/ : index.html, app.<hash>.css, app.<hash>.js (minified when esbuild is
 available), assets/, robots.txt. tools/serve.py serves site/ when it exists.
@@ -48,6 +49,11 @@ h1{color:#ff6ad5;letter-spacing:.2em;font-size:18px;margin:14px 0 4px}p{margin:6
 def main():
     parts = sorted((SRC / "js").glob("[0-9][0-9]-*.js"))
     js = "".join(p.read_text(encoding="utf-8") for p in parts)
+    lazy = {}                                                         # v0.97: a lazy part is built on its own; the app knows it by its hashed name
+    for p in sorted((SRC / "lazy").glob("*.js")) if (SRC / "lazy").is_dir() else []:
+        code = minify(p.read_text(encoding="utf-8"), "js")
+        lazy[f"app.{p.stem}.{hashlib.sha1(code.encode()).hexdigest()[:10]}.js"] = code
+        js = js.replace(f"__LAZY_{p.stem.upper()}__", list(lazy)[-1])
     css = (SRC / "css" / "app.css").read_text(encoding="utf-8")
     js_min, css_min = minify(js, "js"), minify(css, "css")
     h = lambda s: hashlib.sha1(s.encode()).hexdigest()[:10]
@@ -55,12 +61,16 @@ def main():
     if SITE.exists():                     # keep the files the previous page used, so a visitor who still has that page keeps working
         old = SITE / "index.html"
         keep = set(re.findall(r'(app\.[0-9a-f]+\.(?:js|css))', old.read_text(encoding="utf-8"))) if old.is_file() else set()
+        for k in list(keep):                                          # v0.97: and the lazy parts that page's app asks for
+            f = SITE / k
+            if f.is_file() and k.endswith(".js"): keep |= set(re.findall(r'(app\.[a-z]+\.[0-9a-f]{10}\.js)', f.read_text(encoding="utf-8")))
         for f in SITE.glob("app.*"):
             if f.name not in keep:
                 f.unlink()
     SITE.mkdir(exist_ok=True)
     (SITE / jsn).write_text(js_min, encoding="utf-8")
     (SITE / cssn).write_text(css_min, encoding="utf-8")
+    for n, code in lazy.items(): (SITE / n).write_text(code, encoding="utf-8")
     html = (SRC / "_shell.html").read_text(encoding="utf-8")
     html = html.replace("<!--CSS-->", f'<link rel="stylesheet" href="{cssn}">')
     html = html.replace("<!--JS-->", f'<script type="module" src="{jsn}"></script>')

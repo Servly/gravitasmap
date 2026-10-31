@@ -4,6 +4,19 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.97 · major · 31 Oct 2026
+- New in GRAVITAS MODES: Lenses. Three new ways to look at a system, all from its own orbit data
+- Rhythm: two bodies around the same centre, joined by a line again and again. Near a simple ratio the lines close into a pattern with petals. GRAVITAS picks the best pairs, and you can pick any other
+- Seen from: the path one body draws across the sky of another, with a loop each time it seems to walk backwards
+- Resonances: pairs and chains of bodies close to a simple ratio, such as 8 : 5 or 4 : 2 : 1
+- Play the system: the melody of the system, part by part. Each body plays its note when it passes between its centre and the star. The rhythm is the real one, sped up. The pitch keeps the true ratios of the orbits, or moves by whole octaves when they spread too far, and each part says which
+- The sounds are instrument models made in your browser: marimba, vibraphone, glass bars, harp and bell, chosen by the kind of body, over a drone that follows the star. No sound files
+- Landscape: the pull of two bodies in a frame that turns with the smaller one, the five Lagrange points, and the Hill sphere with each moon in it. Pairs of stars show the room each one rules
+- Time: years of motion in one picture, and a body with its moons moving through space. A moon that loops back is marked
+- Melody card: a picture of the pattern and the resonances, to share. Copy link opens the same lens
+- A lens that cannot work in a system stays grey and says why
+- The Lenses load only when you open them. While the window is open the map behind it rests, and the sound stops when you close it or switch tabs
+
 ### v0.96.2 · minor · 29 Oct 2026
 - Collisions: each pair says how far it is from Sol, and from you (where you are in the game with Sync on, or the system on the screen). The card and its text say the distance from Sol too
 - Collisions: new times show at once after they are worked out again. The browser used to keep the old list for up to a day

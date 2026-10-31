@@ -1319,3 +1319,23 @@ body.pfull #modes { display:none !important; }
 #modes .mrow button[data-mode="Collisions"].soon::after { content:""; position:absolute; top:3px; right:4px; width:6px; height:6px; border-radius:50%; background:#ffb84d; box-shadow:0 0 6px #ffb84d; }
 #modes .mrow button[data-mode="Collisions"] { position:relative; }
 #newsBody .cxLy { color:var(--dim); font-size:11.5px; }
+/* v0.97 GRAVITAS MODES: Lenses */
+#news .lens .lnTop { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:4px 0 10px; } #news .lens .lnTop .mSub { margin:0; flex:1; }
+#news .lens .mSub button.off { color:var(--dim); opacity:.55; border-style:dashed; }
+#news .lens .lnAct button, #news .lens .lnBtns button, #news .lens .lnSeen button { font-size:11.5px; padding:4px 10px; border-radius:8px; }
+#news .lens .lnGrid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:16px; align-items:start; }
+#news .lens .lnTwo { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
+#news .lens .lnFig { min-width:0; } #news .lens .lnFig canvas { display:block; border-radius:10px; border:1px solid var(--line); max-width:100%; }
+#news .lens .lnSide { min-width:0; display:flex; flex-direction:column; gap:6px; } #news .lens .lnSide .q { margin:10px 0 2px; }
+#news .lens .lnPlay { display:flex; flex-wrap:wrap; gap:8px; align-items:center; } #news .lens .lnPlay > button.pri { font-size:13px; padding:7px 16px; border-radius:18px; }
+#news .lens select { max-width:100%; font-size:11.5px; } #news .lens .lnVol { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--dim); } #news .lens .lnVol input { width:90px; }
+#news .lens .lnNow { width:100%; } #news .lens .lnSec b { color:var(--accent); } #news .lens .lnSec span { color:var(--dim); font-size:11px; }
+#news .lens .lnVoices { display:flex; flex-direction:column; gap:2px; margin-top:4px; font-size:11.5px; } #news .lens .lnVoices i { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+#news .lens .lnVoices em { color:var(--dim); font-style:normal; font-size:11px; }
+#news .lens .lnPairs { display:flex; flex-direction:column; gap:4px; } #news .lens .lnPairs button { text-align:left; display:flex; flex-direction:column; gap:1px; padding:5px 9px; border-radius:8px; font-size:12px; }
+#news .lens .lnPairs button span { color:var(--dim); font-size:11px; } #news .lens .lnPairs button.on { border-color:var(--accent); background:rgba(255,106,213,.1); }
+#news .lens .lnSeen { display:flex; gap:6px; flex-wrap:wrap; } #news .lens .lnSeen button.on { border-color:#ffd27a; color:#ffd27a; }
+#news .lens .lnRes { display:flex; flex-wrap:wrap; gap:5px; } #news .lens .lnBadge { font-size:11px; padding:3px 8px; border-radius:12px; background:rgba(106,232,255,.08); border:1px solid rgba(106,232,255,.3); }
+#news .lens .lnBadge.chain { background:rgba(255,210,122,.1); border-color:rgba(255,210,122,.45); } #news .lens .lnBadge b { color:#fff; margin-right:4px; } #news .lens .lnBadge i { color:var(--dim); font-style:normal; margin-left:3px; }
+#news .lens .lnBar { margin:0 0 8px; } #news .lens .lnWhy { color:var(--dim); padding:10px 12px; border:1px dashed var(--line); border-radius:8px; }
+@media (max-width:700px) { #news .lens .lnGrid, #news .lens .lnTwo { grid-template-columns:1fr; } }

@@ -69,7 +69,11 @@ You do not need to read code to check this.
    - and only if you switched them on: `room` (pairing, team board) and `report`.
 5. Click any request and look at its URL or **Payload**. You will not find a journal line.
 
-Every network call the app makes is a `fetch(` or `new WebSocket(` in `src/js/`. You can search for them. The site's Content-Security-Policy (`tools/_headers`) tells the browser to run only GRAVITAS's own code and the 3D library, and to connect only to gravitasmap.com.
+Every network call the app makes is a `fetch(` or `new WebSocket(` in `src/js/`, plus the `import(` that loads the Lenses file. You can search for them. The site's Content-Security-Policy (`tools/_headers`) tells the browser to run only GRAVITAS's own code and the 3D library, and to connect only to gravitasmap.com.
+
+## The Lenses
+
+The Lenses (`src/lazy/lens.js`, in GRAVITAS MODES) do not read your journal and make no network call of their own. They load as one more of the site's own files when you open them. Every pattern, picture and note is worked out and played in your browser from the system's orbit data, which the map has already loaded. The melody card is made in your browser and saved only where you save it. The volume you choose is kept in your browser (`localStorage`).
 
 ## No tracking
 

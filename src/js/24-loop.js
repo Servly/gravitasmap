@@ -53,6 +53,7 @@ addEventListener("keyup", e => { PACE.held.delete(e.code); _paceAct(); });
 addEventListener("blur", () => PACE.held.clear());
 var TOUCH_SCREEN = matchMedia("(pointer: coarse)").matches;
 function paceGap(now) {
+  if (typeof LENS !== "undefined" && LENS.open) return 250;      // v0.97: the Lenses window covers the map: 4 frames a second behind it
   const e1 = PACE.cam.elements, e2 = camera.matrixWorld.elements; let moving = false;
   for (let i = 0; i < 16 && !moving; i++) moving = Math.abs(e1[i] - e2[i]) > 1e-5 * (1 + Math.abs(e2[i]));   // a body crawling along at 1× is not "moving"
   PACE.cam.copy(camera.matrixWorld);
