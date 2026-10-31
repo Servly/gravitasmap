@@ -17,7 +17,7 @@ The full explanation, with every step in the code and how to check it yourself i
 | Combat Mode, combat reports | `src/js/42-combat.js` | Nothing. Reports are kept in your browser (`localStorage`), the last 30 |
 | A phone or tablet as a second screen | `src/js/33-pair.js`, `worker/src/room.js` | Only when you pair a device: the short "where am I" summary the Sync card shows, and in a fight the combat screen. The server keeps the latest "where am I" summary for up to 12 hours. The combat screen is only passed on, not kept |
 | Team board | `src/js/43-opboard.js`, `worker/src/room.js` | Only when you choose to add your fight: your CMDR name, ship, kills, credits and top kill, to the people with the board's link. The server keeps nothing: your row lives only on your open connection |
-| Lenses (Rhythm, Landscape, Time, the system's melody) | `src/js/47-lenses.js`, `src/lazy/lens.js` | Nothing. Worked out and played in your browser from the orbit data already loaded |
+| System Sonification and the Lenses (Rhythm, Landscape, Time) | `src/js/47-lenses.js`, `src/lazy/lens.js` | Nothing. Worked out and played in your browser from the orbit data already loaded. WAV and MIDI files are made in your browser |
 | Problem reports | `src/js/27-report.js`, `functions/api/report.js` | Only when you send one: what you wrote, your screenshots and the details shown in the report window |
 
 Every network call the app makes is a `fetch(` or `new WebSocket(` in `src/js/`, plus the `import(` that loads the Lenses file. Search for them. The direct link between your computer and your own phone on the same Wi-Fi is WebRTC with no outside servers (`iceServers: []` in `src/js/33-pair.js`).
@@ -30,7 +30,7 @@ src/            the app's source
   _shell.html     page markup
   css/app.css     all styles
   js/NN-*.js      the app in numbered parts, joined in order into one file by the build
-  lazy/*.js       parts loaded only when opened (the Lenses), built into their own file
+  lazy/*.js       parts loaded only when opened (Sonification and the Lenses), built into their own file
   assets/         logos, textures and sounds
   vendor/         three.js and a QR code library (MIT)
 functions/      the site's server on Cloudflare Pages: /api/system, /api/autocomplete, /api/room, /api/report

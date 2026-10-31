@@ -172,7 +172,7 @@ function timeSet() {
 // Every note is a real instrument model, worked out once into a short sound and then only played back, so a note costs
 // almost nothing. Bars (marimba, vibraphone, glass) ring with their measured overtones, a string is plucked with
 // the Karplus-Strong model, bells carry their hum, tierce and nominal. One shared hall reverb, a soft compressor.
-const A = { ctx: null, master: null, bus: null, send: null, drone: null, cache: new Map(), vol: 0.7, timer: 0, play: null };
+const A = { ctx: null, master: null, bus: null, send: null, drone: null, cache: new Map(), vol: 0.7, timer: 0, play: null, live: [] };
 try { const v = localStorage.getItem("gravitas.lensVol"); if (v !== null) A.vol = clamp(+v, 0, 1); } catch (e) {}
 function audio() {
   if (A.ctx) return A.ctx;
@@ -185,11 +185,21 @@ function chain(ctx) {
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
   const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.1;
   A.master = ctx.createGain(); A.master.gain.value = A.vol * A.vol;
-  A.bus = ctx.createGain(); A.send = ctx.createGain(); A.send.gain.value = 0.42;
-  const verb = ctx.createConvolver(); verb.buffer = hall(ctx, 3.4); const vhp = ctx.createBiquadFilter(); vhp.type = "highpass"; vhp.frequency.value = 160;
-  A.bus.connect(comp); A.bus.connect(A.send); A.send.connect(vhp); vhp.connect(verb); verb.connect(comp);
-  comp.connect(lim); lim.connect(A.master); A.master.connect(ctx.destination);
+  A.bus = ctx.createGain(); A.tone = ctx.createBiquadFilter(); A.tone.type = "lowpass"; A.tone.Q.value = 0.5;   // v0.98 Studio: Warmth
+  A.send = ctx.createGain(); const verb = ctx.createConvolver(); verb.buffer = hall(ctx, 3.4); const vhp = ctx.createBiquadFilter(); vhp.type = "highpass"; vhp.frequency.value = 160;
+  A.dsend = ctx.createGain(); A.delay = ctx.createDelay(2); A.fb = ctx.createGain(); const dlp = ctx.createBiquadFilter(); dlp.type = "lowpass"; dlp.frequency.value = 3200;   // Echo: each repeat a little darker
+  A.bus.connect(A.tone); A.bus.connect(A.send); A.send.connect(vhp); vhp.connect(verb); verb.connect(A.tone);
+  A.bus.connect(A.dsend); A.dsend.connect(A.delay); A.delay.connect(dlp); dlp.connect(A.fb); A.fb.connect(A.delay); dlp.connect(A.tone);
+  A.tone.connect(comp); comp.connect(lim); lim.connect(A.master); A.master.connect(ctx.destination);
+  fx(true);
   return ctx;
+}
+// the Studio's effects, set at once (or smoothly while playing)
+function fx(now) {
+  if (!A.ctx) return; const t = A.ctx.currentTime, set = (p, v) => now ? p.setValueAtTime(v, t) : p.setTargetAtTime(v, t, 0.08);
+  set(A.send.gain, MIX.rev * 0.9); set(A.dsend.gain, MIX.echo * 0.55); set(A.fb.gain, 0.22 + 0.33 * MIX.echo);
+  set(A.tone.frequency, 18000 * Math.pow(1400 / 18000, MIX.warm));
+  if (A.play && A.play.part) set(A.delay.delayTime, A.play.part.echoT); else set(A.delay.delayTime, 0.3);
 }
 // a hall: early reflections, then a dense tail whose highs die first (each side its own, for width)
 function hall(ctx, sec) {
@@ -222,12 +232,15 @@ function instOf(b) {
   return "harp";                                                     // rocky, earth-like, water and ammonia worlds
 }
 // one note of an instrument, worked out once (mono)
-function render(inst, f) {
-  const key = inst + "|" + f.toFixed(2); if (A.cache.has(key)) return A.cache.get(key);
-  const ctx = A.ctx, sr = ctx.sampleRate, I = INST[inst], n = Math.floor(sr * I.len), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+// v0.98: sus follows how slow the body is. A fast body plays a short, bright note. A slow one rings longer, softer
+// and darker, and the slowest swell in like a held tone
+function render(inst, f, sus = 1) {
+  sus = Math.round(clamp(sus, 0.6, 3.2) * 10) / 10;
+  const key = inst + "|" + f.toFixed(2) + "|" + sus; if (A.cache.has(key)) return A.cache.get(key);
+  const ctx = A.ctx, sr = ctx.sampleRate, I = INST[inst], n = Math.floor(sr * Math.min(I.len * Math.max(1, sus * 0.9), 7.5)), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
   if (I.ks) {                                                         // a plucked string (Karplus-Strong, with a tuned delay)
     const N = sr / f, Ni = Math.floor(N - 0.5), fr = N - 0.5 - Ni, ap = (1 - fr) / (1 + fr), line = new Float32Array(Ni + 1);
-    const T60 = clamp(4.5 * Math.pow(220 / f, 0.6), 0.8, 7), rho = Math.pow(10, -3 / (f * T60)), pick = Math.max(2, Math.floor(Ni * 0.13));
+    const T60 = clamp(4.5 * Math.pow(220 / f, 0.6) * sus, 0.5, 8), rho = Math.pow(10, -3 / (f * T60)), pick = Math.max(2, Math.floor(Ni * 0.13));
     let s = 99; const rnd = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 2147483648 - 1);
     let lp = 0; for (let i = 0; i <= Ni; i++) { lp += 0.55 * (rnd() - lp); line[i] = lp; }
     for (let i = Ni; i >= pick; i--) line[i] -= line[i - pick];          // where the string is plucked
@@ -238,11 +251,12 @@ function render(inst, f) {
       line[w] = o; w = (w + 1) % (Ni + 1); prev += 0.6 * (x - prev); d[i] = prev; peak = Math.max(peak, Math.abs(prev));
     }
     for (let i = 0; i < n; i++) d[i] /= peak * 1.4;
+    if (sus > 1.6) { let lp2 = 0; const k = 0.04 / sus; for (let i = 0; i < n; i++) { lp2 += k * (d[i] - lp2); d[i] = d[i] * (1 - 0.35 * (sus - 1.6) / 1.6) + lp2 * 0.6; } }   // a slow string: rounder
   } else {                                                             // a struck bar or bell: decaying overtones, a soft mallet
-    const tScale = Math.pow(440 / f, 0.45), atk = 0.0015 + 0.004 * (1 - I.hard);
+    const hard = I.hard * clamp(1.15 - 0.2 * sus, 0.45, 1.1), tScale = Math.pow(440 / f, 0.45) * sus, atk = 0.0015 + 0.004 * (1 - hard) + 0.012 * Math.max(0, sus - 1);
     for (const [ratio, amp, tau] of I.modes) {
       const fk = f * ratio; if (fk > sr * 0.45) continue;
-      const bright = Math.pow(ratio, -(1 - I.hard) * 0.9), a = amp * bright, T = tau * tScale, dec = Math.exp(-1 / (T * sr));
+      const bright = Math.pow(ratio, -(1 - hard) * 0.9), a = amp * bright, T = tau * tScale, dec = Math.exp(-1 / (T * sr));
       for (const det of ratio === 1 ? [0] : [-0.0007, 0.0007]) {    // a mode is two close tones: a slow shimmer
         const w = TAU * fk * (1 + det) / sr, c = Math.cos(w), s0 = Math.sin(w); let re = 1, im = 0, g = a / (ratio === 1 ? 1 : 2);
         for (let i = 0; i < n; i++) { d[i] += g * im; const r2 = re * c - im * s0; im = re * s0 + im * c; re = r2; g *= dec; if (g < 1e-5) break; }
@@ -250,7 +264,13 @@ function render(inst, f) {
     }
     let s = 7; const rnd = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 2147483648 - 1); let lp = 0;
     const nn = Math.floor(sr * 0.004);
-    for (let i = 0; i < n; i++) { const e = 1 - Math.exp(-i / (atk * sr)); d[i] *= e; if (i < nn) { lp += (0.15 + 0.6 * I.hard) * (rnd() - lp); d[i] += lp * 0.12 * I.hard * (1 - i / nn); } }
+    for (let i = 0; i < n; i++) { const e = 1 - Math.exp(-i / (atk * sr)); d[i] *= e; if (i < nn) { lp += (0.15 + 0.6 * hard) * (rnd() - lp); d[i] += lp * 0.12 * hard * (1 - i / nn); } }
+    if (sus > 1.8) {                                                 // the slowest bodies: a held tone swells in under the strike
+      const amp = Math.min(0.45, 0.3 * (sus - 1.8)), ta = 0.25 * sus, td = 1.1 * sus, w1 = TAU * f / sr;
+      let re = 1, im = 0, re2 = 1, im2 = 0; const c1 = Math.cos(w1), s1 = Math.sin(w1), c2 = Math.cos(2 * w1 * 1.0007), s2 = Math.sin(2 * w1 * 1.0007);
+      for (let i = 0; i < n; i++) { const t = i / sr, e = (1 - Math.exp(-t / ta)) * Math.exp(-t / td); d[i] += amp * e * (im + 0.28 * im2);
+        let q = re * c1 - im * s1; im = re * s1 + im * c1; re = q; q = re2 * c2 - im2 * s2; im2 = re2 * s2 + im2 * c2; re2 = q; }
+    }
     let peak = 1e-9; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(d[i])); for (let i = 0; i < n; i++) d[i] /= peak * 1.2;
   }
   const fo = Math.floor(sr * 0.06); for (let i = 0; i < fo; i++) d[n - 1 - i] *= i / fo;
@@ -287,112 +307,188 @@ function droneStart(star, buf, f, at) {
   return { s, g };
 }
 function droneStop(d, at) { if (!d) return; try { d.g.gain.cancelScheduledValues(at); d.g.gain.setTargetAtTime(0.0001, at, 0.8); d.s.stop(at + 5); } catch (e) {} }
-function hit(buf, at, vel, pan) {
+function hit(buf, at, vel, out) {
   const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = buf;
-  const g = ctx.createGain(); g.gain.value = vel; const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-  s.connect(g); if (p) { p.pan.value = pan; g.connect(p); p.connect(A.bus); } else g.connect(A.bus);
+  const g = ctx.createGain(); g.gain.value = vel; s.connect(g); g.connect(out || A.bus);
   s.start(at); A.live.push({ s, g, at, end: at + buf.duration });
   const now = A.ctx.currentTime;                                    // too many notes still ringing: the oldest fades out (never a click)
-  if (!A.offline && A.live.length > 32) { const o = A.live.find(q => q.at < now && !q.cut); if (o) { o.cut = 1; try { o.g.gain.setTargetAtTime(0, now, 0.04); o.s.stop(now + 0.3); } catch (e) {} } }
+  if (!A.offline && A.live.length > 40) { const o = A.live.find(q => q.at < now && !q.cut); if (o) { o.cut = 1; try { o.g.gain.setTargetAtTime(0, now, 0.04); o.s.stop(now + 0.3); } catch (e) {} } }
 }
-// ------------------------------------------------------------ the tour: the system's melody, family by family
-const MIN_GAP = 0.15, SEC_MIN = 12, SEC_MAX = 24;
-function section(f) {
+// a soft drum for two neighbours lining up with their centre: a low thump and a brush, made once
+function drumBuf() {
+  if (A.drum && A.drum.sampleRate === A.ctx.sampleRate) return A.drum;
+  const sr = A.ctx.sampleRate, n = Math.floor(sr * 0.6), b = A.ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
+  let ph = 0, s = 3, lp = 0; const rnd = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 2147483648 - 1);
+  for (let i = 0; i < n; i++) { const t = i / sr, f = 44 + 70 * Math.exp(-t * 28); ph += TAU * f / sr;
+    lp += 0.25 * (rnd() - lp); d[i] = Math.sin(ph) * Math.exp(-t * 7) * Math.min(1, t * 900) * 0.9 + lp * Math.exp(-t * 45) * 0.35; }
+  let pk = 1e-9; for (let i = 0; i < n; i++) pk = Math.max(pk, Math.abs(d[i])); for (let i = 0; i < n; i++) d[i] /= pk * 1.3;
+  return (A.drum = b);
+}
+// ------------------------------------------------------------ v0.98 GRAVITAS System Sonification
+// A family of bodies becomes a short piece. The bodies come in one by one, from the fastest. Then the inner ones play
+// alone, then the outer ones, then all together. Each body plays its note when it crosses the line below its centre
+// (for moons: the line toward the star). The time is the real one, sped up: each part says how much.
+let MIX = { rev: 0.45, echo: 0.12, warm: 0.15, width: 0.8, drone: true, droneVol: 0.8, drum: true, ring: true, tempo: 1, pitch: "auto", ch: {} };
+try { const v = JSON.parse(localStorage.getItem("gravitas.sonMix") || "null"); if (v) { for (const k of Object.keys(MIX)) if (k !== "ch" && k in v) MIX[k] = v[k]; } } catch (e) {}
+const mixSave = () => { try { const { ch, ...o } = MIX; localStorage.setItem("gravitas.sonMix", JSON.stringify(o)); } catch (e) {} };
+const edited = () => MIX.tempo !== 1 || MIX.pitch === "scale";
+const chOf = b => MIX.ch[b.bodyId] || (MIX.ch[b.bodyId] = { vol: 0.8, mute: false, solo: false, inst: null });
+const SON = { fast: 0.6, slowMax: 16, tail: 2.6, intro: 2.6 };
+// the pitch of each voice: true ratios when they fit the ear, else moved by whole octaves; "scale" also snaps to a pentatonic scale
+function tuneOf(keep) {
+  const fr = keep.map(b => 1 / b.orbitalPeriod), lo = Math.min(...fr), hi = Math.max(...fr), c = 330 / Math.sqrt(lo * hi);
+  if (MIX.pitch === "auto" && hi / lo <= Math.pow(2, 3.5) && lo * c >= 80 && hi * c <= 1500) return { mode: "true", hz: fr.map(x => x * c) };
+  const n = fr.length, rank = fr.map(x => fr.filter(y => y > x).length);          // 0: the fastest
+  let hz = fr.map((x, k) => { let h = x * c; while (h < 220) h *= 2; while (h >= 440) h /= 2; return h * Math.pow(2, n > 2 ? Math.round(1 - 2 * rank[k] / (n - 1)) : 0); });   // fast bodies an octave up, slow ones down
+  if (MIX.pitch === "scale") { const PS = [0, 3, 5, 7, 10]; hz = hz.map(h => { const m = 12 * Math.log2(h / 220), o = Math.floor(m / 12), r = m - 12 * o;
+    let best = PS[0], bd = 99; for (const p of [...PS, 12]) if (Math.abs(p - r) < bd) { bd = Math.abs(p - r); best = p; } return 220 * Math.pow(2, (12 * o + best) / 12); }); return { mode: "scale", hz }; }
+  return { mode: "folded", hz };
+}
+function refAngle(f, t) {                                          // the line a body plays on: fixed for the planets, toward the star for moons
+  if (f.top) return -Math.PI / 2;
+  const s = M.star(f.p); if (s == null) return -Math.PI / 2;
+  const c = abs(f.p, t), st = abs(s, t); return Math.atan2(st[1] - c[1], st[0] - c[0]);
+}
+function partOf(f, full, dry) {
   let keep = f.v.slice(), silent = [];
   for (;;) {
-    if (new Set(keep.map(b => b.orbitalPeriod.toPrecision(4))).size < 2) return null;
-    const Pmin = keep[0].orbitalPeriod, Pmax = keep[keep.length - 1].orbitalPeriod, sLo = MIN_GAP / Pmin, sHi = SEC_MAX / (1.1 * Pmax);
-    if (sLo <= sHi) { let s = sLo * 1.6; if (1.2 * Pmax * s > SEC_MAX) s = Math.max(sLo, SEC_MAX / (1.2 * Pmax));
-      const dur = clamp(1.3 * Pmax * s, SEC_MIN, SEC_MAX);
-      return { f, keep, silent, s, dur }; }
+    if (keep.length < 2 || new Set(keep.map(b => b.orbitalPeriod.toPrecision(4))).size < 2) return null;
+    const s = SON.fast / keep[0].orbitalPeriod / MIX.tempo;            // seconds of sound for one day
+    if (keep[keep.length - 1].orbitalPeriod * s <= SON.slowMax) return dry ? true : build(f, keep, silent, s, full);
     silent.unshift(keep.pop());
   }
 }
-function tuning(sec) {                                              // the pitch of each voice
-  const fr = sec.keep.map(b => 1 / b.orbitalPeriod), lo = Math.min(...fr), hi = Math.max(...fr);
-  const geo = Math.sqrt(lo * hi), c = 330 / geo;
-  if (hi / lo <= Math.pow(2, 3.5) && lo * c >= 80 && hi * c <= 1500) return { mode: "true", hz: fr.map(x => x * c) };
-  return { mode: "folded", hz: fr.map(x => { let h = x * c; while (h < 220) h *= 2; while (h >= 440) h /= 2; return h; }) };
+function build(f, keep, silent, s, full) {
+  const tu = tuneOf(keep), n = keep.length, sec = keep.map(b => b.orbitalPeriod * s);
+  const rs = keep.map(b => Math.log10(Math.max(b.radius || 1, 1))), rlo = Math.min(...rs), rhi = Math.max(...rs);
+  const amax = Math.max(...keep.map(b => b.semiMajorAxis)), amin = Math.min(...keep.map(b => b.semiMajorAxis)), gam = amax / amin > 8 ? Math.log(8) / Math.log(amax / amin) : 1;
+  const v = keep.map((b, k) => ({ b, k, inst: chOf(b).inst || instOf(b), hz: tu.hz[k], sec: sec[k], vel: 0.6 + 0.4 * (rhi > rlo ? (rs[k] - rlo) / (rhi - rlo) : 0.5),
+    pan: n > 1 ? -0.7 + 1.4 * k / (n - 1) : 0, col: COL[k % COL.length], sus: clamp(sec[k] / 1.2, 0.6, 3.2), r: Math.pow(b.semiMajorAxis / amax, gam), ring: !!(b.rings && b.rings.length) }));
+  const sc = [], all = new Set(v.map(x => x.k)); let t = 0;
+  for (let i = 0; i < n; i++) {                                      // the build: one more body at a time, from the fastest
+    const w = i < n - 1 ? clamp(2 * sec[i], 2.4, 7) : clamp(2 * sec[n - 1], 6, 12);
+    sc.push({ name: i ? `${M.nm(keep[i])} joins` : `${M.nm(keep[0])} begins`, on: new Set(v.slice(0, i + 1).map(x => x.k)), t0: t, t1: t + w, drone: true }); t += w;
+  }
+  if (full && n >= 4) {
+    const h = Math.ceil(n / 2), inn = new Set(v.slice(0, h).map(x => x.k)), out = new Set(v.slice(h).map(x => x.k));
+    let w = clamp(3 * sec[h - 1], 6, 10); sc.push({ name: "The inner bodies alone", on: inn, t0: t, t1: t + w, drone: false }); t += w;
+    w = clamp(2 * sec[n - 1], 8, 14); sc.push({ name: "The outer bodies alone", on: out, t0: t, t1: t + w, drone: true }); t += w;
+    w = clamp(2 * sec[n - 1], 8, 14); sc.push({ name: "All together", on: all, t0: t, t1: t + w, drone: true }); t += w;
+  }
+  const P = { f, keep, silent, s, tu, v, scenes: sc, dur: t, echoT: clamp(sec[0] / 2, 0.12, 0.6) };
+  const at = x => { for (const q of sc) if (x >= q.t0 && x < q.t1) return q; return null; };
+  P.sceneAt = at;
+  P.hits = hitsOf(P, G.t).filter(h => { const q = at(h.at); return q && q.on.has(h.k); });
+  P.ups = lineups(P, G.t).filter(h => { const q = at(h.at); return q && q.on.has(h.a) && q.on.has(h.b); });
+  return P;
 }
-// when each voice plays: as it passes between its centre and the star (moons), or crosses the line above the centre
-function refAngle(f, t) {
-  if (f.top) return Math.PI / 2;
-  const s = M.star(f.p); if (s == null) return Math.PI / 2;
-  const c = abs(f.p, t), st = abs(s, t); return Math.atan2(st[1] - c[1], st[0] - c[0]);
-}
-function hitsOf(sec, t0) {
-  const span = sec.dur / sec.s * DAY, out = [], RN = 400, ref = new Float64Array(RN + 1);
-  for (let i = 0; i <= RN; i++) ref[i] = refAngle(sec.f, t0 + span * i / RN);
+// when each body crosses its line: sampled finely, the crossing found between two samples
+function hitsOf(P, t0) {
+  const span = P.dur / P.s * DAY, out = [], RN = 400, ref = new Float64Array(RN + 1);
+  for (let i = 0; i <= RN; i++) ref[i] = refAngle(P.f, t0 + span * i / RN);
   for (let i = 1; i <= RN; i++) { while (ref[i] - ref[i - 1] > Math.PI) ref[i] -= TAU; while (ref[i] - ref[i - 1] < -Math.PI) ref[i] += TAU; }
   const refAt = t => { const u = clamp((t - t0) / span * RN, 0, RN), i = Math.min(RN - 1, Math.floor(u)); return ref[i] + (ref[i + 1] - ref[i]) * (u - i); };
-  sec.keep.forEach((b, k) => {
-    const step = Math.min(b.orbitalPeriod * DAY / 160, span / 200), n = Math.ceil(span / step);
-    let prev = null;
+  P.refAt = refAt; P.t0 = t0; P.span = span;
+  P.keep.forEach((b, k) => {
+    const step = Math.min(b.orbitalPeriod * DAY / 160, span / 200), n = Math.ceil(span / step); let prev = null;
     for (let i = 0; i <= n; i++) {
-      const t = t0 + i * step, p = rel(b, t); let d = Math.atan2(p[1], p[0]) - refAt(t);
-      d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
-      if (prev !== null && Math.abs(d - prev) < Math.PI / 2 && (prev < 0) !== (d < 0)) { const frac = Math.abs(prev) / (Math.abs(prev) + Math.abs(d)); out.push({ k, at: ((i - 1 + frac) * step) / DAY * sec.s }); }
+      const t = t0 + i * step, p = rel(b, t); let d = Math.atan2(p[1], p[0]) - refAt(t); d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
+      if (prev !== null && Math.abs(d - prev) < Math.PI / 2 && (prev < 0) !== (d < 0)) { const fr = Math.abs(prev) / (Math.abs(prev) + Math.abs(d)); out.push({ k, at: (i - 1 + fr) * step / DAY * P.s }); }
       prev = d;
     }
   });
   return out.sort((a, b) => a.at - b.at);
 }
-function tourPlan(onlyFam) {
-  const list = (onlyFam ? [onlyFam] : M.fams).map(section).filter(Boolean);
-  if (!onlyFam) { list.sort((a, b) => (b.f.top ? 1 : 0) - (a.f.top ? 1 : 0) || b.keep.length - a.keep.length); list.splice(6); }
-  return list;
+// neighbours lining up with their centre (a conjunction): when the angle between them passes zero
+function lineups(P, t0) {
+  const out = [];
+  for (let k = 0; k + 1 < P.keep.length; k++) {
+    const A1 = P.keep[k], B1 = P.keep[k + 1]; if (Math.abs(A1.orbitalPeriod / B1.orbitalPeriod - 1) < 2e-3) continue;
+    const step = Math.min(A1.orbitalPeriod * DAY / 120, P.span / 200), n = Math.ceil(P.span / step); let prev = null;
+    for (let i = 0; i <= n; i++) {
+      const t = t0 + i * step, a = rel(A1, t), b = rel(B1, t); let d = Math.atan2(a[1], a[0]) - Math.atan2(b[1], b[0]); d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
+      if (prev !== null && Math.abs(d - prev) < Math.PI / 2 && (prev < 0) !== (d < 0)) { const fr = Math.abs(prev) / (Math.abs(prev) + Math.abs(d)); out.push({ a: k, b: k + 1, at: (i - 1 + fr) * step / DAY * P.s }); }
+      prev = d;
+    }
+  }
+  return out.sort((a, b) => a.at - b.at);
 }
-function tourCan() { const l = tourPlan(); return l.length ? null : "No family here has two bodies whose orbits can be played together."; }
-function voiceInfo(sec) {
-  const tu = tuning(sec), rs = sec.keep.map(b => Math.log10(Math.max(b.radius || 1, 1))), lo = Math.min(...rs), hi = Math.max(...rs);
-  return { tu, v: sec.keep.map((b, k) => ({ b, inst: instOf(b), hz: tu.hz[k], vel: 0.6 + 0.4 * (hi > lo ? (rs[k] - lo) / (hi - lo) : 0.5), pan: sec.keep.length > 1 ? -0.6 + 1.2 * k / (sec.keep.length - 1) : 0, col: COL[k % COL.length] })) };
+// the parts of the piece: which families, in which order (each part is worked out only when its turn comes)
+function sonPlan(onlyFam) {
+  if (onlyFam) return partOf(onlyFam, true, true) ? [{ f: onlyFam, full: true }] : [];
+  const fams = M.fams.slice().sort((a, b) => (b.top ? 1 : 0) - (a.top ? 1 : 0) || b.v.length - a.v.length), out = [];
+  for (const f of fams) { if (partOf(f, !out.length, true)) out.push({ f, full: !out.length }); if (out.length >= 4) break; }
+  return out;
+}
+const built = x => x.p || (x.p = partOf(x.f, x.full));
+function sonParts(onlyFam) { return sonPlan(onlyFam).map(built); }
+function sonCan() { return M.fams.some(f => partOf(f, false, true)) ? null : "No family here has two bodies with different orbits to play together."; }
+function mainStar() { const r = M.byId.get(M.root); return r && r.type === "Star" ? r : [...M.byId.values()].find(b => b.type === "Star") || null; }
+// the mixer: one channel per body (volume, mute, solo, place left to right)
+function chGain(b) { const c = chOf(b), anySolo = A.play && A.play.parts.some(x => x.p && x.p.v.some(v => chOf(v.b).solo)); return c.mute || (anySolo && !c.solo) ? 0 : c.vol * c.vol * 1.4; }
+function channels(P, part) {
+  if (!P.ch) { P.ch = new Map(); P.dg = A.ctx.createGain(); P.dg.gain.value = 0.9; P.dg.connect(A.bus); }   // the drum has its own channel
+  for (const v of part.v) if (!P.ch.has(v.b.bodyId)) {
+    const g = A.ctx.createGain(), p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null; g.gain.value = chGain(v.b);
+    if (p) { p.pan.value = v.pan * MIX.width; g.connect(p); p.connect(A.bus); } else g.connect(A.bus);
+    P.ch.set(v.b.bodyId, { g, p, pan: v.pan });
+  }
+}
+function chUpdate() { const P = A.play; if (!P || !P.ch) return; const t = A.ctx.currentTime;
+  for (const x of P.parts) if (x.p) for (const v of x.p.v) { const c = P.ch.get(v.b.bodyId); if (c) { c.g.gain.setTargetAtTime(chGain(v.b), t, 0.05); if (c.p) c.p.pan.setTargetAtTime(c.pan * MIX.width, t, 0.05); } }
+  if (P.drone) P.drone.g.gain.setTargetAtTime(P.droneOn && MIX.drone ? 0.16 * MIX.droneVol : 0.0001, t, 0.3); }
+function note(P, part, h, at) {
+  const v = part.v[h.k], c = P.ch.get(v.b.bodyId);
+  hit(render(v.inst, v.hz, v.sus), at, v.vel * INST[v.inst].gain * 0.5, c && c.g);
+  if (MIX.ring && v.ring) hit(render("glass", Math.min(v.hz * 4, 3200)), at + 0.012, v.vel * 0.1, c && c.g);   // a ringed body: a little shimmer on top
 }
 async function play(onlyFam) {
   const ctx = audio(); if (!ctx) { G.toast("This browser cannot play sound"); return; }
-  await ctx.resume();
-  stop(true);
-  const plan = tourPlan(onlyFam); if (!plan.length) return;
-  const star = M.byId.get(M.root) && M.byId.get(M.root).type === "Star" ? M.byId.get(M.root) : [...M.byId.values()].find(b => b.type === "Star");
-  const t0 = ctx.currentTime + 0.15, intro = onlyFam ? 1.2 : 3.2, P = { plan, star, i: -1, sec: null, at: t0 + intro, t0, simT0: G.t, drone: null, hits: [], hi: 0, voices: null, glow: [], intro, done: false };
+  await ctx.resume(); stop(true);
+  const parts = sonPlan(onlyFam); if (!parts.length) return;
+  const star = mainStar(), t0 = ctx.currentTime + 0.15;
+  const P = { parts, i: -1, at: t0 + SON.intro, t0, star, vq: [], rip: [], ups: [], droneOn: true, zoom: null };
   A.live = []; A.play = P;
   try { G.Sound.setAmbient(false); } catch (e) {}
-  next(P);
+  nextPart(P);
   (A.droneStar === star && A.droneBuf ? Promise.resolve(A.droneBuf) : droneBuf(star)).then(buf => {
     if (A.play !== P) return; A.droneBuf = buf; A.droneStar = star;
-    const low = P.voices ? Math.min(...P.voices.v.map(v => v.hz)) : 55; P.drone = droneStart(star, buf, low, Math.max(A.ctx.currentTime + 0.05, t0)); });
-  A.timer = setInterval(sched, 90); sched();
-  anim();
-  ui();
+    P.drone = droneStart(star, buf, P.part ? Math.min(...P.part.v.map(v => v.hz)) : 55, Math.max(A.ctx.currentTime + 0.05, t0)); chUpdate(); });
+  A.timer = setInterval(sched, 90); sched(); fx(); anim(); sonUi();
 }
-function next(P) {
-  P.i++; if (P.i >= P.plan.length) { P.end = P.at + 3.5; droneStop(P.drone, P.at + 0.5); return; }
-  const sec = P.plan[P.i], vi = voiceInfo(sec), simStart = G.t;
-  P.sec = sec; P.voices = vi; P.secAt = P.at; P.simStart = simStart; P.hits = hitsOf(sec, simStart); P.hi = 0; P.glow = sec.keep.map(() => -9);
-  (async () => { for (const v of vi.v) { await new Promise(r => setTimeout(r, 0)); if (A.play !== P) return; render(v.inst, v.hz); } })();   // made ahead, one note at a time
-  const low = Math.min(...vi.v.map(v => v.hz)), d = P.drone;            // the drone follows the lowest voice
-  if (d) { let r = low / 55; while (r >= 2) r /= 2; while (r < 1) r *= 2; d.s.playbackRate.setTargetAtTime(r, Math.max(P.at - 1, A.ctx.currentTime), 0.6); }
+function nextPart(P) {
+  P.i++; if (P.i >= P.parts.length) { P.end = P.at + 3.2; P.droneOn = false; if (P.drone) P.drone.g.gain.setTargetAtTime(0.0001, P.at, 0.8); return; }
+  const part = built(P.parts[P.i]); if (!part) { nextPart(P); return; }
+  part.at = P.at; part.hi = 0; part.ui = 0; part.si = 0; P.part = part; channels(P, part);
+  if (P.i + 1 < P.parts.length) setTimeout(() => { if (A.play === P) built(P.parts[P.i + 1]); }, 1500);   // the next part, worked out early
+  (async () => { for (const v of part.v) { await new Promise(r => setTimeout(r, 0)); if (A.play !== P) return; render(v.inst, v.hz, v.sus); if (v.ring) render("glass", Math.min(v.hz * 4, 3200)); } })();   // made ahead, one at a time
+  if (P.drone) { let r = Math.min(...part.v.map(v => v.hz)) / 55; while (r >= 2) r /= 2; while (r < 1) r *= 2; P.drone.s.playbackRate.setTargetAtTime(r, Math.max(P.at - 1, A.ctx.currentTime), 0.6); }
+  if (A.delay) A.delay.delayTime.setTargetAtTime(part.echoT, Math.max(P.at - 0.5, A.ctx.currentTime), 0.3);
 }
 function sched() {
   const P = A.play; if (!P) return;
-  const ctx = A.ctx, horizon = ctx.currentTime + 0.6;
-  while (P.sec && P.i < P.plan.length) {
-    while (P.hi < P.hits.length && P.secAt + P.hits[P.hi].at < horizon) {
-      const h = P.hits[P.hi++], v = P.voices.v[h.k], at = P.secAt + h.at;
-      if (at >= ctx.currentTime) { hit(render(v.inst, v.hz), at, v.vel * INST[v.inst].gain * 0.5, v.pan); (P.queue || (P.queue = [])).push({ at, k: h.k, sec: P.i }); }
-    }
-    if (P.secAt + P.sec.dur < horizon) { P.at = P.secAt + P.sec.dur + 1.2; next(P); } else break;
+  const ctx = A.ctx, now = ctx.currentTime, horizon = now + 0.6;
+  while (P.part && P.i < P.parts.length) {
+    const part = P.part;
+    while (part.si < part.scenes.length && part.at + part.scenes[part.si].t0 < horizon) {   // the drone rests while the inner bodies play alone
+      const q = part.scenes[part.si++], at = Math.max(now, part.at + q.t0); P.droneOn = q.drone;
+      if (P.drone) P.drone.g.gain.setTargetAtTime(q.drone && MIX.drone ? 0.16 * MIX.droneVol : 0.0001, at, 0.7); }
+    while (part.hi < part.hits.length && part.at + part.hits[part.hi].at < horizon) {
+      const h = part.hits[part.hi++], at = part.at + h.at; if (at >= now) { note(P, part, h, at); P.vq.push({ at, i: P.i, k: h.k }); } }
+    while (part.ui < part.ups.length && part.at + part.ups[part.ui].at < horizon) {
+      const h = part.ups[part.ui++], at = part.at + h.at; if (at >= now && MIX.drum) { hit(drumBuf(), at, 0.42, P.dg); P.vq.push({ at, i: P.i, up: h }); } }
+    if (part.at + part.dur + SON.tail < horizon) { P.at = part.at + part.dur + SON.tail; nextPart(P); } else break;
   }
-  if (P.end && ctx.currentTime > P.end) stop();
-  A.live = A.live.filter(o => o.end > ctx.currentTime && !o.cut);
+  if (P.end && now > P.end) stop();
+  A.live = A.live.filter(o => o.end > now && !o.cut);
 }
 function stop(quiet) {
   clearInterval(A.timer); A.timer = 0;
   const P = A.play; A.play = null;
-  if (A.ctx) { const t = A.ctx.currentTime; if (P) droneStop(P.drone, t); for (const o of A.live || []) { try { o.s.stop(t + 0.05); } catch (e) {} } A.live = []; }
-  if (!quiet) { try { G.Sound.setAmbient(!G.map); } catch (e) {} ui(); }
+  if (A.ctx) { const t = A.ctx.currentTime; if (P) droneStop(P.drone, t); for (const o of A.live || []) { try { o.g.gain.setTargetAtTime(0, t, 0.03); o.s.stop(t + 0.2); } catch (e) {} } A.live = []; }
+  if (!quiet) { try { G.Sound.setAmbient(!G.map); } catch (e) {} sonUi(); }
 }
-document.addEventListener("visibilitychange", () => { if (!A.ctx) return; if (document.hidden) A.ctx.suspend(); else if (A.play) A.ctx.resume(); });
-
+document.addEventListener("visibilitychange", () => { if (!A.ctx || A.offline) return; if (document.hidden) A.ctx.suspend(); else if (A.play) A.ctx.resume(); });
 // ------------------------------------------------------------ drawing helpers
 function canvas(el, w, h) {
   const c = el.querySelector("canvas") || el.appendChild(document.createElement("canvas")), dpr = Math.min(devicePixelRatio || 1, G.low ? 1.5 : 2);
@@ -405,8 +501,10 @@ const sizeOf = el => { const w = Math.max(240, Math.floor(el.clientWidth || 300)
 let ROOT = null, ST = { view: "rhythm", pair: 0, seen: 0, land: 0, moonOf: 0, cen: 0, fam: "tour" }, RAF = 0, WATCH = 0;
 export function mount(el, req) {
   ROOT = el; M = null;
-  if (req && req.view) ST.view = req.view;
+  ST.tab = req && req.tab === "son" ? "son" : "lens"; if (ST.tab !== "son" && A.play) stop();                // v0.98: the same file draws the Sonification tab and the Lenses tab
+  if (ST.tab === "son") ST.view = "sonify"; else if (req && req.view && req.view !== "sonify") ST.view = req.view; else if (ST.view === "sonify") ST.view = "rhythm";
   if (req && req.lp && req.lp.length) ST.lp = req.lp;
+  if (req && req.lf != null) ST.lf = req.lf;
   clearInterval(WATCH); WATCH = setInterval(() => { if (ROOT && G.S && (!M || M.S !== G.S)) { stop(true); draw(); } }, 1000);
   draw();
 }
@@ -416,30 +514,32 @@ export function unmount() {
   if (A.ctx) { const c = A.ctx; A.ctx = null; A.cache.clear(); A.droneBuf = null; A.droneStar = null; c.close().catch(() => {}); }
 }
 function why() {                                                     // why a lens cannot work here
-  if (!M) return { rhythm: "No system is open.", landscape: "No system is open.", time: "No system is open." };
+  if (!M) return { rhythm: "No system is open.", landscape: "No system is open.", time: "No system is open.", sonify: "No system is open." };
   const any = [...M.byId.values()].some(M.orbits);
   return {
-    rhythm: !any ? "Nothing in this system orbits anything: there is no rhythm to show." : !pairs().length && tourCan() ? "No two bodies here circle the same centre with different periods." : null,
+    rhythm: !any ? "Nothing in this system orbits anything: there is no rhythm to show." : !pairs().length ? "No two bodies here circle the same centre with different periods." : null,
     landscape: !any ? "Nothing in this system orbits anything." : !landPairs().length ? "The masses needed are missing from the orbit data." : null,
     time: !any ? "Nothing in this system orbits anything: it looks the same at every moment." : !timeSet().cs.length && !timeSet().withMoons.length ? "No centre here has two bodies around it." : null,
+    sonify: !any ? "Nothing in this system orbits anything: it has no rhythm to play." : sonCan(),
   };
 }
 function draw() {
   if (!ROOT) return;
   model();
-  if (M && ST.sysS !== M.S) { ST.sysS = M.S; Object.assign(ST, { pair: 0, seen: 0, land: 0, moonOf: 0, cen: 0, fam: "tour" }); }
+  if (M && ST.sysS !== M.S) { ST.sysS = M.S; Object.assign(ST, { pair: 0, seen: 0, land: 0, moonOf: 0, cen: 0, fam: "tour" }); MIX.ch = {}; }
+  if (M && ST.lf != null) { const i = M.fams.findIndex(f => f.p === ST.lf); if (i >= 0) ST.fam = String(i); ST.lf = null; }
   const W = why();
-  if (W[ST.view]) { const ok = ["rhythm", "landscape", "time"].find(k => !W[k]); if (ok && !ST.forced) ST.view = ok; }
+  if (ST.tab !== "son" && W[ST.view]) { const ok = ["rhythm", "landscape", "time"].find(k => !W[k]); if (ok && !ST.forced) ST.view = ok; }
   const nav = ["rhythm", "landscape", "time"].map(k => `<button type="button" data-lv="${k}" class="${ST.view === k ? "on" : ""}${W[k] ? " off" : ""}"${W[k] ? ` title="${G.esc(W[k])}"` : ""}>${{ rhythm: "Rhythm", landscape: "Landscape", time: "Time" }[k]}</button>`).join("");
-  ROOT.innerHTML = `<div class="q">GRAVITAS: LENSES${M ? ` · ${G.esc(M.sys)}` : ""}</div>
-    <div class="lnTop"><div class="mSub" role="tablist">${nav}</div><span class="lnAct"><button type="button" data-la="link" title="Copy a link to this lens">Copy link</button></span></div>
+  ROOT.innerHTML = `<div class="q">GRAVITAS: ${ST.tab === "son" ? "SYSTEM SONIFICATION" : "LENSES"}${M ? ` · ${G.esc(M.sys)}` : ""}</div>
+    <div class="lnTop"><div class="mSub" role="tablist">${ST.tab === "son" ? "" : nav}</div><span class="lnAct"><button type="button" data-la="link" title="Copy a link to this lens">Copy link</button></span></div>
     <div id="lnBody"></div><div id="lnText"></div>`;
-  ROOT.querySelector(".lnTop").onclick = e => { const b = e.target.closest("[data-lv]"); if (b) { ST.view = b.dataset.lv; ST.forced = true; stop(); draw(); return; }
+  ROOT.querySelector(".lnTop").onclick = e => { const b = e.target.closest("[data-lv]"); if (b) { ST.view = b.dataset.lv; ST.forced = true; draw(); return; }
     const a = e.target.closest("[data-la]"); if (a && a.dataset.la === "link") copyLink(a); };
   const body = ROOT.querySelector("#lnBody");
   if (!M) { body.innerHTML = `<p class="note">Open a system first.</p>`; return; }
   if (W[ST.view]) { body.innerHTML = `<p class="lnWhy">${G.esc(W[ST.view])}</p>`; text(); return; }
-  if (ST.view === "rhythm") rhythmView(body); else if (ST.view === "landscape") landView(body); else timeView(body);
+  if (ST.view === "sonify") sonView(body); else if (ST.view === "rhythm") rhythmView(body); else if (ST.view === "landscape") landView(body); else timeView(body);
   text();
 }
 function text() {
@@ -447,9 +547,14 @@ function text() {
   const T = {
     rhythm: `<div class="q">WHAT RHYTHM SHOWS</div><p>Two bodies around the same centre, joined by a line again and again. When one goes round almost exactly p times while the other goes round q times, the lines close into a pattern with p − q petals. That is a resonance: the two meet at the same places, over and over.</p>
       <p><b>Seen from</b> draws the path one body takes across the sky of the other. Each small loop is a time it seems to walk backwards.</p>
-      <div class="q">THE MELODY</div><p><b>Play the system</b> plays it family by family: the planets, then each body's moons. Each body plays its note when it passes between its centre and the star (for the planets: when it crosses the line above the star). So the rhythm is the real one, sped up. Each part says how much.</p>
-      <p>The pitch is each body's own orbit frequency, raised by the same amount for all, so their true ratios are kept. When they spread too far for the ear, each one is moved by whole octaves instead, and the part says <b>octaves folded</b>. The instrument follows the kind of body: gas giants a marimba, metal-rich bodies a vibraphone, icy bodies glass bars, rocky worlds a harp, stars a bell. That choice, and the star's drone under it, are ours: they are not in the data.</p>
+      <p>To hear the system, open <b>Sonification</b> in GRAVITAS MODES.</p>
       <div class="q">IN THE GAME</div><p>Every crossing of two lines is a moment the two bodies line up. Use it to plan a picture, or to know when a moon will cross your sky.</p>`,
+    sonify: `<div class="q">WHAT YOU HEAR</div><p>The orbits of the system, as music. The bodies around one centre come in one by one, from the fastest. Then the inner ones play alone, the outer ones alone, and all together. A system with many families plays them part by part: the planets first, then the moons.</p>
+      <p>Each body plays its note when it crosses the line below its centre, marked with a small circle (for moons: the line toward the star, so the star is always below). The rhythm is the real one, sped up: each part says how much. Bodies too slow to play with the others are listed as silent.</p>
+      <p>The pitch is each body's own orbit frequency, raised by the same amount for all, so the true ratios are kept. When they spread too far for the ear, each one moves by whole octaves, and the part says so. A soft drum plays when two neighbours line up with their centre: that is in the data too.</p>
+      <div class="q">OURS, NOT THE DATA</div><p>The instruments (gas giants a marimba, metal-rich bodies a vibraphone, icy bodies glass bars, rocky worlds a harp, stars a bell), the star's drone (its colour follows the star's temperature), the shimmer of rings and the effects. Every sound is an instrument model made in your browser. There are no sound files.</p>
+      <div class="q">THE STUDIO</div><p>Change each body's instrument and volume, mute or solo it, set the reverb, echo, warmth and width. Tempo and a musical scale change the system's own timing or ratios, so the piece then says <b>Edited</b>. Save the part as a sound file (WAV), or as notes (MIDI) to make your own music with it.</p>
+      <div class="q">IN THE GAME</div><p>The notes are real moments: a moon passing in front of its star from its planet, two planets lining up. A system that sounds simple and even has bodies in resonance.</p>`,
     landscape: `<div class="q">WHAT LANDSCAPE SHOWS</div><p>The pull of two bodies, seen from a frame that turns with the smaller one. Dark is deep in the big body's well. The bright ring is a ridge, where the pull and the turning balance.</p>
       <p>The five Lagrange points are where a third, small body could ride along. L4 and L5 hold their bodies only when the smaller body is light enough (below about 1/26 of the pair): the window says so when they do not.</p>
       <p>The <b>Hill sphere</b> is the room a body rules: a moon inside it stays its moon. Moons are safe within about half of it.</p>
@@ -462,6 +567,7 @@ function text() {
 }
 async function copyLink(btn) {
   let u = G.shareUrl(false) + "&lens=" + ST.view;
+  if (ST.view === "sonify" && ST.fam !== "tour" && M.fams[+ST.fam]) u += "&lf=" + M.fams[+ST.fam].p;
   const p = ST.view === "rhythm" && pairs()[ST.pair]; if (p) u += "&lp=" + p.A.bodyId + "|" + p.B.bodyId;
   try { await navigator.clipboard.writeText(u); btn.textContent = "Copied"; setTimeout(() => (btn.textContent = "Copy link"), 1800); } catch (e) { prompt("Copy this link:", u); }
 }
@@ -471,16 +577,12 @@ function rhythmView(body) {
   const P = pairs();
   if (ST.lp) { const i = P.findIndex(p => ST.lp.includes(p.A.bodyId) && ST.lp.includes(p.B.bodyId)); if (i >= 0) ST.pair = i; ST.lp = null; }
   if (ST.pair >= P.length) ST.pair = 0;
-  const p = P[ST.pair], R = resonances(), tw = tourCan();
-  const fams = M.fams.map((f, i) => section(f) ? `<option value="${i}"${ST.fam === String(i) ? " selected" : ""}>${G.esc(f.label)}</option>` : "").join("");
+  const p = P[ST.pair], R = resonances();
   const pl = P.slice(0, 3).concat(ST.pair >= 3 ? [P[ST.pair]] : []);
   body.innerHTML = `<div class="lnGrid">
     <div class="lnFig" id="lnFig"></div>
     <div class="lnSide">
-      <div class="lnPlay">${tw ? `<p class="lnWhy">${G.esc(tw)}</p>` : `<button type="button" class="pri" data-lp="go">${A.play ? "■ Stop" : "▶ Play the system"}</button>
-        <select data-lp="fam" aria-label="What to play"><option value="tour">The whole system, part by part</option>${fams}</select>
-        <label class="lnVol">Volume <input type="range" min="0" max="1" step="0.01" value="${A.vol}" data-lp="vol" aria-label="Volume"></label>`}
-        <div id="lnNow" class="lnNow"></div></div>
+      <div class="lnPlay"><button type="button" class="pri" data-lp="son">▶ Hear the system</button><span class="note">in Sonification</span></div>
       ${p ? `<div class="q">PATTERNS</div><div class="lnPairs">${pl.map(x => { const i = P.indexOf(x); return `<button type="button" data-pi="${i}" class="${i === ST.pair ? "on" : ""}"><b>${G.esc(M.nm(x.A))} & ${G.esc(M.nm(x.B))}</b><span>${x.fr.p} : ${x.fr.q} · ${x.petals > 0 ? `${x.petals} petal${x.petals > 1 ? "s" : ""}` : "one loop"} · ${G.esc(x.f.label)}</span></button>`; }).join("")}</div>
         ${P.length > 3 ? `<select data-lp="more" aria-label="All pairs"><option value="">All ${P.length} pairs…</option>${P.map((x, i) => `<option value="${i}">${G.esc(M.nm(x.A))} & ${G.esc(M.nm(x.B))} · ${x.fr.p}:${x.fr.q}</option>`).join("")}</select>` : ""}
         <div class="lnSeen"><button type="button" data-lp="seen" class="${ST.seen ? "on" : ""}">${ST.seen ? `Back to the pattern` : `Seen from ${G.esc(M.nm(p.A))}`}</button>${ST.seen ? `<button type="button" data-lp="flip">Seen from ${G.esc(M.nm(ST.seen === 1 ? p.B : p.A))}</button>` : ""}</div>` : `<p class="note">No pattern: no two bodies here share a centre with different periods.</p>`}
@@ -490,20 +592,16 @@ function rhythmView(body) {
   body.onclick = e => {
     const b = e.target.closest("[data-pi]"); if (b) { ST.pair = +b.dataset.pi; ST.seen = 0; draw(); return; }
     const a = e.target.closest("[data-lp]"); if (!a) return; const k = a.dataset.lp;
-    if (k === "go") { if (A.play) stop(); else play(ST.fam === "tour" ? null : M.fams[+ST.fam]); }
+    if (k === "son") G.openTab("Sonification");
     else if (k === "seen") { ST.seen = ST.seen ? 0 : 1; draw(); }
     else if (k === "flip") { ST.seen = ST.seen === 1 ? 2 : 1; draw(); }
     else if (k === "card") card(a);
   };
   body.onchange = e => { const a = e.target.closest("[data-lp]"); if (!a) return;
-    if (a.dataset.lp === "fam") { ST.fam = a.value; if (A.play) { stop(); } }
     if (a.dataset.lp === "more" && a.value !== "") { ST.pair = +a.value; ST.seen = 0; draw(); } };
-  body.oninput = e => { if (e.target.dataset.lp === "vol") { A.vol = +e.target.value; if (A.master) A.master.gain.setTargetAtTime(A.vol * A.vol, A.ctx.currentTime, 0.05); try { localStorage.setItem("gravitas.lensVol", A.vol); } catch (x) {} } };
-  if (A.play) { anim(); return; }
-  if (p) figRhythm(body.querySelector("#lnFig"), p); else figEmpty(body.querySelector("#lnFig"));
+  if (p) figRhythm(body.querySelector("#lnFig"), p);
 }
 const fmtErr = e => e < 1e-4 ? "within 0.01%" : `within ${(e * 100).toFixed(e < 1e-3 ? 2 : 1)}%`;
-function figEmpty(el) { const s = sizeOf(el), x = canvas(el, s, s); x.fillStyle = "#9d8cc0"; x.font = "13px system-ui"; x.textAlign = "center"; x.fillText("Press play to hear the system", s / 2, s / 2); }
 function figRhythm(el, p, toCtx, box) {
   const s = box || sizeOf(el), x = toCtx || canvas(el, s, s), c = s / 2;
   if (!toCtx) cancelAnimationFrame(RAF);
@@ -533,44 +631,6 @@ function cap(x, s, a, b) {                                          // a caption
   const H = x.canvas.height / (x.getTransform().d || 1), fit = (t, w, px) => { for (; px > 8; px -= 0.5) { x.font = w + px + "px system-ui"; if (x.measureText(t).width <= s - 12) break; } };
   x.fillStyle = "rgba(11,7,22,.75)"; x.fillRect(0, H - 40, s, 40); x.textAlign = "center";
   x.fillStyle = "#fff"; fit(a, "600 ", 12.5); x.fillText(a, s / 2, H - 23); x.fillStyle = "#cbbfdc"; fit(b, "", 11); x.fillText(b, s / 2, H - 8); }
-// the tour on screen: the playing family, each body on its own ring, the line it plays on, and a glow on each note
-function anim() {
-  cancelAnimationFrame(RAF);
-  const el = ROOT && ROOT.querySelector("#lnFig"); if (!el || !A.play) return;
-  const s = sizeOf(el), x = canvas(el, s, s); let last = 0;
-  const frame = now => {
-    const P = A.play; if (!P || !ROOT || !el.isConnected) return;
-    RAF = requestAnimationFrame(frame); if (now - last < 33) return; last = now;
-    const ctx = A.ctx, t = ctx.currentTime, c = s / 2;
-    x.fillStyle = BG; x.fillRect(0, 0, s, s);
-    const nowEl = ROOT.querySelector("#lnNow");
-    if (!P.sec || t < P.secAt) {
-      x.textAlign = "center"; x.fillStyle = "#ff6ad5"; x.font = "600 13px system-ui"; x.fillText("GRAVITAS", c, c - 14);
-      x.fillStyle = "#fff"; x.font = "600 17px system-ui"; x.fillText(P.i >= P.plan.length ? "The end" : `The melody of ${M.sys}`, c, c + 10);
-      if (nowEl) nowEl.innerHTML = P.i >= P.plan.length ? "" : `<span>Starting…</span>`; return;
-    }
-    const sec = P.sec, vi = P.voices, el2 = t - P.secAt, days = el2 / sec.s, tt = P.simStart + days * DAY, ref = refAngle(sec.f, tt);
-    while (P.queue && P.queue.length && P.queue[0].at <= t) { const q = P.queue.shift(); if (q.sec === P.i) P.glow[q.k] = q.at; }
-    x.strokeStyle = "rgba(255,255,255,.3)"; x.lineWidth = 1; x.beginPath(); x.moveTo(c, c); x.lineTo(c, 8); x.stroke();
-    x.fillStyle = "#cbbfdc"; x.font = "10.5px system-ui"; x.textAlign = "left"; x.fillText(sec.f.top ? "the line it plays on" : "toward the star", c + 6, 16);
-    const n = vi.v.length;
-    vi.v.forEach((v, k) => {
-      const R = s * (0.12 + 0.33 * (n > 1 ? k / (n - 1) : 0.5)), q = rel(v.b, tt), a = Math.atan2(q[1], q[0]) - ref + Math.PI / 2, g = Math.max(0, 1 - (t - P.glow[k]) / 0.22);
-      x.strokeStyle = v.col; x.globalAlpha = 0.25 + 0.5 * g; x.lineWidth = 1; x.beginPath(); x.arc(c, c, R, 0, TAU); x.stroke(); x.globalAlpha = 1;
-      const px = c + R * Math.cos(a), py = c - R * Math.sin(a);
-      if (g > 0) { x.fillStyle = v.col; x.globalAlpha = 0.25 * g; x.beginPath(); x.arc(px, py, 9 + 12 * g, 0, TAU); x.fill(); x.globalAlpha = 1; }
-      x.fillStyle = v.col; x.beginPath(); x.arc(px, py, 3.5 + 3 * g, 0, TAU); x.fill();
-    });
-    x.fillStyle = "#fff"; x.beginPath(); x.arc(c, c, 5, 0, TAU); x.fill();
-    if (nowEl && nowEl._k !== P.i) { nowEl._k = P.i;
-      nowEl.innerHTML = `<div class="lnSec"><b>${G.esc(sec.f.label)}</b> <span>part ${P.i + 1} of ${P.plan.length} · 1 day = ${fmtS(sec.s)} · ${vi.tu.mode === "true" ? "true ratios" : "octaves folded"}</span></div>
-        <div class="lnVoices">${vi.v.map(v => `<span><i style="background:${v.col}"></i>${G.esc(M.nm(v.b))} <em>${fmtP(v.b.orbitalPeriod)} · ${noteName(v.hz)} · ${INST[v.inst].label}</em></span>`).join("")}</div>
-        ${sec.silent.length ? `<p class="note">Too slow for this tempo, silent here: ${sec.silent.map(b => G.esc(M.nm(b))).join(", ")}.</p>` : ""}`; }
-  };
-  RAF = requestAnimationFrame(frame);
-}
-const fmtS = s => s >= 1 ? `${s.toFixed(1)} s` : s >= 0.01 ? `${s.toFixed(2)} s` : `${(s * 1000).toFixed(1)} ms`;
-function ui() { if (ROOT && ST.view === "rhythm") { const b = ROOT.querySelector('[data-lp="go"]'); if (b) b.textContent = A.play ? "■ Stop" : "▶ Play the system"; if (!A.play) { const p = pairs()[ST.pair], el = ROOT.querySelector("#lnFig"); const n = ROOT.querySelector("#lnNow"); if (n) { n.innerHTML = ""; n._k = null; } if (el) { if (p) figRhythm(el, p); else figEmpty(el); } } else anim(); } }
 // the melody card: a picture to share, with the pattern, the resonances and where to listen
 function card(btn) {
   const p = pairs()[ST.pair], W = 1200, H = 630, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
@@ -711,23 +771,201 @@ function figThrough(el, pl) {
   x.canvas.style.height = h + "px";
 }
 
-// test hook: the same tour, rendered faster than real time into a WAV file (used to check the sound before a release)
-export async function _offline(fi, secs = 40) {
-  model(); const sr = 44100, ctx = new OfflineAudioContext(2, sr * secs, sr), keep = { ...A };
-  A.cache = new Map(); A.live = []; A.droneBuf = null; A.offline = true; chain(ctx); A.master.gain.value = 0.49;
-  const plan = tourPlan(fi == null ? null : M.fams[fi]), star = [...M.byId.values()].find(b => b.type === "Star"), d = droneStart(star, await droneBuf(star, true), 55, 0);
-  let at = 2.5;
-  for (const sec of plan) { if (at > secs) break; const vi = voiceInfo(sec), hs = hitsOf(sec, G.t);
-    let r = Math.min(...vi.v.map(v => v.hz)) / 55; while (r >= 2) r /= 2; while (r < 1) r *= 2; d.s.playbackRate.setTargetAtTime(r, Math.max(0, at - 1), 0.6);
-    for (const h of hs) { const v = vi.v[h.k]; if (at + h.at < secs) hit(render(v.inst, v.hz), at + h.at, v.vel * INST[v.inst].gain * 0.5, v.pan); }
-    at += sec.dur + 1.2; }
-  droneStop(d, Math.min(at, secs - 3));
-  const buf = await ctx.startRendering();
-  Object.assign(A, keep); A.offline = false;
-  const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, out = new DataView(new ArrayBuffer(44 + n * 4));
-  const w = (o, t) => [...t].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
-  w(0, "RIFF"); out.setUint32(4, 36 + n * 4, true); w(8, "WAVEfmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
-  out.setUint32(24, sr, true); out.setUint32(28, sr * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); w(36, "data"); out.setUint32(40, n * 4, true);
-  let peak = 0; for (let i = 0; i < n; i++) { peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); out.setInt16(44 + i * 4, clamp(L[i], -1, 1) * 32767, true); out.setInt16(46 + i * 4, clamp(R[i], -1, 1) * 32767, true); }
-  return { wav: new Uint8Array(out.buffer), peak, parts: plan.map(p => p.f.label) };
+// ------------------------------------------------------------ the Sonification window: the picture, what plays now, and the Studio
+const STAR_COL = sub => { const s = (sub || "").toLowerCase(); return /black hole/.test(s) ? "#3a2a55" : /neutron|white dwarf|wolf|^o |^b |^a /.test(s) ? "#cfe3ff" : /^f /.test(s) ? "#fff4d8" : /^g /.test(s) ? "#ffe39a" : /^k /.test(s) ? "#ffbf6b" : "#ff9a5c"; };
+function sonView(body) {
+  const why = sonCan();
+  if (why) { body.innerHTML = `<p class="lnWhy">${G.esc(why)}</p>`; return; }
+  const fams = M.fams.map((f, i) => partOf(f, false, true) ? `<option value="${i}"${ST.fam === String(i) ? " selected" : ""}>${G.esc(f.label)}</option>` : "").join("");
+  body.innerHTML = `<div class="snTop"><button type="button" class="pri" data-sn="go">${A.play ? "■ Stop" : "▶ Play"}</button>
+      <select data-sn="fam" aria-label="What to play"><option value="tour">The whole system, part by part</option>${fams}</select>
+      <label class="lnVol">Volume <input type="range" min="0" max="1" step="0.01" value="${A.vol}" data-sn="vol" aria-label="Volume"></label>
+      <span class="snBadge${edited() ? " ed" : ""}" title="${edited() ? "Tempo or pitch changed in the Studio: not the system's own timing or ratios" : "The real rhythm, sped up, and the real ratios"}">${edited() ? "Edited" : "Real"}</span></div>
+    <div class="snFig" id="snFig"></div><div id="snNow" class="snNow"></div>
+    <details class="snStudio" id="snStudio"${ST.studio ? " open" : ""}><summary>STUDIO</summary><div id="snMix"></div></details>`;
+  body.querySelector("#snStudio").ontoggle = e => { ST.studio = e.target.open; };
+  body.onclick = e => { const a = e.target.closest("[data-sn]"); if (!a) return; const k = a.dataset.sn;
+    if (k === "go") { if (A.play) stop(); else play(ST.fam === "tour" ? null : M.fams[+ST.fam]); }
+    else if (k === "mute" || k === "solo") { const c = chOf(M.byId.get(+a.dataset.b)); c[k] = !c[k]; a.classList.toggle("on", c[k]); chUpdate(); }
+    else if (k === "wav") exportWav(a); else if (k === "midi") exportMidi(a); else if (k === "reset") { Object.assign(MIX, { rev: 0.45, echo: 0.12, warm: 0.15, width: 0.8, drone: true, droneVol: 0.8, drum: true, ring: true, tempo: 1, pitch: "auto", ch: {} }); mixSave(); restart(); } };
+  body.onchange = e => { const a = e.target.closest("[data-sn]"); if (!a) return; const k = a.dataset.sn;
+    if (k === "fam") { ST.fam = a.value; if (A.play) stop(); mixUi(); poster(); }
+    else if (k === "inst") { chOf(M.byId.get(+a.dataset.b)).inst = a.value; restart(); }
+    else if (k === "tempo") { MIX.tempo = +a.value; mixSave(); restart(); }
+    else if (k === "pitch") { MIX.pitch = a.value; mixSave(); restart(); }
+    else if (k === "drone" || k === "drum" || k === "ring") { MIX[k] = a.checked; mixSave(); chUpdate(); } };
+  body.oninput = e => { const a = e.target.closest("[data-sn]"); if (!a || a.type !== "range") return; const k = a.dataset.sn, v = +a.value;
+    if (k === "vol") { A.vol = v; if (A.master) A.master.gain.setTargetAtTime(A.vol * A.vol, A.ctx.currentTime, 0.05); try { localStorage.setItem("gravitas.lensVol", A.vol); } catch (x) {} }
+    else if (k === "cv") { chOf(M.byId.get(+a.dataset.b)).vol = v; chUpdate(); }
+    else if (k in MIX && k !== "tempo") { MIX[k] = v; mixSave(); fx(); chUpdate(); } };
+  mixUi();
+  if (A.play) anim(); else poster();
 }
+// a change that alters the notes themselves: the piece starts again with it
+function restart() { const was = !!A.play; if (was) stop(true); M.sonCache = null; draw(); if (was) play(ST.fam === "tour" ? null : M.fams[+ST.fam]); }
+function shownPart() {
+  if (A.play && A.play.part) return A.play.part;
+  const key = [ST.fam, MIX.tempo, MIX.pitch, JSON.stringify(Object.entries(MIX.ch).map(([k, c]) => k + c.inst))].join("|");
+  if (!M.sonCache || M.sonCache.key !== key) { const pl = sonPlan(ST.fam === "tour" ? null : M.fams[+ST.fam])[0]; M.sonCache = { key, p: pl ? built(pl) : null }; }
+  return M.sonCache.p;
+}
+function mixUi() {
+  const el = ROOT && ROOT.querySelector("#snMix"); if (!el) return;
+  const part = shownPart(); if (!part) { el.innerHTML = ""; return; }
+  const sl = (k, l, v, min = 0, max = 1, st = 0.01) => `<label>${l}<input type="range" min="${min}" max="${max}" step="${st}" value="${v}" data-sn="${k}"></label>`;
+  const anyRing = part.v.some(v => v.ring);
+  el.innerHTML = `<p class="note">Channels of: <b>${G.esc(part.f.label)}</b>. Changes play at once. Instrument, tempo and pitch start the piece again.</p>
+    <div class="snCh">${part.v.map(v => { const c = chOf(v.b); return `<div class="snRow"><i style="background:${v.col}"></i><b>${G.esc(M.nm(v.b))}</b><em>${fmtP(v.b.orbitalPeriod)}</em>
+      <select data-sn="inst" data-b="${v.b.bodyId}" aria-label="Instrument">${Object.keys(INST).map(k => `<option value="${k}"${k === v.inst ? " selected" : ""}>${INST[k].label}</option>`).join("")}</select>
+      <input type="range" min="0" max="1" step="0.01" value="${c.vol}" data-sn="cv" data-b="${v.b.bodyId}" aria-label="Volume of ${G.esc(M.nm(v.b))}">
+      <button type="button" data-sn="mute" data-b="${v.b.bodyId}" class="${c.mute ? "on" : ""}" title="Mute">M</button><button type="button" data-sn="solo" data-b="${v.b.bodyId}" class="${c.solo ? "on" : ""}" title="Solo">S</button></div>`; }).join("")}</div>
+    <div class="snGrp"><div class="q">FROM THE SYSTEM</div>
+      <div class="snFx"><label class="ck"><input type="checkbox" data-sn="drone"${MIX.drone ? " checked" : ""}> Star drone</label>${sl("droneVol", "", MIX.droneVol)}</div>
+      <label class="ck"><input type="checkbox" data-sn="drum"${MIX.drum ? " checked" : ""}> Line-ups (a soft drum when two neighbours line up with their centre)</label>
+      ${anyRing ? `<label class="ck"><input type="checkbox" data-sn="ring"${MIX.ring ? " checked" : ""}> Ring shimmer (ringed bodies)</label>` : ""}</div>
+    <div class="snGrp"><div class="q">EFFECTS</div><div class="snFx">${sl("rev", "Reverb", MIX.rev)}${sl("echo", "Echo", MIX.echo)}${sl("warm", "Warmth", MIX.warm)}${sl("width", "Width", MIX.width)}</div></div>
+    <div class="snGrp"><div class="q">TIMING AND PITCH</div><div class="snFx">
+      <label>Tempo <select data-sn="tempo">${[0.5, 0.75, 1, 1.5, 2].map(t => `<option value="${t}"${t === MIX.tempo ? " selected" : ""}>×${t}${t === 1 ? " (real)" : ""}</option>`).join("")}</select></label>
+      <label>Pitch <select data-sn="pitch"><option value="auto"${MIX.pitch === "auto" ? " selected" : ""}>True ratios when they fit</option><option value="octaves"${MIX.pitch === "octaves" ? " selected" : ""}>Octaves folded</option><option value="scale"${MIX.pitch === "scale" ? " selected" : ""}>On a scale (edited)</option></select></label></div></div>
+    <div class="snGrp"><div class="q">SAVE</div><div class="lnBtns"><button type="button" data-sn="wav">Save sound (WAV)</button><button type="button" data-sn="midi">Save notes (MIDI)</button><button type="button" data-sn="reset">Studio back to defaults</button></div>
+      <p class="note">Saves the part above, made in your browser. MIDI rounds each note to the nearest semitone, so open it in FL Studio, Ableton or any music program and make it your own.</p></div>`;
+}
+// the still picture before play: the family on its orbits, where each one plays
+function poster() {
+  const el = ROOT && ROOT.querySelector("#snFig"); if (!el) return;
+  const part = shownPart(); cancelAnimationFrame(RAF);
+  const W = sizeOf(el), H = Math.round(Math.min(W * (W < 520 ? 0.9 : 0.62), 480)), x = canvas(el, W, H); x.fillStyle = "#05030a"; x.fillRect(0, 0, W, H);
+  if (!part) return;
+  const st = { part, zoom: (Math.min(W, H) * 0.42) / 1, t: 0, rip: [], ups: [], glow: part.v.map(() => -9) };
+  drawFamily(x, W, H, part, part.v.map(() => 1), G.t, st.zoom, st.glow, 0, [], [], 1);
+  x.textAlign = "center"; x.fillStyle = "rgba(233,221,255,.85)"; x.font = "600 13px system-ui"; x.fillText(`Press play: the melody of ${M.sys}`, W / 2, 22);
+  nowUi(null);
+}
+function drawFamily(x, W, H, part, lvl, tt, zoom, glow, t, rip, ups, alphaAll) {
+  const c = [W / 2, H / 2], ref = part.refAt ? part.refAt(clamp(tt, part.t0, part.t0 + part.span)) : refAngle(part.f, tt);
+  const cb = part.f.pb, isStar = cb && cb.type === "Star", sc = STAR_COL(isStar ? cb.subType : "");
+  const g = x.createRadialGradient(c[0], c[1], 0, c[0], c[1], 26); g.addColorStop(0, isStar ? sc : "#e9e3f5"); g.addColorStop(0.25, isStar ? sc + "aa" : "#bcb3d0aa"); g.addColorStop(1, "rgba(0,0,0,0)");
+  x.fillStyle = g; x.beginPath(); x.arc(c[0], c[1], 26, 0, TAU); x.fill();
+  x.fillStyle = isStar ? sc : "#e9e3f5"; x.beginPath(); x.arc(c[0], c[1], isStar ? 5 : 4, 0, TAU); x.fill();
+  for (const v of part.v) {
+    const R = v.r * zoom, L = lvl[v.k], gl = Math.max(0, 1 - (t - glow[v.k]) / 0.5) * L;      // L: 0 resting, 1 playing (eased, so bodies fade in and out)
+    x.strokeStyle = v.col; x.lineWidth = 1 + gl; x.globalAlpha = (0.07 + 0.33 * L + 0.5 * gl) * alphaAll; x.beginPath(); x.arc(c[0], c[1], R, 0, TAU); x.stroke();
+    x.globalAlpha = (0.12 + 0.63 * L) * alphaAll; x.lineWidth = 1; x.beginPath(); x.arc(c[0], c[1] + R, 3.5, 0, TAU); x.stroke();      // where it plays
+    const q = rel(v.b, tt), a = Math.atan2(q[1], q[0]) - ref - Math.PI / 2, px = c[0] + R * Math.cos(a), py = c[1] - R * Math.sin(a);
+    x.globalAlpha = (0.18 + 0.82 * L) * alphaAll; x.fillStyle = v.col; x.beginPath(); x.arc(px, py, 2.6 + 2.4 * gl, 0, TAU); x.fill();
+    if (gl > 0) { x.globalAlpha = 0.22 * gl; x.beginPath(); x.arc(px, py, 7 + 9 * gl, 0, TAU); x.fill(); }
+    v._px = px; v._py = py;
+  }
+  x.globalAlpha = 1;
+  for (const r of rip) { const age = (t - r.at) / 0.75; if (age < 0 || age > 1) continue; const v = part.v[r.k];
+    x.strokeStyle = v.col; x.globalAlpha = 0.9 * (1 - age); x.lineWidth = 1.4; x.beginPath(); x.arc(c[0], c[1] + v.r * zoom, 3.5 + 20 * Math.sqrt(age), 0, TAU); x.stroke(); }
+  for (const u of ups) { const age = (t - u.at) / 0.6; if (age < 0 || age > 1) continue; const b = part.v[u.up.b];
+    x.strokeStyle = "#ffffff"; x.globalAlpha = 0.35 * (1 - age); x.lineWidth = 1; x.beginPath(); x.moveTo(c[0], c[1]); x.lineTo(b._px, b._py); x.stroke(); }
+  x.globalAlpha = 1;
+}
+function anim() {
+  cancelAnimationFrame(RAF);
+  const el = ROOT && ROOT.querySelector("#snFig"); if (!el || !A.play) return;
+  const W = sizeOf(el), H = Math.round(Math.min(W * (W < 520 ? 0.9 : 0.62), 480)), x = canvas(el, W, H); let last = 0, lastT = 0, zoom = null, pi = -2, rip = [], ups = [], glow = [], lvl = [];
+  const frame = now => {
+    const P = A.play; if (!P || !ROOT || !el.isConnected) return;
+    RAF = requestAnimationFrame(frame); if (now - last < 33) return; last = now;
+    const t = A.ctx.currentTime; x.fillStyle = "#05030a"; x.fillRect(0, 0, W, H);
+    const part = P.part;
+    if (!part || t < part.at - 0.05) {
+      const k = clamp((t - P.t0) / 1.2, 0, 1); x.globalAlpha = k; x.textAlign = "center";
+      x.fillStyle = "#ff6ad5"; x.font = "600 13px system-ui"; x.fillText("GRAVITAS · SYSTEM SONIFICATION", W / 2, H / 2 - 16);
+      x.fillStyle = "#fff"; x.font = "600 19px system-ui"; x.fillText(P.i >= P.parts.length ? "" : M.sys, W / 2, H / 2 + 12); x.globalAlpha = 1;
+      if (part && pi !== P.i) { nowUi(null); } return;
+    }
+    if (pi !== P.i) { pi = P.i; rip = []; ups = []; glow = part.v.map(() => -9); lvl = part.v.map(() => 0); zoom = null; lastT = t; nowUi(part); mixUi(); }
+    while (P.vq.length && P.vq[0].at <= t) { const q = P.vq.shift(); if (q.i !== P.i) continue; if (q.up) ups.push(q); else { glow[q.k] = q.at; rip.push(q); } }
+    rip = rip.filter(r => t - r.at < 0.8); ups = ups.filter(u => t - u.at < 0.7);
+    const rel0 = t - part.at, sc = part.sceneAt(Math.min(rel0, part.dur - 1e-6)) || part.scenes[part.scenes.length - 1], on = sc.on;
+    const outR = Math.max(...part.v.filter(v => on.has(v.k)).map(v => v.r)), target = (Math.min(W, H) * 0.44) / outR;
+    const dt = Math.max(0, t - lastT); lastT = t;
+    zoom = zoom == null ? target : zoom + (target - zoom) * Math.min(1, dt * 2.2);   // the view glides out as bodies join, and in again
+    for (const v of part.v) lvl[v.k] += ((on.has(v.k) ? 1 : 0) - lvl[v.k]) * Math.min(1, dt * 2.5);
+    const fade = rel0 > part.dur ? clamp(1 - (rel0 - part.dur) / SON.tail, 0, 1) : 1;
+    drawFamily(x, W, H, part, lvl, part.t0 + rel0 / part.s * DAY, zoom, glow, t, rip, ups, 0.25 + 0.75 * fade);
+    const ti = clamp(1 - (rel0 - 1.2) / 1.6, 0, 1);                   // each part opens with its name, which fades
+    if (ti > 0) { x.globalAlpha = ti; x.textAlign = "center"; x.fillStyle = "#fff"; x.font = "600 18px system-ui"; x.fillText(part.f.label, W / 2, H * 0.16); x.fillStyle = "#cbbfdc"; x.font = "12px system-ui"; x.fillText(`1 day = ${fmtS(part.s)}`, W / 2, H * 0.16 + 20); x.globalAlpha = 1; }
+    x.textAlign = "left"; x.fillStyle = "#e9ddff"; x.font = "600 12.5px system-ui"; x.fillText(part.f.label, 12, 20);
+    x.fillStyle = "#cbbfdc"; x.font = "11.5px system-ui"; x.fillText(rel0 <= part.dur ? sc.name : "", 12, 37);
+    x.textAlign = "right"; x.fillStyle = "#9d8cc0"; x.fillText(`day ${(Math.max(0, rel0) / part.s).toFixed(part.s > 0.05 ? 1 : 0)} · 1 day = ${fmtS(part.s)}`, W - 12, 20);
+    x.fillText(`part ${P.i + 1} of ${P.parts.length}`, W - 12, 37);
+  };
+  RAF = requestAnimationFrame(frame);
+}
+const fmtS = s => s >= 1 ? `${s.toFixed(1)} s` : s >= 0.01 ? `${s.toFixed(2)} s` : `${(s * 1000).toFixed(1)} ms`;
+function nowUi(part) {
+  const el = ROOT && ROOT.querySelector("#snNow"); if (!el) return;
+  part = part || shownPart(); if (!part) { el.innerHTML = ""; return; }
+  el.innerHTML = `<div class="lnSec"><b>${G.esc(part.f.label)}</b> <span>1 day = ${fmtS(part.s)} · ${part.tu.mode === "true" ? "true ratios" : part.tu.mode === "scale" ? "on a scale (edited)" : "octaves folded"}</span></div>
+    <div class="lnVoices">${part.v.map(v => `<span><i style="background:${v.col}"></i>${G.esc(M.nm(v.b))} <em>${fmtP(v.b.orbitalPeriod)} · ${noteName(v.hz)} · ${INST[v.inst].label}${v.ring ? " · rings" : ""}</em></span>`).join("")}</div>
+    ${part.silent.length ? `<p class="note">Too slow to play with the others, silent here: ${part.silent.map(b => G.esc(M.nm(b))).join(", ")}.</p>` : ""}`;
+}
+function sonUi() {
+  if (!ROOT || ST.view !== "sonify") return;
+  const b = ROOT.querySelector('[data-sn="go"]'); if (b) b.textContent = A.play ? "■ Stop" : "▶ Play";
+  if (A.play) anim(); else { poster(); mixUi(); }
+}
+// ------------------------------------------------------------ Save: the part as sound (WAV) or as notes (MIDI)
+const dl = (blob, name) => { const u = URL.createObjectURL(blob), l = document.createElement("a"); l.href = u; l.download = name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); };
+const fname = (part, ext) => `GRAVITAS_${M.sys.replace(/[^\w-]+/g, "_")}_${part.f.label.replace(/[^\w-]+/g, "_")}.${ext}`;
+async function renderPart(part) {                                     // the same notes, drone, drum and effects, made faster than real time
+  const sr = 44100, len = part.dur + SON.tail + 1.5, ctx = new OfflineAudioContext(2, Math.ceil(sr * len), sr), keep = { ...A };
+  A.cache = new Map(); A.live = []; A.offline = true; A.drum = null; chain(ctx); A.master.gain.value = 0.55; A.delay.delayTime.value = part.echoT;
+  const P = { parts: [{ p: part }], ch: null }; A.play = P; channels(P, part); A.play = null;
+  const star = mainStar(), dbuf = await droneBuf(star, true), d = droneStart(star, dbuf, Math.min(...part.v.map(v => v.hz)), 0.3), o = 0.6;
+  for (const q of part.scenes) d.g.gain.setTargetAtTime(q.drone && MIX.drone ? 0.16 * MIX.droneVol : 0.0001, o + q.t0, 0.7);
+  d.g.gain.setTargetAtTime(0.0001, o + part.dur, 0.8);
+  for (const h of part.hits) note(P, part, h, o + h.at);
+  if (MIX.drum) for (const u of part.ups) hit(drumBuf(), o + u.at, 0.42, P.dg);
+  try { return await ctx.startRendering(); } finally { Object.assign(A, keep); A.offline = false; }
+}
+async function exportWav(btn) {
+  const part = shownPart(); if (!part) return; if (A.play) stop();
+  btn.disabled = true; btn.textContent = "Making the sound…";
+  try {
+    const buf = await renderPart(part), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, out = new DataView(new ArrayBuffer(44 + n * 4));
+    const w = (o, t) => { for (let i = 0; i < t.length; i++) out.setUint8(o + i, t.charCodeAt(i)); };
+    w(0, "RIFF"); out.setUint32(4, 36 + n * 4, true); w(8, "WAVEfmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
+    out.setUint32(24, 44100, true); out.setUint32(28, 44100 * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); w(36, "data"); out.setUint32(40, n * 4, true);
+    for (let i = 0; i < n; i++) { out.setInt16(44 + i * 4, clamp(L[i], -1, 1) * 32767, true); out.setInt16(46 + i * 4, clamp(R[i], -1, 1) * 32767, true); }
+    dl(new Blob([out.buffer], { type: "audio/wav" }), fname(part, "wav")); btn.textContent = "Saved";
+  } catch (e) { btn.textContent = "Could not make it here"; }
+  setTimeout(() => { btn.disabled = false; btn.textContent = "Save sound (WAV)"; }, 2200);
+}
+// MIDI: one track per body (its instrument as the nearest General MIDI sound), the drum on channel 10, the drone held under it
+const GM = { marimba: 12, vibes: 11, glass: 9, harp: 46, bell: 14 };
+function exportMidi(btn) {
+  const part = shownPart(); if (!part) return;
+  const TPS = 960, vlq = n => { const b = [n & 127]; while ((n >>= 7)) b.unshift((n & 127) | 128); return b; }, midi = hz => clamp(Math.round(69 + 12 * Math.log2(hz / 440)), 0, 127);
+  const track = (evs, name) => { evs.sort((a, b) => a.t - b.t || a.o - b.o); const d = [0, 0xff, 0x03, ...vlq(name.length), ...[...name].map(c => c.charCodeAt(0) & 127)]; let last = 0;
+    for (const e of evs) { const tk = Math.max(0, Math.round(e.t * TPS)); d.push(...vlq(tk - last), ...e.b); last = tk; }
+    d.push(0, 0xff, 0x2f, 0); return [0x4d, 0x54, 0x72, 0x6b, (d.length >>> 24) & 255, (d.length >>> 16) & 255, (d.length >>> 8) & 255, d.length & 255, ...d]; };
+  const tracks = [track([{ t: 0, o: 0, b: [0xff, 0x51, 0x03, 0x07, 0xa1, 0x20] }], "GRAVITAS " + M.sys)];   // 120 beats a minute: 960 ticks a second
+  part.v.forEach((v, k) => {
+    const ch = k % 9, hs = part.hits.filter(h => h.k === k).map(h => h.at), evs = [{ t: 0, o: 0, b: [0xc0 | ch, GM[v.inst]] }], m = midi(v.hz), vel = Math.round(50 + 60 * v.vel);
+    hs.forEach((at, i) => { const end = Math.min(at + 2, i + 1 < hs.length ? hs[i + 1] - 0.01 : at + 2); evs.push({ t: at, o: 1, b: [0x90 | ch, m, vel] }, { t: Math.max(at + 0.08, end), o: 0, b: [0x80 | ch, m, 0] }); });
+    tracks.push(track(evs, M.nm(v.b)));
+  });
+  if (MIX.drum && part.ups.length) tracks.push(track(part.ups.flatMap(u => [{ t: u.at, o: 1, b: [0x99, 36, 80] }, { t: u.at + 0.2, o: 0, b: [0x89, 36, 0] }]), "Line-ups"));
+  if (MIX.drone) { const dm = midi(Math.min(...part.v.map(v => v.hz)) / 2), evs = [{ t: 0, o: 0, b: [0xca, 89] }]; let onAt = null;
+    for (const q of part.scenes) { if (q.drone && onAt === null) { onAt = q.t0; evs.push({ t: q.t0, o: 1, b: [0x9a, dm, 60] }); } else if (!q.drone && onAt !== null) { evs.push({ t: q.t0, o: 0, b: [0x8a, dm, 0] }); onAt = null; } }
+    if (onAt !== null) evs.push({ t: part.dur, o: 0, b: [0x8a, dm, 0] }); tracks.push(track(evs, "Star drone")); }
+  const head = [0x4d, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 1, 0, tracks.length, (480 >> 8) & 255, 480 & 255];
+  dl(new Blob([new Uint8Array([...head, ...tracks.flat()])], { type: "audio/midi" }), fname(part, "mid"));
+  btn.textContent = "Saved"; setTimeout(() => (btn.textContent = "Save notes (MIDI)"), 1800);
+}
+
+// test hook: one part rendered faster than real time into a WAV file (used to check the sound before a release)
+export async function _offline(fi) {
+  model(); const ps = sonParts(fi == null ? null : M.fams[fi]); if (!ps.length) return null;
+  const buf = await renderPart(ps[0]), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, out = new Int16Array(n * 2); let peak = 0;
+  for (let i = 0; i < n; i++) { peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); out[i * 2] = clamp(L[i], -1, 1) * 32767; out[i * 2 + 1] = clamp(R[i], -1, 1) * 32767; }
+  return { pcm: new Uint8Array(out.buffer), sr: 44100, peak, part: ps[0].f.label, scenes: ps[0].scenes.map(q => `${q.t0.toFixed(1)} ${q.name}`), hits: ps[0].hits.length, ups: ps[0].ups.length };
+}
+// test hook: the live sound as a stream, to record a preview with the picture
+export function _tap() { if (!A.ctx) return null; const d = A.ctx.createMediaStreamDestination(); A.master.connect(d); return d.stream; }

@@ -1,6 +1,16 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.98", k: "major", d: "31 Oct 2026", t: [
+      "New in GRAVITAS MODES: System Sonification. The orbits of the system on screen, as music",
+      "The bodies around one centre come in one by one, from the fastest. Then the inner ones play alone, the outer ones alone, and all together. A system with many families plays them part by part: the planets first, then the moons",
+      "Each body plays when it crosses the line below its centre, marked with a small circle that ripples. Its orbit lights up with the note. The view glides out as bodies join and back in when only the inner ones play",
+      "Fast bodies play short, bright notes, an octave up. Slow bodies ring longer and darker, an octave down, and the slowest swell in like a held tone",
+      "A soft drum when two neighbours line up with their centre. A shimmer on ringed bodies. A drone from the star, which rests while the inner bodies play alone",
+      "Studio: each body's instrument, volume, mute and solo. Reverb, echo, warmth and width. Tempo and a musical scale, marked Edited because they change the system's own timing or ratios",
+      "Save the part as a sound file (WAV), or as notes (MIDI) for FL Studio, Ableton or any music program. Made in your browser",
+      "Lenses: the melody moved to Sonification. Rhythm keeps the patterns, the resonances and the melody card, with a button to hear the system",
+    ] },
     { v: "v0.97", k: "major", d: "31 Oct 2026", t: [
       "New in GRAVITAS MODES: Lenses. Three new ways to look at a system, all from its own orbit data",
       "Rhythm: two bodies around the same centre, joined by a line again and again. Near a simple ratio the lines close into a pattern with petals. GRAVITAS picks the best pairs, and you can pick any other",
