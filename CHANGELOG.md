@@ -4,6 +4,15 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.98.1 · minor · 31 Oct 2026
+- Sonification has three parts now: Listen, Studio and Patterns. Patterns is the old Rhythm lens (the patterns two orbits draw, the resonances, the melody card). Lenses keeps Landscape and Time
+- Studio: every change plays at once, while the music goes on. Nothing starts again: not the instrument, the tempo, the pitch or the effects
+- Studio: a mixer of channel strips. Each body has its instrument, its place left or right, a volume fader, mute, solo and a light that flashes with its notes. The drone, the drum and the ring shimmer have their own strips, and a master strip shows the level
+- Studio: twelve instruments in three groups: marimba, vibraphone, glass bars, celesta, kalimba, handpan, electric piano, harp, nylon guitar, bell, singing bowl and a soft pad
+- Each body gets its instrument from its kind: gas giants by their class, rocky, icy, metal-rich, water and Earth-like worlds. Bodies of one kind take turns among close instruments, so a family sounds more varied
+- Studio: presets (Space, Close, Cathedral, Dreamy, Lo-fi), reverb with the size of the room, echo with repeats and a time set by the fastest orbit, chorus, warmth and width. Tempo from ×0.5 to ×2 and transpose
+- The mark next to Play says Real rhythm (the system's own timing and true ratios) or Edited (tempo changed, or the notes on a scale)
+
 ### v0.98 · major · 31 Oct 2026
 - New in GRAVITAS MODES: System Sonification. The orbits of the system on screen, as music
 - The bodies around one centre come in one by one, from the fastest. Then the inner ones play alone, the outer ones alone, and all together. A system with many families plays them part by part: the planets first, then the moons

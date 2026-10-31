@@ -1,6 +1,6 @@
 // ------------------------------------------------------------ v0.97 GRAVITAS MODES: Lenses (v0.98: and System Sonification)
-// Three new ways to look at a system, from its own orbit data: Rhythm (the patterns two orbits draw, and the melody of
-// the system), Landscape (where each body's gravity rules) and Time (years of motion in one picture).
+// v0.98.1: Sonification holds the music, its Studio and the patterns two orbits draw (Patterns, once the Rhythm lens).
+// Lenses holds Landscape (where each body's gravity rules) and Time (years of motion in one picture).
 // The lenses live in their own file (src/lazy/lens.js). It loads only when this window opens, so a visitor who never
 // opens it pays nothing. Everything is worked out and played in the browser: nothing is sent anywhere.
 var LENS = { mod: null, loading: null, err: "", req: null, open: false };
@@ -42,5 +42,5 @@ MODES_TABS = Object.assign({ "Combat": MODES_TABS["Combat"], "Collisions": MODES
 { const q = new URLSearchParams(location.search), v = q.get("lens");
   if (v && /^(rhythm|landscape|time|sonify)$/.test(v)) { const until = Date.now() + 60e3;
     LENS.req = { view: v, lp: (q.get("lp") || "").split("|").filter(Boolean).map(Number), lf: q.get("lf") != null && q.get("lf") !== "" ? +q.get("lf") : null };
-    const go = () => { if (S && S.bodies && S.bodies.length) { setTimeout(() => openNews(v === "sonify" ? "Sonification" : "Lenses", "modes"), 900); return; } if (Date.now() < until) setTimeout(go, 500); };
+    const go = () => { if (S && S.bodies && S.bodies.length) { setTimeout(() => openNews(v === "sonify" || v === "rhythm" ? "Sonification" : "Lenses", "modes"), 900); return; } if (Date.now() < until) setTimeout(go, 500); };
     setTimeout(go, 1000); } }
