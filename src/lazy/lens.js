@@ -994,7 +994,7 @@ function anim() {
     x.textAlign = "left"; x.fillStyle = "#e9ddff"; x.font = "600 12.5px system-ui"; x.fillText(part.f.label, 12, 20);
     x.fillStyle = "#cbbfdc"; x.font = "11.5px system-ui"; x.fillText(rel0 <= part.dur ? sc.name : "", 12, 37);
     x.textAlign = "right"; x.fillStyle = "#9d8cc0"; x.fillText(`day ${(Math.max(0, rel0) / part.s).toFixed(part.s > 0.05 ? 1 : 0)} · 1 day = ${fmtS(part.s / MIX.rate)}`, W - 12, 20);
-    x.fillText(`part ${P.i + 1} of ${P.parts.length}`, W - 12, 37);
+    x.fillText(`part ${Math.min(P.i + 1, P.parts.length)} of ${P.parts.length}`, W - 12, 37);
   };
   ARAF = requestAnimationFrame(frame);
 }

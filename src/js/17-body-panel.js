@@ -68,6 +68,7 @@ function select(b, doFocus) {
     row("Volcanism", b.volcanismType); row("Terraforming", b.terraformingState); row("Reserves", b.reserveLevel);
   }
   row("Distance to arrival", fmt(b.distanceToArrival, 1) + " ls" + (b.timestamps && b.timestamps.distanceToArrival ? ` <span style="color:var(--dim)">(at scan, ${b.timestamps.distanceToArrival.slice(0, 10)})</span>` : ""));
+  { const c = arrivalCheck(b); if (c) row("Model check", `${fmt(c.model, 1)} ls at that time <span style="color:var(--dim)">(${c.off < 1000 ? fmt(c.off, 0) + " km" : fmt(c.off / 1000, 1) + "k km"} off)</span>`); }
   if (b.semiMajorAxis != null) {
     sec("Orbit");
     row("Semi-major axis", `${fmt(b.semiMajorAxis, 5)} AU (${fmt(b.semiMajorAxis * AU_LS, 2)} ls)`); row("Period", fmt(b.orbitalPeriod, 3) + " d");

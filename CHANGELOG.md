@@ -4,6 +4,12 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.0 · minor · 12 Nov 2026
+- Moons are in the right place now. A moon of a planet (or a moon of a moon) had its orbit tilted the wrong way. Checked against the Spansh scan distances in Swoiwns TR-T b8-1: every moon of planets 6, 9 and 10 now matches to a few km (before: up to 51,000 km off). This changes eclipse and collision times for such moons
+- Bodies that orbit a barycentre are not changed. The Eoch Flyuae YK-K c10-56 three-body event stays the same
+- Body panel: a new Model check row. It shows where GRAVITAS puts the body at the time of its Spansh scan, and how far that is from the scan's distance to arrival
+- Sonification: the part counter no longer shows "part 2 of 1" at the end
+
 ### v0.98.1 · minor · 31 Oct 2026
 - Sonification has three parts now: Listen, Studio and Patterns. Patterns is the old Rhythm lens (the patterns two orbits draw, the resonances, the melody card). Lenses keeps Landscape and Time
 - Studio: every change plays at once, while the music goes on. Nothing starts again: not the instrument, the tempo, the pitch or the effects

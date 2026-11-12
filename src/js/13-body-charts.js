@@ -130,6 +130,20 @@ function rotationDial(b) {
   return chart("Rotation & tilt", s + "</svg>", "Spin speed and direction come from the data. The current spin phase does not.");
 }
 
+// --- v0.99: the model against Spansh. Each scan gives distanceToArrival with its own time. The model's distance from the
+// main star at that time should match it. arrivalCheck(b) for one body, gravitasSelfTest() in the console for all.
+function arrivalCheck(b) {
+  const t = b && b.timestamps && Date.parse(b.timestamps.distanceToArrival), star = S.main || S.byId.get(0);
+  if (!t || !b.distanceToArrival || !star || b === star) return null;
+  const W = worldAt(t), p = W.get(b.bodyId), q = W.get(star.bodyId);
+  if (!p || !q) return null;
+  const model = dist(p, q) / LS_MM;
+  return { model, off: Math.abs(model - b.distanceToArrival) * LS_MM * 1000 };   // off in km
+}
+window.gravitasSelfTest = () => {
+  const rows = (S ? S.bodies : []).map(b => { const c = arrivalCheck(b); return c && { body: b.name, spansh_ls: +b.distanceToArrival.toFixed(3), model_ls: +c.model.toFixed(3), off_km: Math.round(c.off) }; }).filter(Boolean);
+  console.table(rows); return rows;
+};
 // --- true world positions at an arbitrary time (does not touch S.world)
 function worldAt(t) {
   const W = new Map();

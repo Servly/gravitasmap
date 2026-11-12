@@ -17,13 +17,27 @@ const MZ = F => [[F[0][0], F[0][1], -F[0][2]], [F[1][0], F[1][1], -F[1][2]], [-F
 const M3 = (A, B2) => A.map((r, i) => [0, 1, 2].map(j => r[0] * B2[0][j] + r[1] * B2[1][j] + r[2] * B2[2][j]));
 const RZ = a => [[Math.cos(a), -Math.sin(a), 0], [Math.sin(a), Math.cos(a), 0], [0, 0, 1]];
 const RX = a => [[1, 0, 0], [0, Math.cos(a), -Math.sin(a)], [0, Math.sin(a), Math.cos(a)]];
+// Inclination sign (v0.99): a moon whose chain up to body 0 holds only planets (a moon, or a moon of a moon, with no
+// barycentre in the chain) uses -inclination. Found from Spansh distanceToArrival in Swoiwns TR-T b8-1 (12 Nov 2026):
+// with it every moon of planets 6, 9 and 10 matches its scan distance to a few km (before: up to 51,000 km off).
+// Bodies with a barycentre in the chain keep +inclination (the Eoch Flyuae YK-K c10-56 event is unchanged).
+function moonSign(byId, parentOf, id) {
+  let n = 0;
+  for (let p = parentOf.get(id); p !== 0; p = parentOf.get(p)) {
+    const pb = p === undefined ? null : byId.get(p);
+    if (!pb || pb.type !== "Planet") return 1;
+    n++;
+  }
+  return n ? -1 : 1;
+}
 function orbitFrames(byId, parentOf) {
   const done = new Set();
   const f = id => {
     const b = byId.get(id); if (!b || done.has(id)) return b ? b._Fraw : null; done.add(id);
     const p = parentOf.get(id), nested = p !== undefined && p !== 0;
     b._nested = nested; const pRaw = nested ? f(p) : null; b._pF = pRaw ? MZ(pRaw) : null;
-    const sg = -1, i = (b.orbitalInclination || 0) * DEG, w = sg * (b.argOfPeriapsis || 0) * DEG, Om = sg * (b.ascendingNode || 0) * DEG;
+    b._iS = moonSign(byId, parentOf, id);
+    const sg = -1, i = b._iS * (b.orbitalInclination || 0) * DEG, w = sg * (b.argOfPeriapsis || 0) * DEG, Om = sg * (b.ascendingNode || 0) * DEG;
     let F = M3(M3(RZ(Om), RX(i)), RZ(w));
     if (pRaw) F = M3(pRaw, F);
     // axial tilt sign, found by in-game tests (v0.38, v0.44): a body orbiting a barycentre that is not itself inside
@@ -39,7 +53,7 @@ function orbitFrames(byId, parentOf) {
 }
 function relPos(b, tMs, mOverride) {
   const a = (b.semiMajorAxis || 0) * AU_LS * LS_MM, e = Math.min(b.orbitalEccentricity || 0, 0.99), sg = -1;
-  const i = (b.orbitalInclination || 0) * DEG, w = sg * (b.argOfPeriapsis || 0) * DEG, Om = sg * (b.ascendingNode || 0) * DEG;
+  const i = (b._iS || 1) * (b.orbitalInclination || 0) * DEG, w = sg * (b.argOfPeriapsis || 0) * DEG, Om = sg * (b.ascendingNode || 0) * DEG;
   let M = mOverride;
   if (M === undefined) {
     const P = (b.orbitalPeriod || 1e9) * 86400000;
