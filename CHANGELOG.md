@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.4 · minor · 13 Nov 2026
+- Fixed: after v0.99.3 the page could stay empty in Chrome. Its early loading of three.js was sent by Cloudflare as a header, so Chrome loaded three.js before it knew where "three" is. That early loading is taken out and three.js loads as before. The smaller system data and the early system request stay
+
 ### v0.99.3 · minor · 13 Nov 2026
 - Systems load much faster: a system now comes without its stations' market, outfitting and shipyard lists (Sol: 93 KB instead of 1851 KB). The Station window asks for them the first time you open a station, and shows Loading… for that moment
 - The first system and three.js are asked for as soon as the page opens, at the same time as the app itself, not one after the other
