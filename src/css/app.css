@@ -1020,6 +1020,7 @@ body:not(.pfull) .jr { padding-top:5px; padding-bottom:5px; }
 
 /* v0.82.5: the 3D buttons on a computer: a column like the map's, top right of the view */
 body:not(.pfull):not(.mapping):not(.surfing) #pZoom3 { display:flex; position:fixed; z-index:4; flex-direction:column; gap:4px; transition:right .32s cubic-bezier(.3,.8,.3,1); }
+body:not(.pfull) #pZoom3:not(.placed) { visibility:hidden; }   /* v0.99.2: no place yet (no system yet): not seen top left */
 body:not(.pfull) #pZoom3 button { width:30px; height:30px; border-radius:8px; font-size:16px; }
 body:not(.pfull) #pZoom3 button[data-z="names"] { font-size:11px; }
 /* v0.90 day and night at settlements */

@@ -178,6 +178,7 @@ function pfullClock() {
     const sc = $("scaleMode"), hn = $("tsHint"), top = Math.max(shown(sc) ? sc.getBoundingClientRect().bottom + 10 : 60, shown(hn) ? hn.getBoundingClientRect().bottom + 8 : 0);   // clear of the "Click for true scale" hint
     const v = [Math.round(right) + "px", Math.round(top) + "px"];
     if (z3.style.right !== v[0] || z3.style.top !== v[1]) { z3.style.right = v[0]; z3.style.top = v[1]; }
+    z3.classList.add("placed");                 // v0.99.2: unseen until it has its place (it sat top left while a system loaded)
   };
   setInterval(z3place, 250); addEventListener("resize", z3place); z3place();
   // ---- v0.78.4: Filters close with a tap anywhere outside them (that tap only closes, it does not pick a body)

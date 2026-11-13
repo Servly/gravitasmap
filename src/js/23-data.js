@@ -19,7 +19,13 @@ async function fetchSuggestions(text) {
   if (v.length) acCache.set(k, v);
   return v;
 }
-function status(msg, err) { const s = $("status"); s.textContent = msg; s.className = "panel" + (err ? " err" : ""); s.style.display = msg ? "block" : "none"; }
+function status(msg, err) { const s = $("status"); s.textContent = msg; s.className = "panel" + (err ? " err" : ""); s.style.display = msg ? "block" : "none";
+  const m = $("splashMsg"); if (m && msg) m.textContent = msg; }   // v0.99.2: the loading screen says the same
+// v0.99.2: the loading screen (in index.html) fades out once the first system is drawn, or as it fails to load
+function splashDone() {
+  const s = $("splash"); if (!s || s.dataset.done) return; s.dataset.done = "1";
+  setTimeout(() => { s.classList.add("out"); setTimeout(() => s.remove(), 500); }, 60);   // (timers, not frames: a tab opened behind others draws none)
+}
 { const nj = $("noJump"); try { nj.checked = localStorage.getItem("gravitas.noJump") === "1"; } catch (e) {}
   nj.addEventListener("change", () => { try { localStorage.setItem("gravitas.noJump", nj.checked ? "1" : "0"); } catch (e) {} }); }
 // v0.90.8: only the newest request may draw its system: an older one that answers later (a slow link, a background tab)
@@ -27,7 +33,7 @@ function status(msg, err) { const s = $("status"); s.textContent = msg; s.classN
 const LOAD = { gen: 0, by: "auto" };
 async function loadSystem(name, opts = {}) {
   const my = ++LOAD.gen;
-  if (!API) { status("Live data needs the local server: run  python tools\\serve.py  and open http://localhost:8765", true); return false; }
+  if (!API) { status("Live data needs the local server: run  python tools\\serve.py  and open http://localhost:8765", true); splashDone(); return false; }
   const skip = $("noJump") && $("noJump").checked;                  // v0.55: the visitor can turn the jump off, and we remember it
   const warp = opts.countdown && !skip ? Warp.start(name) : null;   // only jumps the user starts get the countdown
   if (warp) status("");
@@ -36,11 +42,12 @@ async function loadSystem(name, opts = {}) {
     const req = opts.pre || (opts.id64 ? fetch(`${API}/system?id64=${encodeURIComponent(opts.id64)}`).then(apiJSON)   // v0.94: by Spansh's number (a system Spansh's search does not know yet)
       : typeof sysFetch === "function" ? sysFetch(name) : fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(apiJSON));   // v0.80: the next stop may be here already   // v0.70: Sync may have asked already, during the jump
     // a target that cannot be reached stops the countdown at once instead of after the jump
-    if (warp) { await Promise.race([warp.done, req.then(() => warp.done)]); if (warp.cancelled) return false; }
+    if (warp) { await Promise.race([warp.done, req.then(() => warp.done)]); if (warp.cancelled) { splashDone(); return false; } }
     const j = await req;
     if (my !== LOAD.gen) { if (warp) warp.abort(); return null; }     // a newer request came since: this answer is dropped
     try { if (typeof jrnBefore === "function") jrnBefore(); } catch (e) {}    // v0.81: the old map is lifted out for the jump motion
     build(j); LOAD.by = opts.sync ? "sync" : opts.countdown || opts.user ? "user" : "auto"; status(j.stale || "", !!j.stale); if (j.stale) setTimeout(() => status(""), 9000);
+    splashDone();
     S.byId64 = opts.idLink && opts.id64 ? String(opts.id64) : "";     // v0.94: opened by its number: a link to it says the number too
     try { recentAdd(S.sys.name); sysIdKeep(S.sys.name, S.sys.id64); bmUi(); } catch (e) {}
     try { if (typeof jrnBuilt === "function") jrnBuilt(); } catch (e) {}     // v0.80: the journey bars
@@ -54,7 +61,7 @@ async function loadSystem(name, opts = {}) {
       setTimeout(() => { fly = { t0: performance.now(), dur: 2600, fromT: toT.clone(), fromP: fromP.clone(), toT, toP }; }, 550);
     }
     return true;
-  } catch (e) { if (warp) warp.abort(); if (my !== LOAD.gen) return null; status(`Could not load "${name}": ${e.message}`, true); return false; }
+  } catch (e) { if (warp) warp.abort(); if (my !== LOAD.gen) return null; status(`Could not load "${name}": ${e.message}`, true); splashDone(); return false; }
 }
 // shareable links:  ?system=Name&body=<bodyId>&t=<game time>&tab=Orbit
 let linkState = null;

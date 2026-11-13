@@ -1,6 +1,9 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.2", k: "minor", d: "13 Nov 2026", t: [
+      "A loading screen: the GRAVITAS logo in the middle and what is loading under it, until the first system is drawn. It is part of the page itself, so it shows at once, and it never stays: it goes as the system is drawn or cannot be loaded, and after 12 seconds in any case",
+      "While a system loaded, the 3D view's buttons (Find me, Follow, zoom, Reset view, names) sat for a moment at the top left, over the System panel. They now show only once they are in their place"] },
     { v: "v0.99.1", k: "minor", d: "13 Nov 2026", t: [
       "Collisions: Watch stays on the moment with Sync on. Auto-jump took the map back to your ship's system after 3 seconds. The same for Back in Journey",
       "A long system name next to You are here was squeezed to one word per line. The name now keeps the top line, You are here and the buttons go under it",
