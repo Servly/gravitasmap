@@ -1,5 +1,8 @@
 import { getJSON, getRaw, json, spanshError } from "../../lib/spansh.js";
+import { slimStream } from "../../lib/slim.js";
 // GET /api/system?name=Sol  or  ?id64=10477373803  ->  { system: { summary, ...Spansh dump... } }
+// v0.99.3: &lite=1 -> the same without the stations' market, outfitting and shipyard lists (lib/slim.js); without it,
+// the answer is exactly as before (the Station window asks for that one).
 // Only an exact name is loaded, never a "closest" system.
 // v0.50: the dump is streamed straight through, never read as a whole, so a large system costs almost no CPU
 // (Cloudflare's free plan allows 10 ms of CPU per request). Only its first bytes are looked at, to put the
@@ -9,6 +12,7 @@ const CACHE_S = 900;                                                   // v0.94:
 export async function onRequestGet({ request, env, waitUntil }) {
   const u = new URL(request.url), name = (u.searchParams.get("name") || "").trim();
   let id64 = u.searchParams.get("id64"), summary = null;
+  const lite = u.searchParams.get("lite") === "1";
   try {
     if (!id64) {
       if (!name) return json({ error: "No system name given." }, 400);
@@ -32,7 +36,12 @@ export async function onRequestGet({ request, env, waitUntil }) {
     }
     if (!/^\d{1,20}$/.test(id64)) return json({ error: "Bad system id." }, 400);
     const cache = caches.default, key = new Request(`${u.origin}/api/_dump/${id64}`);
+    const hdr = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": `public, max-age=${CACHE_S}` };
     let body = null;
+    if (lite) {                                                         // v0.99.3: the lite answer has a cache of its own
+      const lkey = new Request(`${u.origin}/api/_lite/${id64}`);
+      try { const c = await cache.match(lkey); if (c) return new Response(withSummary(c.body, summary), { headers: hdr }); } catch (e) {}
+    }
     try { const c = await cache.match(key); if (c) body = c.body; } catch (e) {}
     if (!body) {
       const raw = await getRaw(env, `/dump/${id64}`, 30000);
@@ -41,7 +50,13 @@ export async function onRequestGet({ request, env, waitUntil }) {
       try { waitUntil(cache.put(key, new Response(keep, { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": `public, max-age=${CACHE_S}` } }))); }
       catch (e) { keep.cancel().catch(() => {}); }
     }
-    return new Response(withSummary(body, summary), { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": `public, max-age=${CACHE_S}` } });
+    if (lite) {
+      const [mine, keep] = slimStream(body).tee();
+      body = mine;
+      try { waitUntil(cache.put(new Request(`${u.origin}/api/_lite/${id64}`), new Response(keep, { headers: hdr }))); }
+      catch (e) { keep.cancel().catch(() => {}); }
+    }
+    return new Response(withSummary(body, summary), { headers: hdr });
   } catch (e) {
     if (e && e.status === 404) return json({ error: "This system is not on Spansh." }, 404);
     return json({ error: spanshError(e) }, 502);

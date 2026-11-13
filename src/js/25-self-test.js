@@ -4,6 +4,7 @@
 // and every tab of every body draws without errors, NaN or "undefined".
 const SELFTEST_DEFAULT = ["Sol", "Col 285 Sector VR-E b27-1", "Jackson's Lighthouse", "Colonia", "Sagittarius A*"];
 async function runSelfTest(names) {
+  const SYNCTEST = names.length === 1 && names[0].toLowerCase() === "sync"; if (SYNCTEST) names = [];
   const rep = [], add = (sys, check, ok, detail = "") => rep.push({ sys, check, ok, detail });
   const errs = []; const onErr = e => errs.push(String(e.message || e.reason || e)); addEventListener("error", onErr); addEventListener("unhandledrejection", onErr);
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -86,6 +87,11 @@ async function runSelfTest(names) {
     await wait(800);
     add(sys, "no script errors", errs.length === e0, errs.slice(e0, e0 + 3).join(" | "));
   }
+  // v0.99.3: ?selftest=sync: Sync's states on screen (src/lazy/synctest.js, loaded only here)
+  if (SYNCTEST) { show(false);
+    try { const m = await import("./__LAZY_SYNCTEST__");
+      rep.push(...await m.run({ get S() { return S; }, SYNC, YAH, get LOAD() { return LOAD; }, SYNC_ARRIVE_MS, $, loadSystem, yahUpdate, syncStWord, syncWouldReturn })); }
+    catch (e) { add("Sync", "the Sync test loads", false, e.message); } }
   removeEventListener("error", onErr); removeEventListener("unhandledrejection", onErr);
   show(true); console.table(rep); window.__selftest = rep;
   return rep;

@@ -4,6 +4,12 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.3 · minor · 13 Nov 2026
+- Systems load much faster: a system now comes without its stations' market, outfitting and shipyard lists (Sol: 93 KB instead of 1851 KB). The Station window asks for them the first time you open a station, and shows Loading… for that moment
+- The first system and three.js are asked for as soon as the page opens, at the same time as the app itself, not one after the other
+- What's new loads only when you open it: the app's own file is 80 KB smaller
+- A new check for Sync with the game: open gravitasmap.com/?selftest=sync. It puts Sync's states on screen without the game (You are here, In supercruise, every state of the Sync panel, auto-jump) and checks that no title is squeezed or cut and that auto-jump never takes back a system you opened
+
 ### v0.99.2 · minor · 13 Nov 2026
 - A loading screen: the GRAVITAS logo in the middle and what is loading under it, until the first system is drawn. It is part of the page itself, so it shows at once, and it never stays: it goes as the system is drawn or cannot be loaded, and after 12 seconds in any case
 - While a system loaded, the 3D view's buttons (Find me, Follow, zoom, Reset view, names) sat for a moment at the top left, over the System panel. They now show only once they are in their place

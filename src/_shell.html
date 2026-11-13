@@ -15,6 +15,29 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"GRAVITAS","alternateName":"GRAVITAS – live system map and eclipse calendar for Elite Dangerous","applicationCategory":"GameApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"description":"Free live system map for Elite Dangerous, in 3D and flat like the game's: positions of planets and moons, an eclipse calendar, rings, stations, fleet carriers and the sky from a moon's surface, built from Spansh data and checked against the game.","author":[{"@type":"Person","name":"CMDR Hongark"}],"isAccessibleForFree":true}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%20viewBox%3D%220%200%2064%2064%22%20aria-label%3D%22GRAVITAS%20logo%22%3E%0A%20%20%20%20%3Cdefs%3E%3CradialGradient%20id%3D%22glbg%22%20cx%3D%22.5%22%20cy%3D%22.42%22%20r%3D%22.6%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232a1748%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230b0716%22/%3E%3C/radialGradient%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22glw%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff6ad5%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%236ae8ff%22/%3E%3C/linearGradient%3E%0A%20%20%20%20%20%20%3CradialGradient%20id%3D%22glst%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22/%3E%3Cstop%20offset%3D%22.4%22%20stop-color%3D%22%23ffd27a%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9a3a%22%20stop-opacity%3D%220%22/%3E%3C/radialGradient%3E%3C/defs%3E%0A%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2262%22%20height%3D%2262%22%20rx%3D%2214%22%20fill%3D%22url%28%23glbg%29%22%20stroke%3D%22%23ff6ad5%22%20stroke-opacity%3D%22.45%22/%3E%0A%20%20%20%20%3Cg%20fill%3D%22none%22%20stroke%3D%22url%28%23glw%29%22%20stroke-width%3D%221.1%22%3E%0A%20%20%20%20%20%20%3Cellipse%20cx%3D%2232%22%20cy%3D%2227%22%20rx%3D%2227%22%20ry%3D%228%22%20opacity%3D%22.35%22/%3E%3Cellipse%20cx%3D%2232%22%20cy%3D%2231%22%20rx%3D%2219%22%20ry%3D%225.6%22%20opacity%3D%22.5%22/%3E%0A%20%20%20%20%20%20%3Cellipse%20cx%3D%2232%22%20cy%3D%2236%22%20rx%3D%2212%22%20ry%3D%223.6%22%20opacity%3D%22.7%22/%3E%3Cellipse%20cx%3D%2232%22%20cy%3D%2241%22%20rx%3D%226.5%22%20ry%3D%222%22%20opacity%3D%22.9%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M5%2027%20Q22%2030%2029%2044%20M59%2027%20Q42%2030%2035%2044%20M14%2033.2%20Q26%2034%2030.5%2044%20M50%2033.2%20Q38%2034%2033.5%2044%20M32%2035%20V45%22%20opacity%3D%22.55%22/%3E%0A%20%20%20%20%3C/g%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2232%22%20cy%3D%2246%22%20r%3D%226%22%20fill%3D%22url%28%23glst%29%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2246%22%20r%3D%222.2%22%20fill%3D%22%23fff%22/%3E%0A%20%20%20%20%3Cpath%20id%3D%22glorb%22%20d%3D%22M7%2022%20A25%208%20-8%201%201%2057%2015%20A25%208%20-8%201%201%207%2022%22%20fill%3D%22none%22%20stroke%3D%22%236ae8ff%22%20stroke-width%3D%22.9%22%20stroke-dasharray%3D%222%202.5%22%20opacity%3D%22.8%22/%3E%0A%20%20%20%20%3Ccircle%20r%3D%223%22%20fill%3D%22%23ff6ad5%22%3E%3CanimateMotion%20dur%3D%227s%22%20repeatCount%3D%22indefinite%22%3E%3Cmpath%20xlink%3Ahref%3D%22%23glorb%22/%3E%3C/animateMotion%3E%3C/circle%3E%0A%20%20%3C/svg%3E">
 <!--CSS-->
+<!-- v0.99.3: the import map comes first (it was at the end of the page): a module asked for early needs it -->
+<script type="importmap">
+{ "imports": {
+  "three": "/vendor/three@0.160.0/build/three.module.min.js",
+  "three/addons/controls/OrbitControls.js": "/vendor/gravitas-patches/OrbitControls-0.160.0-p1.js",
+  "three/addons/": "/vendor/three@0.160.0/examples/jsm/"
+} }
+</script>
+<!-- v0.99.3: three.js asked for at once, beside the app's script (the browser found it only once the app had come) -->
+<link rel="modulepreload" href="/vendor/three@0.160.0/build/three.module.min.js">
+<link rel="modulepreload" href="/vendor/gravitas-patches/OrbitControls-0.160.0-p1.js">
+<!-- v0.99.3: the first system asked for at once too, while the app's script is still coming (loadSystem, 23-data.js,
+     takes this answer). The same choice as at start (25-self-test.js): the link's system, else the ship's last one
+     with Sync, else Sol. Nothing else is read or sent -->
+<script>
+(function () { try {
+  var P = new URLSearchParams(location.search); if (P.has("selftest") || !/^https?:$/.test(location.protocol)) return;
+  var id = /^\d{1,20}$/.test(P.get("id64") || "") ? P.get("id64") : "", last = "";
+  try { if (localStorage.getItem("gravitas.sync.on") === "1") last = localStorage.getItem("gravitas.sync.last") || ""; } catch (e) {}
+  var name = P.get("system") || (id ? "system " + id : "") || last || "Sol";
+  window.__early = { name: name, id64: id, r: fetch("/api/system?" + (id ? "id64=" + encodeURIComponent(id) : "name=" + encodeURIComponent(name)) + "&lite=1") };
+} catch (e) {} })();
+</script>
 </head>
 <body>
 <!-- v0.99.2: the loading screen. In the page itself, so it shows before the app's script has come; the app takes it away
@@ -175,13 +198,6 @@
 <div id="tutBtn" class="panel" role="button" tabindex="0" title="A guided tour of GRAVITAS"><b>TUTORIAL</b><div class="hint">take the tour</div></div>
 <div id="fade"></div>
 
-<script type="importmap">
-{ "imports": {
-  "three": "/vendor/three@0.160.0/build/three.module.min.js",
-  "three/addons/controls/OrbitControls.js": "/vendor/gravitas-patches/OrbitControls-0.160.0-p1.js",
-  "three/addons/": "/vendor/three@0.160.0/examples/jsm/"
-} }
-</script>
 <!--JS-->
 </body>
 </html>

@@ -11,6 +11,18 @@ async function apiJSON(r) {
   if (!r.ok || j.error) throw new Error(j.error || r.statusText);
   return j;
 }
+// v0.99.3: a system asked for without its stations' market, outfitting and shipyard lists (&lite=1: Sol 1851 KB ->
+// 93 KB). If that answer fails for any reason but a clear "no" (a 4xx: not found, today's limit), the full system is
+// asked for once, so the lite way can never leave the map empty. A lite answer says so (j.lite); the Station window
+// asks for the full one when it opens (37-station.js).
+async function sysAnswer(r, q) {
+  let res; try { res = await r; } catch (e) { return fetch(`${API}/system?${q}`).then(apiJSON); }
+  if (res.status >= 400 && res.status < 500) return apiJSON(res);
+  try { const j = await apiJSON(res); if (j && j.system) j.lite = true; return j; }
+  catch (e) { return fetch(`${API}/system?${q}`).then(apiJSON); }
+}
+const sysQ = (name, id64) => id64 ? `id64=${encodeURIComponent(id64)}` : `name=${encodeURIComponent(name)}`;
+function sysGet(name, id64) { const q = sysQ(name, id64); return sysAnswer(fetch(`${API}/system?${q}&lite=1`), q); }
 const acCache = new Map();                                        // suggestions already fetched in this visit
 async function fetchSuggestions(text) {
   const k = text.trim().toLowerCase();
@@ -21,6 +33,11 @@ async function fetchSuggestions(text) {
 }
 function status(msg, err) { const s = $("status"); s.textContent = msg; s.className = "panel" + (err ? " err" : ""); s.style.display = msg ? "block" : "none";
   const m = $("splashMsg"); if (m && msg) m.textContent = msg; }   // v0.99.2: the loading screen says the same
+// v0.99.3: the first system, asked for by index.html before this script came: used once, for that same system only
+function earlyTake(name, id64) {
+  const e = window.__early; if (!e) return null; window.__early = null;
+  return e.name === name && String(e.id64 || "") === String(id64 || "") ? sysAnswer(e.r, sysQ(name, id64)) : null;
+}
 // v0.99.2: the loading screen (in index.html) fades out once the first system is drawn, or as it fails to load
 function splashDone() {
   const s = $("splash"); if (!s || s.dataset.done) return; s.dataset.done = "1";
@@ -39,14 +56,14 @@ async function loadSystem(name, opts = {}) {
   if (warp) status("");
   if (!warp) status(`Loading ${name} from Spansh…`);
   try {
-    const req = opts.pre || (opts.id64 ? fetch(`${API}/system?id64=${encodeURIComponent(opts.id64)}`).then(apiJSON)   // v0.94: by Spansh's number (a system Spansh's search does not know yet)
-      : typeof sysFetch === "function" ? sysFetch(name) : fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(apiJSON));   // v0.80: the next stop may be here already   // v0.70: Sync may have asked already, during the jump
+    const req = opts.pre || earlyTake(name, opts.id64) || (opts.id64 ? sysGet(name, opts.id64)   // v0.94: by Spansh's number (a system Spansh's search does not know yet)
+      : typeof sysFetch === "function" ? sysFetch(name) : sysGet(name));   // v0.80: the next stop may be here already   // v0.70: Sync may have asked already, during the jump
     // a target that cannot be reached stops the countdown at once instead of after the jump
     if (warp) { await Promise.race([warp.done, req.then(() => warp.done)]); if (warp.cancelled) { splashDone(); return false; } }
     const j = await req;
     if (my !== LOAD.gen) { if (warp) warp.abort(); return null; }     // a newer request came since: this answer is dropped
     try { if (typeof jrnBefore === "function") jrnBefore(); } catch (e) {}    // v0.81: the old map is lifted out for the jump motion
-    build(j); LOAD.by = opts.sync ? "sync" : opts.countdown || opts.user ? "user" : "auto"; status(j.stale || "", !!j.stale); if (j.stale) setTimeout(() => status(""), 9000);
+    build(j); S.lite = !!j.lite; LOAD.by = opts.sync ? "sync" : opts.countdown || opts.user ? "user" : "auto"; status(j.stale || "", !!j.stale); if (j.stale) setTimeout(() => status(""), 9000);
     splashDone();
     S.byId64 = opts.idLink && opts.id64 ? String(opts.id64) : "";     // v0.94: opened by its number: a link to it says the number too
     try { recentAdd(S.sys.name); sysIdKeep(S.sys.name, S.sys.id64); bmUi(); } catch (e) {}
@@ -145,7 +162,7 @@ async function submitSearch() {            // only an exact system name is loade
   let vals = []; try { vals = await fetchSuggestions(t); } catch (e) {}
   if (same(vals)) return goSystem(same(vals));
   // v0.94.1: the suggestions can be hours behind Spansh's own search (a system added today): ask for the exact name before saying no
-  { const my = acSeq; let j = null; try { j = await fetch(`${API}/system?name=${encodeURIComponent(t)}`).then(apiJSON); } catch (e) {}
+  { const my = acSeq; let j = null; try { j = await sysGet(t); } catch (e) {}
     if (my !== acSeq) return;
     if (j && j.system && j.system.name) { q.value = j.system.name; showSugg([]); q.blur(); return loadSystem(j.system.name, { countdown: true, pre: Promise.resolve(j) }); } }
   showSugg(vals.slice(0, 8), vals.length ? `No system is called “${t}”. Did you mean one of these?` : `No system is called “${t}” on Spansh. Check the spelling.`);

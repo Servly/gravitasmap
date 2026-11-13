@@ -20,12 +20,10 @@ function jrnNewJourney(dest, t) {
 
 // the raw data of a system, kept as text so a fresh copy is built each time (building marks the data it is given)
 function sysFetch(name) {
-  if (typeof JRN === "undefined" || !JRN) return fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(apiJSON);   // the first system loads before this part runs
+  if (typeof JRN === "undefined" || !JRN) return sysGet(name);   // the first system loads before this part runs
   const k = String(name || "").toLowerCase(); if (!k) return Promise.reject(new Error("no name"));
   if (!JRN.cache.has(k)) {
-    const p = fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(async r => {
-      const t = await r.text(); let j; try { j = JSON.parse(t); } catch (e) { throw new Error("the data arrived incomplete. Please try again in a minute."); }
-      if (!r.ok || j.error) throw new Error(j.error || r.statusText); return t; });
+    const p = sysGet(name).then(j => JSON.stringify(j));   // v0.99.3: lite (no market lists), kept as text as before
     p.then(t => { p._v = t; try { jrnSumOf(k, JSON.parse(t)); } catch (e) {} }, () => { if (JRN.cache.get(k) === p) JRN.cache.delete(k); });   // a failed answer is not kept: next time asks again
     JRN.cache.set(k, p);
   }

@@ -187,7 +187,7 @@ async function syncTick() {
     if (SYNC.miss && performance.now() > SYNC.missT) syncFollow(SYNC.miss, true);
     // v0.90.8: following the ship, the map must show the ship's system. If something else is on screen that the visitor did
     // not open themselves (a late answer, a reload from an old link), the ship's system is opened again
-    else if (SYNC.auto && SYNC.here && !SYNC.loading && !SYNC.miss && S && !syncViewing() && LOAD.by !== "user") {
+    else if (syncWouldReturn()) {
       if (!SYNC.driftT) SYNC.driftT = performance.now(); else if (performance.now() - SYNC.driftT > 3000) { SYNC.driftT = 0; syncFollow(SYNC.here, false); }
     } else SYNC.driftT = 0;
     await syncStatus();
@@ -309,7 +309,7 @@ function syncArrive(first) {
 }
 function syncPrefetch(name) {
   if (!API) return;
-  SYNC.pre = { name, req: typeof sysFetch === "function" ? sysFetch(name) : fetch(`${API}/system?name=${encodeURIComponent(name)}`).then(apiJSON) };   // v0.80: shared with the journey's own early fetch
+  SYNC.pre = { name, req: typeof sysFetch === "function" ? sysFetch(name) : sysGet(name) };   // v0.80: shared with the journey's own early fetch
   SYNC.pre.req.catch(() => {});
 }
 async function syncFollow(name, retry) {
@@ -367,6 +367,9 @@ function yahWhat(atStation) {
   if (L) return "Near the surface";
   return "";
 }
+// v0.90.8 (v0.99.3: its own function, for the self-test too): auto-jump takes the map back to the ship's system only
+// when what is on screen was not opened by the visitor
+function syncWouldReturn() { return !!(SYNC.auto && SYNC.here && !SYNC.loading && !SYNC.miss && S && !syncViewing() && LOAD.by !== "user"); }
 function yahUpdate() {
   if (PFULL) queueMicrotask(pfullTitle);                            // v0.77: "● here" on the top bar
   const sys = SYNC.on && syncViewing(), L = sys ? SYNC.live : null;

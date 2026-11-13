@@ -24,6 +24,13 @@ const SYNC_IC = {
 };
 const syncIc = (k, c = "") => `<svg class="sic ${c}" viewBox="0 0 16 16" aria-hidden="true">${SYNC_IC[k] || ""}</svg>`;
 // the light: [kind, short word, why]
+// v0.99.1: a long state ("GAME CLOSED") no longer cuts the title: it goes under it (v0.99.3: its own function, for the
+// self-test too)
+function syncStWord(stw) {
+  const p = $("sync"), st = $("syncSt"); if (!p || !st || st.textContent === stw) return;
+  st.textContent = stw; p.classList.remove("stDown");
+  const b = p.querySelector(".srow b"); if (b && b.scrollWidth > b.clientWidth + 1) p.classList.add("stDown");
+}
 function syncK() {
   const now = Date.now();
   if (SYNC.remote) {
@@ -100,11 +107,7 @@ function syncUi() {
   const p = $("sync"); if (!p || !PAIR_ON) return;                      // runs once the pairing part is there (it starts right after)
   const [k, word, why] = syncK();
   p.dataset.k = k; SYNC.k = k;
-  const st = $("syncSt"), stw = SYNC.on || SYNC.remote ? word : !SYNC.ok ? "needs Chrome or Edge" : "off";
-  if (st.textContent !== stw) {                  // v0.99.1: a long state ("GAME CLOSED") no longer cuts the title: it goes under it
-    st.textContent = stw; p.classList.remove("stDown");
-    const b = p.querySelector(".srow b"); if (b && b.scrollWidth > b.clientWidth + 1) p.classList.add("stDown");
-  }
+  syncStWord(SYNC.on || SYNC.remote ? word : !SYNC.ok ? "needs Chrome or Edge" : "off");
   p.title = why || "";
   const c = $("syncCard"), h = syncCardHTML(); if (c && c._h !== h) { c._h = h; c.innerHTML = h; syncRouteHook(c); }
   if (typeof layoutLeft === "function") layoutLeft();

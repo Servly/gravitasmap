@@ -7,12 +7,12 @@ import json, re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "src" / "js" / "21-updates-window.js"
+SRC = ROOT / "src" / "lazy" / "changes.js"            # v0.99.3: was in src/js/21-updates-window.js
 
 def releases():
     t = SRC.read_text("utf-8")
     m = re.search(r"const CHANGES = (\[.*?\n\]);", t, re.S)
-    if not m: raise SystemExit("CHANGES not found in 21-updates-window.js")
+    if not m: raise SystemExit("CHANGES not found in src/lazy/changes.js")
     js = m.group(1)
     js = re.sub(r"//[^\n]*", "", js)                                  # comments
     js = re.sub(r"([{,]\s*)(q|rel|v|k|d|t)\s*:", r'\1"\2":', js)        # keys in quotes

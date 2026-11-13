@@ -1,8 +1,22 @@
 // v0.79 the station window. A tap or click on a station, a settlement, a construction site or a fleet carrier (on the
 // system map, in 3D, in the System panel or in a body's panel) opens what Spansh knows about it: where it is, its
 // landing pads, its services, and its market, outfitting and shipyard as last reported by players' tools (EDDN).
-// Everything comes with the system data the page already has: nothing extra is loaded, nothing is sent anywhere.
+// v0.99.3: the system comes without the market, outfitting and shipyard lists (much smaller): the first time a
+// station opens, the same system is asked for once more in full (/api/system, as before v0.99.3). Nothing is sent.
 // When several stations share one mark on the map, the window first lists them.
+// v0.99.3: the full system for its lists, asked for once per system; added to the stations already here by their id
+const STWF = { s: null, err: "" };
+function stwFull() {
+  const s = S; if (!s || !s.lite || STWF.s === s) return; STWF.s = s; STWF.err = "";
+  fetch(`${API}/system?id64=${encodeURIComponent(s.sys.id64)}`).then(apiJSON).then(j => {
+    if (S !== s) return;
+    const sys = j.system || {}, by = new Map();
+    [...(sys.stations || []), ...(sys.bodies || []).flatMap(b => b.stations || [])].forEach(x => { if (x && x.id != null) by.set(x.id, x); });
+    for (const x of stwAll()) { const f = by.get(x.id); if (f) { x.market = f.market; x.outfitting = f.outfitting; x.shipyard = f.shipyard; } }
+    s.lite = false;
+  }).catch(e => { if (S === s) STWF.err = `The market, outfitting and shipyard could not be loaded (${e.message}). Open the station again to retry.`; })
+    .then(() => { if (S === s && STW.el && STW.el.style.display === "block" && STW.st) stwRender(false, true); });
+}
 var STW = { el: null, st: null, list: null, tab: "market", q: "", side: "all", sort: { k: "name", d: 1 }, back: null, tog: new Map(), all: {} };
 
 // what we know about a station besides its own record: its look, its kind in words, where it is
@@ -30,7 +44,7 @@ const STW_KEY = ["Refuel", "Repair", "Restock", "Market", "Black Market", "Outfi
   "Material Trader", "Technology Broker", "Search and Rescue", "Vista Genomics", "Pioneer Supplies", "Frontline Solutions", "Apex Interstellar", "Bartender", "Crew Lounge", "Redemption Office"];
 const STW_SKIP = /^(Dock|Autodock|Contacts|Missions|Missions Generated|Station Operations|Station Menu|Flight Controller|Workshop|Social Space|On Dock Mission|Engineer|Powerplay|Tuning|Livery|Shop|Facilitator|Fleet Carrier (Management|Administration)|Carrier ?Fuel|Fleet Carrier Fuel|Fleet Carrier Vendor|Registration Services|Squadron Bank)$/i;
 
-function stnOpen(st, keepBack) { if (!keepBack) STW.back = null; STW.list = null; STW.sort = { k: "name", d: 1 }; STW.st = st; STW.q = ""; STW.side = "all"; stwInit(); stwRender(true); stwShow(); }
+function stnOpen(st, keepBack) { if (STWF.err) { STWF.s = null; STWF.err = ""; } if (!keepBack) STW.back = null; STW.list = null; STW.sort = { k: "name", d: 1 }; STW.st = st; STW.q = ""; STW.side = "all"; stwInit(); stwRender(true); stwShow(); }
 // several stations behind one mark: a short list first
 function stnPick(list) { if (list.length === 1) return stnOpen(list[0]); STW.back = null; STW.list = list; STW.st = null; stwInit(); stwRender(true); stwShow(); }
 function stnClose() { if (!STW.el) return; STW.el.style.display = "none"; STW.st = null; STW.list = null; document.body.classList.remove("stnopen"); if (PFULL && document.body.dataset.sheet === "stn") setSheet(""); stwMark(); stwRoom(); }
@@ -87,6 +101,7 @@ function stwRender(top, keepFocus) {
     pb.innerHTML = h; if (top) el.scrollTop = 0; return;
   }
   const st = STW.st, c = stnCtx(st); if (!c) return;
+  stwFull();                                     // v0.99.3: (only while the system is lite)
   const m = st.market, o = st.outfitting, y = st.shipyard;
   const mk = m && m.commodities ? m.commodities : [], mods = o && o.modules ? o.modules : [], ships = y && y.ships ? y.ships : [];
   const tabs = [["market", "Market", mk.length], ["outfit", "Outfitting", mods.length], ["ships", "Shipyard", ships.length]].filter(t => t[2]);
@@ -104,7 +119,8 @@ function stwRender(top, keepFocus) {
       ${st.carrierDockingAccess ? `<dt>Docking</dt><dd>${esc(st.carrierDockingAccess)}</dd>` : ""}<dt>Reported</dt><dd>${esc(stwAgo(st.updateTime))}</dd></dl>
     ${key.length || rest.length ? `<div class="stsv">${key.map(s => `<span class="on">${esc(s.replace(" Contact", ""))}</span>`).join("")}${rest.map(s => `<span>${esc(s)}</span>`).join("")}</div>` : ""}
     ${c.body && st.latitude != null && typeof dnBlock === "function" ? `<div class="stdn" data-st="${esc(c.name)}" data-b="${c.body.bodyId}">${dnBlock(c.body, st)}</div>` : ""}`;
-  if (!tabs.length) h += `<p class="stnone">${c.build ? "A construction site: what it still needs is not in Spansh's data for this one." : "No market, outfitting or shipyard has been reported for this station yet."}</p>`;
+  if (!tabs.length && S && S.lite) h += `<p class="stnone">${esc(STWF.err || "Loading the market, outfitting and shipyard…")}</p>`;
+  else if (!tabs.length) h += `<p class="stnone">${c.build ? "A construction site: what it still needs is not in Spansh's data for this one." : "No market, outfitting or shipyard has been reported for this station yet."}</p>`;
   else {
     h += `<div class="sttabs" role="tablist">${tabs.map(t => `<button role="tab" data-tab="${t[0]}" aria-selected="${STW.tab === t[0]}"${STW.tab === t[0] ? ' class="on"' : ""}>${t[1]} <i>${t[2]}</i></button>`).join("")}</div>`;
     const ak = STW.tab === "market" ? "m" : STW.tab === "outfit" ? "o" : "s", grouped = !(STW.tab === "market" && STW.sort.k !== "name");

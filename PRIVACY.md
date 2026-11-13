@@ -23,12 +23,13 @@ Where you are and where you jump, your route and jump range, your carriers, your
 | The newest journal is found | `src/js/30-sync.js` · `syncScan`, `syncNewest` | Lists the folder in your browser |
 | New lines are read every second | `src/js/30-sync.js` · `syncTick` | `file.slice(...).text()`: reads only the new part of the file, in memory |
 | Each line is understood | `src/js/30-sync.js` · `syncLine`, `src/js/42-combat.js` · `cbEvent`, `src/js/41-own-carrier.js` · `fcEvent` | Picks out the things listed above. The rest of the line is ignored |
-| The map follows you | `src/js/30-sync.js` · `syncFollow` → `src/js/23-data.js` · `loadSystem` | Asks `/api/system?name=<system>`. Only the system's name |
+| The map follows you | `src/js/30-sync.js` · `syncFollow` → `src/js/23-data.js` · `loadSystem` | Asks `/api/system?name=<system>&lite=1`. Only the system's name |
 | Your scans set the orbits | `src/js/30-sync.js` · `scanSeen`, `src/js/29-coll-engine.js` · `scanFix` | From a Scan line: the body's number and its place on its orbit (MeanAnomaly), in memory for this tab only. Not stored, not sent |
 | Combat reports | `src/js/42-combat.js` · `cbSave` | `localStorage` in your browser, the last 30. Not sent |
 
 The server side is in this repository too:
-- `functions/api/system.js`: takes a system name, asks Spansh, answers. Spansh's answer for that system is kept in Cloudflare's cache for 15 minutes, shared by everyone. Nothing about who asked is kept with it.
+- `functions/api/system.js`: takes a system name (or Spansh's number for it), asks Spansh, answers. Spansh's answer for that system is kept in Cloudflare's cache for 15 minutes, shared by everyone. Nothing about who asked is kept with it.
+  With `&lite=1` (how the site asks since v0.99.3) the answer leaves out the stations' market, outfitting and shipyard lists (`lib/slim.js`), so it is much smaller. The page asks for the first system as soon as it opens (a small script in `index.html`, the same request as the search box would make). When you open a station, the Station window asks once for the same system in full (`/api/system?id64=<number>`, `src/js/37-station.js` · `stwFull`) to show those lists. Only the system's name or number is sent.
 - `functions/api/autocomplete.js`: the search box's suggestions, cached the same way by the text typed.
 - `functions/api/room.js` and `worker/src/room.js`: the phone pairing and the team board (see below).
 - `functions/api/report.js`: problem reports, only when you send one.

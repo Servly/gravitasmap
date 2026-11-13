@@ -13,7 +13,7 @@ The full explanation, with every step in the code and how to check it yourself i
 
 | What | Where in the code | What leaves your computer |
 |---|---|---|
-| Reading the journal and Status.json | `src/js/30-sync.js`, `src/js/42-combat.js` | Only the **name of a system** when GRAVITAS opens it, the same as typing it in the search box (`/api/system?name=…`) |
+| Reading the journal and Status.json | `src/js/30-sync.js`, `src/js/42-combat.js` | Only the **name of a system** when GRAVITAS opens it, the same as typing it in the search box (`/api/system?name=…&lite=1`) |
 | Combat Mode, combat reports | `src/js/42-combat.js` | Nothing. Reports are kept in your browser (`localStorage`), the last 30 |
 | A phone or tablet as a second screen | `src/js/33-pair.js`, `worker/src/room.js` | Only when you pair a device: the short "where am I" summary the Sync card shows, and in a fight the combat screen. The server keeps the latest "where am I" summary for up to 12 hours. The combat screen is only passed on, not kept |
 | Team board | `src/js/43-opboard.js`, `worker/src/room.js` | Only when you choose to add your fight: your CMDR name, ship, kills, credits and top kill, to the people with the board's link. The server keeps nothing: your row lives only on your open connection |
@@ -30,11 +30,11 @@ src/            the app's source
   _shell.html     page markup
   css/app.css     all styles
   js/NN-*.js      the app in numbered parts, joined in order into one file by the build
-  lazy/*.js       parts loaded only when opened (Sonification and the Lenses), built into their own file
+  lazy/*.js       parts loaded only when opened (Sonification and the Lenses, What's new, the Sync self-test), built into their own file
   assets/         logos, textures and sounds
   vendor/         three.js and a QR code library (MIT)
 functions/      the site's server on Cloudflare Pages: /api/system, /api/autocomplete, /api/room, /api/report
-lib/            helpers shared by the functions (Spansh calls)
+lib/            helpers shared by the functions (Spansh calls; slim.js: a system without its market lists)
 worker/         the small pairing and team-board server (a Cloudflare Durable Object)
 plugin/GRAVITAS GRAVITAS for EDMC: Combat Mode on top of the game (tools/plugin_build.py makes its zip)
 tools/          build and publish scripts

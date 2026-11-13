@@ -127,7 +127,7 @@ function cxRefresh() {
   const h = cxBodyHTML(); if (h !== body._h) { body._h = h; body.innerHTML = h; }
   const t = $("cxText"); if (t && CX.pairs && !t._ok) { t._ok = 1; t.innerHTML = CX_TEXT(); }
 }
-async function cxFetch(p) { return fetch(`${API}/system?id64=${encodeURIComponent(p.id)}`).then(apiJSON); }
+async function cxFetch(p) { return sysGet("", p.id); }   // v0.99.3: lite: the pair needs only the orbits
 // one pair, now, from the latest Spansh data (and your own scans): the same engine as the list
 function cxSolve(j, p) {
   const M = cxPrep(j), P = cxPair(M, cxFind(M, p.a), cxFind(M, p.b));
