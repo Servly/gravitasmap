@@ -1,6 +1,10 @@
 // ------------------------------------------------------------ updates window (tabs: add a new entry to NEWS_TABS)
 const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.1", k: "minor", d: "13 Nov 2026", t: [
+      "Collisions: Watch stays on the moment with Sync on. Auto-jump took the map back to your ship's system after 3 seconds. The same for Back in Journey",
+      "A long system name next to You are here was squeezed to one word per line. The name now keeps the top line, You are here and the buttons go under it",
+      "Sync: a long state (GAME CLOSED, RECONNECTING) no longer cuts the title to SYNC WITH THE G…. The state goes under the title instead"] },
     { v: "v0.99.0", k: "minor", d: "12 Nov 2026", t: [
       "Moons are in the right place now. A moon of a planet (or a moon of a moon) had its orbit tilted the wrong way. Checked against the Spansh scan distances in Swoiwns TR-T b8-1: every moon of planets 6, 9 and 10 now matches to a few km (before: up to 51,000 km off). This changes eclipse and collision times for such moons",
       "Bodies that orbit a barycentre are not changed. The Eoch Flyuae YK-K c10-56 three-body event stays the same",

@@ -458,6 +458,9 @@ body.lowfx { --panel: rgba(14,9,26,.95); }
 [data-k="live"] { --sk:#3ddc84; } [data-k="wait"] { --sk:#ffc857; } [data-k="lost"] { --sk:#ff6b6b; } [data-k="off"], [data-k=""] { --sk:#8a8399; }
 #sync[data-k="live"] { border-color:#3ddc8477; box-shadow:0 0 18px -6px #3ddc8455; } #sync[data-k="wait"] { border-color:#ffc85566; } #sync[data-k="lost"] { border-color:#ff6b6b88; }
 #sync .srow { display:flex; align-items:center; gap:8px; }
+/* v0.99.1: the state too long for the row ("GAME CLOSED"): under the title, so the title is never cut */
+#sync.stDown .srow { flex-wrap:wrap; row-gap:4px; } #sync.stDown .srow::after { content:""; order:8; flex-basis:100%; height:0; }
+#sync.stDown #syncSt { order:9; margin-left:16px; }
 #sync .srow b { color:var(--dim); letter-spacing:.08em; font-size:10.5px; white-space:nowrap; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
 #sync[data-st="on"] .srow b, #sync.remote .srow b { color:var(--sk); }
 #sync #syncSt { color:var(--dim); font-size:9.5px; font-weight:700; letter-spacing:.12em; padding:2px 6px; border-radius:9px; border:1px solid transparent; white-space:nowrap; flex:none; }
@@ -571,6 +574,13 @@ body.lowfx { --panel: rgba(14,9,26,.95); }
 #yahSys { display:inline-block; margin-left:6px; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:700; color:#3ddc84; border:1px solid #3ddc8488; background:#3ddc8414; white-space:nowrap; vertical-align:3px; flex:none; }
 /* v0.82.1: a long "In supercruise · heading to …" goes on its own line under the name and stays inside the panel */
 #top .ph:has(#yahSys.long) { flex-wrap:wrap; } #top .ph:has(#yahSys.long) h1 { flex:1 1 0; min-width:0; } #top .ph:has(#yahSys.long)::after { content:""; order:2; flex-basis:100%; height:0; }
+/* v0.99.1: a long name next to You are here was squeezed to a word per line (CMDR Hongark, Col 285 Sector VR-E b27-1):
+   now the name keeps the whole first line when the row cannot hold all, You are here and the buttons go under it
+   (without You are here too: a long name was cut in two) */
+@media not all and (max-height: 520px) and (pointer: coarse) and (min-width: 561px) {
+  #top .ph { flex-wrap:wrap; row-gap:3px; }
+  #top .ph h1, #top .ph:has(#yahSys.long) h1 { flex:1 1 auto; min-width:0; }
+}
 #yahSys.long { order:3; flex:0 1 auto; max-width:100%; min-width:0; overflow:hidden; text-overflow:ellipsis; margin:2px 0 0; box-sizing:border-box; }
 .label .yahTag { position:absolute; left:0; bottom:calc(100% + 2px); padding:0 5px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:.04em; color:#06210f; background:#3ddc84; text-shadow:none; white-space:nowrap; }
 .label.yah .nm { outline:1px solid #3ddc8499; }

@@ -156,7 +156,7 @@ async function cxWatch(p) {
   const e = cxUpcoming(r) || cxClose(r);
   if (r && r.map === false && e) { toast("These two cannot be shown yet: part of what they orbit is missing on Spansh"); cxRefresh(); return; }   // nothing to watch: say so, do not open an empty view
   $("news").style.display = "none";
-  const ok = await loadSystem(p.sys, keep.j ? { pre: Promise.resolve(keep.j), id64: p.id } : { id64: p.id });
+  const ok = await loadSystem(p.sys, keep.j ? { pre: Promise.resolve(keep.j), id64: p.id, user: true } : { id64: p.id, user: true });   // v0.99.1: opened by you: Sync's auto-jump no longer takes it back
   if (ok && S && e) cxWatchAt(p, e);
 }
 // ------------------------------------------------------------ v0.96 the card: a picture, a text, a link and a calendar entry

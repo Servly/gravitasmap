@@ -46,7 +46,9 @@ The server side is in this repository too:
 ## GRAVITAS for EDMC (the plugin)
 
 The plugin (`plugin/GRAVITAS/`, in testing) runs inside E:D Market Connector on your computer. It reads the Journal and
-Status.json that EDMC gives it, works out the fight with the same code as the site (`plugin/GRAVITAS/engine/`, a copy of
+Status.json itself, from the game's own folder (Saved Games, or the folder chosen in EDMC), read only, every 15 ms
+(EDMC's copies only as a fallback). For the bounties you can claim it also reads the older Journals in that folder,
+once as it starts, back to your last death (only their Bounty, RedeemVoucher and Died lines). It works out the fight with the same code as the site (`plugin/GRAVITAS/engine/`, a copy of
 `src/js/42-combat-engine.js`) and shows it on top of the game. It opens no network connection: its own code imports no `socket`, `urllib`, `http.client` or
 `requests` (search `plugin/GRAVITAS/` for `import`). It draws with its own see-through window
 over the game (`plugin/GRAVITAS/gravitas_edmc/hud.py`) and never touches the game itself.

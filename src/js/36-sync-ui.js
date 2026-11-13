@@ -100,7 +100,11 @@ function syncUi() {
   const p = $("sync"); if (!p || !PAIR_ON) return;                      // runs once the pairing part is there (it starts right after)
   const [k, word, why] = syncK();
   p.dataset.k = k; SYNC.k = k;
-  $("syncSt").textContent = SYNC.on || SYNC.remote ? word : !SYNC.ok ? "needs Chrome or Edge" : "off";
+  const st = $("syncSt"), stw = SYNC.on || SYNC.remote ? word : !SYNC.ok ? "needs Chrome or Edge" : "off";
+  if (st.textContent !== stw) {                  // v0.99.1: a long state ("GAME CLOSED") no longer cuts the title: it goes under it
+    st.textContent = stw; p.classList.remove("stDown");
+    const b = p.querySelector(".srow b"); if (b && b.scrollWidth > b.clientWidth + 1) p.classList.add("stDown");
+  }
   p.title = why || "";
   const c = $("syncCard"), h = syncCardHTML(); if (c && c._h !== h) { c._h = h; c.innerHTML = h; syncRouteHook(c); }
   if (typeof layoutLeft === "function") layoutLeft();

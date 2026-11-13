@@ -184,7 +184,7 @@ function jrnInit() {
     JRN.anim = false; try { Sound.click(); } catch (x) {} loadSystem(n, { user: true }).then(() => jrnRender()); };
   up.addEventListener("click", open); dn.addEventListener("click", open); col.addEventListener("click", open);
   // v0.81: back to the ship's system, shown whole (not zoomed on the ship)
-  bk.onclick = () => { JRN.anim = false; const h = jrnAt(); if (h) loadSystem(h).then(() => { jrnRender(); setTimeout(() => { try { smapFit(); } catch (e) {} }, 60); }); };
+  bk.onclick = () => { JRN.anim = false; const h = jrnAt(); if (h) loadSystem(h, { user: true }).then(() => { jrnRender(); setTimeout(() => { try { smapFit(); } catch (e) {} }, 60); }); };
 }
 const jrnStar = c => c ? starChip(c) : "";
 const jrnLy = v => v >= 100 ? v.toFixed(0) : v.toFixed(1);

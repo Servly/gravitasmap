@@ -33,6 +33,9 @@ PW = ROOT / "tools" / "private_words.txt"
 if PW.exists():
     for w in PW.read_text("utf-8").splitlines():
         if w.strip(): BAD.append((re.compile(re.escape(w.strip()), re.I), "one of your private words"))
+# public addresses that must stay as they are: the Saira font's authors, in its licence (plugin/GRAVITAS/fonts/OFL-Saira.txt).
+# Only these exact addresses are skipped, every other one still stops the copy
+PUBLIC = ("omnibus.type@gmail.com",)
 TEXT = {".js", ".mjs", ".css", ".html", ".py", ".json", ".toml", ".md", ".txt", ".bat", ".svg", ".xml", ""}
 
 def files():
@@ -53,6 +56,7 @@ def main():
         if NEVER.search(rel): continue
         if f.suffix.lower() in TEXT:
             t = f.read_text("utf-8", errors="replace")
+            for w in PUBLIC: t = t.replace(w, "")
             for rx, what in BAD:
                 if rx.search(t): found.append(f"{rel}: {what}")
     if found:
