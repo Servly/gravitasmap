@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.29",
+      "en": [
+        "The fight numbers now agree. The Last fight card shows the same credits as the Combat report (the bounties plus the estimated wing bonus), where before one card left the bonus out. And the game sometimes writes the same bounty line twice: GRAVITAS now counts it once (before, such a kill counted twice in kills, credits and Claims). The wing bonus stays an estimate of 7.5 % on what you earn in a wing: checked against the game's own Claims panel it was within a few credits in most fights, and 0.14 % high in one operation."
+      ],
+      "de": [
+        "Die Kampfzahlen stimmen jetzt überein. Die Karte Letzter Kampf zeigt dieselben Credits wie der Kampfbericht (die Kopfgelder plus der geschätzte Wing-Bonus), vorher ließ eine Karte den Bonus weg. Und das Spiel schreibt manchmal dieselbe Kopfgeldzeile doppelt: GRAVITAS zählt sie jetzt einmal (vorher zählte so ein Abschuss doppelt bei Abschüssen, Credits und Claims). Der Wing-Bonus bleibt eine Schätzung von 7,5 % auf das, was du im Wing verdienst: Gegen das Claims-Fenster des Spiels geprüft lag er in den meisten Kämpfen auf wenige Credits genau und in einer Operation 0,14 % zu hoch."
+      ],
+      "es": [
+        "Las cifras del combate ahora coinciden. La tarjeta Último combate muestra los mismos créditos que el informe de combate (las recompensas más la bonificación de wing estimada), antes una tarjeta omitía la bonificación. Y el juego a veces escribe la misma línea de recompensa dos veces: GRAVITAS ahora la cuenta una vez (antes ese combate contaba doble en bajas, créditos y Claims). La bonificación de wing sigue siendo una estimación del 7,5 % de lo que ganas en un wing: comparada con el panel de Claims del propio juego, acertó con pocos créditos de diferencia en la mayoría de los combates y quedó un 0,14 % alta en una operación."
+      ],
+      "fr": [
+        "Les chiffres du combat concordent maintenant. La carte Dernier combat affiche les mêmes crédits que le rapport de combat (les primes plus le bonus d'escadrille estimé), alors qu'avant une carte omettait le bonus. Et le jeu écrit parfois deux fois la même ligne de prime : GRAVITAS la compte maintenant une seule fois (avant, une telle victoire comptait double dans les victoires, les crédits et les Claims). Le bonus d'escadrille reste une estimation de 7,5 % de ce que vous gagnez en escadrille : comparé au panneau Claims du jeu, il était juste à quelques crédits près dans la plupart des combats et 0,14 % trop haut dans une opération."
+      ],
+      "pt-br": [
+        "Os números do combate agora coincidem. O cartão Último combate mostra os mesmos créditos que o relatório de combate (as recompensas mais o bônus de wing estimado), antes um cartão deixava o bônus de fora. E o jogo às vezes escreve a mesma linha de recompensa duas vezes: o GRAVITAS agora conta uma só vez (antes esse abate contava em dobro em abates, créditos e Claims). O bônus de wing continua sendo uma estimativa de 7,5 % do que você ganha em wing: comparado ao painel de Claims do próprio jogo, ficou a poucos créditos na maioria dos combates e 0,14 % alto em uma operação."
+      ],
+      "ru": [
+        "Цифры боя теперь совпадают. Карточка последнего боя показывает те же кредиты, что и боевой отчёт (награды плюс оценочный бонус крыла), раньше одна карточка не учитывала бонус. А игра иногда записывает одну и ту же строку награды дважды: GRAVITAS теперь считает её один раз (раньше такая победа учитывалась дважды в победах, кредитах и Claims). Бонус крыла остаётся оценкой в 7,5 % от заработанного в крыле: по сравнению с панелью Claims самой игры он совпадал с точностью до нескольких кредитов в большинстве боёв и был на 0,14 % выше в одной операции."
+      ]
+    },
+    {
       "v": "0.9.28",
       "en": [
         "Clear the Last fight report with a key. Ctrl+Shift+F6 clears the report at once (change it on the Keys page or use the button in the GRAVITAS menu); your Past combats stay untouched, and the report says which key clears it. The hints at the bottom of the windows now show the keys you really set, and no key text at all for a job that has no key (before, they always showed fixed Ctrl+Shift+F-keys, even when nothing was set).",

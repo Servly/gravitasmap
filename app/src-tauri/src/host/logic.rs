@@ -270,6 +270,7 @@ fn preview_and_shown_match_the_plugin() {
         for (k, w) in h.set.win.iter_mut() { w.on = se["on"][*k].as_bool().unwrap_or(false); }
         h.set.always = se["always"].as_bool().unwrap();
         h.set.claims_note = false; // (the plugin has no Claims note)
+        h.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
         h.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
         h.set.show_gone = se["show_gone"].as_bool().unwrap();
         h.set.hide_maps = se["hide_maps"].as_bool().unwrap();

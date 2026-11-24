@@ -67,6 +67,8 @@ pub struct Opts {
     pub wing_bonus_op: bool,
     /// the report says when Claims hold more than the fight (off = the plugin's report)
     pub claims_note: bool,
+    /// the Last fight / Current fight card's CREDITS include the wing bonus like the report's (off = the plugin's card)
+    pub fight_bonus: bool,
     pub rows: i64,
     /// how many of the latest kills the Kill feed lists (6 = the plugin's)
     pub feed_rows: i64,
@@ -460,6 +462,14 @@ pub fn report(tr: &I18n, v: &Value, now_ms: f64, wing_on: bool, claims_extra: f6
     json!({"kind": "card", "wide": true, "title": tr.t0("report.title"), "head": head, "head2": head2, "badge": result(tr, ep), "tiles": tiles, "sections": sections, "note": notes.join(" · ")})
 }
 
+/// The fight's wing bonus for the CREDITS tile: stamped on the fight when it ended, while it runs the Bounty counter's own (This fight).
+fn live_wing_bonus(ep: &Value, on: bool, opts: &Opts) -> f64 {
+    if truthy(ep.get("wing_bonus")) {
+        return n_or0(ep.get("wing_bonus"));
+    }
+    if on { opts.bounty.as_ref().map(|b| n_or0(b.get("wing_bonus"))).unwrap_or(0.0) } else { 0.0 }
+}
+
 pub fn placeholder(tr: &I18n, key: &str) -> Option<Value> {
     if !["target", "targets", "feed", "fight", "speed"].contains(&key) {
         return None;
@@ -468,16 +478,18 @@ pub fn placeholder(tr: &I18n, key: &str) -> Option<Value> {
 }
 
 /// Between fights, when the HUD stays up: the last fight's kills, totals and takedown speed.
-fn last_fight(tr: &I18n, key: &str, ep: &Value, outer_now: f64) -> Option<Value> {
+fn last_fight(tr: &I18n, key: &str, ep: &Value, outer_now: f64, opts: &Opts, op: &Value) -> Option<Value> {
     let mut e2 = ep.clone();
     if let Some(o) = e2.as_object_mut() {
         let (t0, t1) = (ep.get("t0").cloned().unwrap_or(Value::Null), ep.get("t1").cloned().unwrap_or(Value::Null));
         o.insert("t0".into(), t0);
         o.insert("t1".into(), t1);
     }
-    let v = json!({"on": true, "ep": e2});
+    let v = json!({"on": true, "ep": e2, "op": op});
     let now = if truthy(ep.get("t1")) { n_or0(ep.get("t1")) } else { outer_now };
-    let mut m = model(tr, key, &v, now, &Opts::default())?;
+    // (only the wing-bonus switches go along: the card is otherwise built as always)
+    let inner = Opts { wing_bonus_on: opts.wing_bonus_on, wing_bonus_op: opts.wing_bonus_op, fight_bonus: opts.fight_bonus, ..Opts::default() };
+    let mut m = model(tr, key, &v, now, &inner)?;
     let title = if key == "fight" { tr.t0("fight.last") } else { format!("{}{}", m.get("title").and_then(Value::as_str).unwrap_or(""), tr.t0("fight.last_suffix")) };
     m["title"] = json!(title);
     Some(m)
@@ -588,7 +600,7 @@ pub fn model(tr: &I18n, key: &str, v: &Value, now_ms: f64, opts: &Opts) -> Optio
                 return None;
             }
             if last {
-                return last_fight(tr, key, ep, now_ms);
+                return last_fight(tr, key, ep, now_ms, opts, op);
             }
             match key {
                 "feed" => {
@@ -605,7 +617,7 @@ pub fn model(tr: &I18n, key: &str, v: &Value, now_ms: f64, opts: &Opts) -> Optio
                     let n_v = getd(ep, "n", json!(0));
                     let tiles = vec![
                         json!([tr.t0("tile.kills"), format!("{}{}", py_str(&n_v), if truthy(Some(&seen_v)) { format!("/{}", py_str(&seen_v)) } else { String::new() })]),
-                        json!([tr.t0("tile.credits"), num(ep.get("cr"))]),
+                        json!([tr.t0("tile.credits"), if opts.fight_bonus && wing_on { num(Some(&json!(n_or0(ep.get("cr")) + live_wing_bonus(ep, on, opts)))) } else { num(ep.get("cr")) }]),
                         json!([tr.t0("tile.time"), dur(tr, ms)]),
                         json!([tr.t0("tile.kpm"), per_min(tr, n_or0(Some(&n_v)), ms)]),
                         json!([tr.t0("tile.waves"), py_str(&getd(ep, "attacks", json!(0)))]),
@@ -1081,5 +1093,38 @@ mod key_hint_tests {
         let h = hints(&[("reset", "ZZZ")]);
         assert_eq!(bounty_note(&tr, Some(&h)).rsplit('\n').next().unwrap().rsplit(" · ").next().unwrap(), "ZZZ: Reset Current Fight");
         assert!(!bounty_note(&tr, Some(&h)).contains("Ctrl+Shift"));
+    }
+}
+
+/// 24 Nov 2026, Burak's HIP fight: 17 kills, 10,647,720 cr. The report said 11,446,299 (wing bonus on), the Last fight card 10,647,720.
+#[cfg(test)]
+mod fight_credits_tests {
+    use super::*;
+
+    fn tiles_credits(m: &Value) -> String {
+        m["tiles"].as_array().unwrap().iter().find(|t| t[0] == "CREDITS").map(|t| t[1].as_str().unwrap().to_string()).unwrap_or_default()
+    }
+
+    #[test]
+    fn the_last_fight_card_and_the_report_show_the_same_credits() {
+        let tr = I18n::new("en");
+        let v = json!({"on": false, "ep": {"t0": 1000, "t1": 2000, "n": 17, "seenN": 17, "cr": 10_647_720, "wing_bonus": 798_579}});
+        let b = json!({"cr": 0, "claim": [0, [], 0, [], false]});
+        let mut opts = Opts { bounty: Some(b), wing_bonus_on: true, report_on: true, report_s: 60.0, always: true, ..Default::default() };
+        let rep = model(&tr, "report", &v, 3000.0, &opts).unwrap();
+        let rep_cr = tiles_credits(&rep);
+        assert_eq!(rep_cr, "11,446,299", "the report");
+        // the plugin's card (setting off): the base only
+        assert_eq!(tiles_credits(&model(&tr, "fight", &v, 3000.0, &opts).unwrap()), "10,647,720");
+        opts.fight_bonus = true;
+        assert_eq!(tiles_credits(&model(&tr, "fight", &v, 3000.0, &opts).unwrap()), rep_cr, "same figure in both windows");
+        // while the fight runs: the Bounty counter's This fight bonus
+        let live = json!({"on": true, "ep": {"t0": 1000, "n": 17, "cr": 10_647_720}});
+        opts.bounty = Some(json!({"cr": 10_647_720, "wing_bonus": 798_579}));
+        assert_eq!(tiles_credits(&model(&tr, "fight", &live, 3000.0, &opts).unwrap()), "11,446,299", "fight still on");
+        opts.bounty = Some(json!({"cr": 0, "claim": [0, [], 0, [], false]}));
+        opts.wing_bonus_on = false; // no wing bonus wanted: both show the base
+        assert_eq!(tiles_credits(&model(&tr, "fight", &v, 3000.0, &opts).unwrap()), "10,647,720");
+        assert_eq!(tiles_credits(&model(&tr, "report", &v, 3000.0, &opts).unwrap()), "10,647,720");
     }
 }

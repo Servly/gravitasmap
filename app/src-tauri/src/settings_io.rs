@@ -21,7 +21,7 @@ impl Settings {
         json!({
             "combat_on": self.combat_on, "calm_s": self.calm_s, "sc_ends": self.sc_ends, "report_s": self.report_s, "drop_lost": self.drop_lost,
             "hide_maps": self.hide_maps, "look_hide": self.look_hide, "bonds": self.bonds, "rows": self.rows, "sort": self.sort, "order": self.order,
-            "brief": self.brief, "feed_rows": self.feed_rows, "wing_bonus_on": self.wing_bonus_on, "wing_bonus_op": self.wing_bonus_op, "claim_bonds": self.claim_bonds, "claims_note": self.claims_note, "always": self.always, "show_gone": self.show_gone, "auto": self.auto,
+            "brief": self.brief, "feed_rows": self.feed_rows, "wing_bonus_on": self.wing_bonus_on, "wing_bonus_op": self.wing_bonus_op, "claim_bonds": self.claim_bonds, "claims_note": self.claims_note, "claims_dedupe": self.claims_dedupe, "always": self.always, "show_gone": self.show_gone, "auto": self.auto,
             "bg": self.bg, "opacity": self.opacity, "size_auto": self.size_auto, "size_pct": self.size_pct, "front": self.front, "boot": self.boot, "keys": self.keys, "look_btn": self.look_btn, "look_hold": self.look_hold, "win": Value::Object(win),
         })
     }
@@ -46,6 +46,7 @@ impl Settings {
         self.wing_bonus_on = flag(v.get("wing_bonus_on"), d.wing_bonus_on);
         self.claim_bonds = flag(v.get("claim_bonds"), d.claim_bonds);
         self.claims_note = flag(v.get("claims_note"), d.claims_note);
+        self.claims_dedupe = flag(v.get("claims_dedupe"), d.claims_dedupe);
         self.feed_rows = clamp(v.get("feed_rows"), 1, 10, d.feed_rows);
         self.brief = flag(v.get("brief"), d.brief);
         self.wing_bonus_op = flag(v.get("wing_bonus_op"), d.wing_bonus_op);

@@ -129,6 +129,7 @@ fn engine_run(name: &str) -> Result<usize, String> {
     // the plugin's variants of the settings (make_golden.py VARIANTS): "wing" has combat bonds on
     host.set.always = false; // (the plugin's own default; the app's default is on: every window that is on stays up, as the Bounty counter does)
     host.set.wing_bonus_on = false; // (likewise: the app counts the wing bonus on by default)
+    host.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
     host.set.claim_bonds = false; // (the plugin's Claims never counted bonds)
     host.set.claims_note = false; // (the plugin's report has no Claims note)
     host.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
@@ -223,6 +224,7 @@ fn engine_run_tail(name: &str) -> Result<usize, String> {
     // the plugin's variants of the settings (make_golden.py VARIANTS): "wing" has combat bonds on
     host.set.always = false; // (the plugin's own default; the app's default is on: every window that is on stays up, as the Bounty counter does)
     host.set.wing_bonus_on = false; // (likewise: the app counts the wing bonus on by default)
+    host.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
     host.set.claim_bonds = false; // (the plugin's Claims never counted bonds)
     host.set.claims_note = false; // (the plugin's report has no Claims note)
     host.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)

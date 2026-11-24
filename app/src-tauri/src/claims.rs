@@ -36,6 +36,9 @@ pub struct Owed {
     loose: i64,
     wing_by: Map,
     in_wing: bool,
+    /// ignore a Bounty line that is an exact copy of the Bounty line before it (the game sometimes writes one twice)
+    pub dedupe: bool,
+    last_bounty: Option<Value>,
     station: Option<(Value, Value)>,
     pub cashed: Vec<(i64, Value, Value)>,
 }
@@ -70,6 +73,12 @@ impl Owed {
                 true
             }
             "Bounty" => {
+                if self.dedupe {
+                    if self.last_bounty.as_ref() == Some(e) {
+                        return false;
+                    }
+                    self.last_bounty = Some(e.clone());
+                }
                 let rewards: Vec<Value> = e.get("Rewards").and_then(Value::as_array).cloned().unwrap_or_default();
                 let mut got: Vec<(String, i64)> = Vec::new();
                 for r in &rewards {
@@ -352,6 +361,7 @@ pub struct Claims {
     events: Vec<Value>,
     crev: Option<u64>,
     combined: Option<Owed>,
+    dedupe: bool,
 }
 
 impl Claims {
@@ -411,6 +421,14 @@ impl Claims {
         }
     }
 
+    /// Whether a repeated Bounty line counts once (see Owed::dedupe).
+    pub fn set_dedupe(&mut self, on: bool) {
+        if self.dedupe != on {
+            self.dedupe = on;
+            self.rev += 1;
+        }
+    }
+
     pub fn feed(&mut self, e: &Value) {
         let ev = e.get("event").and_then(Value::as_str).unwrap_or("");
         if !EVENTS.contains(&ev) {
@@ -436,6 +454,7 @@ impl Claims {
                     || str_or_empty(e.get("timestamp")) > base
             };
             let mut o = Owed::new();
+            o.dedupe = self.dedupe;
             let mut today: &[Value] = &self.events;
             if self.died_now {
                 // today's own Died already cleared everything from that point on - the older Journals never mattered again
@@ -492,5 +511,125 @@ impl Claims {
         let cashed: Vec<Value> = o.cashed.iter().map(|(p, s, t)| json!([p, s, t])).collect();
         let facs: Vec<Value> = o.factions().into_iter().map(|(f, v)| json!([f, v])).collect();
         json!([o.total(), facs, o.wing_bonus(), cashed, o.in_wing()])
+    }
+}
+
+/// Real cases from Burak's Journals, checked against the game's own Claims panel / the voucher the game paid.
+#[cfg(test)]
+mod real_cases {
+    use super::*;
+
+    fn bounty(ts: &str, rewards: &[i64], fac: &str) -> Value {
+        let r: Vec<Value> = rewards.iter().map(|a| json!({"Faction": fac, "Reward": a})).collect();
+        json!({"timestamp": ts, "event": "Bounty", "Rewards": r, "TotalReward": rewards.iter().sum::<i64>(), "SharedWithOthers": 2})
+    }
+    /// What the app shows for one faction: what the Journal proves + the wing bonus estimate.
+    fn shown(o: &Owed) -> i64 {
+        o.total() + o.wing_bonus()
+    }
+    fn wing_run(fac: &str, kills: &[i64], dedupe: bool) -> Owed {
+        let mut o = Owed::new();
+        o.dedupe = dedupe;
+        o.feed(&json!({"timestamp": "2026-11-24T20:00:00Z", "event": "WingJoin", "Others": ["A", "B"]}));
+        for (i, k) in kills.iter().enumerate() {
+            o.feed(&bounty(&format!("2026-11-24T20:{:02}:00Z", i + 1), &[*k], fac));
+        }
+        o
+    }
+
+    const PROG: [i64; 8] = [992600, 126000, 104000, 836500, 202158, 1014900, 151300, 1149800];
+    const DARK: [i64; 12] = [239382, 732000, 153800, 595800, 1156200, 916400, 610500, 167400, 778200, 1020300, 252978, 124100];
+    const LYS: [i64; 10] = [795200, 1212200, 136950, 638000, 1035000, 1110100, 1148700, 657300, 80700, 730600];
+    const HIP: [i64; 17] = [100848, 761000, 593500, 787700, 166386, 1211700, 776300, 154110, 1150500, 888100, 101046, 872100, 122430, 668900, 105600, 890800, 1296700];
+
+    /// 24 Nov 2026: three factions match the game's Claims panel to 3 cr or less.
+    #[test]
+    fn the_wing_estimate_matches_the_games_panel() {
+        for (fac, kills, base, game) in [("Progressive Party of Scylla", &PROG[..], 4_577_258, 4_920_550), ("The Dark Wheel", &DARK[..], 6_747_060, 7_253_087), ("L.Y.S Corp.", &LYS[..], 7_544_750, 8_110_604)] {
+            let o = wing_run(fac, kills, true);
+            assert_eq!(o.total(), base, "{fac}: the Journal's own sum");
+            assert!((shown(&o) - game).abs() <= 3, "{fac}: app {} game {game}", shown(&o));
+        }
+    }
+
+    /// 24 Nov 21:21-21:38, Minutemen: 14 kills, the first (120,252) with no SharedWithOthers field: it gets the bonus too. Game panel 6,454,095.
+    #[test]
+    fn an_unshared_kill_in_a_wing_gets_the_bonus_too() {
+        let kills = [120252, 648000, 115805, 66585, 931400, 121000, 276400, 646100, 751800, 1038900, 60100, 110300, 731600, 385572];
+        let o = wing_run("Minutemen", &kills, true);
+        assert_eq!(o.total(), 6_003_814);
+        assert!((shown(&o) - 6_454_095).abs() <= 5, "app {} game 6,454,095", shown(&o));
+    }
+
+    /// The fourth faction of that night is NOT explained: the game paid 754,620 cr of bonus on 10,647,720 cr (7.09 %), 7.5 % on all of it
+    /// is 798,580. No subset of the 17 kills x 7.5 % gives 754,620, and the kill with no SharedWithOthers is not the cause. This test pins
+    /// what is known so a change of the estimate is noticed: the app is 43,959 cr above the game here.
+    #[test]
+    fn hip_5700_is_a_known_unexplained_gap() {
+        let o = wing_run("HIP 5700 Empire League", &HIP, true);
+        assert_eq!(o.total(), 10_647_720);
+        assert_eq!(shown(&o) - 11_402_340, 43_959);
+    }
+
+    /// 7 Nov 2026: the game wrote one Bounty line (two rewards of 654,300) twice and paid it once: the voucher was 19,716,887 cr.
+    #[test]
+    fn a_bounty_line_written_twice_counts_once() {
+        let kills: [i64; 30] = [
+            1163600, 116955, 751200, 138930, 135200, 128700, 934900, 1009200, 1001200, 185328, 876000, 81700, 1160400, 1052900, 83490, 876900, 94990, 1033300, 189156, 681000,
+            253600, 938300, 601700, 455664, 123200, 1094600, 76600, 782900, 142887, 868200,
+        ];
+        let run = |dedupe: bool| {
+            let mut o = Owed::new();
+            o.dedupe = dedupe;
+            o.feed(&json!({"timestamp": "2026-11-07T18:00:00Z", "event": "WingJoin", "Others": ["A", "B"]}));
+            for (i, k) in kills.iter().enumerate() {
+                o.feed(&bounty(&format!("2026-11-07T19:{:02}:{:02}Z", i / 60, i % 60), &[*k], "Turkish Galactic Empire"));
+            }
+            let twice = bounty("2026-11-07T19:02:45Z", &[654300, 654300], "Turkish Galactic Empire");
+            o.feed(&twice);
+            o.feed(&twice);
+            o
+        };
+        let (on, off) = (run(true), run(false));
+        assert_eq!(on.total(), 18_341_300, "once");
+        assert_eq!(off.total(), 19_649_900, "both copies, as the plugin did");
+        assert!((shown(&on) - 19_716_887).abs() <= 15, "app {} game 19,716,887", shown(&on));
+        // two different kills with the same reward are NOT a repeat (the timestamp differs)
+        let mut o = Owed::new();
+        o.dedupe = true;
+        o.feed(&bounty("2026-11-07T19:00:00Z", &[500_000], "X"));
+        o.feed(&bounty("2026-11-07T19:00:01Z", &[500_000], "X"));
+        assert_eq!(o.total(), 1_000_000);
+    }
+
+    /// The Host drops the copy for everything (counter, Claims, engine), and only with the setting on.
+    #[test]
+    fn the_host_drops_the_copy_for_every_reader() {
+        let line = bounty("2026-11-07T19:02:45Z", &[654300, 654300], "Turkish Galactic Empire");
+        for on in [true, false] {
+            let mut h = crate::host::Host::new(true).unwrap();
+            h.set.claims_dedupe = on;
+            h.claims.start(None, None);
+            h.handle(&line, 1_800_000_000.0);
+            h.handle(&line, 1_800_000_000.0);
+            assert_eq!(h.counter.n, if on { 1 } else { 2 }, "kills (dedupe {on})");
+            assert_eq!(h.counter.cr, if on { 1_308_600 } else { 2_617_200 }, "this fight (dedupe {on})");
+            let v = h.claims.view();
+            assert_eq!(v[0].as_i64().unwrap(), if on { 1_308_600 } else { 2_617_200 }, "Claims (dedupe {on})");
+        }
+    }
+
+    /// Claims replays Journals itself (the older ones too): the flag reaches that replay.
+    #[test]
+    fn claims_replay_counts_the_copy_once() {
+        let line = bounty("2026-11-07T19:02:45Z", &[654300, 654300], "Turkish Galactic Empire");
+        for on in [true, false] {
+            let mut c = Claims::new();
+            c.start(None, None);
+            c.set_dedupe(on);
+            c.feed(&line);
+            c.feed(&line);
+            assert_eq!(c.view()[0].as_i64().unwrap(), if on { 1_308_600 } else { 2_617_200 }, "dedupe {on}");
+        }
     }
 }

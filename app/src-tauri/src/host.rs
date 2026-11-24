@@ -41,6 +41,8 @@ pub struct Settings {
     pub claim_bonds: bool,
     /// the Combat report says when Claims hold more than the fight (money from before it)
     pub claims_note: bool,
+    /// the game sometimes writes one Bounty line twice (identical, same second): the second copy is ignored everywhere (the plugin counted both)
+    pub claims_dedupe: bool,
     /// how many kills the Kill feed shows
     pub feed_rows: i64,
     pub wing_bonus_op: bool,
@@ -80,7 +82,7 @@ impl Default for Settings {
         Settings {
             combat_on: true, calm_s: 60, sc_ends: true, report_s: 10.0, drop_lost: true, hide_maps: true, look_hide: true, bonds: false, rows: 6,
             sort: "v".into(), order: combat::DEFAULT_ORDER.iter().map(|s| s.to_string()).collect(), wing_bonus_on: true, brief: false, feed_rows: 6,
-            wing_bonus_op: false, claim_bonds: true, claims_note: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, live_key_hints: true, win,
+            wing_bonus_op: false, claim_bonds: true, claims_note: true, claims_dedupe: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, live_key_hints: true, win,
         }
     }
 }
@@ -104,6 +106,7 @@ pub struct Host {
     pub set: Settings,
     pub counter: Counter,
     pub claims: Claims,
+    last_bounty: Option<Value>,
     /// the combat bonds you carry (they are Claims in the game too; never lost on a death)
     pub bonds: crate::bonds::Bonds,
     pub system: Option<String>,
@@ -181,6 +184,7 @@ impl Host {
             set: Settings::default(),
             counter: Counter::new(),
             claims: Claims::new(),
+            last_bounty: None,
             bonds: Default::default(),
             system: None,
             in_game: None,
@@ -231,10 +235,27 @@ impl Host {
         self.map_music = MAP_MUSIC.contains(&track);
     }
 
+    /// True when this Bounty line is an exact copy of the Bounty line before it (the game wrote it twice; seen 4 Nov and 7 Nov 2026,
+    /// and the game paid it once: 19,716,887 cr from 18,341,300 cr of lines x 1.075). Only with the claims_dedupe setting.
+    fn repeated_bounty(&mut self, e: &Value) -> bool {
+        if !self.set.claims_dedupe || Self::s(e, "event") != "Bounty" {
+            return false;
+        }
+        if self.last_bounty.as_ref() == Some(e) {
+            return true;
+        }
+        self.last_bounty = Some(e.clone());
+        false
+    }
+
     /// One Journal line, from whichever side brought it first (load.py's handle).
     pub fn handle(&mut self, entry: &Value, now: f64) {
         let ev = Self::s(entry, "event");
         crate::drift::event(ev); // (counts only: what the game writes that this version does not know)
+        if self.repeated_bounty(entry) {
+            return;
+        }
+        self.claims.set_dedupe(self.set.claims_dedupe);
         crate::drift::check_fields(entry);
         if HERE_FROM.contains(&ev) && !Self::s(entry, "StarSystem").is_empty() {
             self.system = Some(Self::s(entry, "StarSystem").to_string());
@@ -276,6 +297,10 @@ impl Host {
             if !known {
                 continue;
             }
+            if self.repeated_bounty(e) {
+                continue;
+            }
+            self.claims.set_dedupe(self.set.claims_dedupe);
             if HERE_FROM.contains(&ev) && !Self::s(e, "StarSystem").is_empty() {
                 self.system = Some(Self::s(e, "StarSystem").to_string());
             }
@@ -447,7 +472,7 @@ impl Host {
         let opts = Opts {
             sort: s.sort.clone(), order: s.order.clone(), report_s: s.report_s, banner: pbanner || now < self.banner_until,
             scan: scan.and_then(|x| x.get("pri")).cloned(), tg: scan.and_then(|x| x.get("tg")).cloned(), always: s.always && !preview && !shown, gone: gone_of, show_gone: s.show_gone,
-            bounty: Some(if preview { combat::sample_bounty() } else { bounty }), wing_bonus_on: s.wing_bonus_on, wing_bonus_op: s.wing_bonus_op, claims_note: s.claims_note, rows: s.rows, feed_rows: s.feed_rows,
+            bounty: Some(if preview { combat::sample_bounty() } else { bounty }), wing_bonus_on: s.wing_bonus_on, wing_bonus_op: s.wing_bonus_op, claims_note: s.claims_note, fight_bonus: s.claims_dedupe, rows: s.rows, feed_rows: s.feed_rows,
             keys_on: preview || now < self.keys_until, keys_left: if preview { combat::KEYS_S as i64 } else { ((self.keys_until - now).ceil() as i64).max(0) },
             report_on: preview || shown || now < self.report_until,
             hints: if s.live_key_hints { Some(self.key_texts.clone()) } else { None },

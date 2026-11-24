@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.29
+- The fight numbers now agree. The Last fight card shows the same credits as the Combat report (the bounties plus the estimated wing bonus), where before one card left the bonus out. And the game sometimes writes the same bounty line twice: GRAVITAS now counts it once (before, such a kill counted twice in kills, credits and Claims). The wing bonus stays an estimate of 7.5 % on what you earn in a wing: checked against the game's own Claims panel it was within a few credits in most fights, and 0.14 % high in one operation.
+
 ## 0.9.28
 - Clear the Last fight report with a key. Ctrl+Shift+F6 clears the report at once (change it on the Keys page or use the button in the GRAVITAS menu); your Past combats stay untouched, and the report says which key clears it. The hints at the bottom of the windows now show the keys you really set, and no key text at all for a job that has no key (before, they always showed fixed Ctrl+Shift+F-keys, even when nothing was set).
 - Tidier settings: every dropdown, switch and button of the same kind now has the same size and lines up on its right edge, on every page and in the in-game menu. The Key Bindings rows keep their place when you pick Custom, and the Updates page is as wide as the others.
