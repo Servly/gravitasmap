@@ -1,0 +1,62 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "What the main window may do: its own title bar buttons and events from the Journal reader",
+  "windows": [
+    "main",
+    "menu",
+    "editor"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:window:allow-is-maximized",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://gravitasmap.com/*"
+        },
+        {
+          "url": "https://gravitasmap.com"
+        },
+        {
+          "url": "https://github.com/Servly/gravitasmap"
+        },
+        {
+          "url": "https://github.com/Servly/gravitasmap/*"
+        },
+        {
+          "url": "https://spansh.co.uk/"
+        },
+        {
+          "url": "https://science.canonn.tech/"
+        },
+        {
+          "url": "https://www.elitedangerous.com/"
+        },
+        {
+          "url": "https://www.anthropic.com/claude"
+        },
+        {
+          "url": "https://inara.cz/"
+        },
+        {
+          "url": "https://edsy.org/"
+        },
+        {
+          "url": "https://github.com/njthomson/SrvSurvey"
+        },
+        {
+          "url": "https://github.com/jixxed/ed-odyssey-materials-helper"
+        },
+        {
+          "url": "https://github.com/characterecho-sean/ed-unofficial-patch"
+        }
+      ]
+    }
+  ]
+}

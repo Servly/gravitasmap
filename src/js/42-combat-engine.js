@@ -75,7 +75,7 @@ function cbEvent(j, replay) {
     case "Undocked": CB.docked = false; break;
     case "FSDJump": CB.docked = false; CB.scan.clear(); if (CB.op && j.StarSystem) CB.op.sys = String(j.StarSystem); if (CB.on && fresh) cbEnd(t, "jump"); break;
     case "StartJump": if (j.JumpType === "Hyperspace" && CB.on && fresh) cbEnd(t, "jump"); break;
-    case "Docked": CB.docked = true; if (CB.on && fresh) cbEnd(t, "docked"); break;
+    case "Docked": CB.docked = true; CB.scan.clear(); if (CB.on && fresh) cbEnd(t, "docked"); break;
     case "Music": {                                                     // v0.91.2: phases, and no fight while docked (the game plays combat music in the menus too)
       const was = /combat/i.test(CB.music), now = /combat/i.test(String(j.MusicTrack || "")); CB.music = String(j.MusicTrack || "");
       if (!now) { if (was) CB.calmT = t; if (CB.ep && CB.ep.bigOn) { CB.ep.bigOn = false; cbMark("big", t, 0); } break; }

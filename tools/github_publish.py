@@ -6,12 +6,13 @@
 What it does:
   1. CHANGELOG.md from the "What's new" notes (tools/changelog.py)
   2. a clean copy for GitHub in ..\\gravitasmap-github (tools/github_export.py: an allow list, then a scan for anything private)
-  3. one commit "GRAVITAS v0.92.2" and a tag "v0.92.2" whose message holds that version's notes, then a push
+  3. app/CHANGELOG.md from the app's What's new (tools/app_changelog.py)
+  4. one commit "GRAVITAS v0.92.2" and a tag "v0.92.2" whose message holds that version's notes, then a push
 
 It never uses your personal e-mail: the commits are signed with your GitHub "noreply" address, and it stops if the
 copy's address is anything else. It never deletes anything in this folder.
 """
-import re, subprocess, sys
+import json, re, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -44,9 +45,9 @@ def main():
                  "The export looks for them in every file before anything is copied. That file itself is never copied.")
     if not setup and not (OUT / ".git").exists():
         print("GitHub is not set up yet (run: python tools\\github_publish.py --setup). Skipped."); return
-    import changelog, github_export
-    changelog.main()
-    sys.argv = [sys.argv[0], str(OUT)]; github_export.OUT = OUT; github_export.main()
+    import changelog, github_export, app_changelog
+    changelog.main(); app_changelog.main()
+    github_export.run(OUT, prune=True)          # exact mirror: stops on anything private, removes what is no longer exported
     if not (OUT / ".git").exists():
         mail = input("Your GitHub noreply address (GitHub > Settings > Emails, ends with @users.noreply.github.com): ").strip()
         if not mail.lower().endswith("@users.noreply.github.com"): sys.exit("That is not a noreply address. Nothing was pushed.")
@@ -62,7 +63,14 @@ def main():
     else: print("No changes since the last push.")
     if not git("tag", "-l", ver):
         git("tag", "-a", ver, "-m", f"GRAVITAS {ver}\n\n{notes(ver)}")
-    git("push", "-u", "origin", "main"); git("push", "origin", ver)
+    # the app's own tag (app-v0.9.27) for the GitHub Release made by tools/github_release.py
+    import github_release_notes as GN
+    app = GN.app_version(); atag = f"app-v{app}"
+    if not git("tag", "-l", atag):
+        try: an = chr(10).join(f"- {x}" for x in next(e for e in json.loads((ROOT / "app/src/whatsnew.json").read_text("utf-8"))["versions"] if e["v"] == app)["en"])
+        except Exception: an = ""
+        git("tag", "-a", atag, "-m", f"GRAVITAS app {app}" + chr(10) + chr(10) + an)
+    git("push", "-u", "origin", "main"); git("push", "origin", ver); git("push", "origin", atag)
     print(f"GitHub: GRAVITAS {ver} pushed, with its tag. https://github.com/Servly/gravitasmap")
 
 if __name__ == "__main__":

@@ -1,0 +1,33 @@
+name: Antivirus or SmartScreen detection
+description: Your security program warns about the installer or the app
+labels: ["antivirus"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The installer is unsigned today, so some programs warn. We want to know which ones, so we can report false positives. Please do not attach the file.
+  - type: input
+    id: program
+    attributes:
+      label: Security program and its version
+    validations:
+      required: true
+  - type: input
+    id: detection
+    attributes:
+      label: Detection name
+      description: Exactly as the program shows it.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: GRAVITAS version and SHA-256 of the file
+      description: In PowerShell, Get-FileHash on the installer. Compare with the one on gravitasmap.com.
+    validations:
+      required: true
+  - type: textarea
+    id: when
+    attributes:
+      label: When did it warn?
+      description: While downloading, while installing, on start, or while the game ran. What did the program do (block, quarantine, delete)?

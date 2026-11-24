@@ -1,0 +1,1300 @@
+{
+  "versions": [
+    {
+      "v": "0.9.27",
+      "en": [
+        "The Combat report now explains Claims. The report counts only that fight, while Claims hold every bounty you have not cashed in yet. When Claims hold more, the report adds one line with the exact amount from before the fight, so the two numbers can be read side by side. There is a switch for it in the Claims card (on by default)."
+      ],
+      "de": [
+        "Der Kampfbericht erklärt jetzt die Claims. Der Bericht zählt nur dieses Gefecht, die Claims enthalten jedes noch nicht eingelöste Kopfgeld. Enthalten die Claims mehr, fügt der Bericht eine Zeile mit dem genauen Betrag von vor dem Gefecht hinzu, sodass beide Zahlen nebeneinander lesbar sind. Dafür gibt es einen Schalter in der Karte Claims (standardmäßig an)."
+      ],
+      "es": [
+        "El informe de combate ahora explica los Claims. El informe cuenta solo ese combate, mientras que los Claims incluyen cada recompensa que aún no has cobrado. Cuando los Claims incluyen más, el informe añade una línea con la cantidad exacta de antes del combate, para poder leer ambas cifras juntas. Hay un interruptor en la tarjeta Claims (activado por defecto)."
+      ],
+      "fr": [
+        "Le rapport de combat explique maintenant les Claims. Le rapport ne compte que ce combat, alors que les Claims contiennent chaque prime pas encore encaissée. Quand les Claims contiennent plus, le rapport ajoute une ligne avec le montant exact d'avant le combat, pour lire les deux chiffres côte à côte. Un interrupteur existe dans la carte Claims (activé par défaut)."
+      ],
+      "pt-br": [
+        "O relatório de combate agora explica os Claims. O relatório conta só aquele combate, enquanto os Claims incluem toda recompensa que você ainda não resgatou. Quando os Claims têm mais, o relatório acrescenta uma linha com o valor exato de antes do combate, para ler os dois números lado a lado. Há uma chave para isso no cartão Claims (ligada por padrão)."
+      ],
+      "ru": [
+        "Боевой отчёт теперь объясняет Claims. Отчёт считает только этот бой, а Claims содержат каждую награду, которую вы ещё не обналичили. Когда в Claims больше, отчёт добавляет строку с точной суммой, полученной до боя, чтобы обе цифры можно было читать рядом. Для этого есть переключатель в карточке Claims (по умолчанию включён)."
+      ]
+    },
+    {
+      "v": "0.9.26",
+      "en": [
+        "Link a browser with a short code. In the Phones and tablets block, Link a browser shows a code for two minutes: type it on gravitasmap.com (Devices, Link with the GRAVITAS app) and that page shows and manages the same list of devices as the app. The version label now says Beta, the About page fits the other pages and its Frontier and Claude names are links, and a few labels and gaps are tidier."
+      ],
+      "de": [
+        "Einen Browser mit einem kurzen Code verknüpfen. Im Block Handys und Tablets zeigt Browser verknüpfen zwei Minuten lang einen Code: Gib ihn auf gravitasmap.com ein (Geräte, Mit der GRAVITAS-App verknüpfen), und diese Seite zeigt und verwaltet dieselbe Geräteliste wie die App. Die Versionsanzeige sagt jetzt Beta, die Über-Seite passt zu den anderen Seiten, die Namen Frontier und Claude sind Links, und einige Beschriftungen und Abstände sind aufgeräumter."
+      ],
+      "es": [
+        "Vincula un navegador con un código corto. En el bloque Teléfonos y tabletas, Vincular un navegador muestra un código durante dos minutos: escríbelo en gravitasmap.com (Dispositivos, Vincular con la app GRAVITAS) y esa página muestra y gestiona la misma lista de dispositivos que la app. La etiqueta de versión ahora dice Beta, la página Acerca de encaja con las demás y los nombres de Frontier y Claude son enlaces, y algunas etiquetas y espacios están más cuidados."
+      ],
+      "fr": [
+        "Associez un navigateur avec un code court. Dans le bloc Téléphones et tablettes, Associer un navigateur affiche un code pendant deux minutes : saisissez-le sur gravitasmap.com (Appareils, Associer avec l'app GRAVITAS) et cette page montre et gère la même liste d'appareils que l'app. L'étiquette de version indique maintenant Bêta, la page À propos s'accorde aux autres pages, les noms Frontier et Claude sont des liens, et quelques libellés et espacements sont plus soignés."
+      ],
+      "pt-br": [
+        "Vincule um navegador com um código curto. No bloco Celulares e tablets, Vincular um navegador mostra um código por dois minutos: digite-o em gravitasmap.com (Dispositivos, Vincular com o app GRAVITAS) e essa página mostra e gerencia a mesma lista de dispositivos do app. O rótulo da versão agora diz Beta, a página Sobre combina com as outras e os nomes Frontier e Claude são links, e alguns rótulos e espaços ficaram mais cuidados."
+      ],
+      "ru": [
+        "Свяжите браузер коротким кодом. В блоке «Телефоны и планшеты» кнопка «Связать браузер» показывает код на две минуты: введите его на gravitasmap.com (Устройства, «Связать с приложением GRAVITAS»), и эта страница покажет тот же список устройств и позволит им управлять. Метка версии теперь говорит «бета», страница «О программе» подогнана под остальные, названия Frontier и Claude стали ссылками, а некоторые подписи и отступы аккуратнее."
+      ]
+    },
+    {
+      "v": "0.9.25",
+      "en": [
+        "Phones and tablets are now managed in one place. The Modes page has a Phones and tablets block: who follows, whether they are awake, and a Remove button for each, plus Stop sharing. The same list is in the map window and in the browser (Open in browser), and a change made in one place shows in the others within seconds. The pairing now belongs to the app, so it survives closing the map window.",
+        "A tidier look: a redesigned About page (with the TRGE squadron emblem), a better place for the Open the GRAVITAS MAP button, one clean layout for every window setting (On, Perspective, Colour, Default position), no Preview tag on Combat, Thargoid and Debrief, and the Debrief history tab is gone."
+      ],
+      "de": [
+        "Handys und Tablets werden jetzt an einem Ort verwaltet. Die Modi-Seite hat einen Block Handys und Tablets: wer folgt, ob das Gerät wach ist, eine Schaltfläche Entfernen für jedes Gerät und Freigabe beenden. Dieselbe Liste gibt es im Kartenfenster und im Browser (Im Browser öffnen), und eine Änderung an einer Stelle erscheint in Sekunden an den anderen. Die Kopplung gehört jetzt der App und bleibt auch nach dem Schließen des Kartenfensters erhalten.",
+        "Ein aufgeräumteres Aussehen: eine neu gestaltete Über-Seite (mit dem TRGE-Staffelwappen), ein besserer Platz für die Schaltfläche GRAVITAS MAP öffnen, ein einheitliches Layout für jede Fenstereinstellung (An, Perspektive, Farbe, Standardposition), kein Vorschau-Hinweis mehr bei Kampf, Thargoid und Debrief, und der Tab Debrief-Verlauf ist entfernt."
+      ],
+      "es": [
+        "Los teléfonos y tabletas ahora se gestionan en un solo lugar. La página de Modos tiene un bloque Teléfonos y tabletas: quién sigue, si está activo y un botón Quitar para cada uno, además de Dejar de compartir. La misma lista está en la ventana del mapa y en el navegador (Abrir en el navegador), y un cambio hecho en un sitio aparece en los otros en segundos. El emparejamiento ahora pertenece a la app y sobrevive al cerrar la ventana del mapa.",
+        "Un aspecto más ordenado: una página Acerca de rediseñada (con el emblema del escuadrón TRGE), un mejor lugar para el botón Abrir el GRAVITAS MAP, un único diseño para cada ajuste de ventana (Activo, Perspectiva, Color, Posición predeterminada), sin etiqueta de Vista previa en Combate, Thargoid y Debrief, y la pestaña Historial de Debrief ya no está."
+      ],
+      "fr": [
+        "Les téléphones et tablettes se gèrent désormais au même endroit. La page Modes a un bloc Téléphones et tablettes : qui suit, s'il est actif, un bouton Retirer pour chacun, et Arrêter le partage. La même liste est dans la fenêtre de la carte et dans le navigateur (Ouvrir dans le navigateur), et un changement fait à un endroit apparaît ailleurs en quelques secondes. L'appairage appartient maintenant à l'app et survit à la fermeture de la fenêtre de la carte.",
+        "Un aspect plus soigné : une page À propos refaite (avec l'emblème de l'escadron TRGE), un meilleur emplacement pour le bouton Ouvrir la GRAVITAS MAP, une seule mise en page pour chaque réglage de fenêtre (Actif, Perspective, Couleur, Position par défaut), plus d'étiquette Aperçu sur Combat, Thargoid et Debrief, et l'onglet Historique Debrief a disparu."
+      ],
+      "pt-br": [
+        "Celulares e tablets agora são gerenciados em um só lugar. A página Modos tem um bloco Celulares e tablets: quem acompanha, se está ativo e um botão Remover para cada um, além de Parar de compartilhar. A mesma lista está na janela do mapa e no navegador (Abrir no navegador), e uma mudança feita em um lugar aparece nos outros em segundos. O pareamento agora pertence ao app e sobrevive ao fechar a janela do mapa.",
+        "Um visual mais organizado: uma página Sobre redesenhada (com o emblema do esquadrão TRGE), um lugar melhor para o botão Abrir o GRAVITAS MAP, um único layout para cada ajuste de janela (Ligado, Perspectiva, Cor, Posição padrão), sem o selo Prévia em Combate, Thargoid e Debrief, e a aba Histórico do Debrief foi removida."
+      ],
+      "ru": [
+        "Телефоны и планшеты теперь управляются в одном месте. На странице режимов есть блок «Телефоны и планшеты»: кто следит, активно ли устройство, кнопка «Убрать» для каждого и «Прекратить доступ». Тот же список есть в окне карты и в браузере («Открыть в браузере»), а изменение в одном месте появляется в других за секунды. Сопряжение теперь принадлежит приложению и сохраняется после закрытия окна карты.",
+        "Аккуратнее внешний вид: переработанная страница «О программе» (с эмблемой эскадрильи TRGE), более удобное место для кнопки «Открыть GRAVITAS MAP», единый вид каждой настройки окна (Вкл., Перспектива, Цвет, Позиция по умолчанию), нет метки «Предпросмотр» у Боя, Thargoid и Debrief, вкладка «История Debrief» убрана."
+      ]
+    },
+    {
+      "v": "0.9.24",
+      "en": [
+        "Licences complete. The licence list that comes with the app (Licences button in About) now has the full text for every one of the open-source libraries it uses, including eight that were missing before. Nothing else changed."
+      ],
+      "de": [
+        "Lizenzen vollständig. Die mit der App gelieferte Lizenzliste (Schaltfläche Lizenzen unter Über) enthält jetzt den vollen Text für jede verwendete Open-Source-Bibliothek, auch für acht, die bisher fehlten. Sonst hat sich nichts geändert."
+      ],
+      "es": [
+        "Licencias completas. La lista de licencias que viene con la app (botón Licencias en Acerca de) ahora tiene el texto completo de cada biblioteca de código abierto que usa, incluidas ocho que faltaban. No ha cambiado nada más."
+      ],
+      "fr": [
+        "Licences complètes. La liste des licences fournie avec l'app (bouton Licences dans À propos) contient maintenant le texte complet de chaque bibliothèque open source utilisée, dont huit qui manquaient. Rien d'autre n'a changé."
+      ],
+      "pt-br": [
+        "Licenças completas. A lista de licenças que acompanha o app (botão Licenças em Sobre) agora tem o texto completo de cada biblioteca de código aberto usada, incluindo oito que faltavam. Nada mais mudou."
+      ],
+      "ru": [
+        "Лицензии полные. Список лицензий, который идёт с приложением (кнопка «Лицензии» в «О программе»), теперь содержит полный текст для каждой используемой библиотеки с открытым кодом, включая восемь, которых раньше не было. Больше ничего не изменилось."
+      ]
+    },
+    {
+      "v": "0.9.23",
+      "en": [
+        "Safer and easier to look after. The Journal lines handed to the map window no longer carry your commander ID, credits or loan, and player chat text is not passed on. Links the map page opens in your browser are limited to a short list. Updates are saved in a private folder and checked again right before they run, and an older update file can no longer replace a newer one. Problems the app can see in the game's files (a field that changed, a track it does not know) are now noticed: a calm note on the Modes page, and About has a Copy diagnostic report button for bug reports (nothing is sent, you copy it yourself) and a Licences button.",
+        "Also: a damaged Status.json no longer hides every window, the game's newest key bindings file is used, pairing a phone is safer, and a few layout details (the bottom bar in narrow windows, the menu tabs and buttons) are tidier."
+      ],
+      "de": [
+        "Sicherer und leichter zu pflegen. Die an das Kartenfenster übergebenen Journal-Zeilen enthalten deine Commander-ID, Credits und Kredit nicht mehr, und Chat-Texte anderer Spieler werden nicht weitergegeben. Links, die die Kartenseite in deinem Browser öffnet, sind auf eine kurze Liste begrenzt. Updates werden in einem privaten Ordner gespeichert und direkt vor dem Start erneut geprüft, und eine ältere Update-Datei kann eine neuere nicht mehr ersetzen. Probleme, die die App in den Spieldateien sieht (ein geändertes Feld, ein unbekannter Titel), werden jetzt bemerkt: ein ruhiger Hinweis auf der Modi-Seite, und Über hat eine Schaltfläche Diagnosebericht kopieren für Fehlerberichte (nichts wird gesendet, du kopierst es selbst) und eine Schaltfläche Lizenzen.",
+        "Außerdem: Eine beschädigte Status.json blendet nicht mehr alle Fenster aus, die neueste Tastenbelegungsdatei des Spiels wird genutzt, das Koppeln eines Telefons ist sicherer, und einige Layout-Details (die untere Leiste in schmalen Fenstern, die Menü-Tabs und Schaltflächen) sind aufgeräumter."
+      ],
+      "es": [
+        "Más seguro y fácil de mantener. Las líneas del Journal que se pasan a la ventana del mapa ya no llevan tu ID de comandante, créditos ni préstamo, y el texto del chat de otros jugadores no se pasa. Los enlaces que la página del mapa abre en tu navegador se limitan a una lista corta. Las actualizaciones se guardan en una carpeta privada y se comprueban de nuevo justo antes de ejecutarse, y un archivo de actualización antiguo ya no puede sustituir a uno más nuevo. Los problemas que la app ve en los archivos del juego (un campo que cambió, una pista que no conoce) ahora se notan: una nota tranquila en la página de Modos, y Acerca de tiene un botón Copiar informe de diagnóstico para informes de errores (no se envía nada, lo copias tú) y un botón Licencias.",
+        "Además: un Status.json dañado ya no oculta todas las ventanas, se usa el archivo de atajos más reciente del juego, emparejar un teléfono es más seguro y algunos detalles de diseño (la barra inferior en ventanas estrechas, las pestañas y botones del menú) están más cuidados."
+      ],
+      "fr": [
+        "Plus sûr et plus facile à entretenir. Les lignes du Journal passées à la fenêtre de la carte ne portent plus ton ID de commandant, tes crédits ni ton prêt, et le texte du chat des autres joueurs n'est pas transmis. Les liens que la page de la carte ouvre dans ton navigateur sont limités à une courte liste. Les mises à jour sont enregistrées dans un dossier privé et revérifiées juste avant d'être lancées, et un ancien fichier de mise à jour ne peut plus remplacer un plus récent. Les problèmes que l'app voit dans les fichiers du jeu (un champ qui a changé, une piste inconnue) sont maintenant remarqués : une note discrète sur la page des Modes, et À propos a un bouton Copier le rapport de diagnostic pour les rapports de bug (rien n'est envoyé, tu le copies toi-même) et un bouton Licences.",
+        "Aussi : un Status.json abîmé ne cache plus toutes les fenêtres, le fichier de raccourcis le plus récent du jeu est utilisé, l'appairage d'un téléphone est plus sûr, et quelques détails de mise en page (la barre du bas dans les fenêtres étroites, les onglets et boutons du menu) sont plus soignés."
+      ],
+      "pt-br": [
+        "Mais seguro e fácil de manter. As linhas do Journal entregues à janela do mapa não levam mais seu ID de comandante, créditos nem empréstimo, e o texto do chat de outros jogadores não é repassado. Os links que a página do mapa abre no seu navegador ficam limitados a uma lista curta. As atualizações são salvas em uma pasta privada e conferidas de novo logo antes de rodar, e um arquivo de atualização antigo não pode mais substituir um mais novo. Problemas que o app vê nos arquivos do jogo (um campo que mudou, uma faixa que não conhece) agora são notados: um aviso tranquilo na página de Modos, e Sobre tem um botão Copiar relatório de diagnóstico para relatos de erro (nada é enviado, você mesmo copia) e um botão Licenças.",
+        "Também: um Status.json danificado não esconde mais todas as janelas, o arquivo de atalhos mais novo do jogo é usado, parear um telefone é mais seguro e alguns detalhes de layout (a barra inferior em janelas estreitas, as abas e botões do menu) ficaram mais cuidados."
+      ],
+      "ru": [
+        "Надёжнее и проще в сопровождении. Строки Journal, передаваемые окну карты, больше не содержат ваш ID командира, кредиты и заём, а текст чата других игроков не передаётся. Ссылки, которые страница карты открывает в вашем браузере, ограничены коротким списком. Обновления сохраняются в закрытой папке и проверяются ещё раз прямо перед запуском, а старый файл обновления больше не может заменить более новый. Проблемы, которые приложение видит в файлах игры (изменившееся поле, неизвестный трек), теперь замечаются: спокойная заметка на странице режимов, а в «О программе» есть кнопка «Скопировать диагностический отчёт» для сообщений об ошибках (ничего не отправляется, вы копируете сами) и кнопка «Лицензии».",
+        "Кроме того: повреждённый Status.json больше не скрывает все окна, используется самый новый файл привязок клавиш игры, сопряжение телефона стало безопаснее, а некоторые детали вёрстки (нижняя панель в узких окнах, вкладки и кнопки меню) аккуратнее."
+      ]
+    },
+    {
+      "v": "0.9.22",
+      "en": [
+        "Stronger and steadier. A big Journal (30 MB and more) is now read in pieces in well under a second instead of stalling the app at start. If one of the app's own files (settings, Past combats, Hunts, Debriefs) ever cannot be read, it is kept as a .bad copy and the backup copy is used: nothing is wiped any more, and files are written in one safe step. A panic inside one part of the app is written to the log and that part starts again instead of dying silently. Hand-edited profile colours, huge or broken PVP files, oversized files and a wrong update download can no longer crash or freeze it.",
+        "Lighter at rest: hidden windows (the menu, the editor, the app in the tray) really stop polling, the app window asks less often when you are in the game, settings sliders are saved when you stop moving them, and the Thargoid recordings and the log no longer grow for ever."
+      ],
+      "de": [
+        "Stärker und stabiler. Ein großes Journal (30 MB und mehr) wird jetzt in Stücken in deutlich unter einer Sekunde gelesen, statt die App beim Start zu blockieren. Kann eine eigene Datei der App (Einstellungen, Vergangene Kämpfe, Jagden, Debriefings) einmal nicht gelesen werden, wird sie als .bad-Kopie behalten und die Sicherungskopie genutzt: nichts wird mehr gelöscht, und Dateien werden in einem sicheren Schritt geschrieben. Ein Absturz in einem Teil der App wird ins Protokoll geschrieben und dieser Teil startet neu, statt still zu sterben. Von Hand geänderte Profilfarben, riesige oder kaputte PVP-Dateien, übergroße Dateien und ein falscher Update-Download können sie nicht mehr abstürzen oder einfrieren lassen.",
+        "Leichter im Ruhezustand: Versteckte Fenster (das Menü, der Editor, die App im Tray) hören wirklich auf zu pollen, das App-Fenster fragt seltener, wenn du im Spiel bist, Regler werden gespeichert, wenn du sie loslässt, und die Thargoid-Aufnahmen und das Protokoll wachsen nicht mehr endlos."
+      ],
+      "es": [
+        "Más sólida y estable. Un Journal grande (30 MB o más) ahora se lee por partes en bastante menos de un segundo en vez de bloquear la app al inicio. Si uno de los archivos propios de la app (ajustes, combates pasados, cacerías, debriefings) no se puede leer, se guarda como copia .bad y se usa la copia de seguridad: ya no se borra nada, y los archivos se escriben en un paso seguro. Un fallo dentro de una parte de la app se escribe en el registro y esa parte vuelve a arrancar en vez de morir en silencio. Colores de perfil editados a mano, archivos PVP enormes o rotos, archivos demasiado grandes y una descarga de actualización incorrecta ya no pueden bloquearla ni congelarla.",
+        "Más ligera en reposo: las ventanas ocultas (el menú, el editor, la app en la bandeja) dejan de consultar de verdad, la ventana de la app pregunta menos cuando estás en el juego, los deslizadores se guardan cuando dejas de moverlos, y las grabaciones Thargoid y el registro ya no crecen sin fin."
+      ],
+      "fr": [
+        "Plus solide et plus stable. Un gros Journal (30 Mo et plus) est maintenant lu par morceaux en bien moins d'une seconde au lieu de bloquer l'app au démarrage. Si un fichier propre à l'app (réglages, combats passés, chasses, débriefings) ne peut pas être lu, il est gardé en copie .bad et la copie de sauvegarde est utilisée : plus rien n'est effacé, et les fichiers sont écrits en une seule étape sûre. Une panique dans une partie de l'app est écrite dans le journal et cette partie redémarre au lieu de mourir en silence. Des couleurs de profil modifiées à la main, des fichiers PVP énormes ou cassés, des fichiers trop gros et un mauvais téléchargement de mise à jour ne peuvent plus la faire planter ou geler.",
+        "Plus légère au repos : les fenêtres cachées (le menu, l'éditeur, l'app dans la zone de notification) cessent vraiment d'interroger, la fenêtre de l'app demande moins souvent quand tu es dans le jeu, les curseurs sont enregistrés quand tu arrêtes de les bouger, et les enregistrements Thargoid et le journal ne grossissent plus sans fin."
+      ],
+      "pt-br": [
+        "Mais forte e estável. Um Journal grande (30 MB ou mais) agora é lido em partes em bem menos de um segundo em vez de travar o app na abertura. Se um dos arquivos do próprio app (configurações, combates passados, caçadas, debriefings) não puder ser lido, ele é guardado como cópia .bad e a cópia de segurança é usada: nada mais é apagado, e os arquivos são gravados em um passo seguro. Um erro dentro de uma parte do app é escrito no registro e essa parte recomeça em vez de morrer em silêncio. Cores de perfil editadas à mão, arquivos PVP enormes ou quebrados, arquivos grandes demais e um download de atualização errado não podem mais derrubá-lo nem congelá-lo.",
+        "Mais leve em repouso: janelas escondidas (o menu, o editor, o app na bandeja) realmente param de consultar, a janela do app pergunta menos quando você está no jogo, os controles deslizantes são salvos quando você para de movê-los, e as gravações Thargoid e o registro não crescem mais sem fim."
+      ],
+      "ru": [
+        "Прочнее и стабильнее. Большой Journal (30 МБ и больше) теперь читается по частям быстрее секунды, а не подвешивает приложение при запуске. Если собственный файл приложения (настройки, прошлые бои, охоты, разборы) не читается, он сохраняется как копия .bad, а используется резервная копия: ничего больше не стирается, и файлы записываются одним безопасным шагом. Сбой в одной части приложения записывается в журнал, и эта часть запускается снова, а не умирает молча. Цвета профиля, изменённые вручную, огромные или битые PVP-файлы, слишком большие файлы и неверная загрузка обновления больше не могут его обрушить или заморозить.",
+        "Легче в покое: скрытые окна (меню, редактор, приложение в трее) действительно перестают опрашивать, окно приложения реже спрашивает, когда вы в игре, ползунки сохраняются, когда вы перестаёте их двигать, а записи Thargoid и журнал больше не растут бесконечно."
+      ]
+    },
+    {
+      "v": "0.9.21",
+      "en": [
+        "The GRAVITAS MAP's Sync is lighter and safer: it no longer sends everything again every minute, it keeps only the newest lines for a page that reloads, starts again cleanly after a long gap, skips a half-written Status.json, looks for a new Journal every 10 s instead of every second, and the window opens only our own site (a link to another place opens in your browser).",
+        "Clearer wording: the Visits and On-foot tabs say they are planned, the Updates page no longer repeats its title, the System map card says Edit HUD is in the GRAVITAS menu over the game, and some translations were corrected (orrery in German and Russian, On-foot history, PVP, Debrief).",
+        "New: the Visits tab on the Map page lists the systems you jumped to, newest first, read from your Journal each time it opens (nothing is stored). Pick one and it opens in the GRAVITAS MAP."
+      ],
+      "de": [
+        "Die Synchronisierung der GRAVITAS MAP ist schlanker und sicherer: Sie sendet nicht mehr jede Minute alles neu, behält für eine neu geladene Seite nur die neuesten Zeilen, beginnt nach einer langen Pause sauber neu, überspringt eine halb geschriebene Status.json, sucht alle 10 s statt jede Sekunde nach einem neuen Journal, und das Fenster öffnet nur unsere eigene Seite (ein Link woandershin öffnet sich im Browser).",
+        "Klarere Texte: Die Tabs Besuche und Verlauf zu Fuß sagen, dass sie geplant sind, die Updates-Seite wiederholt ihren Titel nicht mehr, die Systemkarte sagt, dass Edit HUD im GRAVITAS-Menü über dem Spiel liegt, und einige Übersetzungen wurden verbessert (Orrery auf Deutsch und Russisch, Verlauf zu Fuß, PVP, Debriefing).",
+        "Neu: Der Tab Besuche auf der Kartenseite listet die Systeme, in die du gesprungen bist, neueste zuerst, bei jedem Öffnen aus deinem Journal gelesen (nichts wird gespeichert). Wähle eines, und es öffnet sich in der GRAVITAS MAP."
+      ],
+      "es": [
+        "La sincronización del GRAVITAS MAP es más ligera y segura: ya no reenvía todo cada minuto, guarda solo las líneas más nuevas para una página que se recarga, vuelve a empezar limpiamente tras una pausa larga, omite un Status.json a medio escribir, busca un Journal nuevo cada 10 s en vez de cada segundo, y la ventana solo abre nuestro propio sitio (un enlace a otro lugar se abre en tu navegador).",
+        "Textos más claros: las pestañas Visitas y A pie dicen que están planeadas, la página de Actualizaciones ya no repite su título, la tarjeta del mapa del sistema dice que Edit HUD está en el menú GRAVITAS sobre el juego, y se corrigieron algunas traducciones (orrery en alemán y ruso, historial a pie, PVP, debriefing).",
+        "Nuevo: la pestaña Visitas de la página del mapa lista los sistemas a los que saltaste, del más nuevo al más antiguo, leídos de tu Journal cada vez que se abre (no se guarda nada). Elige uno y se abre en el GRAVITAS MAP."
+      ],
+      "fr": [
+        "La synchronisation de la GRAVITAS MAP est plus légère et plus sûre : elle ne renvoie plus tout chaque minute, ne garde que les lignes les plus récentes pour une page rechargée, repart proprement après une longue pause, ignore un Status.json à moitié écrit, cherche un nouveau Journal toutes les 10 s au lieu de chaque seconde, et la fenêtre n'ouvre que notre propre site (un lien ailleurs s'ouvre dans ton navigateur).",
+        "Textes plus clairs : les onglets Visites et À pied disent qu'ils sont prévus, la page Mises à jour ne répète plus son titre, la carte du système dit qu'Edit HUD est dans le menu GRAVITAS par-dessus le jeu, et quelques traductions ont été corrigées (orrery en allemand et en russe, historique à pied, PVP, débriefing).",
+        "Nouveau : l'onglet Visites de la page Carte liste les systèmes vers lesquels tu as sauté, du plus récent au plus ancien, lus dans ton Journal à chaque ouverture (rien n'est enregistré). Choisis-en un et il s'ouvre dans la GRAVITAS MAP."
+      ],
+      "pt-br": [
+        "A sincronização do GRAVITAS MAP ficou mais leve e segura: não reenvia tudo a cada minuto, guarda só as linhas mais novas para uma página que recarrega, recomeça limpo depois de uma pausa longa, ignora um Status.json escrito pela metade, procura um Journal novo a cada 10 s em vez de a cada segundo, e a janela só abre o nosso próprio site (um link para outro lugar abre no seu navegador).",
+        "Textos mais claros: as abas Visitas e A pé dizem que estão planejadas, a página de Atualizações não repete mais o título, o cartão do mapa do sistema diz que o Edit HUD fica no menu GRAVITAS sobre o jogo, e algumas traduções foram corrigidas (orrery em alemão e russo, histórico a pé, PVP, debriefing).",
+        "Novo: a aba Visitas da página do mapa lista os sistemas para os quais você saltou, do mais novo ao mais antigo, lidos do seu Journal toda vez que abre (nada é guardado). Escolha um e ele abre no GRAVITAS MAP."
+      ],
+      "ru": [
+        "Синхронизация GRAVITAS MAP стала легче и безопаснее: она больше не отправляет всё заново каждую минуту, хранит для перезагруженной страницы только самые новые строки, чисто начинает заново после долгой паузы, пропускает недописанный Status.json, ищет новый Journal раз в 10 с вместо каждой секунды, а окно открывает только наш сайт (ссылка на другое место откроется в браузере).",
+        "Понятнее тексты: вкладки «Посещения» и «История пешком» сообщают, что они запланированы, страница обновлений больше не повторяет заголовок, карточка карты системы говорит, что Edit HUD находится в меню GRAVITAS поверх игры, и исправлены некоторые переводы (оррери на немецком и русском, история пешком, PVP, разбор).",
+        "Новое: вкладка «Посещения» на странице карты показывает системы, в которые вы прыгали, от новых к старым, читая ваш Journal при каждом открытии (ничего не сохраняется). Выберите систему, и она откроется в GRAVITAS MAP."
+      ]
+    },
+    {
+      "v": "0.9.19",
+      "en": [
+        "The GRAVITAS MAP now belongs to the app. Map, Collisions, Sonification and Lenses are marked Ready and open in the GRAVITAS MAP window (a button on the Map page and in the in-game menu). The map follows your jumps by itself: the app reads your Journal and hands it to the window, so there is no folder to choose and nothing to confirm each time. Nothing is uploaded.",
+        "New: the Sync with the game card on the Modes page, Updates has its own place in the side bar, and About now thanks the people and projects behind GRAVITAS and lists the tools we support. Sub-tabs have clearer names (Visits, Fight history, Hunt history), the main buttons have colours of their own, and the Map page no longer says Planned."
+      ],
+      "de": [
+        "Die GRAVITAS MAP gehört jetzt zur App. Karte, Kollisionen, Sonifikation und Linsen sind als Bereit markiert und öffnen sich im Fenster der GRAVITAS MAP (Schaltfläche auf der Kartenseite und im Spielmenü). Die Karte folgt deinen Sprüngen von selbst: Die App liest dein Journal und gibt es an das Fenster weiter, du wählst keinen Ordner und bestätigst nichts mehr. Nichts wird hochgeladen.",
+        "Neu: die Karte Mit dem Spiel synchronisieren auf der Modi-Seite, Updates hat einen eigenen Platz in der Seitenleiste, und Über GRAVITAS dankt den Menschen und Projekten hinter GRAVITAS und nennt die Werkzeuge, die wir unterstützen. Unterregister haben klarere Namen (Besuche, Kampfverlauf, Jagdverlauf), die Hauptschaltflächen haben eigene Farben, und die Kartenseite sagt nicht mehr Geplant."
+      ],
+      "es": [
+        "El GRAVITAS MAP ahora pertenece a la app. Mapa, Colisiones, Sonificación y Lentes aparecen como Listo y se abren en la ventana del GRAVITAS MAP (un botón en la página del mapa y en el menú del juego). El mapa sigue tus saltos por sí solo: la app lee tu Journal y se lo pasa a la ventana, no hay carpeta que elegir ni nada que confirmar cada vez. No se sube nada.",
+        "Nuevo: la tarjeta Sincronizar con el juego en la página de Modos, Actualizaciones tiene su propio sitio en la barra lateral, y Acerca de agradece a las personas y proyectos detrás de GRAVITAS y lista las herramientas que apoyamos. Las subpestañas tienen nombres más claros (Visitas, Historial de combates, Historial de cacerías), los botones principales tienen colores propios y la página del mapa ya no dice Planeado."
+      ],
+      "fr": [
+        "La GRAVITAS MAP fait maintenant partie de l'app. Carte, Collisions, Sonification et Lentilles sont marquées Prêt et s'ouvrent dans la fenêtre de la GRAVITAS MAP (un bouton sur la page Carte et dans le menu du jeu). La carte suit tes sauts toute seule : l'app lit ton Journal et le passe à la fenêtre, plus de dossier à choisir ni de confirmation à chaque fois. Rien n'est envoyé.",
+        "Nouveau : la carte Synchroniser avec le jeu sur la page des Modes, Mises à jour a sa propre place dans la barre latérale, et À propos remercie les personnes et projets derrière GRAVITAS et liste les outils que nous soutenons. Les sous-onglets ont des noms plus clairs (Visites, Historique des combats, Historique des chasses), les boutons principaux ont leurs propres couleurs et la page Carte ne dit plus Prévu."
+      ],
+      "pt-br": [
+        "O GRAVITAS MAP agora pertence ao app. Mapa, Colisões, Sonificação e Lentes aparecem como Pronto e abrem na janela do GRAVITAS MAP (um botão na página do mapa e no menu do jogo). O mapa acompanha seus saltos sozinho: o app lê seu Journal e entrega à janela, sem pasta para escolher e nada para confirmar a cada vez. Nada é enviado.",
+        "Novo: o cartão Sincronizar com o jogo na página de Modos, Atualizações tem seu próprio lugar na barra lateral, e Sobre agradece às pessoas e projetos por trás do GRAVITAS e lista as ferramentas que apoiamos. As subabas têm nomes mais claros (Visitas, Histórico de combates, Histórico de caçadas), os botões principais têm cores próprias e a página do mapa não diz mais Planejado."
+      ],
+      "ru": [
+        "GRAVITAS MAP теперь часть приложения. Карта, Столкновения, Сонификация и Линзы помечены как Готово и открываются в окне GRAVITAS MAP (кнопка на странице карты и во внутриигровом меню). Карта сама следует за вашими прыжками: приложение читает ваш Journal и передаёт его окну, выбирать папку и каждый раз подтверждать ничего не нужно. Ничего не отправляется.",
+        "Новое: карточка «Синхронизация с игрой» на странице режимов, у «Обновлений» своё место в боковой панели, а «О программе» благодарит людей и проекты за GRAVITAS и перечисляет поддерживаемые инструменты. У вкладок более понятные названия (Посещения, История боёв, История охот), у главных кнопок свои цвета, а страница карты больше не пишет «Запланировано»."
+      ]
+    },
+    {
+      "v": "0.9.17",
+      "en": [
+        "PVP mode: the new Compare tab. Load your fight files and the other commander's: GRAVITAS finds the fights that are the same fight, puts the two PCs' clocks together (a death and a kill are one moment, and an interdiction both wrote; else the clocks as they are, with a slider to move one side) and shows both fights on one timeline: shields, hull steps, attacks, heat, Flight Assist, what each scan showed of the other, deaths, and the two ship builds side by side. With Observations switched on it adds up to four plain facts. Files are only read, never sent."
+      ],
+      "de": [
+        "PVP-Modus: der neue Tab Vergleichen. Lade deine Kampfdateien und die des anderen Commanders: GRAVITAS findet die Kämpfe, die derselbe Kampf sind, bringt die Uhren beider PCs zusammen (ein Tod und ein Abschuss sind ein Moment, ebenso ein Interdiction, das beide schrieben; sonst die Uhren wie sie sind, mit Schieberegler für eine Seite) und zeigt beide Kämpfe auf einer Zeitleiste: Schilde, Hüllenstufen, Angriffe, Hitze, Flight Assist, was jeder Scan vom anderen zeigte, Tode und die beiden Schiffsaufbauten nebeneinander. Mit eingeschalteten Beobachtungen kommen bis zu vier einfache Fakten dazu. Dateien werden nur gelesen, nie gesendet."
+      ],
+      "es": [
+        "Modo PVP: la nueva pestaña Comparar. Carga tus archivos de combate y los del otro comandante: GRAVITAS encuentra los combates que son el mismo, junta los relojes de los dos PC (una muerte y una baja son un solo momento, igual que una interdicción que ambos escribieron; si no, los relojes tal cual, con un deslizador para mover un lado) y muestra ambos combates en una línea de tiempo: escudos, escalones del casco, ataques, calor, Flight Assist, lo que cada escaneo mostró del otro, muertes y las dos configuraciones de nave lado a lado. Con Observaciones activadas añade hasta cuatro hechos simples. Los archivos solo se leen, nunca se envían."
+      ],
+      "fr": [
+        "Mode PVP : le nouvel onglet Comparer. Chargez vos fichiers de combat et ceux de l'autre commandant : GRAVITAS trouve les combats qui sont le même combat, accorde les horloges des deux PC (une mort et une destruction sont un seul instant, comme une interdiction écrite par les deux ; sinon les horloges telles quelles, avec un curseur pour déplacer un côté) et montre les deux combats sur une chronologie : boucliers, paliers de coque, attaques, chaleur, Flight Assist, ce que chaque scan a montré de l'autre, morts et les deux configurations de vaisseau côte à côte. Avec les Observations activées, jusqu'à quatre faits simples s'ajoutent. Les fichiers sont seulement lus, jamais envoyés."
+      ],
+      "pt-br": [
+        "Modo PVP: a nova aba Comparar. Carregue seus arquivos de luta e os do outro comandante: o GRAVITAS acha as lutas que são a mesma luta, junta os relógios dos dois PCs (uma morte e um abate são um só momento, assim como uma interdição que os dois registraram; senão os relógios como estão, com um controle deslizante para mover um lado) e mostra as duas lutas em uma linha do tempo: escudos, degraus do casco, ataques, calor, Flight Assist, o que cada scan mostrou do outro, mortes e as duas configurações de nave lado a lado. Com Observações ligadas, acrescenta até quatro fatos simples. Os arquivos só são lidos, nunca enviados."
+      ],
+      "ru": [
+        "Режим PVP: новая вкладка «Сравнение». Загрузите ваши файлы боёв и файлы другого командира: GRAVITAS найдёт бои, которые являются одним боем, сведёт часы двух ПК (смерть и убийство — один момент, как и перехват, записанный в обоих файлах; иначе часы как есть, с ползунком для сдвига одной стороны) и покажет оба боя на одной хронологии: щиты, ступени корпуса, атаки, нагрев, Flight Assist, что показал каждый скан о другом, смерти и две сборки кораблей рядом. При включённых наблюдениях добавляется до четырёх простых фактов. Файлы только читаются, никогда не отправляются."
+      ]
+    },
+    {
+      "v": "0.9.16",
+      "en": [
+        "New mode: PVP (off until you switch it on). Each fight with another commander is saved as a file on your computer: XXX_vs_YYY_fight_N.gravitas, with what the game wrote about you (attacks, shields, hull steps, Flight Assist, heat, the ships you locked, your ship's build if you allow it). It holds no keys and no mouse data and no commander ID. You send the file to the other commander yourself. The PVP page lists your fights with a timeline. Next version: load your friend's file and read the two fights together."
+      ],
+      "de": [
+        "Neuer Modus: PVP (aus, bis du ihn einschaltest). Jeder Kampf mit einem anderen Commander wird als Datei auf deinem Computer gespeichert: XXX_vs_YYY_fight_N.gravitas, mit dem, was das Spiel über dich schrieb (Angriffe, Schilde, Hüllenstufen, Flight Assist, Hitze, gesperrte Schiffe, dein Schiffsaufbau, wenn du es erlaubst). Sie enthält keine Tasten, keine Mausdaten und keine Commander-ID. Du schickst die Datei dem anderen Commander selbst. Die PVP-Seite listet deine Kämpfe mit Zeitleiste. Nächste Version: die Datei deines Freundes laden und beide Kämpfe gemeinsam lesen."
+      ],
+      "es": [
+        "Modo nuevo: PVP (apagado hasta que lo actives). Cada combate con otro comandante se guarda como archivo en tu ordenador: XXX_vs_YYY_fight_N.gravitas, con lo que el juego escribió sobre ti (ataques, escudos, escalones del casco, Flight Assist, calor, las naves fijadas, la configuración de tu nave si lo permites). No tiene teclas, ni datos del ratón, ni ID de comandante. Tú envías el archivo al otro comandante. La página PVP lista tus combates con una línea de tiempo. Próxima versión: cargar el archivo de tu amigo y leer los dos combates juntos."
+      ],
+      "fr": [
+        "Nouveau mode : PVP (désactivé tant que vous ne l'activez pas). Chaque combat avec un autre commandant est enregistré en fichier sur votre ordinateur : XXX_vs_YYY_fight_N.gravitas, avec ce que le jeu a écrit sur vous (attaques, boucliers, paliers de coque, Flight Assist, chaleur, vaisseaux verrouillés, la configuration de votre vaisseau si vous l'autorisez). Il ne contient ni touches, ni données de souris, ni ID de commandant. Vous envoyez le fichier vous-même à l'autre commandant. La page PVP liste vos combats avec une chronologie. Prochaine version : charger le fichier de votre ami et lire les deux combats ensemble."
+      ],
+      "pt-br": [
+        "Novo modo: PVP (desligado até você ligar). Cada luta com outro comandante é salva como arquivo no seu computador: XXX_vs_YYY_fight_N.gravitas, com o que o jogo escreveu sobre você (ataques, escudos, degraus do casco, Flight Assist, calor, naves travadas, a configuração da sua nave se você permitir). Não tem teclas, nem dados do mouse, nem ID de comandante. Você mesmo envia o arquivo ao outro comandante. A página PVP lista suas lutas com uma linha do tempo. Próxima versão: carregar o arquivo do seu amigo e ler as duas lutas juntas."
+      ],
+      "ru": [
+        "Новый режим: PVP (выключен, пока вы не включите). Каждый бой с другим командиром сохраняется файлом на вашем компьютере: XXX_vs_YYY_fight_N.gravitas, с тем, что игра написала о вас (атаки, щиты, ступени корпуса, Flight Assist, нагрев, захваченные корабли, сборка вашего корабля, если вы разрешите). В нём нет клавиш, данных мыши и ID командира. Файл вы отправляете другому командиру сами. Страница PVP показывает ваши бои с хронологией. Следующая версия: загрузить файл друга и читать два боя вместе."
+      ]
+    },
+    {
+      "v": "0.9.15",
+      "en": [
+        "New mode: Debrief (off until you switch it on). A small window shows the ship keys you press while you fly (a tap flashes, a hold counts the seconds) with the game's action name first and your key in brackets, Flight Assist, and the mouse's direction. After each fight a report shows a timeline: shields, hull steps, attacks, heat, kills, the ship you locked, Flight Assist, your keys and the mouse. Only the keys the game binds to ship actions are followed, and only while you are in your ship with the game in front. Everything stays on your computer."
+      ],
+      "de": [
+        "Neuer Modus: Debriefing (aus, bis du ihn einschaltest). Ein kleines Fenster zeigt die Schiffstasten, die du im Flug drückst (ein Tippen blitzt, ein Halten zählt Sekunden), zuerst mit dem Namen der Spielaktion und deiner Taste in Klammern, dazu Flight Assist und die Richtung der Maus. Nach jedem Kampf zeigt ein Bericht eine Zeitleiste: Schilde, Hüllenstufen, Angriffe, Hitze, Abschüsse, das gesperrte Schiff, Flight Assist, deine Tasten und die Maus. Verfolgt werden nur Tasten, die das Spiel Schiffsaktionen zuweist, und nur wenn du im Schiff sitzt und das Spiel vorne ist. Alles bleibt auf deinem Computer."
+      ],
+      "es": [
+        "Modo nuevo: Informe (apagado hasta que lo actives). Una ventana pequeña muestra las teclas de la nave que pulsas al volar (un pulso destella, una pulsación larga cuenta segundos), con el nombre de la acción del juego primero y tu tecla entre paréntesis, además de Flight Assist y la dirección del ratón. Tras cada combate un informe muestra una línea de tiempo: escudos, escalones del casco, ataques, calor, bajas, la nave fijada, Flight Assist, tus teclas y el ratón. Solo se siguen las teclas que el juego asigna a acciones de la nave, y solo con tu nave y el juego delante. Todo queda en tu ordenador."
+      ],
+      "fr": [
+        "Nouveau mode : Débriefing (désactivé tant que vous ne l'activez pas). Une petite fenêtre montre les touches du vaisseau pressées en vol (un appui clignote, un maintien compte les secondes), avec d'abord le nom de l'action du jeu et votre touche entre parenthèses, Flight Assist et la direction de la souris. Après chaque combat, un rapport montre une chronologie : boucliers, paliers de coque, attaques, chaleur, destructions, le vaisseau verrouillé, Flight Assist, vos touches et la souris. Seules les touches que le jeu donne aux actions du vaisseau sont suivies, et seulement quand vous êtes dans votre vaisseau avec le jeu au premier plan. Tout reste sur votre ordinateur."
+      ],
+      "pt-br": [
+        "Novo modo: Debriefing (desligado até você ligar). Uma janela pequena mostra as teclas da nave que você pressiona ao voar (um toque pisca, um segurar conta segundos), com o nome da ação do jogo primeiro e sua tecla entre parênteses, mais Flight Assist e a direção do mouse. Após cada luta, um relatório mostra uma linha do tempo: escudos, degraus do casco, ataques, calor, abates, a nave travada, Flight Assist, suas teclas e o mouse. Só são seguidas as teclas que o jogo dá a ações da nave, e só com você na nave e o jogo na frente. Tudo fica no seu computador."
+      ],
+      "ru": [
+        "Новый режим: Разбор (выключен, пока вы не включите). Небольшое окно показывает нажатые в полёте клавиши корабля (нажатие вспыхивает, удержание считает секунды): сначала название действия игры, ваша клавиша в скобках, а также Flight Assist и направление мыши. После каждого боя отчёт показывает хронологию: щиты, ступени корпуса, атаки, нагрев, убийства, захваченный корабль, Flight Assist, ваши клавиши и мышь. Отслеживаются только клавиши, которые игра отдаёт действиям корабля, и только когда вы в корабле и игра на переднем плане. Всё остаётся на вашем компьютере."
+      ]
+    },
+    {
+      "v": "0.9.14",
+      "en": [
+        "Fix: after you dock, the Targets by value list is cleared. A ship you scanned in a fight but did not kill no longer stays on the card for 10 minutes."
+      ],
+      "de": [
+        "Fix: Nach dem Andocken wird die Liste Ziele nach Wert geleert. Ein Schiff, das du im Kampf gescannt, aber nicht getötet hast, bleibt nicht mehr 10 Minuten auf der Karte."
+      ],
+      "es": [
+        "Arreglo: al atracar se vacía la lista de objetivos por valor. Una nave que escaneaste en un combate pero no destruiste ya no se queda 10 minutos en la tarjeta."
+      ],
+      "fr": [
+        "Correctif : à l'amarrage, la liste des cibles par valeur est vidée. Un vaisseau scanné pendant un combat mais pas détruit ne reste plus 10 minutes sur la carte."
+      ],
+      "pt-br": [
+        "Correção: ao atracar, a lista de alvos por valor é limpa. Uma nave que você escaneou numa luta mas não destruiu não fica mais 10 minutos no cartão."
+      ],
+      "ru": [
+        "Исправление: после стыковки список целей по ценности очищается. Корабль, который вы просканировали в бою, но не уничтожили, больше не остаётся на карточке 10 минут."
+      ]
+    },
+    {
+      "v": "0.9.13",
+      "en": [
+        "The Xeno Hunt report now compares the hunt with your other hunts: its time against your average, bonds per hour, the time since your last hunt, and a short summary of the session. It also names the build you flew (read from the Journal, nothing to type in) and shows your average on that build, plus your total overheating time."
+      ],
+      "de": [
+        "Der Xeno-Jagdbericht vergleicht die Jagd jetzt mit deinen anderen Jagden: Zeit gegen deinen Schnitt, Bonds pro Stunde, Zeit seit der letzten Jagd und eine kurze Zusammenfassung der Sitzung. Er nennt auch den geflogenen Build (aus dem Journal gelesen, nichts einzugeben) mit deinem Schnitt darauf, und deine gesamte Überhitzungszeit."
+      ],
+      "es": [
+        "El informe de la caza Xeno ahora compara la caza con tus otras cazas: su tiempo frente a tu media, bonos por hora, el tiempo desde tu última caza y un breve resumen de la sesión. También nombra el build que volaste (leído del Journal, nada que escribir) con tu media en él, y tu tiempo total de sobrecalentamiento."
+      ],
+      "fr": [
+        "Le rapport de chasse Xeno compare maintenant la chasse à vos autres chasses : son temps face à votre moyenne, bons par heure, temps depuis la dernière chasse et un court résumé de la session. Il nomme aussi le build piloté (lu dans le Journal, rien à saisir) avec votre moyenne dessus, et votre durée totale de surchauffe."
+      ],
+      "pt-br": [
+        "O relatório da caça Xeno agora compara a caça com suas outras caças: o tempo contra sua média, bônus por hora, o tempo desde a última caça e um resumo curto da sessão. Também nomeia o build que você pilotou (lido do Journal, nada a digitar) com sua média nele, e seu tempo total de superaquecimento."
+      ],
+      "ru": [
+        "Отчёт об охоте на ксено теперь сравнивает охоту с вашими другими: время против среднего, бонды в час, время с прошлой охоты и краткий итог сессии. Он также называет вашу сборку (читается из Журнала, вводить ничего не нужно) и показывает ваше среднее на ней, а также общее время перегрева."
+      ]
+    },
+    {
+      "v": "0.9.12",
+      "en": [
+        "The Xeno Hunt report now shows your hull as a range (for example 40-60 %, marked as an estimate). The game writes the hull only in 20 % steps, and 12 of 12 real hunts fell inside the range. No step at all means 80-100 %. Attacks are counted as waves, not as Journal lines."
+      ],
+      "de": [
+        "Der Xeno-Jagdbericht zeigt deine Hülle jetzt als Bereich (zum Beispiel 40-60 %, als Schätzung markiert). Das Spiel schreibt die Hülle nur in 20-%-Schritten, und 12 von 12 echten Jagden lagen im Bereich. Gar keine Stufe bedeutet 80-100 %. Angriffe werden als Wellen gezählt, nicht als Journal-Zeilen."
+      ],
+      "es": [
+        "El informe de la caza Xeno ahora muestra tu casco como un rango (por ejemplo 40-60 %, marcado como estimación). El juego escribe el casco solo en escalones del 20 %, y 12 de 12 cazas reales cayeron dentro del rango. Ningún escalón significa 80-100 %. Los ataques se cuentan como oleadas, no como líneas del Journal."
+      ],
+      "fr": [
+        "Le rapport de chasse Xeno montre maintenant votre coque comme une plage (par exemple 40-60 %, marquée comme estimation). Le jeu n'écrit la coque que par paliers de 20 %, et 12 chasses réelles sur 12 sont tombées dans la plage. Aucun palier signifie 80-100 %. Les attaques sont comptées en vagues, pas en lignes du Journal."
+      ],
+      "pt-br": [
+        "O relatório da caça Xeno agora mostra seu casco como uma faixa (por exemplo 40-60 %, marcada como estimativa). O jogo escreve o casco só em degraus de 20 %, e 12 de 12 caças reais caíram dentro da faixa. Nenhum degrau significa 80-100 %. Os ataques são contados como ondas, não como linhas do Journal."
+      ],
+      "ru": [
+        "Отчёт об охоте на ксено теперь показывает корпус как диапазон (например 40-60 %, помечен как оценка). Игра пишет корпус только ступенями по 20 %, и 12 из 12 реальных охот попали в диапазон. Отсутствие ступени означает 80-100 %. Атаки считаются волнами, а не строками Журнала."
+      ]
+    },
+    {
+      "v": "0.9.11",
+      "en": [
+        "The Xeno Hunt report no longer shows a hull number when the game wrote no hull step (it only writes one every 20 %). It says no step instead, and a new Damage taken block lists the attacks received and the heat damage events the Journal counted."
+      ],
+      "de": [
+        "Der Xeno-Jagdbericht zeigt keine Hüllenzahl mehr, wenn das Spiel keine Hüllenstufe geschrieben hat (es schreibt nur alle 20 %). Stattdessen steht keine Stufe, und ein neuer Block Erlittener Schaden listet die erhaltenen Angriffe und Hitzeschaden-Ereignisse aus dem Journal."
+      ],
+      "es": [
+        "El informe de la caza Xeno ya no muestra un número de casco cuando el juego no escribió ningún escalón (solo escribe uno cada 20 %). Dice sin escalón, y un nuevo bloque Daño recibido lista los ataques recibidos y los eventos de daño por calor del Journal."
+      ],
+      "fr": [
+        "Le rapport de chasse Xeno n'affiche plus de valeur de coque quand le jeu n'a écrit aucun palier (il n'en écrit qu'un tous les 20 %). Il indique aucun palier, et un nouveau bloc Dégâts subis liste les attaques subies et les événements de dégâts de chaleur du Journal."
+      ],
+      "pt-br": [
+        "O relatório da caça Xeno não mostra mais um número de casco quando o jogo não escreveu nenhum degrau (só escreve um a cada 20 %). Diz sem degrau, e um novo bloco Dano recebido lista os ataques recebidos e os eventos de dano por calor do Journal."
+      ],
+      "ru": [
+        "Отчёт об охоте на ксено больше не показывает число корпуса, если игра не записала ступень (она пишет только каждые 20 %). Вместо этого стоит нет ступени, а новый блок Полученный урон перечисляет полученные атаки и случаи урона от перегрева из Журнала."
+      ]
+    },
+    {
+      "v": "0.9.10",
+      "en": [
+        "The Xeno Hunt report no longer claims a lowest hull it cannot know. The game writes the hull only in 20 % steps and not at all for heat damage, so the tile now says Last hull with max in front after heat damage, and the timeline notes it."
+      ],
+      "de": [
+        "Der Xeno-Jagdbericht behauptet keine niedrigste Hülle mehr, die er nicht kennen kann. Das Spiel schreibt die Hülle nur in 20-%-Schritten und gar nicht bei Hitzeschaden. Die Kachel heißt jetzt Letzte Hülle, nach Hitzeschaden mit Höchstens-Zeichen, und die Zeitleiste vermerkt es."
+      ],
+      "es": [
+        "El informe de la caza Xeno ya no afirma un casco mínimo que no puede conocer. El juego escribe el casco solo en pasos del 20 % y nada en el daño por calor, así que la casilla dice Último casco, con signo de máximo tras daño por calor, y la cronología lo anota."
+      ],
+      "fr": [
+        "Le rapport de chasse Xeno n'affirme plus une coque minimale qu'il ne peut pas connaître. Le jeu n'écrit la coque que par paliers de 20 % et pas du tout pour les dégâts de chaleur. La tuile dit maintenant Dernière coque, avec un signe maximum après des dégâts de chaleur, et la chronologie le note."
+      ],
+      "pt-br": [
+        "O relatório da caça Xeno não afirma mais um casco mínimo que não pode saber. O jogo escreve o casco só em passos de 20 % e nada no dano por calor, então o bloco diz Último casco, com sinal de máximo após dano por calor, e a linha do tempo anota."
+      ],
+      "ru": [
+        "Отчёт об охоте на ксено больше не заявляет минимальный корпус, которого он знать не может. Игра пишет корпус только шагами по 20 % и совсем не пишет урон от перегрева. Теперь плитка называется Последний корпус, после урона от перегрева с знаком не более, а хронология это отмечает."
+      ]
+    },
+    {
+      "v": "0.9.9",
+      "en": [
+        "The modes switch by themselves. A small card at the top says Combat Mode On in a ship fight, Thargoid Mode On in a Xeno Hunt and On Foot Mode On when you leave the ship. All three are on by default. The switches in Modes only turn one off completely.",
+        "A Xeno Hunt no longer shows a Combat report with 0 kills. The Xeno Hunt report shows instead, and the hunt goes to Past Thargoid with the system, the kills named by bond (Cyclops, Scout...) and the overheating time.",
+        "Past Thargoid and Past combats refresh by themselves while they are open.",
+        "Fixed: after a settings reset the Combat mode started off and no window showed."
+      ],
+      "de": [
+        "Die Modi wechseln von selbst. Eine kleine Karte oben sagt Kampfmodus an im Schiffskampf, Thargoid-Modus an in einer Xeno-Jagd und Zu-Fuß-Modus an, wenn du das Schiff verlässt. Alle drei sind standardmäßig an. Die Schalter bei Modi schalten einen nur ganz aus.",
+        "Eine Xeno-Jagd zeigt keinen Kampfbericht mit 0 Abschüssen mehr. Stattdessen erscheint der Xeno-Jagdbericht, und die Jagd landet in den früheren Thargoid-Jagden mit System, nach Prämie benannten Abschüssen (Cyclops, Scout ...) und Überhitzungszeit.",
+        "Frühere Thargoid-Jagden und frühere Kämpfe aktualisieren sich von selbst, solange sie offen sind.",
+        "Behoben: Nach einem Zurücksetzen der Einstellungen startete der Kampfmodus aus und kein Fenster erschien."
+      ],
+      "es": [
+        "Los modos cambian solos. Una pequeña tarjeta arriba dice Modo Combate activado en un combate de nave, Modo Thargoid activado en una caza Xeno y Modo a pie activado al salir de la nave. Los tres vienen activados. Los interruptores en Modos solo desactivan uno por completo.",
+        "Una caza Xeno ya no muestra un informe de combate con 0 bajas. Se muestra el informe de la caza Xeno y la caza va a las cazas Thargoid anteriores con el sistema, las bajas nombradas por bono (Cyclops, Scout...) y el tiempo de sobrecalentamiento.",
+        "Las cazas Thargoid anteriores y los combates anteriores se actualizan solos mientras están abiertos.",
+        "Corregido: tras restablecer los ajustes, el modo Combate empezaba apagado y no se mostraba ninguna ventana."
+      ],
+      "fr": [
+        "Les modes changent tout seuls. Une petite carte en haut dit Mode Combat activé dans un combat de vaisseau, Mode Thargoid activé dans une chasse Xeno et Mode à pied activé quand tu quittes le vaisseau. Les trois sont activés par défaut. Les interrupteurs dans Modes n'en désactivent un que complètement.",
+        "Une chasse Xeno n'affiche plus de rapport de combat avec 0 victoire. Le rapport de chasse Xeno s'affiche à la place, et la chasse va dans les chasses Thargoid passées avec le système, les victoires nommées d'après la prime (Cyclops, Scout...) et le temps de surchauffe.",
+        "Les chasses Thargoid passées et les combats passés se rafraîchissent tout seuls tant qu'ils sont ouverts.",
+        "Corrigé : après une réinitialisation des réglages, le mode Combat démarrait désactivé et aucune fenêtre ne s'affichait."
+      ],
+      "pt-br": [
+        "Os modos mudam sozinhos. Um pequeno cartão no topo diz Modo Combate ativado numa luta de nave, Modo Thargoid ativado numa caça Xeno e Modo a pé ativado ao sair da nave. Os três vêm ligados. Os interruptores em Modos só desligam um por completo.",
+        "Uma caça Xeno não mostra mais um relatório de combate com 0 abates. O relatório da caça Xeno aparece no lugar, e a caça vai para as caças Thargoid anteriores com o sistema, os abates nomeados pelo bônus (Cyclops, Scout...) e o tempo de superaquecimento.",
+        "As caças Thargoid anteriores e os combates anteriores se atualizam sozinhos enquanto estão abertos.",
+        "Corrigido: após redefinir as configurações, o modo Combate começava desligado e nenhuma janela aparecia."
+      ],
+      "ru": [
+        "Режимы переключаются сами. Небольшая карточка вверху сообщает: режим боя включён в бою на корабле, режим таргоидов включён в охоте на ксено, пеший режим включён при выходе из корабля. По умолчанию включены все три. Переключатели в разделе режимов лишь полностью отключают режим.",
+        "Охота на ксено больше не показывает боевой отчёт с 0 убийств. Вместо него показывается отчёт об охоте, а сама охота попадает в прошлые охоты на таргоидов с системой, убийствами по размеру премии (Cyclops, Scout...) и временем перегрева.",
+        "Прошлые охоты на таргоидов и прошлые бои обновляются сами, пока открыты.",
+        "Исправлено: после сброса настроек режим боя стартовал выключенным и окна не показывались."
+      ]
+    },
+    {
+      "v": "0.9.7",
+      "en": [
+        "Your settings, Past combats and Past Thargoid now get a second copy in %LOCALAPPDATA%\\GRAVITAS-backup, outside the app's folders, so an uninstall or a repair does not take them with it. A lost file comes back by itself at the next start.",
+        "A blocked update now says so and what to do (an antivirus can block it), instead of \"Could not check\".",
+        "Build changes against false antivirus alarms. The app is being prepared for code signing."
+      ],
+      "de": [
+        "Deine Einstellungen, früheren Kämpfe und Thargoid-Jagden bekommen jetzt eine zweite Kopie in %LOCALAPPDATA%\\GRAVITAS-backup, außerhalb der App-Ordner, damit eine Deinstallation oder Reparatur sie nicht mitnimmt. Eine verlorene Datei kommt beim nächsten Start von selbst zurück.",
+        "Ein blockiertes Update sagt das jetzt und was zu tun ist (ein Virenschutz kann es blockieren), statt \"Could not check\".",
+        "Änderungen am Build gegen falsche Virenalarme. Die App wird für die Code-Signierung vorbereitet."
+      ],
+      "es": [
+        "Tus ajustes, combates anteriores y cazas Thargoid anteriores ahora tienen una segunda copia en %LOCALAPPDATA%\\GRAVITAS-backup, fuera de las carpetas de la app, para que una desinstalación o reparación no se los lleve. Un archivo perdido vuelve solo en el siguiente inicio.",
+        "Una actualización bloqueada ahora lo dice y explica qué hacer (un antivirus puede bloquearla), en lugar de \"Could not check\".",
+        "Cambios en la compilación contra falsas alarmas de antivirus. La app se prepara para la firma de código."
+      ],
+      "fr": [
+        "Tes réglages, tes combats passés et tes chasses Thargoid passées ont maintenant une seconde copie dans %LOCALAPPDATA%\\GRAVITAS-backup, hors des dossiers de l'app, pour qu'une désinstallation ou une réparation ne les emporte pas. Un fichier perdu revient seul au prochain démarrage.",
+        "Une mise à jour bloquée le dit maintenant et explique quoi faire (un antivirus peut la bloquer), au lieu de \"Could not check\".",
+        "Changements de compilation contre les fausses alertes antivirus. L'app est préparée pour la signature de code."
+      ],
+      "pt-br": [
+        "Suas configurações, combates anteriores e caças Thargoid anteriores agora têm uma segunda cópia em %LOCALAPPDATA%\\GRAVITAS-backup, fora das pastas do app, para que uma desinstalação ou reparo não as leve junto. Um arquivo perdido volta sozinho na próxima abertura.",
+        "Uma atualização bloqueada agora avisa e diz o que fazer (um antivírus pode bloqueá-la), em vez de \"Could not check\".",
+        "Mudanças na compilação contra falsos alarmes de antivírus. O app está sendo preparado para a assinatura de código."
+      ],
+      "ru": [
+        "Ваши настройки, прошлые бои и прошлые охоты на таргоидов теперь получают вторую копию в %LOCALAPPDATA%\\GRAVITAS-backup, вне папок приложения, чтобы удаление или восстановление не уносило их с собой. Потерянный файл возвращается сам при следующем запуске.",
+        "Заблокированное обновление теперь сообщает об этом и о том, что делать (его может блокировать антивирус), вместо \"Could not check\".",
+        "Изменения сборки против ложных тревог антивируса. Приложение готовится к подписи кода."
+      ]
+    },
+    {
+      "v": "0.9.6",
+      "en": [
+        "Past Thargoid keeps your Xeno Hunts: system, what you killed (Scout, Cyclops, Orthrus, Basilisk, Medusa or Hydra, named by the bond), time, bonds and the full report. Copy for Discord and Show in the game work there too.",
+        "Thargoid fights no longer land in Past combats with 0 kills.",
+        "Star your best fights: a star button in Past combats and Past Thargoid. Starred ones stay on top and are never removed when the list is full.",
+        "Overheating time: the Thargoid card shows how long the ship was really overheating, and the report lists each stretch."
+      ],
+      "de": [
+        "Frühere Thargoid-Jagden speichert deine Xeno-Jagden: System, was du abgeschossen hast (Scout, Cyclops, Orthrus, Basilisk, Medusa oder Hydra, nach der Prämie benannt), Zeit, Prämien und den vollen Bericht. Für Discord kopieren und Im Spiel zeigen gehen auch dort.",
+        "Thargoid-Kämpfe landen nicht mehr mit 0 Abschüssen in den früheren Kämpfen.",
+        "Markiere deine besten Kämpfe mit einem Stern: Sterne gibt es bei den früheren Kämpfen und den Thargoid-Jagden. Markierte bleiben oben und werden nie entfernt, wenn die Liste voll ist.",
+        "Überhitzungszeit: Die Thargoid-Karte zeigt, wie lange das Schiff wirklich überhitzt war, und der Bericht listet jede Phase."
+      ],
+      "es": [
+        "Cazas Thargoid anteriores guarda tus cazas Xeno: sistema, qué abatiste (Scout, Cyclops, Orthrus, Basilisk, Medusa o Hydra, según el bono), tiempo, bonos y el informe completo. Copiar para Discord y Mostrar en el juego también funcionan ahí.",
+        "Los combates contra Thargoids ya no acaban en los combates anteriores con 0 bajas.",
+        "Marca tus mejores combates con una estrella: hay un botón de estrella en los combates anteriores y en las cazas Thargoid. Los marcados quedan arriba y nunca se borran cuando la lista se llena.",
+        "Tiempo de sobrecalentamiento: la tarjeta Thargoid muestra cuánto estuvo realmente sobrecalentada la nave y el informe lista cada tramo."
+      ],
+      "fr": [
+        "Chasses Thargoid passées garde tes chasses Xeno : système, ce que tu as abattu (Scout, Cyclops, Orthrus, Basilisk, Medusa ou Hydra, nommé d'après la prime), durée, primes et le rapport complet. Copier pour Discord et Afficher dans le jeu y fonctionnent aussi.",
+        "Les combats contre les Thargoids n'arrivent plus dans les combats passés avec 0 victoire.",
+        "Marque tes meilleurs combats d'une étoile : un bouton étoile dans les combats passés et les chasses Thargoid. Ceux marqués restent en haut et ne sont jamais retirés quand la liste est pleine.",
+        "Temps de surchauffe : la carte Thargoid montre combien de temps le vaisseau a réellement surchauffé et le rapport liste chaque période."
+      ],
+      "pt-br": [
+        "Caças Thargoid anteriores guarda suas caças Xeno: sistema, o que você abateu (Scout, Cyclops, Orthrus, Basilisk, Medusa ou Hydra, pelo nome do bônus), tempo, bônus e o relatório completo. Copiar para o Discord e Mostrar no jogo também funcionam lá.",
+        "Combates contra Thargoids não vão mais para os combates anteriores com 0 abates.",
+        "Marque seus melhores combates com uma estrela: há um botão de estrela nos combates anteriores e nas caças Thargoid. Os marcados ficam no topo e nunca são removidos quando a lista enche.",
+        "Tempo de superaquecimento: o cartão Thargoid mostra quanto tempo a nave realmente superaqueceu e o relatório lista cada trecho."
+      ],
+      "ru": [
+        "Раздел «Прошлые охоты на таргоидов» хранит ваши охоты на ксено: система, кого вы убили (Scout, Cyclops, Orthrus, Basilisk, Medusa или Hydra, по размеру премии), время, премии и полный отчёт. Копирование для Discord и показ в игре там тоже работают.",
+        "Бои с таргоидами больше не попадают в прошлые бои с 0 убийств.",
+        "Отмечайте лучшие бои звездой: кнопка со звездой есть в прошлых боях и в прошлых охотах на таргоидов. Отмеченные остаются вверху и не удаляются, когда список заполнен.",
+        "Время перегрева: карточка таргоидов показывает, как долго корабль реально перегревался, а отчёт перечисляет каждый отрезок."
+      ]
+    },
+    {
+      "v": "0.9.5",
+      "en": [
+        "Xeno Hunt ends at the last kill: a Cyclops hunt ends the moment the Cyclops dies, a scout hunt when the last scout the signal promised is down (threat 3 = 2 scouts, threat 4 = 4 scouts). The report shows at once instead of about a minute later.",
+        "The Thargoid card shows scout kills as 2/4 while the signal's promise is known.",
+        "Fixed: when the game played its Exploration music right at the drop, the signal's threat level was lost and the card showed no threat."
+      ],
+      "de": [
+        "Die Xeno-Jagd endet beim letzten Abschuss: Eine Cyclops-Jagd endet, sobald der Cyclops fällt, eine Scout-Jagd, wenn der letzte vom Signal versprochene Scout erledigt ist (Stufe 3 = 2 Scouts, Stufe 4 = 4 Scouts). Der Bericht erscheint sofort statt etwa eine Minute später.",
+        "Die Thargoid-Karte zeigt Scout-Abschüsse als 2/4, solange das Versprechen des Signals bekannt ist.",
+        "Behoben: Spielte das Spiel direkt beim Absprung seine Exploration-Musik, ging die Bedrohungsstufe des Signals verloren und die Karte zeigte keine Stufe."
+      ],
+      "es": [
+        "La caza Xeno termina con la última baja: una caza de Cyclops acaba en cuanto muere el Cyclops, y una de scouts cuando cae el último scout que prometía la señal (amenaza 3 = 2 scouts, amenaza 4 = 4 scouts). El informe aparece al instante, no un minuto después.",
+        "La tarjeta Thargoid muestra las bajas de scouts como 2/4 mientras se conoce lo que promete la señal.",
+        "Corregido: si el juego ponía su música de Exploration justo al llegar, se perdía el nivel de amenaza de la señal y la tarjeta no mostraba amenaza."
+      ],
+      "fr": [
+        "La chasse Xeno se termine à la dernière victoire : une chasse au Cyclops finit dès que le Cyclops tombe, une chasse aux scouts quand le dernier scout promis par le signal est abattu (menace 3 = 2 scouts, menace 4 = 4 scouts). Le rapport s'affiche aussitôt au lieu d'une minute plus tard.",
+        "La carte Thargoid montre les victoires sur scouts sous la forme 2/4 tant que la promesse du signal est connue.",
+        "Corrigé : quand le jeu jouait sa musique Exploration dès l'arrivée, le niveau de menace du signal était perdu et la carte n'en montrait pas."
+      ],
+      "pt-br": [
+        "A caça Xeno termina no último abate: uma caça de Cyclops acaba assim que o Cyclops morre, e uma de scouts quando o último scout prometido pelo sinal cai (ameaça 3 = 2 scouts, ameaça 4 = 4 scouts). O relatório aparece na hora, não um minuto depois.",
+        "O cartão Thargoid mostra os abates de scouts como 2/4 enquanto a promessa do sinal é conhecida.",
+        "Corrigido: quando o jogo tocava a música Exploration logo na chegada, o nível de ameaça do sinal se perdia e o cartão não mostrava ameaça."
+      ],
+      "ru": [
+        "Охота на ксено заканчивается на последнем убийстве: охота на Cyclops завершается, как только Cyclops убит, охота на скаутов, когда сбит последний скаут, обещанный сигналом (угроза 3 = 2 скаута, угроза 4 = 4 скаута). Отчёт появляется сразу, а не примерно через минуту.",
+        "Карточка Thargoid показывает убийства скаутов как 2/4, пока известно обещание сигнала.",
+        "Исправлено: если игра включала музыку Exploration прямо при выходе, уровень угрозы сигнала терялся, и карточка не показывала угрозу."
+      ]
+    },
+    {
+      "v": "0.9.4",
+      "en": [
+        "The Shutdown Field warning window is gone: the game gives no sign before a shutdown, and you feel it anyway.",
+        "The Thargoid page is tidied: the two Xeno Hunt windows show by themselves while Thargoids are about, the page text says what is shown and what the game does not write, and the recording folder path is fixed."
+      ],
+      "de": [
+        "Das Fenster der Shutdown-Field-Warnung ist weg: Das Spiel gibt vor einer Abschaltung kein Zeichen, und du spürst sie ohnehin.",
+        "Die Thargoid-Seite ist aufgeräumt: Die zwei Fenster der Xeno-Jagd erscheinen von selbst, solange Thargoiden da sind, der Text sagt, was gezeigt wird und was das Spiel nicht schreibt, und der Pfad des Aufnahmeordners stimmt wieder."
+      ],
+      "es": [
+        "La ventana de aviso del Shutdown Field ya no existe: el juego no da ninguna señal antes de un apagón y se nota igualmente.",
+        "La página Thargoid está ordenada: las dos ventanas de la caza Xeno aparecen solas mientras haya Thargoids, el texto dice qué se muestra y qué no escribe el juego, y la ruta de la carpeta de grabación está corregida."
+      ],
+      "fr": [
+        "La fenêtre d'alerte Shutdown Field a disparu : le jeu ne donne aucun signe avant une coupure et on la sent de toute façon.",
+        "La page Thargoid est remise en ordre : les deux fenêtres de la chasse Xeno s'affichent d'elles-mêmes tant que des Thargoids sont là, le texte dit ce qui est montré et ce que le jeu n'écrit pas, et le chemin du dossier d'enregistrement est corrigé."
+      ],
+      "pt-br": [
+        "A janela de aviso do Shutdown Field foi removida: o jogo não dá nenhum sinal antes de um desligamento e você sente de qualquer jeito.",
+        "A página Thargoid foi arrumada: as duas janelas da caça Xeno aparecem sozinhas enquanto houver Thargoids, o texto diz o que é mostrado e o que o jogo não escreve, e o caminho da pasta de gravação foi corrigido."
+      ],
+      "ru": [
+        "Окно предупреждения Shutdown Field убрано: игра ничего не пишет перед отключением, и вы его и так чувствуете.",
+        "Страница Thargoid приведена в порядок: два окна охоты на ксено появляются сами, пока рядом таргоиды, текст говорит, что показывается и чего игра не пишет, а путь к папке записи исправлен."
+      ]
+    },
+    {
+      "v": "0.9.3",
+      "en": [
+        "The three Xeno Hunt windows (Thargoid card, Xeno Hunt report, Shutdown Field warning) moved from the Combat page to the Thargoid page, in the app and in the GRAVITAS menu. Their settings stay as they were."
+      ],
+      "de": [
+        "Die drei Xeno-Jagd-Fenster (Thargoid-Karte, Jagdbericht, Shutdown-Field-Warnung) sind von der Combat-Seite auf die Thargoid-Seite gewandert, in der App und im GRAVITAS-Menü. Ihre Einstellungen bleiben erhalten."
+      ],
+      "es": [
+        "Las tres ventanas de la caza Xeno (tarjeta Thargoid, informe de caza, aviso del Shutdown Field) pasaron de la página Combat a la página Thargoid, en la app y en el menú GRAVITAS. Sus ajustes se conservan."
+      ],
+      "fr": [
+        "Les trois fenêtres de la chasse Xeno (carte Thargoid, rapport de chasse, alerte Shutdown Field) passent de la page Combat à la page Thargoid, dans l'app et dans le menu GRAVITAS. Leurs réglages sont conservés."
+      ],
+      "pt-br": [
+        "As três janelas da caça Xeno (cartão Thargoid, relatório de caça, aviso do Shutdown Field) saíram da página Combat e foram para a página Thargoid, no app e no menu GRAVITAS. As configurações continuam as mesmas."
+      ],
+      "ru": [
+        "Три окна охоты на ксено (карточка Thargoid, отчёт об охоте, предупреждение Shutdown Field) перенесены со страницы Combat на страницу Thargoid, в приложении и в меню GRAVITAS. Их настройки сохранены."
+      ]
+    },
+    {
+      "v": "0.9.2",
+      "en": [
+        "Xeno Hunt: three new windows for Thargoid fights. The Thargoid card takes the place of Targets by value while Thargoids are about: threat level and likely enemy, time, kills and bonds, attacks, shutdowns, heat, your hull steps.",
+        "Xeno Hunt report: when the hunt ends, a report shows for a minute: kills by type, timeline, lowest hull, salvage.",
+        "Shutdown Field warning, at the very top: a hint to have the Shutdown Field Neutraliser ready in an Interceptor fight, and a red alert the moment your systems are shut down.",
+        "The game writes no Thargoid hull, shield or hearts, so none are shown. Windows are in the Windows list and can be moved in Edit HUD."
+      ],
+      "de": [
+        "Xeno-Jagd: drei neue Fenster für Thargoiden-Kämpfe. Die Thargoid-Karte ersetzt Targets by value, solange Thargoiden da sind: Bedrohungsstufe und wahrscheinlicher Gegner, Zeit, Abschüsse und Prämien, Angriffe, Abschaltungen, Hitze, deine Hüllenstufen.",
+        "Xeno-Jagdbericht: Nach der Jagd erscheint eine Minute lang ein Bericht: Abschüsse nach Art, Zeitleiste, niedrigste Hülle, Bergung.",
+        "Shutdown-Field-Warnung ganz oben: ein Hinweis, den Shutdown Field Neutraliser bereitzuhalten, und ein roter Alarm, sobald deine Systeme abgeschaltet werden.",
+        "Das Spiel schreibt keine Hülle, Schilde oder Herzen der Thargoiden, also zeigen wir sie nicht. Die Fenster stehen in der Fensterliste und lassen sich in Edit HUD verschieben."
+      ],
+      "es": [
+        "Caza Xeno: tres ventanas nuevas para los combates contra Thargoids. La tarjeta Thargoid ocupa el lugar de Targets by value mientras haya Thargoids: nivel de amenaza y enemigo probable, tiempo, bajas y bonos, ataques, apagones, calor y los escalones de tu casco.",
+        "Informe de caza Xeno: al terminar la caza se muestra un informe durante un minuto: bajas por tipo, cronología, casco mínimo y restos recogidos.",
+        "Aviso del Shutdown Field, arriba del todo: un recordatorio para tener listo el Shutdown Field Neutraliser en un combate con Interceptor y una alerta roja en cuanto se apagan tus sistemas.",
+        "El juego no escribe el casco, los escudos ni los corazones del Thargoid, así que no se muestran. Las ventanas están en la lista de ventanas y se mueven en Edit HUD."
+      ],
+      "fr": [
+        "Chasse Xeno : trois nouvelles fenêtres pour les combats contre les Thargoids. La carte Thargoid prend la place de Targets by value tant que des Thargoids sont là : niveau de menace et ennemi probable, durée, victoires et primes, attaques, coupures, chaleur et paliers de votre coque.",
+        "Rapport de chasse Xeno : à la fin de la chasse, un rapport s'affiche une minute : victoires par type, chronologie, coque minimale, récupération.",
+        "Alerte Shutdown Field, tout en haut : un rappel d'avoir le Shutdown Field Neutraliser prêt dans un combat d'Intercepteur et une alerte rouge dès que vos systèmes sont coupés.",
+        "Le jeu n'écrit ni coque, ni boucliers, ni cœurs du Thargoid : rien n'est donc affiché. Les fenêtres sont dans la liste des fenêtres et se déplacent dans Edit HUD."
+      ],
+      "pt-br": [
+        "Caça Xeno: três janelas novas para combates contra Thargoids. O cartão Thargoid ocupa o lugar de Targets by value enquanto houver Thargoids: nível de ameaça e inimigo provável, tempo, abates e bônus, ataques, desligamentos, calor e os degraus do seu casco.",
+        "Relatório de caça Xeno: ao fim da caça, um relatório aparece por um minuto: abates por tipo, linha do tempo, casco mínimo e recuperado.",
+        "Aviso do Shutdown Field, no topo: um lembrete para deixar o Shutdown Field Neutraliser pronto numa luta com Interceptor e um alerta vermelho assim que seus sistemas são desligados.",
+        "O jogo não escreve casco, escudos ou corações do Thargoid, então eles não aparecem. As janelas estão na lista de janelas e podem ser movidas em Edit HUD."
+      ],
+      "ru": [
+        "Охота на ксено: три новых окна для боёв с таргоидами. Карточка Thargoid занимает место Targets by value, пока рядом таргоиды: уровень угрозы и вероятный противник, время, убийства и премии, атаки, отключения, перегрев, ступени вашего корпуса.",
+        "Отчёт об охоте на ксено: по окончании охоты на минуту появляется отчёт: убийства по типам, хронология, минимальный корпус, добыча.",
+        "Предупреждение Shutdown Field наверху: напоминание держать Shutdown Field Neutraliser наготове в бою с Перехватчиком и красная тревога, как только ваши системы отключены.",
+        "Игра не пишет корпус, щиты и сердца таргоида, поэтому они не показываются. Окна есть в списке окон, их можно двигать в Edit HUD."
+      ]
+    },
+    {
+      "v": "0.9.1",
+      "en": [
+        "The System map follows the keys much faster: its picture is drawn about 8 times quicker.",
+        "Size, opacity and dark ground in Edit HUD are now each window's own. \"Same as all windows\" puts a window back on the shared settings.",
+        "The map's width and height sliders move the card live, without rebuilding it.",
+        "Open the map window closes the menu and opens the site big, in front."
+      ],
+      "de": [
+        "Die Systemkarte folgt den Tasten viel schneller: Ihr Bild wird etwa 8-mal schneller gezeichnet.",
+        "Größe, Deckkraft und dunkler Grund in Edit HUD gelten jetzt für jedes Fenster einzeln. „Wie alle Fenster“ stellt ein Fenster wieder auf die gemeinsamen Einstellungen.",
+        "Die Regler für Breite und Höhe der Karte bewegen die Karte live, ohne sie neu aufzubauen.",
+        "„Kartenfenster öffnen“ schließt das Menü und öffnet die Seite groß im Vordergrund."
+      ],
+      "es": [
+        "El mapa del sistema sigue las teclas mucho más rápido: su imagen se dibuja unas 8 veces más deprisa.",
+        "El tamaño, la opacidad y el fondo oscuro de Edit HUD son ahora propios de cada ventana. «Igual que todas las ventanas» devuelve una ventana a los ajustes comunes.",
+        "Los controles de ancho y alto del mapa mueven la tarjeta en vivo, sin reconstruirla.",
+        "Abrir la ventana del mapa cierra el menú y abre el sitio grande y al frente."
+      ],
+      "fr": [
+        "La carte du système suit les touches bien plus vite : son image est dessinée environ 8 fois plus rapidement.",
+        "La taille, l'opacité et le fond sombre d'Edit HUD sont maintenant propres à chaque fenêtre. « Comme toutes les fenêtres » remet une fenêtre sur les réglages communs.",
+        "Les curseurs de largeur et de hauteur de la carte déplacent la carte en direct, sans la reconstruire.",
+        "Ouvrir la fenêtre de la carte ferme le menu et ouvre le site en grand, au premier plan."
+      ],
+      "pt-br": [
+        "O mapa do sistema acompanha as teclas bem mais rápido: a imagem é desenhada cerca de 8 vezes mais depressa.",
+        "Tamanho, opacidade e fundo escuro do Edit HUD agora são próprios de cada janela. «Igual a todas as janelas» devolve uma janela aos ajustes comuns.",
+        "Os controles de largura e altura do mapa mexem o cartão ao vivo, sem reconstruí-lo.",
+        "Abrir a janela do mapa fecha o menu e abre o site grande, à frente."
+      ],
+      "ru": [
+        "Карта системы гораздо быстрее следует за клавишами: её картинка рисуется примерно в 8 раз быстрее.",
+        "Размер, прозрачность и тёмная подложка в Edit HUD теперь у каждого окна свои. «Как у всех окон» возвращает окно к общим настройкам.",
+        "Ползунки ширины и высоты карты двигают карту сразу, без перестройки.",
+        "«Открыть окно карты» закрывает меню и открывает сайт крупно, поверх всего."
+      ]
+    },
+    {
+      "v": "0.9.0",
+      "en": [
+        "NEW: the System map as a window over the game, like the Bounty counter. It shows the map of the system you are in, at the top of the screen by default, with the same eased perspective, Edit HUD and profiles. Switch it on in the Windows list (System map) or on the Map page.",
+        "Move and zoom the map with Ctrl+Shift and the number pad (8 up, 4 left, 5 down, 6 right, + and - zoom, 0 the whole system). Every key can be changed on Key Bindings, Map tab.",
+        "The Map page can also open the whole site in a window of its own."
+      ],
+      "de": [
+        "NEU: die Systemkarte als Fenster über dem Spiel, wie der Bounty counter. Sie zeigt die Karte des Systems, in dem du bist, standardmäßig oben auf dem Bildschirm, mit derselben Perspektive, Edit HUD und Profilen. Einschalten in der Fensterliste (System map) oder auf der Kartenseite.",
+        "Karte bewegen und zoomen mit Strg+Umschalt und dem Ziffernblock (8 hoch, 4 links, 5 runter, 6 rechts, + und - Zoom, 0 das ganze System). Jede Taste lässt sich unter Tastenbelegung, Reiter Map, ändern.",
+        "Die Kartenseite kann auch die ganze Seite in einem eigenen Fenster öffnen."
+      ],
+      "es": [
+        "NUEVO: el mapa del sistema como ventana sobre el juego, igual que el Bounty counter. Muestra el mapa del sistema en el que estás, arriba en la pantalla por defecto, con la misma perspectiva, Edit HUD y perfiles. Actívalo en la lista de ventanas (System map) o en la página Mapa.",
+        "Mueve y acerca el mapa con Ctrl+Mayús y el teclado numérico (8 arriba, 4 izquierda, 5 abajo, 6 derecha, + y - zoom, 0 todo el sistema). Cada tecla se puede cambiar en Atajos, pestaña Map.",
+        "La página Mapa también puede abrir todo el sitio en una ventana propia."
+      ],
+      "fr": [
+        "NOUVEAU : la carte du système comme fenêtre sur le jeu, comme le Bounty counter. Elle montre la carte du système où vous êtes, en haut de l'écran par défaut, avec la même perspective, Edit HUD et les profils. Activez-la dans la liste des fenêtres (System map) ou sur la page Carte.",
+        "Déplacez et zoomez la carte avec Ctrl+Maj et le pavé numérique (8 haut, 4 gauche, 5 bas, 6 droite, + et - zoom, 0 tout le système). Chaque touche se change dans Raccourcis, onglet Map.",
+        "La page Carte peut aussi ouvrir tout le site dans une fenêtre à part."
+      ],
+      "pt-br": [
+        "NOVO: o mapa do sistema como janela sobre o jogo, como o Bounty counter. Mostra o mapa do sistema em que você está, no topo da tela por padrão, com a mesma perspectiva, Edit HUD e perfis. Ligue na lista de janelas (System map) ou na página Mapa.",
+        "Mova e dê zoom no mapa com Ctrl+Shift e o teclado numérico (8 cima, 4 esquerda, 5 baixo, 6 direita, + e - zoom, 0 o sistema todo). Cada tecla pode ser trocada em Atalhos, aba Map.",
+        "A página Mapa também pode abrir o site inteiro em uma janela própria."
+      ],
+      "ru": [
+        "НОВОЕ: карта системы как окно поверх игры, подобно Bounty counter. Показывает карту системы, в которой вы находитесь, по умолчанию вверху экрана, с той же перспективой, Edit HUD и профилями. Включается в списке окон (System map) или на странице карты.",
+        "Двигайте и масштабируйте карту клавишами Ctrl+Shift и цифрового блока (8 вверх, 4 влево, 5 вниз, 6 вправо, + и - масштаб, 0 вся система). Каждую клавишу можно изменить в разделе «Клавиши», вкладка Map.",
+        "Со страницы карты можно также открыть весь сайт в отдельном окне."
+      ]
+    },
+    {
+      "v": "0.8.5",
+      "en": [
+        "The windows hide while the game's own menu (Esc, Options) is open. It follows the \"Hide in maps\" switch.",
+        "GRAVITAS reads the game's free look binding again every 3 seconds, so changing it between Toggle and Hold in the game works without a restart.",
+        "The Wing bonus tip says it counts only if your squadron has the perk."
+      ],
+      "de": [
+        "Die Fenster verschwinden, solange das Spielmenü (Esc, Optionen) offen ist. Es folgt dem Schalter „Hide in maps“.",
+        "GRAVITAS liest die Free-Look-Belegung des Spiels alle 3 Sekunden neu: Der Wechsel zwischen Umschalten und Halten im Spiel gilt ohne Neustart.",
+        "Der Hinweis zum Wing-Bonus sagt, dass er nur zählt, wenn dein Squadron den Vorteil hat."
+      ],
+      "es": [
+        "Las ventanas se ocultan mientras el menú del juego (Esc, Opciones) está abierto. Sigue el interruptor «Hide in maps».",
+        "GRAVITAS vuelve a leer cada 3 segundos la tecla de vista libre del juego, así que cambiarla entre alternar y mantener en el juego funciona sin reiniciar.",
+        "La ayuda del bonus de ala dice que solo cuenta si tu escuadrón tiene esa ventaja."
+      ],
+      "fr": [
+        "Les fenêtres se cachent tant que le menu du jeu (Échap, Options) est ouvert. Elles suivent l'interrupteur « Hide in maps ».",
+        "GRAVITAS relit toutes les 3 secondes la touche de vue libre du jeu : passer de bascule à maintien dans le jeu marche sans redémarrer.",
+        "L'info-bulle du bonus d'escadron dit qu'il ne compte que si votre escadrille a cet avantage."
+      ],
+      "pt-br": [
+        "As janelas se escondem enquanto o menu do jogo (Esc, Opções) está aberto. Segue a chave «Hide in maps».",
+        "O GRAVITAS relê a cada 3 segundos a tecla de visão livre do jogo, então trocar entre alternar e segurar no jogo funciona sem reiniciar.",
+        "A dica do bônus de ala diz que só conta se o seu esquadrão tiver essa vantagem."
+      ],
+      "ru": [
+        "Окна скрываются, пока открыто меню игры (Esc, Настройки). Это зависит от переключателя «Hide in maps».",
+        "GRAVITAS каждые 3 секунды заново читает клавишу свободного обзора из игры, поэтому смена «переключение / удержание» в игре работает без перезапуска.",
+        "Подсказка о бонусе крыла говорит, что он считается, только если у вашего сквадрона есть это преимущество."
+      ]
+    },
+    {
+      "v": "0.8.4",
+      "en": [
+        "Every control in the app and in the GRAVITAS menu now has a short hover tip that says what it does."
+      ],
+      "de": [
+        "Jedes Bedienelement in der App und im GRAVITAS-Menü hat jetzt einen kurzen Hinweis beim Darüberfahren, der sagt, was es tut."
+      ],
+      "es": [
+        "Cada control de la app y del menú de GRAVITAS tiene ahora una breve ayuda al pasar el ratón que explica para qué sirve."
+      ],
+      "fr": [
+        "Chaque commande de l'app et du menu GRAVITAS a maintenant une courte info-bulle qui dit à quoi elle sert."
+      ],
+      "pt-br": [
+        "Cada controle do app e do menu do GRAVITAS agora tem uma dica curta ao passar o mouse, dizendo para que serve."
+      ],
+      "ru": [
+        "У каждого элемента в приложении и в меню GRAVITAS теперь есть короткая подсказка при наведении, объясняющая, что он делает."
+      ]
+    },
+    {
+      "v": "0.8.3",
+      "en": [
+        "The Thargoid recording writes a status line only when something changed (plus one every 2 s), so a fight's file is about 40 times smaller."
+      ],
+      "de": [
+        "Die Thargoid-Aufzeichnung schreibt eine Statuszeile nur bei einer Änderung (plus eine alle 2 s), die Datei eines Kampfs ist etwa 40-mal kleiner."
+      ],
+      "es": [
+        "La grabación Thargoid escribe una línea de estado solo cuando algo cambió (más una cada 2 s), el archivo de un combate es unas 40 veces menor."
+      ],
+      "fr": [
+        "L'enregistrement thargoïde n'écrit une ligne d'état que si quelque chose a changé (plus une toutes les 2 s) : le fichier d'un combat est environ 40 fois plus petit."
+      ],
+      "pt-br": [
+        "A gravação Thargoid escreve uma linha de status só quando algo muda (mais uma a cada 2 s), o arquivo de uma luta fica cerca de 40 vezes menor."
+      ],
+      "ru": [
+        "Запись таргоидов пишет строку состояния только при изменении (плюс одну раз в 2 с): файл боя примерно в 40 раз меньше."
+      ]
+    },
+    {
+      "v": "0.8.2",
+      "en": [
+        "While a Thargoid recording runs, GRAVITAS looks at the status file every 15 ms, as it does with the Journal (the game itself writes it about once a second)."
+      ],
+      "de": [
+        "Solange eine Thargoid-Aufzeichnung läuft, prüft GRAVITAS die Statusdatei alle 15 ms, wie das Journal (das Spiel schreibt sie selbst etwa einmal pro Sekunde)."
+      ],
+      "es": [
+        "Mientras corre una grabación Thargoid, GRAVITAS mira el archivo de estado cada 15 ms, como el Journal (el juego lo escribe una vez por segundo)."
+      ],
+      "fr": [
+        "Pendant un enregistrement thargoïde, GRAVITAS regarde le fichier d'état toutes les 15 ms, comme le Journal (le jeu l'écrit environ une fois par seconde)."
+      ],
+      "pt-br": [
+        "Enquanto uma gravação Thargoid roda, o GRAVITAS olha o arquivo de status a cada 15 ms, como o Journal (o jogo o escreve cerca de uma vez por segundo)."
+      ],
+      "ru": [
+        "Пока идёт запись таргоидов, GRAVITAS смотрит файл состояния каждые 15 мс, как журнал (сама игра пишет его примерно раз в секунду)."
+      ]
+    },
+    {
+      "v": "0.8.1",
+      "en": [
+        "Thargoid recorder: while Thargoids are about, GRAVITAS records what the game's status file shows and the Journal events that matter into a file on your computer, so shutdowns, shields and hull steps can be studied. Never sent anywhere."
+      ],
+      "de": [
+        "Thargoid-Aufzeichnung: Solange Thargoids in der Nähe sind, zeichnet GRAVITAS auf, was die Statusdatei des Spiels zeigt, und die wichtigen Journal-Ereignisse in einer Datei auf deinem Computer. Nie versendet."
+      ],
+      "es": [
+        "Grabador Thargoid: mientras haya Thargoids, GRAVITAS graba en tu equipo lo que muestra el archivo de estado del juego y los eventos del Journal que importan. Nunca se envía."
+      ],
+      "fr": [
+        "Enregistreur thargoïde : tant que des Thargoïdes sont là, GRAVITAS enregistre sur votre ordinateur ce que montre le fichier d'état du jeu et les événements du Journal qui comptent. Jamais envoyé."
+      ],
+      "pt-br": [
+        "Gravador Thargoid: enquanto houver Thargoids, o GRAVITAS grava no seu computador o que o arquivo de status do jogo mostra e os eventos do Journal que importam. Nunca é enviado."
+      ],
+      "ru": [
+        "Запись таргоидов: пока рядом таргоиды, GRAVITAS записывает на вашем компьютере, что показывает файл состояния игры, и важные события журнала. Никогда не отправляется."
+      ]
+    },
+    {
+      "v": "0.8.0",
+      "en": [
+        "Claims now include your combat bonds, as the game's own Claims panel does (a Thargoid Hydra bond, scout bonds and so on), with the 7.5 % wing estimate. Bonds are never lost, not even when your ship is destroyed. A switch under Claims turns it off.",
+        "Closing the menu (key, X or Esc) turns Edit HUD off, so it opens clean next time.",
+        "The windows list is tidier: each window has its own block, where it shows is grouped (Main view, Left, Comms, Role, Right panel), the arrow buttons are gone (drag in Edit HUD instead) and Reset is now Default position.",
+        "Free look: after the game window was away or the menu was open, free look is taken as off again, so the windows no longer end up the wrong way round."
+      ],
+      "de": [
+        "Claims enthalten jetzt deine Kampfanleihen wie das Claims-Panel des Spiels (Hydra-Anleihe, Scout-Anleihen usw.), mit der 7,5-%-Wing-Schätzung. Anleihen gehen nie verloren, auch nicht bei Zerstörung des Schiffs. Ein Schalter unter Claims schaltet es ab.",
+        "Beim Schließen des Menüs (Taste, X oder Esc) wird Edit HUD ausgeschaltet.",
+        "Die Fensterliste ist aufgeräumter: jedes Fenster hat einen eigenen Block, der Ort ist gruppiert, die Pfeiltasten sind weg (stattdessen in Edit HUD ziehen), Reset heißt jetzt Standardposition.",
+        "Free Look: Nach Abwesenheit des Spielfensters oder offenem Menü gilt Free Look wieder als aus, die Fenster stehen nicht mehr verkehrt."
+      ],
+      "es": [
+        "Claims ahora incluye tus bonos de combate, como el panel Claims del juego (un bono de Hydra Thargoid, bonos de exploradores, etc.), con la estimación de 7,5 % de wing. Los bonos nunca se pierden, ni siquiera si destruyen tu nave. Un interruptor en Claims lo desactiva.",
+        "Al cerrar el menú (tecla, X o Esc) Editar HUD se apaga solo.",
+        "La lista de ventanas está más ordenada: cada ventana tiene su bloque, el lugar está agrupado, las flechas ya no están (arrastra en Editar HUD) y Reset ahora es Posición predeterminada.",
+        "Free look: tras estar la ventana del juego ausente o el menú abierto, se toma como apagado, y las ventanas ya no quedan al revés."
+      ],
+      "fr": [
+        "Claims inclut maintenant vos bons de combat, comme le panneau Claims du jeu (bon d'Hydre Thargoid, bons d'éclaireurs, etc.), avec l'estimation wing de 7,5 %. Les bons ne sont jamais perdus, même si votre vaisseau est détruit. Un interrupteur sous Claims le désactive.",
+        "En fermant le menu (touche, X ou Échap), Modifier le HUD s'éteint.",
+        "La liste des fenêtres est plus claire : un bloc par fenêtre, l'emplacement est groupé, les flèches ont disparu (glissez dans Modifier le HUD) et Reset devient Position par défaut.",
+        "Free look : après l'absence de la fenêtre du jeu ou menu ouvert, il est considéré éteint, les fenêtres ne sont plus à l'envers."
+      ],
+      "pt-br": [
+        "Claims agora inclui seus bônus de combate, como o painel Claims do jogo (bônus de Hydra Thargoid, de batedores etc.), com a estimativa de 7,5 % de wing. Bônus nunca se perdem, nem se sua nave for destruída. Um interruptor em Claims desliga.",
+        "Ao fechar o menu (tecla, X ou Esc), Editar HUD desliga sozinho.",
+        "A lista de janelas está mais organizada: um bloco por janela, o local agrupado, sem setas (arraste em Editar HUD) e Reset agora é Posição padrão.",
+        "Free look: depois que a janela do jogo ficou ausente ou o menu aberto, é tomado como desligado, e as janelas não ficam mais invertidas."
+      ],
+      "ru": [
+        "Claims теперь включает ваши боевые облигации, как панель Claims игры (облигация Гидры таргоидов, облигации разведчиков и т. д.), с оценкой 7,5 % за винг. Облигации никогда не теряются, даже при уничтожении корабля. Переключатель в Claims отключает это.",
+        "При закрытии меню (клавиша, X или Esc) режим «Править HUD» выключается.",
+        "Список окон стал аккуратнее: у каждого окна свой блок, место показа сгруппировано, стрелок нет (перетаскивайте в «Править HUD»), Reset теперь «Позиция по умолчанию».",
+        "Free look: после отсутствия окна игры или открытого меню он считается выключенным, окна больше не работают наоборот."
+      ]
+    },
+    {
+      "v": "0.7.9",
+      "en": [
+        "Fix: grabbing a window straight after dropping it no longer sends the dashed box back to where it was before. Each grab starts exactly where you dropped, and the window lands where the box is dropped."
+      ],
+      "de": [
+        "Fix: Greifst du ein Fenster direkt nach dem Loslassen, springt der gestrichelte Rahmen nicht mehr zurück. Jedes Greifen beginnt genau dort, wo du abgelegt hast, und das Fenster landet dort, wo der Rahmen losgelassen wird."
+      ],
+      "es": [
+        "Corrección: al agarrar una ventana justo después de soltarla, el cuadro de puntos ya no vuelve a donde estaba antes. Cada agarre empieza exactamente donde soltaste y la ventana queda donde sueltas el cuadro."
+      ],
+      "fr": [
+        "Correction : en ressaisissant une fenêtre juste après l'avoir lâchée, le cadre en pointillés ne revient plus là où il était. Chaque saisie commence exactement là où vous avez déposé, et la fenêtre se place où le cadre est lâché."
+      ],
+      "pt-br": [
+        "Correção: ao pegar uma janela logo depois de soltá-la, a caixa tracejada não volta mais para onde estava. Cada pegada começa exatamente onde você soltou, e a janela fica onde a caixa é solta."
+      ],
+      "ru": [
+        "Исправлено: если взять окно сразу после отпускания, пунктирная рамка больше не возвращается на прежнее место. Каждый захват начинается точно там, где вы отпустили, и окно встаёт туда, куда отпущена рамка."
+      ]
+    },
+    {
+      "v": "0.7.8",
+      "en": [
+        "Fix: grabbing a window again right after dropping it, the dashed box now starts where you dropped it (the game window is repainted a moment later).",
+        "The editor button now names the state (Locked or Unlocked) instead of the action, which read the wrong way round."
+      ],
+      "de": [
+        "Fix: Greifst du ein Fenster direkt nach dem Loslassen erneut, beginnt der gestrichelte Rahmen dort, wo du es abgelegt hast (das Spielfenster wird einen Moment später neu gezeichnet).",
+        "Die Editor-Taste nennt jetzt den Zustand (Gesperrt oder Entsperrt) statt der Aktion, die verkehrt herum wirkte."
+      ],
+      "es": [
+        "Corrección: al volver a agarrar una ventana justo después de soltarla, el cuadro de puntos empieza donde la soltaste (la ventana se repinta un instante después).",
+        "El botón del editor ahora nombra el estado (Bloqueada o Desbloqueada) en lugar de la acción, que se leía al revés."
+      ],
+      "fr": [
+        "Correction : en ressaisissant une fenêtre juste après l'avoir lâchée, le cadre en pointillés commence là où vous l'avez déposée (la fenêtre est redessinée un instant plus tard).",
+        "Le bouton de l'éditeur indique maintenant l'état (Verrouillée ou Déverrouillée) et non l'action, qui se lisait à l'envers."
+      ],
+      "pt-br": [
+        "Correção: ao pegar uma janela de novo logo depois de soltá-la, a caixa tracejada começa onde você a soltou (a janela é redesenhada um instante depois).",
+        "O botão do editor agora mostra o estado (Travada ou Destravada) em vez da ação, que parecia invertida."
+      ],
+      "ru": [
+        "Исправлено: если взять окно снова сразу после отпускания, пунктирная рамка начинается там, где вы его оставили (окно перерисовывается чуть позже).",
+        "Кнопка редактора теперь называет состояние (Закреплено или Откреплено), а не действие, которое читалось наоборот."
+      ]
+    },
+    {
+      "v": "0.7.7",
+      "en": [
+        "Fix: moving a window a second time, the dashed box now starts where the window is, not where it was before the first move."
+      ],
+      "de": [
+        "Fix: Beim zweiten Verschieben eines Fensters beginnt der gestrichelte Rahmen dort, wo das Fenster ist, nicht dort, wo es vor dem ersten Verschieben war."
+      ],
+      "es": [
+        "Corrección: al mover una ventana por segunda vez, el cuadro de puntos empieza donde está la ventana, no donde estaba antes del primer movimiento."
+      ],
+      "fr": [
+        "Correction : en déplaçant une fenêtre une deuxième fois, le cadre en pointillés commence là où est la fenêtre, pas là où elle était avant le premier déplacement."
+      ],
+      "pt-br": [
+        "Correção: ao mover uma janela pela segunda vez, a caixa tracejada começa onde a janela está, não onde estava antes do primeiro movimento."
+      ],
+      "ru": [
+        "Исправлено: при повторном перемещении окна пунктирная рамка теперь начинается там, где окно сейчас, а не там, где оно было до первого перемещения."
+      ]
+    },
+    {
+      "v": "0.7.6",
+      "en": [
+        "The menu key is Ctrl+Shift+K only (G got in the game's way). A saved G becomes K. You can still set your own key under Key Bindings.",
+        "When the menu opens, the mouse cursor is brought to the middle of it, so it is never lost.",
+        "The editor guides never stay on screen: they show only while the menu and Edit HUD are open, and the menu closes by itself when you switch to another program.",
+        "Dragging a window now moves only the dashed box, and the window takes its place when you let go (smooth, no cost while dragging)."
+      ],
+      "de": [
+        "Die Menütaste ist nur noch Strg+Umschalt+K (G kam dem Spiel in die Quere). Ein gespeichertes G wird zu K. Eine eigene Taste kannst du weiter unter Tastenbelegung einstellen.",
+        "Beim Öffnen des Menüs wird der Mauszeiger in dessen Mitte geholt, er geht nie verloren.",
+        "Die Editor-Hilfslinien bleiben nie auf dem Bildschirm: Sie erscheinen nur bei offenem Menü und Edit HUD, und das Menü schließt sich selbst, wenn du das Programm wechselst.",
+        "Beim Ziehen bewegt sich nur noch der gestrichelte Rahmen, das Fenster nimmt beim Loslassen seinen Platz ein (flüssig, ohne Kosten beim Ziehen)."
+      ],
+      "es": [
+        "La tecla del menú es solo Ctrl+Shift+K (la G molestaba al juego). Una G guardada pasa a K. Puedes elegir tu propia tecla en Teclas.",
+        "Al abrir el menú, el cursor del ratón se lleva al centro del menú, así nunca se pierde.",
+        "Las guías del editor nunca se quedan en pantalla: solo se ven con el menú y Editar HUD abiertos, y el menú se cierra solo al cambiar de programa.",
+        "Al arrastrar, solo se mueve el cuadro de puntos y la ventana ocupa su lugar al soltar (fluido, sin coste al arrastrar)."
+      ],
+      "fr": [
+        "La touche du menu est uniquement Ctrl+Maj+K (le G gênait le jeu). Un G enregistré devient K. Vous pouvez toujours choisir votre touche dans Touches.",
+        "À l'ouverture du menu, le curseur de la souris est amené au milieu, il n'est jamais perdu.",
+        "Les repères de l'éditeur ne restent jamais à l'écran : ils n'apparaissent que menu et Modifier le HUD ouverts, et le menu se ferme seul quand vous changez de programme.",
+        "En glissant, seul le cadre en pointillés bouge et la fenêtre prend sa place au relâchement (fluide, sans coût pendant le glissement)."
+      ],
+      "pt-br": [
+        "A tecla do menu é só Ctrl+Shift+K (o G atrapalhava o jogo). Um G salvo vira K. Você ainda pode definir sua própria tecla em Teclas.",
+        "Ao abrir o menu, o cursor do mouse é levado ao meio dele, então nunca se perde.",
+        "As guias do editor nunca ficam na tela: só aparecem com o menu e Editar HUD abertos, e o menu fecha sozinho quando você troca de programa.",
+        "Ao arrastar, só a caixa tracejada se move e a janela assume o lugar ao soltar (fluido, sem custo ao arrastar)."
+      ],
+      "ru": [
+        "Клавиша меню теперь только Ctrl+Shift+K (G мешала игре). Сохранённая G заменяется на K. Свою клавишу можно задать в разделе «Клавиши».",
+        "При открытии меню курсор мыши переносится в его центр и не теряется.",
+        "Направляющие редактора никогда не остаются на экране: они видны только при открытых меню и «Править HUD», а меню закрывается само при переключении на другую программу.",
+        "При перетаскивании двигается только пунктирная рамка, окно занимает место при отпускании (плавно, без нагрузки при перетаскивании)."
+      ]
+    },
+    {
+      "v": "0.7.5",
+      "en": [
+        "Fix: Edit HUD froze the app (GRAVITAS stopped responding). The editor layer is now built safely.",
+        "Fix: the Perspective switch no longer breaks the window rows in the Combat tab."
+      ],
+      "de": [
+        "Fix: HUD bearbeiten hat die App eingefroren (GRAVITAS reagierte nicht mehr). Die Editor-Ebene wird jetzt sicher aufgebaut.",
+        "Fix: Der Perspektive-Schalter bringt die Fensterzeilen im Combat-Tab nicht mehr durcheinander."
+      ],
+      "es": [
+        "Corrección: Editar HUD congelaba la app (GRAVITAS no respondía). La capa del editor ahora se crea de forma segura.",
+        "Corrección: el interruptor de Perspectiva ya no desordena las filas de ventanas en la pestaña Combat."
+      ],
+      "fr": [
+        "Correction : Modifier le HUD figeait l'app (GRAVITAS ne répondait plus). La couche de l'éditeur est maintenant créée en toute sécurité.",
+        "Correction : l'interrupteur Perspective ne déforme plus les lignes de fenêtres de l'onglet Combat."
+      ],
+      "pt-br": [
+        "Correção: Editar HUD travava o app (GRAVITAS não respondia). A camada do editor agora é criada com segurança.",
+        "Correção: o interruptor de Perspectiva não bagunça mais as linhas de janelas na aba Combat."
+      ],
+      "ru": [
+        "Исправлено: «Править HUD» зависало приложение (GRAVITAS не отвечал). Слой редактора теперь создаётся безопасно.",
+        "Исправлено: переключатель «Перспектива» больше не ломает строки окон на вкладке Combat."
+      ]
+    },
+    {
+      "v": "0.7.4",
+      "en": [
+        "Fix: the Profiles pop-up now opens in front of everything and is solid."
+      ],
+      "de": [
+        "Fix: Das Profile-Fenster öffnet sich jetzt vor allem anderen und ist undurchsichtig."
+      ],
+      "es": [
+        "Corrección: la ventana de Perfiles ahora se abre delante de todo y es opaca."
+      ],
+      "fr": [
+        "Correction : la fenêtre Profils s'ouvre maintenant devant tout et est opaque."
+      ],
+      "pt-br": [
+        "Correção: a janela de Perfis agora abre na frente de tudo e é opaca."
+      ],
+      "ru": [
+        "Исправлено: окно «Профили» теперь открывается поверх всего и непрозрачно."
+      ]
+    },
+    {
+      "v": "0.7.3",
+      "en": [
+        "Profiles: one button next to the game status on the Modes page. Pick your ship from the list (no typing), save your window settings for it, load or delete saved ones.",
+        "The About text on the Modes page is wider and justified, and names its maker."
+      ],
+      "de": [
+        "Profile: eine Taste neben dem Spielstatus auf der Modi-Seite. Schiff aus der Liste wählen (ohne Tippen), Fenstereinstellungen dafür speichern, gespeicherte laden oder löschen.",
+        "Der Infotext auf der Modi-Seite ist breiter, im Blocksatz und nennt den Urheber."
+      ],
+      "es": [
+        "Perfiles: un botón junto al estado del juego en la página Modos. Elige tu nave de la lista (sin escribir), guarda los ajustes de ventanas para ella, carga o borra los guardados.",
+        "El texto informativo de la página Modos es más ancho, justificado y nombra a su autor."
+      ],
+      "fr": [
+        "Profils : un bouton à côté de l'état du jeu sur la page Modes. Choisissez votre vaisseau dans la liste (sans taper), enregistrez les réglages des fenêtres, chargez ou supprimez ceux enregistrés.",
+        "Le texte d'information de la page Modes est plus large, justifié, et nomme son auteur."
+      ],
+      "pt-br": [
+        "Perfis: um botão ao lado do status do jogo na página Modos. Escolha sua nave na lista (sem digitar), salve os ajustes das janelas para ela, carregue ou apague os salvos.",
+        "O texto informativo da página Modos está mais largo, justificado e cita o autor."
+      ],
+      "ru": [
+        "Профили: одна кнопка рядом со статусом игры на странице «Режимы». Выберите корабль из списка (без ввода), сохраните для него настройки окон, загружайте или удаляйте сохранённые.",
+        "Информационный текст на странице «Режимы» стал шире, выровнен по ширине и называет автора."
+      ]
+    },
+    {
+      "v": "0.7.2",
+      "en": [
+        "Updates no longer open any command window: the installer is started directly, silently, and the app comes back by itself.",
+        "Windows snap to the screen's edge guides and the centre line when you drop them.",
+        "Each window has its own dark ground level in the editor's settings.",
+        "The menu can be folded to its title bar with the new button.",
+        "Profiles are now also on the Modes page and in the menu's first tab."
+      ],
+      "de": [
+        "Updates öffnen kein Befehlsfenster mehr: Der Installer startet direkt und still, und die App kommt von selbst zurück.",
+        "Fenster rasten beim Loslassen an den Randlinien und der Mittellinie ein.",
+        "Jedes Fenster hat in den Editor-Einstellungen seinen eigenen Wert für den dunklen Grund.",
+        "Das Menü lässt sich mit der neuen Taste auf die Titelleiste einklappen.",
+        "Profile gibt es jetzt auch auf der Modi-Seite und im ersten Tab des Menüs."
+      ],
+      "es": [
+        "Las actualizaciones ya no abren ninguna ventana de comandos: el instalador se inicia directamente, en silencio, y la app vuelve sola.",
+        "Las ventanas se ajustan a las guías del borde y a la línea central al soltarlas.",
+        "Cada ventana tiene su propio nivel de fondo oscuro en los ajustes del editor.",
+        "El menú se puede plegar a su barra de título con el nuevo botón.",
+        "Los perfiles también están en la página Modos y en la primera pestaña del menú."
+      ],
+      "fr": [
+        "Les mises à jour n'ouvrent plus aucune fenêtre de commande : l'installateur démarre directement, en silence, et l'app revient seule.",
+        "Les fenêtres s'alignent sur les guides du bord et la ligne centrale quand on les lâche.",
+        "Chaque fenêtre a son propre niveau de fond sombre dans les réglages de l'éditeur.",
+        "Le menu se replie sur sa barre de titre avec le nouveau bouton.",
+        "Les profils sont aussi sur la page Modes et dans le premier onglet du menu."
+      ],
+      "pt-br": [
+        "As atualizações não abrem mais nenhuma janela de comando: o instalador inicia direto, em silêncio, e o app volta sozinho.",
+        "As janelas se encaixam nas guias da borda e na linha central ao soltar.",
+        "Cada janela tem seu próprio nível de fundo escuro nas configurações do editor.",
+        "O menu pode ser recolhido para a barra de título com o novo botão.",
+        "Os perfis agora também estão na página Modos e na primeira aba do menu."
+      ],
+      "ru": [
+        "Обновления больше не открывают окно командной строки: установщик запускается напрямую и тихо, а приложение возвращается само.",
+        "Окна примагничиваются к направляющим у края и к центральной линии при отпускании.",
+        "У каждого окна в настройках редактора свой уровень тёмной подложки.",
+        "Меню можно свернуть до заголовка новой кнопкой.",
+        "Профили теперь есть и на странице «Режимы», и на первой вкладке меню."
+      ]
+    },
+    {
+      "v": "0.7.1",
+      "en": [
+        "Edit HUD: a new button in the menu (left of Opacity). Turn it on to get the bars on the windows. Every change is saved to your profile at once.",
+        "Windows now follow the mouse while you drag them, and the bars line up with them.",
+        "Every window takes the perspective of the side it is on (left: comms panel, right: right panel, middle: flat). Each window has a Perspective switch.",
+        "Fix: clicking the editor no longer hides the menu or freezes the screen. Fix: the size bar works. Fix: the tray icon brings the app back. Wing is the first card under the quick actions."
+      ],
+      "de": [
+        "HUD bearbeiten: neue Taste im Menü (links von Deckkraft). Einschalten zeigt die Leisten an den Fenstern. Jede Änderung wird sofort im Profil gespeichert.",
+        "Fenster folgen beim Ziehen jetzt der Maus, und die Leisten liegen genau darauf.",
+        "Jedes Fenster übernimmt die Perspektive seiner Seite (links: Comms-Panel, rechts: rechtes Panel, Mitte: flach). Jedes Fenster hat einen Perspektive-Schalter.",
+        "Fix: Ein Klick auf den Editor versteckt das Menü nicht mehr und friert den Bildschirm nicht ein. Fix: Der Größenregler funktioniert. Fix: Das Tray-Symbol holt die App zurück. Wing ist die erste Karte unter den Schnellaktionen."
+      ],
+      "es": [
+        "Editar HUD: nuevo botón en el menú (a la izquierda de Opacidad). Actívalo para ver las barras de las ventanas. Cada cambio se guarda al instante en tu perfil.",
+        "Las ventanas siguen al ratón mientras las arrastras y las barras quedan alineadas con ellas.",
+        "Cada ventana toma la perspectiva de su lado (izquierda: panel de comunicaciones, derecha: panel derecho, centro: plana). Cada ventana tiene un interruptor de Perspectiva.",
+        "Corrección: hacer clic en el editor ya no oculta el menú ni congela la pantalla. Corrección: la barra de tamaño funciona. Corrección: el icono de la bandeja recupera la app. Wing es la primera tarjeta bajo las acciones rápidas."
+      ],
+      "fr": [
+        "Modifier le HUD : nouveau bouton dans le menu (à gauche d'Opacité). Activez-le pour voir les barres sur les fenêtres. Chaque changement est enregistré tout de suite dans votre profil.",
+        "Les fenêtres suivent la souris pendant le glissement et les barres restent alignées dessus.",
+        "Chaque fenêtre prend la perspective de son côté (gauche : panneau comms, droite : panneau de droite, milieu : à plat). Chaque fenêtre a un interrupteur Perspective.",
+        "Correction : cliquer sur l'éditeur ne cache plus le menu et ne fige plus l'écran. Correction : la barre de taille fonctionne. Correction : l'icône de la zone de notification rouvre l'app. Wing est la première carte sous les actions rapides."
+      ],
+      "pt-br": [
+        "Editar HUD: novo botão no menu (à esquerda de Opacidade). Ligue para ver as barras nas janelas. Cada mudança é salva na hora no seu perfil.",
+        "As janelas seguem o mouse enquanto você as arrasta e as barras ficam alinhadas com elas.",
+        "Cada janela assume a perspectiva do seu lado (esquerda: painel de comunicações, direita: painel direito, meio: plana). Cada janela tem um interruptor de Perspectiva.",
+        "Correção: clicar no editor não esconde mais o menu nem congela a tela. Correção: a barra de tamanho funciona. Correção: o ícone da bandeja traz o app de volta. Wing é o primeiro cartão abaixo das ações rápidas."
+      ],
+      "ru": [
+        "Править HUD: новая кнопка в меню (слева от «Прозрачность»). Включите её, чтобы появились панели на окнах. Каждое изменение сразу сохраняется в профиле.",
+        "Окна теперь следуют за мышью при перетаскивании, а панели совпадают с ними.",
+        "Каждое окно принимает перспективу своей стороны (слева: панель связи, справа: правая панель, в середине: плоское). У каждого окна есть переключатель «Перспектива».",
+        "Исправлено: щелчок по редактору больше не скрывает меню и не вешает экран. Исправлено: ползунок размера работает. Исправлено: значок в трее возвращает приложение. Wing теперь первая карточка под быстрыми действиями."
+      ]
+    },
+    {
+      "v": "0.7.0",
+      "en": [
+        "New on-screen editor: open the GRAVITAS menu and every window gets a thin bar. Unlock a window, drag it where you want, Lock it. Colour, size, opacity and dark ground are in the same bar.",
+        "Drag a window across the middle of the screen: in the middle band it is flat, on the left it takes the comms panel's perspective, on the right the right panel's.",
+        "The Kill feed length can be set.",
+        "Fix: Esc could stop working in the game after the menu was opened and closed. GRAVITAS now tells the game that Ctrl, Shift, Alt, Windows and Esc are released."
+      ],
+      "de": [
+        "Neuer Editor auf dem Bildschirm: Öffne das GRAVITAS-Menü, und jedes Fenster bekommt eine dünne Leiste. Fenster entsperren, ziehen, sperren. Farbe, Größe, Deckkraft und dunkler Grund sind in derselben Leiste.",
+        "Zieh ein Fenster über die Bildschirmmitte: im mittleren Band ist es flach, links hat es die Perspektive des Comms-Panels, rechts die des rechten Panels.",
+        "Die Länge des Kill-Feeds ist einstellbar.",
+        "Behoben: Esc konnte im Spiel nach dem Öffnen und Schließen des Menüs nicht mehr gehen. GRAVITAS meldet dem Spiel jetzt, dass Strg, Umschalt, Alt, Windows und Esc losgelassen sind."
+      ],
+      "es": [
+        "Nuevo editor en pantalla: abre el menú de GRAVITAS y cada ventana recibe una barra fina. Desbloquea una ventana, arrástrala y bloquéala. Color, tamaño, opacidad y fondo oscuro están en la misma barra.",
+        "Arrastra una ventana por el centro de la pantalla: en la banda central es plana, a la izquierda toma la perspectiva del panel de comunicaciones, a la derecha la del panel derecho.",
+        "La longitud del Kill feed se puede ajustar.",
+        "Arreglo: Esc podía dejar de funcionar en el juego tras abrir y cerrar el menú. GRAVITAS ahora avisa al juego de que Ctrl, Shift, Alt, Windows y Esc están sueltas."
+      ],
+      "fr": [
+        "Nouvel éditeur à l'écran : ouvrez le menu GRAVITAS et chaque fenêtre reçoit une barre fine. Déverrouillez, glissez, verrouillez. Couleur, taille, opacité et fond sombre sont dans la même barre.",
+        "Glissez une fenêtre au milieu de l'écran : dans la bande centrale elle est à plat, à gauche elle prend la perspective du panneau comms, à droite celle du panneau de droite.",
+        "La longueur du Kill feed est réglable.",
+        "Correction : Échap pouvait ne plus marcher dans le jeu après avoir ouvert et fermé le menu. GRAVITAS indique maintenant au jeu que Ctrl, Maj, Alt, Windows et Échap sont relâchées."
+      ],
+      "pt-br": [
+        "Novo editor na tela: abra o menu do GRAVITAS e cada janela ganha uma barra fina. Destrave uma janela, arraste e trave. Cor, tamanho, opacidade e fundo escuro ficam na mesma barra.",
+        "Arraste uma janela pelo meio da tela: na faixa central ela fica plana, à esquerda assume a perspectiva do painel de comunicações, à direita a do painel direito.",
+        "O tamanho do Kill feed pode ser ajustado.",
+        "Correção: o Esc podia parar de funcionar no jogo depois de abrir e fechar o menu. O GRAVITAS agora avisa o jogo que Ctrl, Shift, Alt, Windows e Esc foram soltas."
+      ],
+      "ru": [
+        "Новый редактор на экране: откройте меню GRAVITAS, и у каждого окна появится тонкая панель. Откройте окно, перетащите, закрепите. Цвет, размер, непрозрачность и тёмная подложка там же.",
+        "Перетащите окно через середину экрана: в средней полосе оно плоское, слева получает перспективу панели связи, справа правой панели.",
+        "Длину ленты убийств можно задать.",
+        "Исправлено: Esc мог перестать работать в игре после открытия и закрытия меню. Теперь GRAVITAS сообщает игре, что Ctrl, Shift, Alt, Windows и Esc отпущены."
+      ]
+    },
+    {
+      "v": "0.6.5",
+      "en": [
+        "New Key Bindings menu: every shortcut in one place, each with a default, an alternative and a Custom choice (two modifiers and a key, Windows key too).",
+        "The GRAVITAS menu key is Ctrl+Shift+G again (Ctrl+Shift+K is one click away).",
+        "Bounty counter in brief: only the money, for those who do not want the details.",
+        "A window moved to the other side of the screen takes that side's perspective.",
+        "Colours have Apply and Default buttons.",
+        "Dark ground is with the windows, Targets by value has one card, Look and Behaviour are separate, Wing is first in Behaviour and counts by itself.",
+        "The Target card and the test panel are gone. The windows show only over the game, never over the desktop.",
+        "The version is shown at the top. Tab order is Map, Combat, Thargoid, On Foot everywhere. See-through is now Opacity.",
+        "Starting the app again brings back a hidden window. Tray actions are written to gravitas.log."
+      ],
+      "de": [
+        "Neues Menü Tastenbelegung: alle Kürzel an einem Ort, jedes mit Standard, Alternative und eigener Belegung (zwei Modifikatoren und eine Taste, auch Windows-Taste).",
+        "Die Menütaste ist wieder Strg+Umschalt+G (Strg+Umschalt+K ist ein Klick entfernt).",
+        "Bounty-Zähler kurz: nur das Geld, für alle ohne Interesse an Details.",
+        "Ein Fenster auf der anderen Bildschirmseite übernimmt deren Perspektive.",
+        "Farben haben Übernehmen und Standard.",
+        "Dunkler Hintergrund bei den Fenstern, Ziele nach Wert in einer Karte, Aussehen und Verhalten getrennt, Wing zuerst im Verhalten und zählt automatisch.",
+        "Die Karte Ziel und das Testfenster sind weg. Fenster erscheinen nur über dem Spiel, nie über dem Desktop.",
+        "Die Version steht oben. Reiter-Reihenfolge überall Karte, Kampf, Thargoid, Zu Fuß. Durchsichtigkeit heißt jetzt Deckkraft.",
+        "Ein erneuter Start holt ein verstecktes Fenster zurück. Tray-Aktionen stehen in gravitas.log."
+      ],
+      "es": [
+        "Nuevo menú Atajos de teclado: todos los atajos en un lugar, cada uno con predeterminado, alternativa y opción personalizada (dos modificadores y una tecla, también la tecla Windows).",
+        "La tecla del menú vuelve a ser Ctrl+Shift+G (Ctrl+Shift+K a un clic).",
+        "Contador de recompensas breve: solo el dinero, para quien no quiere detalles.",
+        "Una ventana movida al otro lado de la pantalla toma la perspectiva de ese lado.",
+        "Los colores tienen Aplicar y Predeterminado.",
+        "El fondo oscuro está con las ventanas, Objetivos por valor tiene una tarjeta, Aspecto y Comportamiento van separados, Ala va primero y cuenta sola.",
+        "Se quitaron la tarjeta Objetivo y el panel de prueba. Las ventanas solo se ven sobre el juego, nunca sobre el escritorio.",
+        "La versión se muestra arriba. Orden de pestañas: Mapa, Combate, Thargoid, A pie. Transparencia ahora es Opacidad.",
+        "Abrir la app otra vez trae de vuelta una ventana oculta. Las acciones de la bandeja se anotan en gravitas.log."
+      ],
+      "fr": [
+        "Nouveau menu Raccourcis clavier : tous les raccourcis au même endroit, chacun avec défaut, alternative et choix personnalisé (deux modificateurs et une touche, touche Windows comprise).",
+        "La touche du menu redevient Ctrl+Maj+G (Ctrl+Maj+K à un clic).",
+        "Compteur de primes bref : seulement l'argent, pour ceux qui ne veulent pas les détails.",
+        "Une fenêtre déplacée de l'autre côté de l'écran prend la perspective de ce côté.",
+        "Les couleurs ont Appliquer et Par défaut.",
+        "Le fond sombre est avec les fenêtres, Cibles par valeur a une seule carte, Apparence et Comportement sont séparés, Escadrille en premier et compte tout seul.",
+        "La carte Cible et le panneau de test sont supprimés. Les fenêtres n'apparaissent que sur le jeu, jamais sur le bureau.",
+        "La version s'affiche en haut. Ordre des onglets : Carte, Combat, Thargoid, À pied. Transparence devient Opacité.",
+        "Relancer l'app ramène une fenêtre cachée. Les actions de la zone de notification sont notées dans gravitas.log."
+      ],
+      "pt-br": [
+        "Novo menu Atalhos de teclado: todos os atalhos em um lugar, cada um com padrão, alternativa e opção personalizada (dois modificadores e uma tecla, inclusive a tecla Windows).",
+        "A tecla do menu volta a ser Ctrl+Shift+G (Ctrl+Shift+K a um clique).",
+        "Contador de recompensas resumido: só o dinheiro, para quem não quer detalhes.",
+        "Uma janela movida para o outro lado da tela assume a perspectiva desse lado.",
+        "As cores têm Aplicar e Padrão.",
+        "O fundo escuro fica com as janelas, Alvos por valor tem um cartão, Aparência e Comportamento são separados, Ala vem primeiro e conta sozinha.",
+        "O cartão Alvo e o painel de teste saíram. As janelas só aparecem sobre o jogo, nunca sobre a área de trabalho.",
+        "A versão aparece no topo. Ordem das abas: Mapa, Combate, Thargoid, A pé. Transparência agora é Opacidade.",
+        "Abrir o app de novo traz de volta uma janela escondida. As ações da bandeja são anotadas em gravitas.log."
+      ],
+      "ru": [
+        "Новое меню «Горячие клавиши»: все сочетания в одном месте, у каждого есть стандарт, вариант и своя клавиша (два модификатора и клавиша, в том числе Windows).",
+        "Клавиша меню снова Ctrl+Shift+G (Ctrl+Shift+K в один клик).",
+        "Краткий счётчик наград: только деньги, для тех, кому не нужны подробности.",
+        "Окно, перенесённое на другую сторону экрана, получает перспективу этой стороны.",
+        "У цветов есть кнопки «Применить» и «По умолчанию».",
+        "Тёмная подложка у окон, «Цели по ценности» в одной карточке, «Вид» и «Поведение» разделены, «Крыло» первым и считается само.",
+        "Карточка «Цель» и тестовая панель убраны. Окна показываются только поверх игры, не поверх рабочего стола.",
+        "Версия показана вверху. Порядок вкладок везде: Карта, Бой, Таргоид, Пешком. «Прозрачность» теперь «Непрозрачность».",
+        "Повторный запуск возвращает скрытое окно. Действия значка в трее пишутся в gravitas.log."
+      ]
+    },
+    {
+      "v": "0.6.4",
+      "en": [
+        "Updating no longer flashes a console window: the update runs out of sight.",
+        "While it updates, the app says where the update comes from (gravitasmap.com, checked and signed) and that it will restart in a few seconds.",
+        "Windows that are on now stay on screen even when nothing is happening (Targets, Kill feed, Current fight, Time to kill wait as empty frames), like the Bounty counter. You can turn this off under Look and behaviour."
+      ],
+      "de": [
+        "Beim Aktualisieren blitzt kein Konsolenfenster mehr auf: das Update läuft unsichtbar.",
+        "Beim Aktualisieren sagt die App, woher das Update kommt (gravitasmap.com, geprüft und signiert) und dass sie in wenigen Sekunden neu startet.",
+        "Eingeschaltete Fenster bleiben jetzt auf dem Bildschirm, auch wenn nichts passiert (Ziele, Kill-Feed, Aktueller Kampf, Zeit bis zum Abschuss warten als leere Rahmen), wie der Kopfgeld-Zähler. Unter Aussehen und Verhalten abschaltbar."
+      ],
+      "es": [
+        "Al actualizar ya no parpadea una ventana de consola: la actualización corre fuera de la vista.",
+        "Mientras actualiza, la app dice de dónde viene la actualización (gravitasmap.com, comprobada y firmada) y que se reiniciará en unos segundos.",
+        "Las ventanas activadas ahora se quedan en pantalla aunque no pase nada (Objetivos, Registro de derribos, Combate actual y Tiempo para derribar esperan como marcos vacíos), como el contador de recompensas. Se puede apagar en Aspecto y comportamiento."
+      ],
+      "fr": [
+        "La mise à jour ne fait plus clignoter de fenêtre console : elle se fait hors de vue.",
+        "Pendant la mise à jour, l'app dit d'où elle vient (gravitasmap.com, vérifiée et signée) et qu'elle redémarre dans quelques secondes.",
+        "Les fenêtres activées restent maintenant à l'écran même quand rien ne se passe (Cibles, Fil des victoires, Combat en cours, Temps pour abattre attendent en cadres vides), comme le compteur de primes. Désactivable dans Aspect et comportement."
+      ],
+      "pt-br": [
+        "Atualizar não faz mais piscar uma janela de console: a atualização roda fora de vista.",
+        "Enquanto atualiza, o app diz de onde vem a atualização (gravitasmap.com, verificada e assinada) e que reinicia em alguns segundos.",
+        "As janelas ligadas agora ficam na tela mesmo sem nada acontecendo (Alvos, Feed de abates, Combate atual, Tempo para abater esperam como molduras vazias), como o contador de recompensas. Dá para desligar em Aparência e comportamento."
+      ],
+      "ru": [
+        "При обновлении больше не мигает окно консоли: обновление идёт незаметно.",
+        "Во время обновления приложение сообщает, откуда оно (gravitasmap.com, проверено и подписано) и что перезапустится через несколько секунд.",
+        "Включённые окна теперь остаются на экране, даже когда ничего не происходит (Цели, Лента убийств, Текущий бой, Время до убийства ждут пустыми рамками), как счётчик наград. Можно отключить в разделе Вид и поведение."
+      ]
+    },
+    {
+      "v": "0.6.2",
+      "en": [
+        "Choose your own key to open the GRAVITAS window: Combat > Keys > \"Open the GRAVITAS window\". It works from the game too.",
+        "This What's new window shows once after every update. You can open it again from About.",
+        "The menu key is Ctrl+Shift+K. The other keys are optional now and each one can be removed.",
+        "The app looks for an update when it opens and installs small ones by itself as it opens; while it is open it only says \"new version\".",
+        "Moving or snapping a window now shows that window with made-up data wherever it is tied to, so you can see where it goes. It no longer turns Preview on by itself.",
+        "The windows stay visible while the GRAVITAS menu is open.",
+        "\"Hide the overlay while the mouse is over\" is gone."
+      ],
+      "de": [
+        "Wähle deine eigene Taste, um das GRAVITAS-Fenster zu öffnen: Kampf > Tasten > \"GRAVITAS-Fenster öffnen\". Sie funktioniert auch im Spiel.",
+        "Dieses Fenster \"Neu\" erscheint einmal nach jedem Update. Du kannst es unter Info wieder öffnen.",
+        "Die Menütaste ist Strg+Umschalt+K. Die anderen Tasten sind jetzt optional und jede lässt sich entfernen.",
+        "Die App sucht beim Öffnen nach einem Update und installiert kleine selbst beim Öffnen; während sie offen ist, meldet sie nur \"neue Version\".",
+        "Beim Verschieben oder Einrasten zeigt sich das Fenster jetzt mit erfundenen Daten, egal woran es gebunden ist, damit du siehst, wohin es kommt. Die Vorschau schaltet sich nicht mehr von selbst ein.",
+        "Die Fenster bleiben sichtbar, solange das GRAVITAS-Menü offen ist.",
+        "\"Overlay verbergen, solange die Maus darüber ist\" ist entfallen."
+      ],
+      "es": [
+        "Elige tu propia tecla para abrir la ventana de GRAVITAS: Combate > Teclas > \"Abrir la ventana de GRAVITAS\". Funciona también desde el juego.",
+        "Esta ventana de Novedades aparece una vez tras cada actualización. Puedes abrirla de nuevo en Acerca de.",
+        "La tecla del menú es Ctrl+Mayús+K. Las demás teclas son opcionales y cada una se puede quitar.",
+        "La app busca actualizaciones al abrirse e instala las pequeñas por sí sola al abrirse; con la app abierta solo avisa de \"versión nueva\".",
+        "Al mover o ajustar una ventana, esta se muestra con datos inventados, esté atada a lo que esté, para que veas dónde va. Ya no activa la vista previa por sí sola.",
+        "Las ventanas siguen visibles mientras el menú de GRAVITAS está abierto.",
+        "\"Ocultar el overlay mientras el ratón está encima\" ya no existe."
+      ],
+      "fr": [
+        "Choisissez votre propre touche pour ouvrir la fenêtre GRAVITAS : Combat > Touches > \"Ouvrir la fenêtre GRAVITAS\". Elle marche aussi depuis le jeu.",
+        "Cette fenêtre Nouveautés s'affiche une fois après chaque mise à jour. Vous pouvez la rouvrir dans À propos.",
+        "La touche du menu est Ctrl+Maj+K. Les autres touches sont facultatives et chacune peut être retirée.",
+        "L'app cherche une mise à jour à l'ouverture et installe les petites d'elle-même à l'ouverture ; ouverte, elle dit seulement \"nouvelle version\".",
+        "Déplacer ou aligner une fenêtre l'affiche maintenant avec des données inventées, quel que soit son panneau, pour voir où elle va. L'aperçu ne s'active plus tout seul.",
+        "Les fenêtres restent visibles tant que le menu GRAVITAS est ouvert.",
+        "« Masquer l'overlay quand la souris est dessus » a disparu."
+      ],
+      "pt-br": [
+        "Escolha sua própria tecla para abrir a janela do GRAVITAS: Combate > Teclas > \"Abrir a janela do GRAVITAS\". Funciona também de dentro do jogo.",
+        "Esta janela de Novidades aparece uma vez após cada atualização. Você pode abri-la de novo em Sobre.",
+        "A tecla do menu é Ctrl+Shift+K. As outras teclas são opcionais e cada uma pode ser removida.",
+        "O app procura atualização ao abrir e instala as pequenas sozinho ao abrir; com o app aberto, ele só avisa \"versão nova\".",
+        "Mover ou encaixar uma janela agora a mostra com dados inventados, esteja presa ao que estiver, para ver onde ela vai. A prévia não liga mais sozinha.",
+        "As janelas continuam visíveis enquanto o menu do GRAVITAS está aberto.",
+        "\"Esconder o overlay enquanto o mouse está em cima\" foi removido."
+      ],
+      "ru": [
+        "Выберите свою клавишу для открытия окна GRAVITAS: Бой > Клавиши > \"Открыть окно GRAVITAS\". Работает и из игры.",
+        "Это окно \"Что нового\" показывается один раз после каждого обновления. Его можно открыть снова в разделе О программе.",
+        "Клавиша меню Ctrl+Shift+K. Остальные клавиши необязательны, любую можно убрать.",
+        "Приложение ищет обновление при открытии и ставит малые само при открытии; пока оно открыто, оно только сообщает \"новая версия\".",
+        "Перемещение или привязка окна теперь показывает его с выдуманными данными, к чему бы оно ни было привязано, чтобы видеть, куда оно встанет. Превью больше не включается само.",
+        "Окна остаются видны, пока открыто меню GRAVITAS.",
+        "\"Скрывать оверлей, пока над ним мышь\" убрано."
+      ]
+    }
+  ]
+}

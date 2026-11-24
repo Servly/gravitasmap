@@ -1,0 +1,43 @@
+[package]
+name = "gravitas"
+version = "0.9.27"
+description = "GRAVITAS, a free fan-made companion for Elite Dangerous"
+authors = ["CMDR Hongark"]
+edition = "2021"
+license = "MIT"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+indexmap = "2"
+webview2-com = "0.39"
+ureq = "2"
+ed25519-dalek = "2"
+sha2 = "0.10"
+regex = "1"
+known-folders = "1"
+tiny-skia = "0.11"
+rquickjs = { version = "0.9", default-features = false }
+ab_glyph = "0.2"
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_System_LibraryLoader", "Win32_Security", "Win32_System_Threading", "Win32_System_Time", "Win32_UI_WindowsAndMessaging", "Win32_UI_Input", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_Com", "Win32_UI_Shell"] }
+sysinfo = { version = "0.33", default-features = false, features = ["system"] }
+
+[features]
+# a build for virus scans only: the input-watching calls are off (never shipped)
+diag-noinput = []
+# the Microsoft Store build: no updater (the Store updates the app), no developer environment switches, no second copy of the settings folder
+store = []
+
+[profile.release]
+# The plain build settings (18 Nov): the size-tuned, link-time-optimised, stripped build (opt-level "s", lto, panic abort, strip) was flagged by Kaspersky
+# (VHO:Trojan.Win32.Sdum.gen) while this one, built from the same code, scanned clean. Do not go back to the size-tuned profile without a scan.
+opt-level = 3
+lto = false
+codegen-units = 16
+panic = "unwind"
+strip = false

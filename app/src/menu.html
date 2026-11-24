@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRAVITAS menu</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="rows.css">
+<link rel="stylesheet" href="menu.css">
+</head>
+<body>
+<div class="win menu" id="win">
+  <div class="titlebar" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><span class="lg" id="lg"></span>GRAVITAS</div>
+    <div class="ribbon" id="ribbon" data-tauri-drag-region data-i18n="menu.title"></div>
+    <button class="btn sm medit" id="mEdit" data-i18n-title="menu.edit.d"><span data-i18n="menu.edit"></span></button>
+    <label class="malpha" data-i18n-title="tip.mAlpha"><span id="mAlphaLab" data-i18n="menu.see"></span><input type="range" id="mAlpha" min="35" max="100" step="1"></label>
+    <div class="wc"><button id="mMin" data-i18n-title="tip.mMin" class="x" aria-label="Collapse">&#8211;</button><button id="mClose" data-i18n-title="tip.mClose" class="x" aria-label="Close">&#10005;</button></div>
+  </div>
+  <div class="mbody">
+    <nav class="tabs" id="tabs" role="tablist">
+      <button class="tab on" data-i18n-title="tip.tab.main" data-tab="main" data-i18n="menu.tab.main"></button>
+      <button class="tab" data-i18n-title="tip.tab.map" data-tab="map" data-i18n="menu.tab.map"></button>
+      <button class="tab" data-i18n-title="tip.tab.combat" data-tab="combat" data-i18n="menu.tab.combat"></button>
+      <button class="tab" data-i18n-title="tip.tab.thargoid" data-tab="thargoid" data-i18n="menu.tab.thargoid"></button>
+      <button class="tab" data-i18n-title="tip.tab.debrief" data-tab="debrief" data-i18n="menu.tab.debrief"></button>
+      <button class="tab" data-i18n-title="tip.tab.pvp" data-tab="pvp" data-i18n="menu.tab.pvp"></button>
+      <button class="tab" data-i18n-title="tip.tab.foot" data-tab="foot" data-i18n="menu.tab.foot"></button>
+      <button class="tab" data-i18n-title="tip.tab.keys" data-tab="keys" data-i18n="nav.keys"></button>
+    </nav>
+    <section class="pane on" id="p-main"></section>
+    <section class="pane" id="p-map"></section>
+    <section class="pane" id="p-combat"></section>
+    <section class="pane" id="p-thargoid"></section>
+    <section class="pane" id="p-debrief"></section>
+    <section class="pane" id="p-pvp"></section>
+    <section class="pane" id="p-foot"></section>
+    <section class="pane" id="p-keys"></section>
+    <p class="mhint" data-i18n="menu.hint"></p>
+  </div>
+</div>
+<script src="combatui.js"></script>
+<script src="keybind.js"></script>
+<script src="menu.js"></script>
+</body>
+</html>

@@ -91,6 +91,17 @@ def main():
     else:
         if not (SITE / "assets").is_dir():
             print("  warning: no assets folder found (src/assets or prototype/assets); images and sounds will be missing")
+    # v0.99.6: the saved copy of Sol is made again at every build when it is more than a day old (so deploy.bat and deploy_app.bat keep it fresh by themselves).
+    # It never breaks a build: if Spansh does not answer, the old copy stays.
+    try:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import refresh_sol
+        print("  Sol saved copy:", refresh_sol.refresh(max_age_hours=24))
+    except Exception as e:
+        print(f"  warning: the saved copy of Sol was not refreshed ({type(e).__name__}: {e}); the old one stays")
+    if (ROOT / "saved").is_dir():                                      # v0.99.6: the saved copy of Sol (tools/refresh_sol.py), sent only when Spansh does not answer
+        shutil.rmtree(SITE / "saved", ignore_errors=True)
+        shutil.copytree(ROOT / "saved", SITE / "saved")
     if (ROOT / "tools" / "_headers").is_file():                       # caching rules and the content security policy for Cloudflare Pages
         hdr = (ROOT / "tools" / "_headers").read_text(encoding="utf-8")
         inline = [m for m in re.findall(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", html, re.S) if "ld+json" not in m[0]]

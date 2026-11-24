@@ -438,7 +438,7 @@ function smapFit() {
     const L = 36 + (jn && document.body.classList.contains("jrnCol") ? 188 : 0), T = jn ? 96 : document.body.classList.contains("pRt") ? 90 : 54, Bm = jn ? 64 + Math.min(jn, innerWidth < 600 ? 2 : 3) * 40 : 54,   /* v0.78.5: the route strip; v0.80: the journey bars; v0.81: the route column */ w = W - L - 36, h = H - T - Bm;
     k = Math.max(0.12, Math.min(1.15, w / P.W, h / P.H)); if (k < 0.5) k = Math.max(k, Math.min(0.6, W > H ? w / P.W : h / P.H));   // sideways: fill the width, swipe down for long moon chains
     tx = P.W * k <= w ? L + (w - P.W * k) / 2 : L; ty = T + Math.max(0, (h - P.H * k) / 2);
-  } else if (k < 0.5 && isPhone()) { k = Math.max(k, Math.min(0.6, (H - 30) / P.H)); tx = 4; ty = 12; }   // a narrow phone: readable size from the top, swipe for the rest
+  } else if (k < 0.5 && isPhone() && !(typeof APP_SMAP !== "undefined" && APP_SMAP)) { k = Math.max(k, Math.min(0.6, (H - 30) / P.H)); tx = 4; ty = 12; }   // a narrow phone: readable size from the top, swipe for the rest
   SMAP.v = { k, tx, ty, auto: true }; SMAP.fitT = performance.now();
   smapApply();
 }

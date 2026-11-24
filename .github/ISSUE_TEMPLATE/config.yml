@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea (Discussions)
+    url: https://github.com/Servly/gravitasmap/discussions
+    about: Ask how something works or share an idea.
+  - name: Privacy, what GRAVITAS reads and sends
+    url: https://github.com/Servly/gravitasmap/blob/main/PRIVACY.md
+    about: The exact list, with the code behind each step.
+  - name: Security problem
+    url: https://github.com/Servly/gravitasmap/security/advisories/new
+    about: Please report it privately here, not in a public issue.

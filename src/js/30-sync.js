@@ -2,12 +2,15 @@
 // The browser reads the game's Journal files from the folder the player chooses (Chrome and Edge only).
 // Nothing is uploaded or stored: only the lines that say where the ship is are read, and only the system's name
 // is sent, the same way a search does. All system data still comes from Spansh.
+// v0.99.7: inside the GRAVITAS app's map window (?app=window) the app reads the Journal folder itself and hands the lines over (src/js/48-app-hook.js): no folder question
+const APP_WINDOW = /[?&]app=window(&|$)/.test(location.search);
 const SYNC = {
-  ok: typeof window.showDirectoryPicker === "function" && window.isSecureContext,
+  ok: (typeof window.showDirectoryPicker === "function" && window.isSecureContext) || APP_WINDOW,
   on: false, dir: null, file: null, fname: "", pos: 0, rest: "", timer: 0, scanT: 0, busy: false,
   here: "", at: null, jumping: "", pend: null, miss: "", missN: 0, missT: 0, auto: true, err: 0,
 };
 const SYNC_LINKED = new URLSearchParams(location.search).has("system");   // v0.75.6: read at once (the page rewrites its address later)
+const SYNC_MISS_WAIT = [30, 60, 120, 300];                           // v0.99.9: seconds between searches for a system Spansh does not know yet (at most 4 retries)
 const SYNC_ARRIVE_MS = 60000;                                         // v0.76: how long the arrival star keeps "You are here"
 const SYNC_PATH = "%USERPROFILE%\\Saved Games\\Frontier Developments\\Elite Dangerous";
 const SYNC_EV = /"event":"(Scan|Shutdown|LoadGame|Location|FSDJump|CarrierJump|StartJump|ApproachBody|SupercruiseExit|Touchdown|Docked|LeaveBody|Undocked|ApproachSettlement|Liftoff|Disembark|Embark|NavRoute|NavRouteClear|Loadout|CarrierLocation|CarrierJumpRequest|CarrierJumpCancelled|CarrierStats|Music|ShipTargeted|UnderAttack|Bounty|FactionKillBond|CapShipBond|HeatWarning|HeatDamage|ShieldState|HullDamage|Interdicted|Interdiction|EscapeInterdiction|Died|Resurrect|GameModeChange|WingJoin|WingAdd|WingLeave|SupercruiseDestinationDrop|FighterDestroyed|LaunchFighter|SupercruiseEntry|Missions|Statistics|ReceiveText|CommitCrime|Rank|Progress)"/;   // v0.91: and the fight   // v0.78: the route and the jump range too
@@ -64,6 +67,7 @@ function syncToggle() {
   syncStartFlow(false);
 }
 async function syncStartFlow(change) {
+  if (APP_WINDOW && window.__gravitasApp && __gravitasApp.dir) { if (__gravitasApp.ready()) return syncStart(__gravitasApp.dir(), true); toast("Waiting for the GRAVITAS app to hand over the Journal…"); return; }   // the app is the folder
   // with a remembered answer and a folder chosen before, starting only asks the browser for permission again
   if (!change && syncLS("consent") === "1") {
     const h = SYNC.dir || await syncLoadDir();
@@ -323,7 +327,7 @@ async function syncFollow(name, retry) {
   if (ok) { SYNC.shown = S.sys.name; syncLS("last", S.sys.name); SYNC.miss = ""; SYNC.missN = 0; syncShow(); syncBody(); return; }
   if (!syncSame(name, SYNC.here)) return syncShow();
   SYNC.missN = retry ? SYNC.missN + 1 : 1;
-  if (SYNC.missN <= 10) { SYNC.miss = name; SYNC.missT = performance.now() + 60000; if (retry) status(""); }   // not in Spansh yet: try again each minute for ten minutes
+  if (SYNC.missN <= SYNC_MISS_WAIT.length) { SYNC.miss = name; SYNC.missT = performance.now() + SYNC_MISS_WAIT[SYNC.missN - 1] * 1000; if (retry) status(""); }   // not in Spansh yet: try again after 30 s, 1, 2 and 5 minutes, then stop (v0.99.9: was every minute for ten)
   else { SYNC.miss = ""; SYNC.pend = name; }
   syncShow();
 }
@@ -504,8 +508,8 @@ function tgtMapTick() {
     $("syncSw").title = SYNC.ok ? "GRAVITAS follows your jumps in Elite Dangerous" : "Sync with the game needs Chrome or Edge on a computer";
     $("syncGo").onclick = () => { if (SYNC.pend) syncFollow(SYNC.pend, false); };
     $("syncAuto").onchange = e => { SYNC.auto = e.target.checked; syncLS("auto", SYNC.auto ? "1" : "0"); if (SYNC.auto && SYNC.pend && !S) syncFollow(SYNC.pend, false); };
-    $("syncDir").onclick = () => syncDialog(true);
-    $("syncPlug").onclick = () => openNews("GRAVITAS for EDMC", "plugin");   // v0.93: Show me is on the map (Find me); here: the plugin
+    $("syncDir").onclick = () => APP_WINDOW ? toast("The GRAVITAS app reads your Journal folder itself: there is nothing to choose.") : syncDialog(true);
+    $("syncPlug").onclick = () => openNews("GRAVITAS APP", "plugin");   // v0.93: Show me is on the map (Find me); here: the plugin
     syncShow();
     // last visit had it on: resume quietly when the browser still allows reading the folder, else wait for a click
     if (SYNC.ok && syncLS("on") === "1") syncLoadDir().then(async h => {

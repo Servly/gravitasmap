@@ -1,0 +1,15 @@
+{
+  "name": "gravitas",
+  "version": "0.9.27",
+  "private": true,
+  "description": "GRAVITAS, a free fan-made companion for Elite Dangerous",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
+

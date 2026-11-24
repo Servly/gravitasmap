@@ -6,15 +6,35 @@
 // them (WebRTC). Which way is used is decided once per pairing and remembered.
 // v0.92: in a fight the combat screen goes too. Through the server it is a message of its own that is passed on and never kept.
 const PAIR = {
-  role: "", room: "", code: "", exp: 0, ws: null, retry: 0, timer: 0, beat: null, sent: "", lastT: 0,
+  role: "", room: "", hk: "", code: "", exp: 0, ws: null, retry: 0, timer: 0, beat: null, sent: "", lastT: 0,
   peers: new Map(),            // host: viewer id -> { pc, dc, mode }
   pc: null, dc: null, mode: "", got: false, hostOn: false, sig: "", chk: null, chkN: 0, miss: 0, nextChk: 0, okT: 0,   // viewer (v0.82: sig, the check)
 };
 var PAIR_ON = true;                    // a plain flag (var, no wait for this file): earlier files may call pairUi() once it is set
 const PAIR_LS = { host: "gravitas.pair.host", view: "gravitas.pair.view" };
-const pairGet = k => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
-const pairSet = (k, v) => { try { v ? localStorage.setItem(k, JSON.stringify(v)) : localStorage.removeItem(k); } catch (e) {} };
+// v0.99.10: in the app's map window the computer's pairing is kept by the app (APPPAIR, 33-pair-manage.js), never in this window's web storage
+const pairGet = k => { if (APP_WINDOW && k === PAIR_LS.host) return APPPAIR.rec; try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
+const pairSet = (k, v) => { if (APP_WINDOW && k === PAIR_LS.host) { APPPAIR.rec = v || null; return; } try { v ? localStorage.setItem(k, JSON.stringify(v)) : localStorage.removeItem(k); } catch (e) {} };
 const PAIR_RTC = typeof RTCPeerConnection === "function";
+// v0.99.9: everything a paired computer relays is treated as untrusted text: copied into plain values (numbers clamped, strings cut and
+// stripped of < > " and `, odd keys dropped, depth and width limited) before any screen builds HTML from it. The server does the same.
+// BEGIN remoteClean (tools/test_room.mjs reads this block)
+function remoteClean(v, depth) {
+  depth = depth || 0;
+  if (v == null) return null;
+  if (typeof v === "number") return Number.isFinite(v) ? Math.max(-1e15, Math.min(1e15, v)) : 0;
+  if (typeof v === "boolean") return v;
+  if (typeof v === "string") return v.replace(/[\x00-\x1f\x7f<>"`]/g, "").slice(0, 240);
+  if (depth >= 8) return null;
+  if (Array.isArray(v)) return v.slice(0, 200).map(x => remoteClean(x, depth + 1));
+  if (typeof v === "object") {
+    const o = {}; let n = 0;
+    for (const k of Object.keys(v)) { if (k === "__proto__" || k === "constructor" || k === "prototype" || /[<>"`]/.test(k) || k.length > 60) continue; if (++n > 80) break; o[k] = remoteClean(v[k], depth + 1); }
+    return o;
+  }
+  return null;
+}
+// END remoteClean
 
 // ---- the connection to the room (both sides)
 function pairOpen() {
@@ -22,13 +42,26 @@ function pairOpen() {
   try { PAIR.ws && PAIR.ws.close(); } catch (e) {}
   const u = new URL(`${API}/room`, location.href); u.protocol = u.protocol === "https:" ? "wss:" : "ws:";
   u.searchParams.set("room", PAIR.room); u.searchParams.set("role", PAIR.role);
-  let ws; try { ws = new WebSocket(u); } catch (e) { return pairRetry(); }
+  if (PAIR.role === "host" && !PAIR.hk) return pairHostLost();   // v0.99.9: the host key
+  // v0.99.10: the key travels as the WebSocket sub-protocol "gravitas.hk.<key>", not in the address (an address is logged). If the link never opens twice in a row
+  // (a proxy that drops sub-protocols), the old way, ?hk=, is used so sharing keeps working
+  if (PAIR.role === "host" && PAIR.hkq) u.searchParams.set("hk", PAIR.hk);
+  let ws, opened = false; try { ws = PAIR.role === "host" && !PAIR.hkq ? new WebSocket(u, ["gravitas.hk." + PAIR.hk]) : new WebSocket(u); } catch (e) { return pairRetry(); }
   PAIR.ws = ws;
-  ws.onopen = () => { PAIR.retry = 0; PAIR.wsT = Date.now(); pairUi(); syncShow(); if (PAIR.role === "host") { PAIR.sent = ""; pairPush(true); } };
+  ws.onopen = () => { opened = true; PAIR.hkFail = 0; PAIR.retry = 0; PAIR.evicted = false; PAIR.wsT = Date.now(); pairUi(); syncShow(); if (PAIR.role === "host") { PAIR.sent = ""; pairPush(true); } };
   ws.onmessage = e => { PAIR.wsT = Date.now(); let m; try { m = JSON.parse(e.data); } catch (x) { return; } pairMsg(m); };
-  ws.onclose = ev => { if (PAIR.ws !== ws) return; PAIR.ws = null; pairUi(); syncShow(); if (ev.code === 4000) return;
+  ws.onclose = ev => { if (PAIR.ws !== ws) return; PAIR.ws = null; if (!opened && PAIR.role === "host" && !PAIR.hkq && ev.code === 1006 && ++PAIR.hkFail >= 2) PAIR.hkq = true; pairUi(); syncShow();
+    if (ev.code === 4000) { if (PAIR.role === "host") { PAIR.evicted = true; PM.t = 0; } return; }   // v0.99.10: another place pushes now: this one keeps the pairing and only manages the devices
+    if (ev.code === 4004 && PAIR.role === "host") { pairGone("Sharing was stopped from another place."); return; }   // v0.99.10: stopped elsewhere: forget it here, calmly
+    if (ev.code === 4001 && PAIR.role === "host") { pairHostLost(); return; }   // v0.99.9: the room does not know this computer's key
     if (ev.code === 4003) { if (PAIR.role === "view") pairRemoved(); return; }   // v0.94: the computer stopped this device following
     if (PAIR.role) pairRetry(); };
+}
+// v0.99.9: this computer no longer holds the key of its pairing (an old link from before keys, or the pairing is gone): stop quietly, sharing again starts a new one
+function pairHostLost() {
+  const msg = PAIR.linked ? PAIR_LINK_ENDED : "This link has expired. Tap Devices to start sharing again.";
+  pairHostStop(true);
+  toast(msg);
 }
 // v0.78: give up on a socket without waiting for its goodbye, and build a new one
 function pairDropWs() {
@@ -45,6 +78,8 @@ const pairSend = m => { try { if (PAIR.ws && PAIR.ws.readyState === 1) { PAIR.ws
 function pairMsg(m) {
   if (m.t === "hb") return;
   if (PAIR.role === "host") {
+    if (m.t === "devs") { pairDevs(m.d, m.on); return; }              // v0.99.10: the room's list, pushed when it changes
+    if (m.t === "hello") { if (Array.isArray(m.devs)) pairDevs(m.devs, true); return; }
     if (m.t === "hi") { const p = PAIR.peers.get(m.id) || { mode: "server", seenT: Date.now() }; p.n = String(m.n || "").slice(0, 40); p.t0 = p.t0 || Date.now(); PAIR.peers.set(m.id, p); pairUi(); return; }   // v0.94
     if (m.t === "join") { if (m.on) { const p = PAIR.peers.get(m.id) || { mode: "server" }; p.seenT = Date.now(); p.t0 = p.t0 || Date.now(); PAIR.peers.set(m.id, p); } else pairDropPeer(m.id); pairUi(); if (m.on) pairPush(true); return; }
     if (m.t === "ping") {
@@ -63,7 +98,7 @@ function pairMsg(m) {
   if (m.t === "hello") { pairSend({ t: "hi", n: pairDevName() }); PAIR.hostOn = !!m.host; if (m.s) pairApply(m.s); pairUi(); pairRtcStart(); PAIR.chk = null; PAIR.nextChk = Date.now() + 1500; return; }   // v0.82: check soon after (re)joining
   if (m.t === "host") { PAIR.hostOn = !!m.on; pairUi(); syncShow(); if (m.on && PAIR.mode !== "server") pairRtcStart(); if (m.on) { PAIR.chk = null; PAIR.miss = 0; PAIR.nextChk = Date.now() + 1500; } return; }
   if (m.t === "state") { pairApply(m.s); return; }
-  if (m.t === "cb") { if (PAIR.role === "view" && !(m.at && m.at < (PAIR.cbT || 0))) { PAIR.cbT = m.at || Date.now(); try { cbRemote(m.c && typeof m.c === "object" ? m.c : null); } catch (e) {} } return; }   // v0.92: passed on by the server, never kept there
+  if (m.t === "cb") { if (PAIR.role === "view" && !(m.at && m.at < (PAIR.cbT || 0))) { PAIR.cbT = m.at || Date.now(); try { cbRemote(m.c && typeof m.c === "object" ? remoteClean(m.c) : null); } catch (e) {} } return; }   // v0.92: passed on by the server, never kept there
   if (m.t === "pong") { if (m.d && m.d.chk) { pairChecked(m.d); return; } pairPong(m.d, "server"); return; }
   if (m.t === "sig") { pairViewSig(m.d || {}); return; }
 }
@@ -90,21 +125,30 @@ function pairPush(force) {
   for (const p of PAIR.peers.values()) if (p.dc && p.dc.readyState === "open") { try { p.dc.send(msg); } catch (e) {} }
 }
 async function pairHostStart(again) {
-  if (!SYNC.ok || !SYNC.on) { toast("Turn on Sync with the game first."); return; }
+  if (APP_WINDOW && !APPPAIR.ready) { toast("Waiting for the GRAVITAS app…"); return; }   // (the app hands over its pairing first: a second one must not be made over it)
+  const keep = again && PAIR.room && PAIR.hk;
+  if (!keep && (!SYNC.ok || !SYNC.on)) { toast("Turn on Sync with the game first."); return; }   // (a new code for a pairing this page already holds needs no Sync)
   let r, j;
-  try { r = await fetch(`${API}/room${again && PAIR.room ? `?room=${PAIR.room}` : ""}`, { method: "POST" }); j = await r.json(); } catch (e) { j = null; }
+                         // v0.99.9: a new code for the same pairing needs its key
+  try { r = await fetch(`${API}/room${keep ? `?room=${PAIR.room}` : ""}`, { method: "POST", headers: keep ? { "X-Host-Key": PAIR.hk } : {} }); j = await r.json(); } catch (e) { j = null; }
   if (!r || !r.ok || !j || !j.room) { toast((j && j.error) || "Pairing is not available right now."); return; }
-  const fresh = PAIR.room !== j.room;
-  PAIR.role = "host"; PAIR.room = j.room; PAIR.code = j.code; PAIR.exp = j.exp;
-  pairSet(PAIR_LS.host, { room: j.room, t: Date.now() });
-  if (fresh || !PAIR.ws) pairOpen();
+  const fresh = PAIR.room !== j.room; if (fresh) PAIR.linked = false;     // v0.99.11: a pairing made here is not one taken from the app
+  if (typeof j.hostKey === "string" && /^[0-9a-f]{32}$/.test(j.hostKey)) PAIR.hk = j.hostKey;   // a new pairing: a new key (the old pairing's key is useless now)
+  else if (fresh) { toast("Pairing is not available right now."); return; }
+  PAIR.role = "host"; PAIR.room = j.room; PAIR.code = String(j.code || "").replace(/\D/g, "").slice(0, 8); PAIR.exp = +j.exp || 0;
+  pairSet(PAIR_LS.host, PAIR.linked ? { room: j.room, hk: PAIR.hk, t: Date.now(), linked: 1 } : { room: j.room, hk: PAIR.hk, t: Date.now() });
+  if (fresh) { PM.devs = null; PM.t = 0; PAIR.evicted = false; }
+  if (SYNC.on && !SYNC.remote && !PAIR.evicted && (fresh || !PAIR.ws)) pairOpen(); else if (!SYNC.on) PM.wait = true;
   pairBeat(true); pairDialog(); pairUi();
 }
-function pairHostStop() {
+// local = true: the pairing is already gone (stopped somewhere else, expired): only forget it here. Else it is ended for everybody (devices removed, key wiped)
+function pairHostStop(local) {
+  { const room = PAIR.room, hk = PAIR.hk; if (local !== true && room && hk) pairApiRaw(room, hk, "stop").catch(() => {}); }
+  PM.devs = null; PM.wait = false; PAIR.evicted = false;
   pairSet(PAIR_LS.host, null);
   for (const id of [...PAIR.peers.keys()]) pairDropPeer(id);
   PAIR.role = ""; const ws = PAIR.ws; PAIR.ws = null; try { ws && ws.close(); } catch (e) {}
-  PAIR.room = ""; PAIR.code = ""; clearTimeout(PAIR.timer); pairBeat(false); pairUi();
+  PAIR.room = ""; PAIR.code = ""; PAIR.hk = ""; PAIR.linked = false; clearTimeout(PAIR.timer); pairBeat(false); pairUi();
   const d = $("pairDlg"); if (d) d.style.display = "none";
 }
 // v0.76 kept only the Journal reading and the sending on a worker's beat while devices followed; v0.78's heartbeat, the
@@ -133,7 +177,7 @@ function pairDropRtc(p) { try { p.dc && p.dc.close(); } catch (e) {} try { p.pc 
 // app in the background) even though its link is still open. The computer shows that instead of a green "following"
 const PAIR_MAX = 4;                                                    // the room server takes up to 4 devices per computer
 const pairAwake = p => !!p && Date.now() - (p.seenT || 0) < 40000;
-function pairCounts() { let a = 0, s = 0; for (const p of PAIR.peers.values()) pairAwake(p) ? a++ : s++; return { a, s, n: a + s }; }
+function pairCounts() { let a = 0, s = 0; for (const p of pairList()) p.awake ? a++ : s++; return { a, s, n: a + s }; }   // v0.99.10: the room's list when this page holds the key
 function pairDropPeer(id) { const p = PAIR.peers.get(id); if (p) pairDropRtc(p); PAIR.peers.delete(id); }
 
 // ---- viewer: follow the computer
@@ -168,12 +212,17 @@ function pairRemoved() {
   status("The computer you followed stopped sharing with this device.", true); setTimeout(() => status(""), 8000);
 }
 // the computer: stop one device following (×), or every device and a fresh link, so the old link no longer works
-function pairKick(id) { pairSend({ t: "kick", to: id }); pairDropPeer(id); pairUi(); }
+// v0.99.10: through the open link when there is one, else by the room's own address (a page without a link manages the list too)
+function pairKick(id) {
+  if (!pairSend({ t: "kick", to: id }) && PAIR.hk) pairApi("kick", `&to=${id}`).then(r => { if (r.st === 200 && r.j) pairDevs(r.j.devices, r.j.hostOn); else if (r.st === 410 || r.st === 403) pairGone(); }).catch(() => {});
+  pairDropPeer(id); if (PM.devs) PM.devs.list = PM.devs.list.filter(d => d.id !== id); pairUi();
+}
 async function pairNewLink() {
-  pairSend({ t: "kick", to: "*" });
+  const old = { room: PAIR.room, hk: PAIR.hk };
   for (const id of [...PAIR.peers.keys()]) pairDropPeer(id);
   const ws = PAIR.ws; PAIR.ws = null; setTimeout(() => { try { ws && ws.close(1000, "new link"); } catch (e) {} }, 400);
-  PAIR.room = ""; PAIR.code = ""; pairSet(PAIR_LS.host, null);
+  PAIR.room = ""; PAIR.code = ""; PAIR.hk = ""; PAIR.linked = false; PM.devs = null; PAIR.evicted = false; pairSet(PAIR_LS.host, null);
+  if (old.room && old.hk) { try { await pairApiRaw(old.room, old.hk, "stop"); } catch (e) {} }   // the old pairing ends for everybody: devices are removed, the other places that hold it drop it
   await pairHostStart(false);
   toast("New link and code: the old ones no longer work");
 }
@@ -189,7 +238,8 @@ function pairApply(s) {
   PAIR.hostT = Date.now();                                             // v0.78: the computer is there (it also says so every 15 s)
   if (s.t && s.t <= PAIR.lastT) return;                                // the same news by the other way: already seen
   PAIR.lastT = s.t || Date.now();
-  { const r = Object.assign({}, s); delete r.t; delete r.cb; PAIR.sig = pairSig(JSON.stringify(r)); }   // v0.82: what this device has, to compare with the computer
+  { const r = Object.assign({}, s); delete r.t; delete r.cb; PAIR.sig = pairSig(JSON.stringify(r)); }   // v0.82: what this device has, to compare with the computer (of the news as it came, before cleaning)
+  s = remoteClean(s);                                                  // v0.99.9: untrusted text from here on
   const first = !PAIR.got; PAIR.got = true;
   const here = typeof s.here === "string" ? s.here.slice(0, 120) : "", moved = here !== SYNC.here;
   if (moved) { SYNC.prev = SYNC.here; SYNC.here = here; }
@@ -282,10 +332,12 @@ function pairSetMode(mode, ms) {
 
 // ---- what the panels show
 function pairUi() {
-  const b = $("syncPair"); if (b) { const c = pairCounts(); b.style.display = SYNC.ok && SYNC.on && !SYNC.remote && !isPhone() ? "" : "none";
+  const b = $("syncPair"); if (b) { const c = pairCounts(); b.style.display = (SYNC.ok && SYNC.on && !SYNC.remote && !isPhone()) || (PAIR.role === "host" && PAIR.hk && !isPhone()) ? "" : "none";   // v0.99.10: a page that only manages a pairing (no Sync here) keeps the button
     b.classList.toggle("on", PAIR.role === "host" && c.a > 0); b.classList.toggle("wait", PAIR.role === "host" && !c.a);   // v0.91.4: green only while a device really follows
     b.title = PAIR.role === "host" ? (c.a ? `${c.a} device${c.a > 1 ? "s" : ""} following${c.s ? `, ${c.s} asleep` : ""}` : c.s ? `${c.s} device${c.s > 1 ? "s" : ""} asleep` : "Sharing: no device follows yet") : `Show this on a phone or tablet (up to ${PAIR_MAX} devices): it follows your ship too`; }
   const d = $("pairDlg"); if (d && d.style.display === "flex") pairDialogFill();
+  { const row = $("syncLinkRow"); if (row) { row.style.display = APP_WINDOW || isPhone() || PAIR.role === "view" || SYNC.remote ? "none" : ""; const b = row.querySelector("button");
+      b.textContent = PAIR.role === "host" ? "Link another pairing" : "Link with the GRAVITAS app"; b.title = "Take up the pairing of the GRAVITAS app in this browser: type the code the app shows (Modes, Phones and tablets, Link a browser)"; } }   // v0.99.11
   syncPhoneRow();                                                     // v0.78: the phone line under the Sync card
 }
 const pairHow = () => PAIR.mode === "direct" ? "direct over your network" : PAIR.mode === "server" ? "through the GRAVITAS server" : "connecting…";
@@ -298,12 +350,13 @@ function pairDialog() {
       <div class="pq"><div class="qr" aria-label="QR code for the pairing link"></div><div class="pc"><span>Scan with the phone's camera, or open <b>gravitasmap.com</b> on it, tap <b>About</b> and type this code:</span><b class="code"></b><em class="exp"></em><button class="new">New code</button></div></div>
       <p class="who"></p><ul class="devs"></ul>
       <p class="note">Shared: only the summary Sync shows here (system, body, station, landed or docked, your target, game closed). Your Journal stays on this computer. Keep this tab open: it keeps reading the Journal even behind the game.</p>
-      <div class="act"><button class="newlink" title="Every device stops following, and the old link and code no longer work">New link</button><button class="stop">Stop sharing</button><button class="no">Close</button></div></div></div>`;
+      <div class="act"><button class="newlink" title="Every device stops following, and the old link and code no longer work">New link</button><button class="linkapp" title="Take up the pairing of the GRAVITAS app in this browser, with the code the app shows">Link another pairing</button><button class="stop">Stop sharing</button><button class="no">Close</button></div></div></div>`;
     document.body.appendChild(d);
     const close = () => { d.style.display = "none"; };
     d.querySelector(".x").onclick = close; d.querySelector(".no").onclick = close;
     d.addEventListener("click", e => { if (e.target === d) close(); const k = e.target.closest && e.target.closest("[data-kick]"); if (k) pairKick(k.dataset.kick); });
     d.querySelector(".newlink").onclick = pairNewLink;
+    { const la = d.querySelector(".linkapp"); la.onclick = pairLinkDialog; if (APP_WINDOW) la.style.display = "none"; }   // v0.99.11: the app's own window already holds the app's pairing
     addEventListener("keydown", e => { if (e.key === "Escape" && d.style.display === "flex") close(); });
     d.querySelector(".stop").onclick = pairHostStop;
     d.querySelector(".new").onclick = () => pairHostStart(true);
@@ -315,12 +368,13 @@ function pairDialogFill() {
   d.querySelector(".code").textContent = PAIR.code ? PAIR.code.replace(/(\d{3})(\d{3})/, "$1 $2") : "—";
   const left = PAIR.exp - Date.now();
   d.querySelector(".exp").textContent = PAIR.code ? (left > 0 ? `valid for ${Math.ceil(left / 60000)} more min (the QR code keeps working)` : "this code has expired · the QR code still works") : "";
-  const c = pairCounts(), ways = [...PAIR.peers.values()].filter(pairAwake).map(p => p.mode === "direct" ? "direct" : "via server");
-  d.querySelector(".who").textContent = !PAIR.ws ? "Connecting to the GRAVITAS server…" : c.n ? `${c.a ? `Following now: ${c.a} of ${PAIR_MAX} device${c.a > 1 ? "s" : ""} (${ways.join(", ")})` : "No device is awake"}${c.s ? `. Asleep: ${c.s} (screen off or app in the background: it catches up when it wakes)` : ""}` : `No device follows yet (up to ${PAIR_MAX}).`;
+  const list = pairList(), c = pairCounts(), ways = list.filter(p => p.awake).map(p => p.mode === "direct" ? "direct" : "via server");
+  const nb = PAIR.evicted ? " · Another window is sharing your ship's position right now: you can still remove devices from here." : PAIR.hk && !SYNC.on ? " · Sync is off in this window: it only manages the devices (it sends no news)." : "";
+  d.querySelector(".who").textContent = (!PAIR.ws && !pairFresh() ? "Connecting to the GRAVITAS server…" : c.n ? `${c.a ? `Following now: ${c.a} of ${PAIR_MAX} device${c.a > 1 ? "s" : ""} (${ways.join(", ")})` : "No device is awake"}${c.s ? `. Asleep: ${c.s} (screen off or app in the background: it catches up when it wakes)` : ""}` : `No device follows yet (up to ${PAIR_MAX}).`) + nb;
   // v0.94: each device, with × to stop it following
   const hm = t => { const x = new Date(t); return `${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`; };
-  const list = [...PAIR.peers.entries()].map(([id, p]) => `<li class="${pairAwake(p) ? "" : "zz"}"><span class="dn">${esc(p.n || "A device")}</span><span class="dm">${pairAwake(p) ? (p.mode === "direct" ? "direct" : "via server") : "asleep"}${p.t0 ? ` · since ${hm(p.t0)}` : ""}</span><button type="button" data-kick="${esc(id)}" title="Stop this device following" aria-label="Stop this device following">×</button></li>`).join("");
-  const ul = d.querySelector(".devs"); if (ul.innerHTML !== list) ul.innerHTML = list;
+  const lis = list.map(p => [p.id, p]).map(([id, p]) => `<li class="${p.awake ? "" : "zz"}"><span class="dn">${esc(p.n || "A device")}</span><span class="dm">${p.awake ? (p.mode === "direct" ? "direct" : "via server") : "asleep"}${p.t0 ? ` · since ${hm(p.t0)}` : ""}</span><button type="button" data-kick="${esc(id)}" title="Remove this device. It can follow again with the link or code: use New link to lock everything" aria-label="Remove this device">×</button></li>`).join("");
+  const ul = d.querySelector(".devs"); if (ul.innerHTML !== lis) ul.innerHTML = lis;
 }
 function pairLink() { return `${location.origin}/?pair=${PAIR.room}`; }
 let _qrLoad = null;
@@ -351,6 +405,9 @@ function pairJoinBox(host) {
   const so = document.querySelector("#sync .so");
   if (so && !$("syncPair")) { const b = document.createElement("button"); b.id = "syncPair"; b.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.4" y="1.6" width="7.2" height="12.8" rx="1.6"/><path d="M7 12.2h2"/></svg>Devices'; b.title = "Show this on a phone or tablet (up to 4 devices): it follows your ship too"; b.onclick = () => (PAIR.role === "host" ? pairDialog() : pairHostStart(false)); so.insertBefore(b, $("syncDir")); }
   pairJoinBox($("credits")); pairJoinBox($("sync"));
+  { const sy = $("sync");   // v0.99.11: a normal browser can take up the GRAVITAS app's pairing (not in the app's own window, not on a phone)
+    if (sy && !APP_WINDOW && !$("syncLinkRow")) { const row = document.createElement("div"); row.id = "syncLinkRow"; row.className = "plinkrow";
+      row.innerHTML = '<button id="syncLink" type="button">Link with the GRAVITAS app</button>'; sy.appendChild(row); row.querySelector("button").onclick = pairLinkDialog; } }
   TICK.add(() => {                                                     // v0.78.6: the worker's clock (see 30-sync.js), not a page timer
     // v0.78: a quiet link is noticed. Both sides say "still here" to the server every 15 s (answered by the server itself,
     // without waking the room), the computer repeats its news every 15 s, and a link silent for 45 s is rebuilt
@@ -372,14 +429,17 @@ function pairJoinBox(host) {
     t.addEventListener(ev, () => { if (!document.hidden) pairWake(); });
   // a QR link: ?pair=ROOM (then the address is cleaned, so a shared link of the view never carries the pairing)
   const P = new URLSearchParams(location.search), q = P.get("pair");
-  if (q && /^[a-z2-7]{20,32}$/.test(q)) { P.delete("pair"); history.replaceState(null, "", location.pathname + (P.toString() ? "?" + P : "") + location.hash); pairJoin(q); }
+  // v0.99.10: the app opened this page with its pairing in the address FRAGMENT (#host=room.key): a browser never sends a fragment to a server.
+  // It is read once, the address is cleaned at once, and this tab then shows and manages the same devices
+  const hh = /^#host=([a-z2-7]{20,32})\.([0-9a-f]{32})$/.exec(location.hash);
+  // (taken up after the last part has loaded: the panels it draws are defined further down)
+  if (hh) { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} setTimeout(() => { if (pairAdopt(hh[1], hh[2])) setTimeout(() => toast("This page now shows the devices of your GRAVITAS pairing."), 1000); }, 0); }
+  else if (q && /^[a-z2-7]{20,32}$/.test(q)) { P.delete("pair"); history.replaceState(null, "", location.pathname + (P.toString() ? "?" + P : "") + location.hash); pairJoin(q); }
   else {
     const v = pairGet(PAIR_LS.view), h = pairGet(PAIR_LS.host), fresh = o => o && o.room && Date.now() - (o.t || 0) < 12 * 3600e3;
+    if (h && !/^[0-9a-f]{32}$/.test(h.hk || "")) pairSet(PAIR_LS.host, null);   // v0.99.9: a pairing from before host keys cannot be taken back: start again
     if (fresh(v)) pairJoin(v.room);
-    else if (fresh(h)) {                                               // this computer was sharing: share again once Sync is back on
-      const wait = setInterval(() => { if (SYNC.on && !SYNC.remote) { clearInterval(wait); PAIR.role = "host"; PAIR.room = h.room; pairOpen(); pairBeat(true); pairUi(); } }, 1000);
-      setTimeout(() => clearInterval(wait), 120000);
-    }
+    else if (fresh(h) && /^[0-9a-f]{32}$/.test(h.hk || "")) setTimeout(() => pairAdopt(h.room, h.hk, !!h.linked), 0);   // this computer was sharing: it keeps the pairing, links again once Sync is on (v0.99.10: and shows the devices before that)
   }
   pairUi();
 }

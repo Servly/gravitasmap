@@ -3,6 +3,44 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.17", k: "minor", d: "24 Nov 2026", t: [
+      "The App window explains a scanner flag: the installer is not signed yet, automatic engines are often cautious with new unsigned files, and signing comes with the Microsoft Store version.",
+    ] },
+    { v: "v0.99.16", k: "minor", d: "24 Nov 2026", t: [
+      "The App window keeps the VirusTotal result of the installer current: our server asks VirusTotal about the installer's file hash at most every 6 hours and the window shows the latest number, the engine names and the date it was checked. If that is not available it shows the result written when the version was released.",
+    ] },
+    { v: "v0.99.15", k: "minor", d: "24 Nov 2026", t: [
+      "The App window shows the public VirusTotal result for the installer as it is: how many engines flagged the file, their names, and a link to the full report. A new version carries no scan line until it has been scanned.",
+    ] },
+    { v: "v0.99.14", k: "minor", d: "24 Nov 2026", t: [
+      "The App window is redesigned: the app icon, what the app does, a Microsoft Store card (coming soon), the installer with its version and size, the SHA-256 with a Copy button to check the download, and three calm steps for the Windows SmartScreen notice. Inside the GRAVITAS app the same window helps you share the link with a friend. When the installer was scanned with Kaspersky Premium, the window says so for that exact file (it disappears for a version that was not scanned), with a link to its VirusTotal report once the file is uploaded there.",
+    ] },
+    { v: "v0.99.12", k: "minor", d: "24 Nov 2026", t: [
+      "The Plugin button in the Sync card is now App. It opens a short page about the GRAVITAS app for Windows with a link to the latest installer (its version and SHA-256 are read from the same signed file the app uses). The Microsoft Store entry says Coming soon until it is listed. The old EDMC plugin is retired.",
+    ] },
+    { v: "v0.99.11", k: "minor", d: "24 Nov 2026", t: [
+      "Link this browser with the GRAVITAS app: in Devices, Link with the GRAVITAS app takes the short code the app shows (valid two minutes, single use) and this page then shows and manages the same list of phones and tablets as the app. Wrong codes are limited to five tries per address every ten minutes.",
+    ] },
+    { v: "v0.99.10", k: "minor", d: "24 Nov 2026", t: [
+      "Phones and tablets, in one list everywhere: the Devices window now shows who follows and whether each device is awake, lets you remove a device or stop sharing, and keeps the list in step with the GRAVITAS app and its map window (a change in one place shows in the others within seconds). Remove only drops a device: Stop sharing is what locks the pairing.",
+      "A pairing can be opened in this browser from the GRAVITAS app (Open in browser).",
+    ] },
+    { v: "v0.99.9", k: "minor", d: "25 Nov 2026", t: [
+      "Safer phone and tablet pairing: the pairing code works once (it can be repeated from the same address for 90 seconds), lookups are limited, and only the computer that created the pairing can host it. A pairing saved before this update has to be started again from Devices.",
+      "The team board and the data a paired computer sends are cleaned before they are shown. Problem reports are checked more strictly. Systems are kept longer in the cache and a system that Spansh does not know yet is looked for less often, so the map stays quick when many people use it.",
+    ] },
+    { v: "v0.99.8", k: "minor", d: "24 Nov 2026", t: [
+      "For the GRAVITAS app: its Visits list can open a system in the map window, and Sync does not take you back to your ship while you look at it. The page itself now asks Cloudflare not to add its own analytics script to it (Cache-Control: no-transform): the site never had analytics of its own.",
+    ] },
+    { v: "v0.99.7", k: "minor", d: "24 Nov 2026", t: [
+      "For the GRAVITAS app: its map window (?app=window) is handed your Journal by the app itself, so Sync with the game starts by itself there and never asks for the Journal folder. The window can also open straight on Collisions, Sonification or Lenses. In a browser nothing changes: you still choose your Journal folder once.",
+    ] },
+    { v: "v0.99.6", k: "minor", d: "20 Nov 2026", t: [
+      "When Spansh, where all the data comes from, does not answer, the map now says so calmly, in amber, instead of showing an error: \"Spansh, where the data comes from, is not answering right now. It may be updating.\" Before, Cloudflare replaced our message with a plain \"error code: 502\" page, so the real reason never reached you.",
+      "Sol always opens: the site keeps a saved copy of Sol, with its date, and sends it only when Spansh does not answer, with a line that says so. Other systems still need Spansh.",
+    ] },
+    { v: "v0.99.5", k: "minor", d: "17 Nov 2026", t: [
+      "For the GRAVITAS app: ?app=smap shows only the System map, see-through, so the app can show it as a window over the game. The app tells it which system to show and moves or zooms it. Nothing changes on the site itself"] },
     { v: "v0.99.4", k: "minor", d: "13 Nov 2026", t: [
       "Fixed: after v0.99.3 the page could stay empty in Chrome. Its early loading of three.js was sent by Cloudflare as a header, so Chrome loaded three.js before it knew where \"three\" is. That early loading is taken out and three.js loads as before. The smaller system data and the early system request stay"] },
     { v: "v0.99.3", k: "minor", d: "13 Nov 2026", t: [

@@ -1,4 +1,4 @@
-import { getJSON, getRaw, json, spanshError } from "../../lib/spansh.js";
+import { getJSON, getRaw, json, spanshDown, validId64, cacheSeconds, NOT_FOUND_CACHE_S, SOL_ID64 } from "../../lib/spansh.js";
 import { slimStream } from "../../lib/slim.js";
 // GET /api/system?name=Sol  or  ?id64=10477373803  ->  { system: { summary, ...Spansh dump... } }
 // v0.99.3: &lite=1 -> the same without the stations' market, outfitting and shipyard lists (lib/slim.js); without it,
@@ -8,35 +8,56 @@ import { slimStream } from "../../lib/slim.js";
 // (Cloudflare's free plan allows 10 ms of CPU per request). Only its first bytes are looked at, to put the
 // summary in front. Dumps are kept in Cloudflare's cache for 15 minutes. Positions are computed in the browser
 // from the orbits, so a cached dump never shows old positions.
-const CACHE_S = 900;                                                   // v0.94: 15 minutes (was an hour): new scans show sooner
+// v0.99.6: Sol only: when Spansh does not answer, a saved copy (saved/sol.lite.json and sol.full.json, made by tools/refresh_sol.py)
+// is sent instead, so the site can always be tried. The copy says so (its own "stale" line, shown by the page) and has its date.
+const SOL = SOL_ID64;
+async function savedSol(env, origin, lite) {
+  try {
+    if (!env || !env.ASSETS) return null;
+    const r = await env.ASSETS.fetch(new Request(`${origin}/saved/sol.${lite ? "lite" : "full"}.json`));
+    if (!r.ok) { try { await r.body?.cancel(); } catch (e) {} return null; }
+    return new Response(r.body, { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
+  } catch (e) { return null; }
+}
+// v0.99.9: dumps are kept an hour (Sol: 15 minutes, lib/spansh.js cacheSeconds), a name Spansh does not know is remembered for 2 minutes
+// (the Spansh search is the expensive part, and a typo is often tried again at once). A 503 "Spansh is not answering" is never cached.
 export async function onRequestGet({ request, env, waitUntil }) {
   const u = new URL(request.url), name = (u.searchParams.get("name") || "").trim();
   let id64 = u.searchParams.get("id64"), summary = null;
+  if (id64 != null) { id64 = validId64(id64); if (!id64) return json({ error: "Bad system id." }, 400); }
   const lite = u.searchParams.get("lite") === "1";
   try {
     if (!id64) {
       if (!name) return json({ error: "No system name given." }, 400);
       if (name.length > 80) return json({ error: "System name too long." }, 400);
       // v0.75.5: which system a name means (and its summary) is kept in Cloudflare's cache too, like the dump
-      const nk = new Request(`${u.origin}/api/_name/${encodeURIComponent(name.toLowerCase())}`);
-      try { const c = await caches.default.match(nk); if (c) ({ id64, summary } = await c.json()); } catch (e) {}
+      const nk = new Request(`${u.origin}/api/_name/${encodeURIComponent(name.toLowerCase())}`), nf = new Request(`${u.origin}/api/_nf/${encodeURIComponent(name.toLowerCase())}`);
+      try { const c = await caches.default.match(nf); if (c) return json(await c.json(), 404); } catch (e) {}
+      try { const c = await caches.default.match(nk); if (c) { const j = await c.json(); id64 = validId64(String(j.id64)); summary = id64 ? j.summary : null; } } catch (e) {}
     }
     if (!id64) {
-      const d = await getJSON(env, `/search?q=${encodeURIComponent(name)}`, 2, 15000);
+      let d;
+      try { d = await getJSON(env, `/search?q=${encodeURIComponent(name)}`, 2, 15000); }
+      catch (e) { if (name.toLowerCase() === "sol") { id64 = SOL; } else throw e; }      // (Sol needs no search: its number is fixed)
+      if (!d) { /* Sol by its number: no summary, the dump comes next */ } else {
       const systems = (d.results || []).filter(r => r.type === "system").map(r => r.record);
       const hit = systems.find(s => s.name.toLowerCase() === name.toLowerCase());
       if (!hit) {
         const near = systems.slice(0, 5).map(s => s.name).join(", ");
-        return json({ error: `System not found on Spansh: ${name}` + (near ? ` (did you mean: ${near}?)` : "") }, 404);
+        const nfBody = { error: `System not found on Spansh: ${name}` + (near ? ` (did you mean: ${near}?)` : "") };
+        try { waitUntil(caches.default.put(new Request(`${u.origin}/api/_nf/${encodeURIComponent(name.toLowerCase())}`), new Response(JSON.stringify(nfBody), { headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${NOT_FOUND_CACHE_S}` } }))); } catch (e) {}
+        return json(nfBody, 404);
       }
-      id64 = String(hit.id64);
+      id64 = validId64(String(hit.id64));
+      if (!id64) return json({ error: "Bad system id." }, 400);
       const { bodies, stations, ...rest } = hit; summary = rest;      // power, factions, economy: Spansh's search record
       try { const nk = new Request(`${u.origin}/api/_name/${encodeURIComponent(name.toLowerCase())}`);
-        waitUntil(caches.default.put(nk, new Response(JSON.stringify({ id64, summary }), { headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${CACHE_S}` } }))); } catch (e) {}
+        waitUntil(caches.default.put(nk, new Response(JSON.stringify({ id64, summary }), { headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${cacheSeconds(id64)}` } }))); } catch (e) {}
+      }
     }
-    if (!/^\d{1,20}$/.test(id64)) return json({ error: "Bad system id." }, 400);
+    if (!validId64(id64)) return json({ error: "Bad system id." }, 400);
     const cache = caches.default, key = new Request(`${u.origin}/api/_dump/${id64}`);
-    const hdr = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": `public, max-age=${CACHE_S}` };
+    const CACHE_S = cacheSeconds(id64), hdr = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": `public, max-age=${CACHE_S}` };
     let body = null;
     if (lite) {                                                         // v0.99.3: the lite answer has a cache of its own
       const lkey = new Request(`${u.origin}/api/_lite/${id64}`);
@@ -59,7 +80,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
     return new Response(withSummary(body, summary), { headers: hdr });
   } catch (e) {
     if (e && e.status === 404) return json({ error: "This system is not on Spansh." }, 404);
-    return json({ error: spanshError(e) }, 502);
+    if (String(id64) === SOL) { const saved = await savedSol(env, u.origin, lite); if (saved) return saved; }
+    return spanshDown(e);
   }
 }
 // Put "summary" first inside {"system":{ ... }} while the bytes flow past. Only the first bytes are decoded.

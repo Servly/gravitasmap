@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRAVITAS</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="rows.css">
+<link rel="stylesheet" href="about.css">
+<link rel="stylesheet" href="debrief.css">
+</head>
+<body>
+<div class="win" id="win">
+  <div class="titlebar" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><span class="lg" id="lg"></span>GRAVITAS</div>
+    <div class="ribbon" id="ribbon" data-tauri-drag-region></div>
+    <div class="wc">
+      <button id="wMin" data-i18n-title="tip.wMin" aria-label="Minimize">&#8211;</button>
+      <button id="wMax" data-i18n-title="tip.wMax" aria-label="Maximize">&#9633;</button>
+      <button id="wClose" data-i18n-title="tip.wClose" class="x" aria-label="Close">&#10005;</button>
+    </div>
+  </div>
+
+  <nav class="rail" id="rail" aria-label="Main">
+    <span class="pill" id="pill"></span>
+    <button class="nav on" data-i18n-title="tip.nav.modes" data-view="hub"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg><span data-i18n="nav.modes"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.map" data-view="map"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-24 12 12)"/></svg><span data-i18n="nav.map"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.combat" data-view="combat"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="1.2"/></svg><span data-i18n="nav.combat"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.thargoid" data-view="thargoid"><svg viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><circle cx="12" cy="12" r="3"/></svg><span data-i18n="nav.thargoid"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.debrief" data-view="debrief"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 15l3-4 3 3 3-5 3 4"/></svg><span data-i18n="nav.debrief"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.pvp" data-view="pvp"><svg viewBox="0 0 24 24"><path d="M4 20L14 10M14 4h6v6M20 20L10 10M10 4H4v6"/></svg><span data-i18n="nav.pvp"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.foot" data-view="foot"><svg viewBox="0 0 24 24"><ellipse cx="8" cy="8" rx="2.6" ry="4.2"/><ellipse cx="16" cy="16" rx="2.6" ry="4.2"/></svg><span data-i18n="nav.foot"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.keys" data-view="keys"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button>
+    <span class="sp"></span>
+    <button class="nav" data-i18n-title="tip.nav.updates" data-view="updates"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v7M8.8 11.2L12 14.4l3.2-3.2"/></svg><span data-i18n="nav.updates"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.settings" data-view="prefs"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg><span data-i18n="nav.settings"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.about" data-view="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span data-i18n="nav.about"></span></button>
+  </nav>
+
+  <main class="main">
+    <section class="view on" id="v-hub" aria-label="Modes">
+      <div class="head rise" style="--i:0">
+        <div><h2 data-i18n="hub.eyebrow"></h2><h1 id="hello"></h1><p class="sub" data-i18n="hub.sub"></p></div>
+        <div class="chips"><span class="chip" data-i18n-title="tip.chip"><span class="dot" id="dot"></span><span id="chipText"></span></span>
+          <div class="profwrap"><button class="chip profbtn" id="profBtn" data-i18n-title="tip.profbtn" aria-haspopup="true"><span id="profLabel"></span><span class="caret">&#9662;</span></button><div class="profpop card" id="profPop" hidden></div></div></div>
+      </div>
+      <div class="hub">
+        <div class="grid" id="modes"></div>
+        <p class="note rise" id="driftNote" style="--i:8" hidden data-i18n="drift.note"></p>
+        <div id="hub-sync"></div>
+        <div id="hub-profiles"></div>
+        <div class="card rise" style="--i:8"><h2 data-i18n="journal.title"></h2><ul class="log" id="log" data-i18n-title="tip.journal"></ul><p class="note" data-i18n="journal.note"></p></div>
+        <p class="legal" data-i18n="hub.legal"></p>
+      </div>
+    </section>
+
+    <section class="view" id="v-map" aria-label="map">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.map"></h2><h1 data-i18n="page.map.h1"></h1><p class="sub" data-i18n="page.map.sub"></p></div></div>
+      <nav class="tabs" data-scope="map"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.visits" data-tab="past" data-i18n="tab.past.map"></button></nav>
+      <div class="pane on" id="map-overview"></div><div class="pane" id="map-past"></div>
+    </section>
+
+    <section class="view" id="v-combat" aria-label="combat">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.combat"></h2><h1 data-i18n="page.combat.h1"></h1><p class="sub" data-i18n="page.combat.sub"></p></div></div>
+      <nav class="tabs" data-scope="combat"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.windows" data-tab="windows" data-i18n="tab.windows"></button><button class="tab" data-i18n-title="tip.tab.look" data-tab="look" data-i18n="tab.look"></button><button class="tab" data-i18n-title="tip.tab.behaviour" data-tab="behaviour" data-i18n="tab.behaviour"></button><button class="tab" data-i18n-title="tip.tab.past" data-tab="past" data-i18n="tab.past.combat"></button></nav>
+      <div class="pane on" id="combat-overview"></div><div class="pane" id="combat-windows"></div><div class="pane" id="combat-look"></div><div class="pane" id="combat-behaviour"></div><div class="pane" id="combat-past"></div>
+    </section>
+
+    <section class="view" id="v-debrief" aria-label="debrief">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.debrief"></h2><h1 data-i18n="page.debrief.h1"></h1><p class="sub" data-i18n="page.debrief.sub"></p></div></div>
+      <div class="pane on" id="debrief-overview"></div>
+    </section>
+
+    <section class="view" id="v-pvp" aria-label="pvp">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.pvp"></h2><h1 data-i18n="page.pvp.h1"></h1><p class="sub" data-i18n="page.pvp.sub"></p></div></div>
+      <nav class="tabs" data-scope="pvp"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.past" data-tab="past" data-i18n="tab.past.pvp"></button><button class="tab" data-i18n-title="tip.pvp.tab.cmp" data-tab="cmp" data-i18n="tab.pvp.cmp"></button></nav>
+      <div class="pane on" id="pvp-overview"></div><div class="pane" id="pvp-past"></div><div class="pane" id="pvp-cmp"></div>
+    </section>
+
+    <section class="view" id="v-thargoid" aria-label="thargoid">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.thargoid"></h2><h1 data-i18n="page.thargoid.h1"></h1><p class="sub" data-i18n="page.thargoid.sub"></p></div></div>
+      <nav class="tabs" data-scope="thargoid"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.past" data-tab="past" data-i18n="tab.past.thargoid"></button></nav>
+      <div class="pane on" id="thargoid-overview"></div><div class="pane" id="thargoid-past"></div>
+    </section>
+
+    <section class="view" id="v-foot" aria-label="foot">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.foot"></h2><h1 data-i18n="page.foot.h1"></h1><p class="sub" data-i18n="page.soon.sub"></p></div></div>
+      <nav class="tabs" data-scope="foot"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.planned" data-tab="past" data-i18n="tab.past.foot"></button></nav>
+      <div class="pane on" id="foot-overview"></div><div class="pane" id="foot-past"></div>
+    </section>
+
+    <section class="view" id="v-keys" aria-label="Key Bindings">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.keys"></h2><h1 data-i18n="page.keys.h1"></h1><p class="sub" data-i18n="page.keys.sub"></p></div></div>
+      <nav class="tabs" data-scope="keys"><button class="tab on" data-i18n-title="tip.tab.main" data-tab="main" data-i18n="menu.tab.main"></button><button class="tab" data-i18n-title="tip.tab.map" data-tab="map" data-i18n="menu.tab.map"></button><button class="tab" data-i18n-title="tip.tab.combat" data-tab="combat" data-i18n="menu.tab.combat"></button><button class="tab" data-i18n-title="tip.tab.thargoid" data-tab="thargoid" data-i18n="menu.tab.thargoid"></button><button class="tab" data-i18n-title="tip.tab.foot" data-tab="foot" data-i18n="menu.tab.foot"></button></nav>
+      <div class="pane on" id="keys-main"></div><div class="pane" id="keys-map"></div><div class="pane" id="keys-combat"></div><div class="pane" id="keys-thargoid"></div><div class="pane" id="keys-foot"></div>
+    </section>
+
+    <section class="view" id="v-prefs" aria-label="Settings">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="prefs.h2"></h2><h1 data-i18n="prefs.h1"></h1></div></div>
+      <nav class="tabs" data-scope="prefs"><button class="tab on" data-i18n-title="tip.tab.general" data-tab="general" data-i18n="tab.general"></button><button class="tab" data-i18n-title="tip.tab.tests" data-tab="tests" data-i18n="tab.tests"></button></nav>
+      <div class="pane on" id="prefs-general"><div class="narrow">
+        <h2 class="rise" style="--i:1" data-i18n="prefs.lang"></h2>
+        <div class="list rise" style="--i:2" id="langs" role="radiogroup"></div>
+        <p class="note rise" style="--i:3" data-i18n="prefs.lang.note"></p>
+      </div></div>
+      <div class="pane" id="prefs-tests"></div>
+    </section>
+
+    <section class="view" id="v-updates" aria-label="Updates">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.updates"></h2><h1 data-i18n="updates.h1"></h1></div></div>
+      <div class="narrow"><div class="card rise" style="--i:1" id="updCard"></div></div>
+    </section>
+
+    <section class="view" id="v-about" aria-label="About">
+      <div class="ab">
+        <div class="card ab-head rise" style="--i:0">
+          <span class="lg logo" id="lgBig"></span>
+          <div class="ab-id">
+            <h1>GRAVITAS</h1>
+            <p class="sub" data-i18n="about.tagline"></p>
+            <p class="ab-text" data-i18n="about.text"></p>
+            <div class="ab-ver"><span class="badge" id="ver"></span></div>
+            <div class="links"><button class="btn" id="wnOpen" data-i18n-title="tip.wn.open" data-i18n="wn.open"></button><button class="btn" id="diagCopy" data-i18n-title="tip.about.diag" data-i18n="about.diag"></button><button class="btn" id="licOpen" data-i18n-title="tip.about.lic" data-i18n="about.lic"></button><a class="btn ghost" data-i18n-title="tip.github" href="https://github.com/Servly/gravitasmap" data-ext>GitHub</a><a class="btn ghost" data-i18n-title="tip.site" href="https://gravitasmap.com" data-ext>gravitasmap.com</a></div>
+          </div>
+        </div>
+        <div class="card rise" style="--i:1"><h2 data-i18n="about.thanks.h"></h2><ul class="ab-list" id="thanks"></ul>
+          <div class="sqd"><img src="assets/trge-banner.png" alt="Turkish Galactic Empire squadron emblem" width="250" height="75"><p data-i18n="about.trge"></p></div></div>
+        <div class="card rise" style="--i:2"><h2 data-i18n="about.apps.h"></h2><ul class="ab-list" id="apps"></ul></div>
+        <div class="card ab-legal rise" style="--i:3"><p data-i18n="about.credit"></p></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="modal" id="wn" hidden role="dialog" aria-modal="true" aria-labelledby="wnT"><div class="card wnbox"><h2 id="wnT"></h2><div id="wnBody"></div><div class="opt" style="justify-content:flex-end"><button class="btn" id="wnOk"></button></div></div></div>
+<div class="upd" id="upd" hidden><span id="updText"></span><button class="btn" id="updBtn"></button></div>
+<script src="dbgraph.js"></script>
+<script src="dbpair.js"></script>
+<script src="combatui.js"></script>
+<script src="keybind.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

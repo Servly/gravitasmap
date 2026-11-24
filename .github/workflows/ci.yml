@@ -1,0 +1,49 @@
+# Checks that need no secrets and no private files. Runs on every push and pull request. It never publishes anything.
+name: ci
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the build tool (esbuild)
+        working-directory: tools
+        run: npm install --no-audit --no-fund
+      - name: Build the site (also makes the saved copy of Sol that one test needs)
+        run: python tools/build.py
+      - name: Server code tests
+        run: |
+          node tools/test_room.mjs
+          node tools/test_scan.mjs
+          if [ -f saved/sol.lite.json ]; then node tools/test_system_fallback.mjs; else echo "no saved copy of Sol (Spansh not answering): test_system_fallback skipped"; fi
+      - name: Language files
+        run: python tools/check_langs.py
+      - name: Release notes and changelogs are made from their sources
+        run: |
+          python tools/changelog.py
+          python tools/app_changelog.py --check
+          git diff --exit-code CHANGELOG.md || (echo "CHANGELOG.md is not up to date: run python tools/changelog.py" && exit 1)
+
+  app:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      - name: Unit tests of the app (the parity tests that replay private Journals skip themselves when the files are not there)
+        working-directory: app/src-tauri
+        run: cargo test --no-fail-fast -- --test-threads=1

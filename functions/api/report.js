@@ -1,11 +1,15 @@
 import { json } from "../../lib/spansh.js";
+import { imageKind, readCapped } from "../../lib/report-guard.js";
 // POST /api/report  ->  e-mails the report through Resend (https://resend.com).
 // Secrets, set in the Cloudflare dashboard, never in this file:
 //   RESEND_API_KEY   the Resend API key
 //   REPORT_TO        the address that receives reports (only ever stored here, on the server side)
 //   REPORT_FROM      optional sender, for example "GRAVITAS <reports@your-domain>" once the domain is verified in Resend
 const clean = (s, n) => String(s ?? "").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").slice(0, n);
-const MAX = 12 * 1024 * 1024, WAIT_S = 60;
+// v0.99.9: a header-like field (the mail subject) never carries CR, LF or TAB; the body is read with a hard 8 MB limit; screenshots are
+// checked by their first bytes (JPEG, PNG, WebP), at most 3, and 6 MB of base64 in all.
+const line = (s, n) => clean(s, n).replace(/[\r\n\t]+/g, " ").trim();
+const MAX = 8 * 1024 * 1024, WAIT_S = 60, MAX_IMG = 3, MAX_IMG_B64 = 6 * 1024 * 1024;
 // v0.75.5: one report a minute from the same address. The address is kept only as a one-way code (a hash), only for a
 // minute, and only in Cloudflare's cache at the data centre that took the report. It is never stored anywhere else.
 async function seenKey(request) {
@@ -20,8 +24,8 @@ export async function onRequestPost({ request, env }) {
   if (origin) { let ok = false; try { const o = new URL(origin), u = new URL(request.url); ok = o.host === u.host || o.hostname === "localhost" || o.hostname === "127.0.0.1"; } catch (e) {} if (!ok) return json({ error: "Reports can only be sent from GRAVITAS itself." }, 403); }
   const len = +(request.headers.get("Content-Length") || 0);
   if (len > MAX) return json({ error: "Report too large." }, 413);
-  let raw; try { raw = await request.text(); } catch (e) { return json({ error: "Bad report." }, 400); }
-  if (raw.length > MAX) return json({ error: "Report too large." }, 413);      // also when no size was announced
+  let raw; try { raw = await readCapped(request, MAX); } catch (e) { return json({ error: "Bad report." }, 400); }
+  if (raw == null) return json({ error: "Report too large." }, 413);          // also when no size was announced
   let d; try { d = JSON.parse(raw); } catch (e) { return json({ error: "Bad report." }, 400); }
   if (!d || typeof d !== "object") return json({ error: "Bad report." }, 400);
   if (d.website) return json({ ok: true });                                   // hidden field: only bots fill it in
@@ -32,9 +36,11 @@ export async function onRequestPost({ request, env }) {
   const ctx = d.context && typeof d.context === "object" ? d.context : {};
   const rid = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14) + "-" + crypto.randomUUID().slice(0, 6);
   const attachments = [];
-  (Array.isArray(d.images) ? d.images : []).slice(0, 3).forEach((im, i) => {
-    const m = /^data:image\/(?:jpeg|jpg|png|webp);base64,(.+)$/s.exec(String(im && im.data || ""));
-    if (m) attachments.push({ filename: `screenshot-${i + 1}.jpg`, content: m[1] });
+  let b64 = 0;
+  (Array.isArray(d.images) ? d.images : []).slice(0, MAX_IMG).forEach((im, i) => {
+    const m = /^data:image\/(?:jpeg|jpg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(String(im && im.data || "")), kind = m && imageKind(m[1]);
+    if (!kind || b64 + m[1].length > MAX_IMG_B64) return;
+    b64 += m[1].length; attachments.push({ filename: `screenshot-${i + 1}.${kind}`, content: m[1] });
   });
   const body = [`GRAVITAS problem report ${rid}`, "", "What happened:", text, "",
     `CMDR: ${clean(d.cmdr, 60) || "-"}`, `Reply to: ${clean(d.mail, 120) || "-"}`, "", "Context:",
@@ -45,7 +51,7 @@ export async function onRequestPost({ request, env }) {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: env.REPORT_FROM || "GRAVITAS <onboarding@resend.dev>", to: [env.REPORT_TO],
-      subject: `GRAVITAS report · ${clean(ctx.system, 60) || "no system"} · ${clean(ctx.version, 12)}`, text: body, attachments }),
+      subject: `GRAVITAS report · ${line(ctx.system, 60) || "no system"} · ${line(ctx.version, 12)}`, text: body, attachments }),
   });
   } catch (e) { return json({ error: "The mail service could not be reached. Please try again later." }, 502); }
   if (!r.ok) return json({ error: `The report could not be sent (mail service answered ${r.status}).` }, 502);

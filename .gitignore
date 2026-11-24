@@ -14,3 +14,14 @@ __pycache__/
 *.pyc
 *.log
 data/cache/
+# app build output and local files (v: release sync)
+app/src-tauri/target/
+app/src-tauri/gen/
+app/node_modules/
+tools/appsign/target/
+*.private
+*.exe
+*.zip
+*.pfx
+*.bak*
+.claude/

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "GRAVITAS",
+  "version": "0.9.27",
+  "identifier": "com.gravitasmap.app",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "GRAVITAS",
+        "width": 1180,
+        "height": 780,
+        "minWidth": 760,
+        "minHeight": 560,
+        "center": true,
+        "decorations": false,
+        "shadow": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "resources": {
+      "../../THIRD-PARTY-LICENSES.txt": "THIRD-PARTY-LICENSES.txt",
+      "../../NOTICE.md": "NOTICE.md",
+      "fonts/OFL-Saira.txt": "licenses/OFL-Saira.txt",
+      "fonts/OFL-Michroma.txt": "licenses/OFL-Michroma.txt"
+    },
+    "shortDescription": "GRAVITAS, a free fan-made companion for Elite Dangerous",
+    "publisher": "CMDR Hongark",
+    "copyright": "Fan-made. Elite Dangerous (c) Frontier Developments plc.",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English"]
+      }
+    }
+  }
+}
+

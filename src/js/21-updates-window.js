@@ -139,11 +139,12 @@ function openNews(tab, set) {
   NEWS_SET = set === "modes" && typeof MODES_TABS !== "undefined" ? "modes" : set === "plugin" && typeof PLUGIN_TABS !== "undefined" ? "plugin" : "about";   // v0.93: and the plugin
   const T = NEWS_SET === "modes" ? MODES_TABS : NEWS_SET === "plugin" ? PLUGIN_TABS : NEWS_TABS;
   if (NEWS_SET === "modes") { if (tab && T[tab]) MODES.tab = tab; tab = MODES.tab; } else if (NEWS_SET === "plugin") { tab = tab && T[tab] ? tab : Object.keys(T)[0]; } else { if (tab) newsTab = tab; tab = newsTab; }
-  $("newsH3").textContent = NEWS_SET === "modes" ? "GRAVITAS MODES" : NEWS_SET === "plugin" ? "GRAVITAS PLUGIN" : "ABOUT GRAVITAS"; $("news").setAttribute("aria-label", $("newsH3").textContent);
+  $("newsH3").textContent = NEWS_SET === "modes" ? "GRAVITAS MODES" : NEWS_SET === "plugin" ? "GRAVITAS APP" : "ABOUT GRAVITAS"; $("news").setAttribute("aria-label", $("newsH3").textContent);
   $("newsTabs").innerHTML = Object.keys(T).map(t => `<button data-t="${t}" class="${t === tab ? "on" : ""}">${t}</button>`).join("");
   $("newsBody").innerHTML = T[tab](); $("newsBody").scrollTop = 0;
   $("newsTabs").querySelectorAll("button").forEach(b => b.onclick = () => openNews(b.dataset.t, NEWS_SET));
   $("newsBody").querySelectorAll(".repOpen").forEach(b => b.onclick = () => { $("news").style.display = "none"; openReport(); });
+  $("news").classList.toggle("app", NEWS_SET === "plugin");   // v0.99.13: the app window has no tab strip and its own heading
   $("news").style.display = "flex";
 }
 $("newsBtn").onclick = () => openNews();

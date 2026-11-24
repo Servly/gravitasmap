@@ -1,0 +1,22 @@
+/* the About page: cards in the app's own style (the site's About > Thanks is the same family) */
+.ab{display:grid;gap:14px}.ab .card{margin:0}
+.ab-head{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;padding:16px}
+.ab-head .logo{width:96px;height:96px;flex:none}
+.ab-id{flex:1 1 320px;min-width:0;display:grid;gap:10px;justify-items:start}
+.ab-id h1{font-size:30px;letter-spacing:.22em}
+.ab-id .sub{margin:-4px 0 0}
+.ab-text{margin:0;color:var(--dim);max-width:62ch}
+.badge{display:inline-block;font-size:11.5px;font-weight:600;color:var(--accent);border:1px solid rgba(255,106,213,.4);background:rgba(255,106,213,.08);border-radius:99px;padding:3px 12px}
+.ab-id .links{margin-top:4px}
+.ab-list{list-style:none;margin:0;padding:0}
+.ab-list li{display:grid;grid-template-columns:minmax(150px,250px) minmax(0,1fr);gap:4px 18px;padding:11px 0;border-top:1px solid var(--line);align-items:baseline;min-width:0}
+.ab-list li:first-child{border-top:0}
+.ab-list b,.ab-list a{color:var(--text);font-weight:600;text-decoration:none;overflow-wrap:anywhere}
+.ab-list a{justify-self:start;border-bottom:1px solid rgba(106,232,255,.4)}
+.ab-list a:hover{color:var(--cyan)}
+.ab-d{color:var(--dim);font-size:13px}
+.sqd{display:flex;align-items:center;gap:18px;margin-top:10px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.sqd img{width:200px;max-width:100%;height:auto;flex:none}
+.sqd p{margin:0;color:var(--text);font-size:13.5px;min-width:0}
+.ab-legal p{margin:0;color:var(--dim);font-size:12.5px}
+@media (max-width:640px){.ab-list li{grid-template-columns:minmax(0,1fr)}.sqd{flex-direction:column;align-items:flex-start}.ab-head{padding:16px}}

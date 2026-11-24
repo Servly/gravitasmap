@@ -121,8 +121,8 @@ function syncPhoneRow() {
   const r = $("syncPhone"); if (!r || !PAIR_ON) return;                // (the pairing part may not have started yet)
   let h = "", k = "";
   if (PAIR.role === "host" && !SYNC.remote) {
-    const c = pairCounts(), n = c.a, direct = [...PAIR.peers.values()].filter(p => pairAwake(p) && p.mode === "direct").length;
-    if (!PAIR.ws || PAIR.ws.readyState !== 1) { k = "lost"; h = "Devices: reconnecting to the server…"; }
+    const c = pairCounts(), n = c.a, direct = pairList().filter(p => p.awake && p.mode === "direct").length;   // v0.99.10: the room's list (the same in every place that holds the pairing)
+    if ((!PAIR.ws || PAIR.ws.readyState !== 1) && !pairFresh()) { k = "lost"; h = "Devices: reconnecting to the server…"; }
     else if (!c.n) { k = "wait"; h = `Devices: waiting for a phone or tablet (up to ${PAIR_MAX})`; }
     else if (!n) { k = "wait"; h = `${c.s} device${c.s > 1 ? "s" : ""} asleep · catches up when it wakes`; }   // v0.91.4: linked but quiet
     else { k = "live"; h = `${n} device${n > 1 ? "s" : ""} following · ${direct === n ? "direct" : direct ? `${direct} direct` : "via server"}${c.s ? ` · ${c.s} asleep` : ""}`; }

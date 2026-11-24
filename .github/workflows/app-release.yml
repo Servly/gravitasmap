@@ -1,0 +1,55 @@
+# DRAFT, not run yet. The public build of the GRAVITAS app, to be signed by SignPath Foundation (free for open source, see CODE_SIGNING.md).
+# Before it can work: the SignPath project must exist and the three values below must be set in the repository's settings (Variables and Secrets).
+# The signing step is written from SignPath's documented GitHub action and still has to be checked against a real run.
+name: app-release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "GRAVITAS app version (for the artifact name)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the installer (unsigned)
+        working-directory: app
+        run: |
+          npm ci
+          npx tauri build
+      - name: Keep the build for signing
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravitas-unsigned-${{ inputs.version }}
+          path: app/src-tauri/target/release/bundle/nsis/*.exe
+
+  sign:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Sign the installer with SignPath
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: gravitas
+          signing-policy-slug: release-signing
+          github-artifact-id: ${{ needs.build.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gravitas-signed-${{ inputs.version }}
+          path: signed

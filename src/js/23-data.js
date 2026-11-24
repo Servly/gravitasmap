@@ -5,10 +5,12 @@ async function apiJSON(r) {
   const type = r.headers.get("content-type") || "";
   if (!type.includes("json")) {
     if (r.status === 429) throw new Error("GRAVITAS has reached today's free limit of its host. It resets at 00:00 UTC. Please try again later.");
+    // v0.99.6: a 502, 503 or 504 that is not ours is most often Spansh being away (Cloudflare turns those into a text page): said calmly
+    if (r.status === 502 || r.status === 503 || r.status === 504) { const e = new Error("Spansh, where the data comes from, may not be answering right now. It may be updating."); e.soft = true; throw e; }
     throw new Error(`the server answered unexpectedly (status ${r.status}). Please try again in a minute.`);
   }
   let j; try { j = await r.json(); } catch (e) { throw new Error("the data arrived incomplete. Please try again in a minute."); }
-  if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+  if (!r.ok || j.error) { const e = new Error(j.error || r.statusText); if (j.soft) e.soft = true; throw e; }
   return j;
 }
 // v0.99.3: a system asked for without its stations' market, outfitting and shipyard lists (&lite=1: Sol 1851 KB ->
@@ -31,7 +33,7 @@ async function fetchSuggestions(text) {
   if (v.length) acCache.set(k, v);
   return v;
 }
-function status(msg, err) { const s = $("status"); s.textContent = msg; s.className = "panel" + (err ? " err" : ""); s.style.display = msg ? "block" : "none";
+function status(msg, err, soft) { const s = $("status"); s.textContent = msg; s.className = "panel" + (err ? " err" : "") + (soft ? " soft" : ""); s.style.display = msg ? "block" : "none";
   const m = $("splashMsg"); if (m && msg) m.textContent = msg; }   // v0.99.2: the loading screen says the same
 // v0.99.3: the first system, asked for by index.html before this script came: used once, for that same system only
 function earlyTake(name, id64) {
@@ -63,7 +65,7 @@ async function loadSystem(name, opts = {}) {
     const j = await req;
     if (my !== LOAD.gen) { if (warp) warp.abort(); return null; }     // a newer request came since: this answer is dropped
     try { if (typeof jrnBefore === "function") jrnBefore(); } catch (e) {}    // v0.81: the old map is lifted out for the jump motion
-    build(j); S.lite = !!j.lite; LOAD.by = opts.sync ? "sync" : opts.countdown || opts.user ? "user" : "auto"; status(j.stale || "", !!j.stale); if (j.stale) setTimeout(() => status(""), 9000);
+    build(j); S.lite = !!j.lite; LOAD.by = opts.sync ? "sync" : opts.countdown || opts.user ? "user" : "auto"; status(j.stale || "", false, !!j.stale); if (j.stale) setTimeout(() => status(""), 15000);   // v0.99.6: a saved copy is told calmly, not as an error
     splashDone();
     S.byId64 = opts.idLink && opts.id64 ? String(opts.id64) : "";     // v0.94: opened by its number: a link to it says the number too
     try { recentAdd(S.sys.name); sysIdKeep(S.sys.name, S.sys.id64); bmUi(); } catch (e) {}
@@ -78,7 +80,7 @@ async function loadSystem(name, opts = {}) {
       setTimeout(() => { fly = { t0: performance.now(), dur: 2600, fromT: toT.clone(), fromP: fromP.clone(), toT, toP }; }, 550);
     }
     return true;
-  } catch (e) { if (warp) warp.abort(); if (my !== LOAD.gen) return null; status(`Could not load "${name}": ${e.message}`, true); splashDone(); return false; }
+  } catch (e) { if (warp) warp.abort(); if (my !== LOAD.gen) return null; e.soft ? status(`${e.message} "${name}" could not be loaded yet. Please try again in a minute.`, false, true) : status(`Could not load "${name}": ${e.message}`, true); splashDone(); return false; }
 }
 // shareable links:  ?system=Name&body=<bodyId>&t=<game time>&tab=Orbit
 let linkState = null;

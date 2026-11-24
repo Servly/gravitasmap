@@ -1,0 +1,46 @@
+name: Bug report
+description: Something does not work or looks wrong
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. **Please do not attach Journal files and do not write real CMDR names.** If a screenshot shows names, hide them first.
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options:
+        - Website (gravitasmap.com)
+        - GRAVITAS app (Windows)
+        - Phone or tablet pairing
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: In the app, the About page. On the website, the number under the logo, bottom left.
+      placeholder: "app 0.9.27 / site 0.99.17"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: textarea
+    id: env
+    attributes:
+      label: Your setup
+      description: Windows version, browser, game mode (Borderless or Windowed), screen size.
+  - type: textarea
+    id: diag
+    attributes:
+      label: Diagnostic report (app only, optional)
+      description: In the app, About, then Copy diagnostic report. It holds counts only, no names or paths. Paste it here.
+      render: text

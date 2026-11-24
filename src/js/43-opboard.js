@@ -9,6 +9,17 @@ const opRid = () => { const B = "abcdefghijklmnopqrstuvwxyz234567", b = crypto.g
 const opLink = () => `${location.origin}/?op=${OP.id}`;
 const opCan = () => typeof SYNC !== "undefined" && SYNC.on && !SYNC.remote;   // only your own game can add a row
 const opCut = (v, n) => String(v || "").slice(0, n);
+// v0.99.9: a row that came from the server is untrusted: copied into exactly the fields the board shows, numbers clamped,
+// strings cut and stripped of < > " and `. (The server does the same; this is the second wall.)
+const opNum = v => { v = +v; return Number.isFinite(v) ? Math.max(-1e15, Math.min(1e15, v)) : 0; };
+const opStr = (v, n) => String(v == null ? "" : v).replace(/[\x00-\x1f\x7f<>"`]/g, "").slice(0, n);
+const opId = v => /^[a-z0-9-]{1,16}$/.test(String(v)) ? String(v) : "";
+function opClean(s) {
+  if (!s || typeof s !== "object") return null;
+  const t = s.top && typeof s.top === "object" ? { p: opStr(s.top.p, 40), s: opStr(s.top.s, 30), cr: opNum(s.top.cr) } : null;
+  const o = s.op && typeof s.op === "object" ? { n: opStr(s.op.n, 60), site: opStr(s.op.site, 60), sys: opStr(s.op.sys, 60) } : null;
+  return { c: opStr(s.c, 40), sh: opStr(s.sh, 30), on: s.on ? 1 : 0, n: opNum(s.n), cr: opNum(s.cr), t0: opNum(s.t0), t1: opNum(s.t1), ph: opNum(s.ph), sd: opNum(s.sd), d: s.d ? 1 : 0, seen: opNum(s.seen), top: t, op: o };
+}
 function opSave() { if (OP.id && !OP.key) OP.key = opRid().slice(0, 12); try { OP.id ? localStorage.setItem(OP_LS, JSON.stringify({ id: OP.id, role: OP.role, k: OP.key, t: Date.now() })) : localStorage.removeItem(OP_LS); } catch (e) {} }
 // what this CMDR shares: the totals of their own fight, nothing else
 function opSummary() {
@@ -35,12 +46,12 @@ function opOpen() {
 function opRetry() { clearTimeout(OP.timer); const wait = Math.min(30000, 2000 * Math.pow(2, OP.retry++)); OP.timer = setTimeout(() => { if (OP.id) opOpen(); }, wait); }
 function opMsg(m) {
   if (m.t === "ophello") {   // v0.92.4: the server's list is the truth. Rows it no longer has are marked as left, never added twice
-    OP.me = String(m.id || ""); const now = new Set();
-    for (const r of m.all || []) if (r && r.s) { now.add(String(r.id)); OP.rows.set(String(r.id), Object.assign({}, r.s, { id: String(r.id), cn: r.c || "", gone: false })); }
+    OP.me = opId(m.id); const now = new Set();
+    for (const r of Array.isArray(m.all) ? m.all.slice(0, 40) : []) { const id = r && opId(r.id), c = id && opClean(r.s); if (c) { now.add(id); OP.rows.set(id, Object.assign(c, { id, cn: opStr(r.c, 8), gone: false })); } }
     for (const [id, r] of OP.rows) if (!now.has(id) && id !== OP.me) r.gone = true;
     opRender(); return; }
-  if (m.t === "op" && m.s && typeof m.s === "object") { OP.rows.set(String(m.id), Object.assign({}, m.s, { id: String(m.id), cn: m.c || "", gone: false, at: Date.now() })); opRender(); return; }
-  if (m.t === "opleft") { const r = OP.rows.get(String(m.id)); if (r && (!m.c || !r.cn || m.c === r.cn)) { r.gone = true; opRender(); } }   // v0.92.4: only their current connection
+  if (m.t === "op" && m.s && typeof m.s === "object") { const id = opId(m.id), c = id && opClean(m.s); if (c) { OP.rows.set(id, Object.assign(c, { id, cn: opStr(m.c, 8), gone: false, at: Date.now() })); opRender(); } return; }
+  if (m.t === "opleft") { const r = OP.rows.get(opId(m.id)); if (r && (!m.c || !r.cn || opStr(m.c, 8) === r.cn)) { r.gone = true; opRender(); } }   // v0.92.4: only their current connection
 }
 function opPush(force) {
   if (OP.role !== "crew" || !OP.ws || OP.ws.readyState !== 1 || !opCan()) return;
@@ -77,19 +88,19 @@ function opHTML(inWin) {
   const L = opRows(), st = opState(L), mine = L.find(r => r.id === OP.me), tot = L.reduce((a, r) => a + (r.cr || 0), 0), kills = L.reduce((a, r) => a + (r.n || 0), 0);
   const lead = st === "done" && L[0] && L[0].n ? L[0].id : "";
   const rows = L.map((r, i) => `<li class="${r.id === OP.me ? "me" : ""}${r.gone ? " gone" : ""}${r.id === lead ? " lead" : ""}"><span class="or">${i + 1}</span>
-    <span class="oc"><b>CMDR ${esc(r.c)}</b>${r.id === OP.me ? `<em class="cbMate">YOU</em>` : ""}<small>${esc(r.sh || "")}${r.ph > 1 ? ` · phase ${r.ph}` : ""}</small></span>
+    <span class="oc"><b>CMDR ${esc(r.c)}</b>${r.id === OP.me ? `<em class="cbMate">YOU</em>` : ""}<small>${esc(r.sh || "")}${r.ph > 1 ? ` · phase ${opNum(r.ph)}` : ""}</small></span>
     <span class="ost ${r.gone ? "off" : r.on ? "on" : r.t0 ? "done" : "wait"}">${r.gone ? "left" : r.on ? "in combat" : r.t0 ? "done" : "waiting"}</span>
-    <span class="okn"><b>${r.n || 0}</b><small>kills</small></span><span class="ocr"><b>${cbNum(r.cr)}</b><small>cr</small></span>
-    <span class="otp">${r.top ? `Top: ${esc(r.top.p)} · ${esc(r.top.s)} · ${cbNum(r.top.cr)} cr` : ""}${r.d ? ` <i class="bad">ship lost</i>` : r.sd ? ` <i>shields fell ${r.sd}×</i>` : ""}</span></li>`).join("");
+    <span class="okn"><b>${cbNum(r.n)}</b><small>kills</small></span><span class="ocr"><b>${cbNum(r.cr)}</b><small>cr</small></span>
+    <span class="otp">${r.top ? `Top: ${esc(r.top.p)} · ${esc(r.top.s)} · ${cbNum(r.top.cr)} cr` : ""}${r.d ? ` <i class="bad">ship lost</i>` : r.sd ? ` <i>shields fell ${opNum(r.sd)}×</i>` : ""}</span></li>`).join("");
   const join = OP.role !== "crew" ? (opCan() ? `<div class="obJoin"><p>Add your own fight to this board? Everyone with the link will see your CMDR name, ship, kills and credits while GRAVITAS is open.</p><button data-ob="join">Add my fight</button></div>`
     : `<p class="cbNote">To add your own fight, open this link on the computer where you play, with Sync with the game on.</p>`) : "";
   const tools = `<button data-ob="link">Copy link</button>${L.length ? `<button data-ob="img">Copy image</button><button data-ob="text">Copy text</button>` : ""}<button data-ob="leave">Leave</button>`;
   if (inWin) return `<div class="mBar"><b class="obSt ${st}">${st === "live" ? "LIVE" : st === "done" ? "RESULTS" : "WAITING"}</b><span class="mWhere">${esc(opWhere(L))}</span>${tools}</div>
-    <div class="obBody inWin">${L.length ? `<p class="obTot"><b>${L.length}</b> CMDR${L.length > 1 ? "s" : ""} · <b>${kills}</b> kills · <b>${cbNum(tot)}</b> cr</p><ol class="obRows">${rows}</ol>` : `<p class="obEmpty">${OP.err ? "Paused." : OP.ws ? "Nobody has added a fight yet. Copy the link and share it with your team: each CMDR opens it on the computer where they play, with Sync on." : "Connecting…"}</p>`}
+    <div class="obBody inWin">${L.length ? `<p class="obTot"><b>${L.length}</b> CMDR${L.length > 1 ? "s" : ""} · <b>${cbNum(kills)}</b> kills · <b>${cbNum(tot)}</b> cr</p><ol class="obRows">${rows}</ol>` : `<p class="obEmpty">${OP.err ? "Paused." : OP.ws ? "Nobody has added a fight yet. Copy the link and share it with your team: each CMDR opens it on the computer where they play, with Sync on." : "Connecting…"}</p>`}
     ${OP.err ? `<p class="obErr">${esc(OP.err)} <button data-ob="re">Reconnect</button></p>` : ""}${join}<p class="cbNote">Each row comes from that CMDR's own game. A kill shared by the team counts for everyone who hit it, as in the game, so the team total is not a sum of different ships. GRAVITAS's server keeps nothing: when a CMDR closes GRAVITAS, their row is gone from the server. Leave closes the board on this computer.</p></div>`;
   return `<div class="cbHead rep"><b class="cbTag">TEAM BOARD</b><span class="cbWhere">${esc(opWhere(L))}</span><b class="obSt ${st}">${st === "live" ? "LIVE" : st === "done" ? "RESULTS" : "WAITING"}</b>
     <button data-ob="link">Copy link</button>${L.length ? `<button data-ob="img">Copy image</button><button data-ob="text">Copy text</button>` : ""}<button data-ob="leave">Leave</button><button data-ob="min">Close</button></div>
-    <div class="obBody">${L.length ? `<p class="obTot"><b>${L.length}</b> CMDR${L.length > 1 ? "s" : ""} · <b>${kills}</b> kills · <b>${cbNum(tot)}</b> cr</p><ol class="obRows">${rows}</ol>` : `<p class="obEmpty">${OP.err ? "Paused." : OP.ws ? "Nobody has added a fight yet. Share the link: each CMDR opens it on the computer where they play." : "Connecting…"}</p>`}
+    <div class="obBody">${L.length ? `<p class="obTot"><b>${L.length}</b> CMDR${L.length > 1 ? "s" : ""} · <b>${cbNum(kills)}</b> kills · <b>${cbNum(tot)}</b> cr</p><ol class="obRows">${rows}</ol>` : `<p class="obEmpty">${OP.err ? "Paused." : OP.ws ? "Nobody has added a fight yet. Share the link: each CMDR opens it on the computer where they play." : "Connecting…"}</p>`}
     ${OP.err ? `<p class="obErr">${esc(OP.err)} <button data-ob="re">Reconnect</button></p>` : ""}${join}<p class="cbNote">Each row comes from that CMDR's own game. A kill shared by the team counts for everyone who hit it, as in the game, so the team total is not a sum of different ships. GRAVITAS's server keeps nothing: when a CMDR closes GRAVITAS, their row is gone from the server. ${mine ? "You share only your totals, never your journal." : ""}</p></div>`;
 }
 function opInit() {
