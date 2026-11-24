@@ -1,6 +1,33 @@
 {
   "versions": [
     {
+      "v": "0.9.28",
+      "en": [
+        "Clear the Last fight report with a key. Ctrl+Shift+F6 clears the report at once (change it on the Keys page or use the button in the GRAVITAS menu); your Past combats stay untouched, and the report says which key clears it. The hints at the bottom of the windows now show the keys you really set, and no key text at all for a job that has no key (before, they always showed fixed Ctrl+Shift+F-keys, even when nothing was set).",
+        "Tidier settings: every dropdown, switch and button of the same kind now has the same size and lines up on its right edge, on every page and in the in-game menu. The Key Bindings rows keep their place when you pick Custom, and the Updates page is as wide as the others."
+      ],
+      "de": [
+        "Den Bericht Letzter Kampf mit einer Taste löschen. Strg+Umschalt+F6 löscht den Bericht sofort (auf der Seite Tasten änderbar oder über die Schaltfläche im GRAVITAS-Menü); deine früheren Kämpfe bleiben unberührt, und der Bericht nennt die Taste zum Löschen. Die Hinweise am unteren Rand der Fenster zeigen jetzt die Tasten, die du wirklich eingestellt hast, und gar keinen Tastentext für eine Funktion ohne Taste (vorher standen dort immer feste Strg+Umschalt+F-Tasten, auch wenn nichts eingestellt war).",
+        "Aufgeräumtere Einstellungen: Jedes Auswahlfeld, jeder Schalter und jede Schaltfläche derselben Art hat jetzt dieselbe Größe und schließt rechts bündig ab, auf jeder Seite und im Menü im Spiel. Die Zeilen der Tastenbelegung bleiben an ihrem Platz, wenn du Benutzerdefiniert wählst, und die Seite Updates ist so breit wie die anderen."
+      ],
+      "es": [
+        "Borra el informe del Último combate con una tecla. Ctrl+Mayús+F6 borra el informe al instante (se cambia en la página Teclas o con el botón del menú GRAVITAS); tus combates anteriores no se tocan y el informe indica la tecla que lo borra. Las pistas al pie de las ventanas ahora muestran las teclas que realmente pusiste, y ningún texto de tecla para una función sin tecla (antes mostraban siempre Ctrl+Mayús+F fijas, aunque no hubiera nada configurado).",
+        "Ajustes más ordenados: cada lista desplegable, interruptor y botón del mismo tipo tiene ahora el mismo tamaño y se alinea por su borde derecho, en todas las páginas y en el menú dentro del juego. Las filas de Teclas mantienen su sitio al elegir Personalizado, y la página Actualizaciones es tan ancha como las demás."
+      ],
+      "fr": [
+        "Effacez le rapport du Dernier combat avec une touche. Ctrl+Maj+F6 efface le rapport aussitôt (modifiable sur la page Touches ou avec le bouton du menu GRAVITAS) ; vos combats passés restent intacts et le rapport indique la touche qui l'efface. Les indications en bas des fenêtres montrent maintenant les touches que vous avez vraiment réglées, et aucun texte de touche pour une fonction sans touche (avant, elles affichaient toujours des touches Ctrl+Maj+F fixes, même sans réglage).",
+        "Réglages plus soignés : chaque liste déroulante, interrupteur et bouton du même type a maintenant la même taille et s'aligne sur son bord droit, sur chaque page et dans le menu en jeu. Les lignes des Touches gardent leur place quand vous choisissez Personnalisé, et la page Mises à jour est aussi large que les autres."
+      ],
+      "pt-br": [
+        "Limpe o relatório do Último combate com uma tecla. Ctrl+Shift+F6 limpa o relatório na hora (mude na página Teclas ou use o botão do menu GRAVITAS); seus combates anteriores não são tocados e o relatório diz qual tecla o limpa. As dicas no rodapé das janelas agora mostram as teclas que você realmente definiu, e nenhum texto de tecla para uma função sem tecla (antes mostravam sempre teclas Ctrl+Shift+F fixas, mesmo sem nada definido).",
+        "Ajustes mais organizados: cada lista suspensa, interruptor e botão do mesmo tipo agora tem o mesmo tamanho e se alinha pela borda direita, em todas as páginas e no menu dentro do jogo. As linhas de Teclas mantêm o lugar quando você escolhe Personalizado, e a página Atualizações é tão larga quanto as outras."
+      ],
+      "ru": [
+        "Очистка отчёта о последнем бое клавишей. Ctrl+Shift+F6 сразу очищает отчёт (клавишу можно изменить на странице «Клавиши» или нажать кнопку в меню GRAVITAS); прошлые бои не затрагиваются, а отчёт сообщает, какая клавиша его очищает. Подсказки внизу окон теперь показывают клавиши, которые вы действительно задали, и никакого текста клавиши для функции без клавиши (раньше всегда показывались фиксированные Ctrl+Shift+F, даже если ничего не было задано).",
+        "Аккуратнее настройки: каждый выпадающий список, переключатель и кнопка одного вида теперь одного размера и выровнены по правому краю на каждой странице и в меню в игре. Строки «Клавиш» остаются на месте при выборе «Свой», а страница «Обновления» такой же ширины, как остальные."
+      ]
+    },
+    {
       "v": "0.9.27",
       "en": [
         "The Combat report now explains Claims. The report counts only that fight, while Claims hold every bounty you have not cashed in yet. When Claims hold more, the report adds one line with the exact amount from before the fight, so the two numbers can be read side by side. There is a switch for it in the Claims card (on by default)."

@@ -134,6 +134,8 @@ pub struct Host {
     pub preview_t0: f64,
     /// the keys the player set for the jobs the footers name (job -> key text), kept up to date by live.rs
     pub key_texts: HashMap<String, String>,
+    /// the fight (its start time) whose Last fight report was cleared with its key: the windows that show the last fight between fights leave it out too
+    pub cleared: Option<String>,
     /// the windows boot up as holograms the next time they show (after the HUD was away: not in the cockpit, nothing to show)
     pub need_boot: bool,
     /// a window being placed from the menu or the window (its name, or "*" for all): shown with made-up data while it is edited, whatever else is on
@@ -202,6 +204,7 @@ impl Host {
             preview: false,
             preview_t0: 0.0,
             key_texts: HashMap::new(),
+            cleared: None,
             need_boot: true,
             edit: None,
             finished: Vec::new(),
@@ -412,9 +415,14 @@ impl Host {
         t.scan = scan.clone();
         t.gone = Some(gone.clone());
         let on_now = v.as_ref().map(|x| truthy_opt(x.get("on"))).unwrap_or(false);
-        let v_shown = if self.preview { Some(combat::sample(now * 1000.0)) } else if shown.is_some() && !on_now { shown.clone() } else { v.clone() }; // Preview, or a past report asked for from Past combats
+        let v_shown = if self.preview { Some(combat::sample(now * 1000.0)) } else if shown.is_some() && !on_now { shown.clone() } else { v.clone().filter(|x| !self.is_cleared(x)) }; // Preview, or a past report asked for from Past combats
         t.items = self.windows(v_shown.as_ref(), scan.as_ref(), &gone, now, shown.is_some());
         t
+    }
+
+    /// A fight that is over and whose report was cleared (Controls.cleared): nothing of it is shown between fights any more.
+    pub fn is_cleared(&self, v: &Value) -> bool {
+        self.cleared.is_some() && !truthy_opt(v.get("on")) && v.get("ep").and_then(|e| e.get("t0")).map(|t| t.to_string()) == self.cleared
     }
 
     /// load.py's draw(), the part that makes the windows: which ones show, and each one's card and place.

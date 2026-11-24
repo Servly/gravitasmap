@@ -494,6 +494,7 @@ fn run() {
             h.report_until = ctl.report_until;
             h.report_auto = ctl.report_auto;
             h.last_view = ctl.last_view.clone();
+            h.cleared = ctl.cleared.clone();
             for o in outs {
                 use crate::controls::Out;
                 match o {

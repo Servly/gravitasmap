@@ -36,7 +36,7 @@ a{color:var(--cyan)}
 
 .main{position:relative;min-width:0;min-height:0}
 .view{position:absolute;inset:0;overflow:auto;padding:22px 26px 28px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(16px) scale(.985);
-  transition:opacity .12s var(--ease),transform .5s var(--spring),visibility 0s .12s;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+  transition:opacity .12s var(--ease),transform .5s var(--spring),visibility 0s .12s;scrollbar-width:thin;scrollbar-gutter:stable;scrollbar-color:var(--line-2) transparent}
 .view.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition-delay:0s;transition:opacity .3s var(--ease),transform .5s var(--spring)}
 .view.on .rise{animation:rise .7s var(--spring) both;animation-delay:calc(var(--i,0)*55ms)}
 @keyframes rise{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
@@ -49,7 +49,7 @@ h2{margin:0 0 4px;font:600 11px var(--font-ui);letter-spacing:.14em;text-transfo
 .dot.on{background:var(--good);box-shadow:0 0 0 3px rgba(125,255,155,.18),0 0 10px rgba(125,255,155,.6)}
 .hub{display:grid;gap:16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.narrow{max-width:560px;display:grid;gap:10px}
+.narrow{display:grid;gap:10px}
 
 .mode{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;background:var(--glass);border:1px solid var(--line);text-align:left;overflow:hidden;
   transition:transform .4s var(--spring),border-color .3s,box-shadow .3s;--mx:50%;--my:0%;cursor:pointer}
@@ -91,7 +91,7 @@ h2{margin:0 0 4px;font:600 11px var(--font-ui);letter-spacing:.14em;text-transfo
 .view:not(.on) .logo,body.idle *,body.idle *::before,body.idle *::after{animation-play-state:paused!important}
 @keyframes float{50%{transform:translateY(-6px)}}
 .links{display:flex;gap:10px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;padding:10px 16px;border-radius:14px;font-weight:600;font-size:13px;border:1px solid var(--line-2);background:rgba(255,255,255,.05);text-decoration:none;color:var(--text);transition:transform .3s var(--spring),background .25s}
+.btn{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:41px;padding:10px 16px;border-radius:14px;font-weight:600;font-size:13px;border:1px solid var(--line-2);background:rgba(255,255,255,.05);text-decoration:none;color:var(--text);transition:transform .3s var(--spring),background .25s}
 .btn:hover{background:rgba(255,255,255,.1)} .btn:active{transform:scale(.95)}
 
 .toasts{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:22px;display:grid;gap:8px;justify-items:center;pointer-events:none;width:min(92vw,420px)}
@@ -121,6 +121,7 @@ h2{margin:0 0 4px;font:600 11px var(--font-ui);letter-spacing:.14em;text-transfo
 .acts{display:flex;flex-wrap:wrap;gap:8px}
 .wins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 22px}.wins .opt{border-top:0;padding:6px 0}
 .rng{display:flex;align-items:center;gap:10px}.rng input{width:160px;accent-color:var(--accent)}.rng b{min-width:3.2em;text-align:right;font-weight:600}
+select.sel,.txt{box-sizing:border-box;height:35px}
 select.sel{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line-2);border-radius:12px;padding:6px 10px;font:inherit}
 select.sel option{background:#1a1030}
 .keytxt{font-family:Consolas,monospace;font-size:12.5px;color:var(--cyan);white-space:nowrap}
@@ -128,7 +129,7 @@ select.sel option{background:#1a1030}
 .wrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);flex-wrap:wrap}.wrow:first-of-type{border-top:0}
 .wname{min-width:140px;font-weight:600}.wrow .sel{max-width:170px}.wrow .sel.sm{max-width:110px}
 .swatch{width:34px;height:28px;border:1px solid var(--line-2);border-radius:8px;background:none;padding:0;cursor:pointer}
-.mv{display:inline-flex;gap:3px}.btn.sm{padding:4px 9px;font-size:12px;border-radius:9px}
+.mv{display:inline-flex;gap:3px}.btn.sm{padding:4px 9px;font-size:12px;border-radius:9px;min-height:28px;height:28px}
 .txt{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line-2);border-radius:10px;padding:6px 10px;font:inherit;min-width:0}.txt.key{width:170px;text-align:center;font-family:Consolas,monospace;color:var(--cyan)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip2{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:99px;padding:3px 6px 3px 12px;font-size:12.5px}
 .chip2 .x{color:var(--dim);padding:0 6px;border-radius:99px}.chip2 .x:hover{color:#fff;background:#c42b4a}
@@ -143,9 +144,11 @@ select.sel option{background:#1a1030}
 .wnbox h3{margin:14px 0 4px;color:var(--accent);font-size:12px;letter-spacing:.12em}.wnbox ul{margin:6px 0 10px 18px;padding:0}.wnbox li{margin:6px 0;color:var(--text)}
 
 /* Key Bindings controls */
-.kbctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
-.kbcustom{display:flex;gap:6px;align-items:center}
+.kbctl{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.kbcustom{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.opt .kbcustom select.sel{width:168px}
 .kbcustom .key{width:64px;text-align:center}
+.kbcustom .btn{min-width:70px}
 h3.sub2{margin:14px 0 4px;font-size:13px;font-weight:600;opacity:.85}
 [hidden]{display:none!important}
 
@@ -170,7 +173,7 @@ h3.sub2{margin:14px 0 4px;font-size:13px;font-weight:600;opacity:.85}
 
 /* v0.9.18: Ready tag, the main buttons of a feature (each feature its own colour), the Sync card, About lists */
 .tag.ready{color:#7dffb0;border-color:rgba(125,255,176,.4);background:rgba(125,255,176,.07)}
-.btn.go{--c1:#6ae8ff;--c2:#a77bff;color:#0b0618;border:0;padding:12px 20px;font-size:14px;font-weight:700;letter-spacing:.02em;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 6px 22px -8px var(--c1)}
+.btn.go{--c1:#6ae8ff;--c2:#a77bff;color:#0b0618;border:0;min-height:44px;padding:12px 20px;font-size:14px;font-weight:700;letter-spacing:.02em;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 6px 22px -8px var(--c1)}
 .btn.go:hover{background:linear-gradient(135deg,var(--c1),var(--c2));filter:brightness(1.12)}
 .btn.go.map{--c1:#6ae8ff;--c2:#a77bff}
 .btn.go.combat{--c1:#ffb060;--c2:#ff6a4d}

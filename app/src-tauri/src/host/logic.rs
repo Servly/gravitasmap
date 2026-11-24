@@ -323,3 +323,15 @@ fn a_window_being_placed_shows_alone_with_made_up_data() {
     h.edit = None;
     assert!(!names(h.draw(1_800_000_000.0)).contains(&"fight".to_string()));
 }
+
+/// After the Last fight report was cleared, that fight is left out of the windows that show the last fight between fights; a new fight, or a fight still on, is not.
+#[test]
+fn a_cleared_fight_is_left_out_between_fights() {
+    let mut h = crate::host::Host::new(true).unwrap();
+    let over = json!({"on": false, "ep": {"t0": 1000, "t1": 2000}});
+    assert!(!h.is_cleared(&over), "nothing cleared yet");
+    h.cleared = Some("1000".into());
+    assert!(h.is_cleared(&over));
+    assert!(!h.is_cleared(&json!({"on": true, "ep": {"t0": 1000}})), "a fight that is on is never hidden");
+    assert!(!h.is_cleared(&json!({"on": false, "ep": {"t0": 5000, "t1": 6000}})), "the next fight shows");
+}

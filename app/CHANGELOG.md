@@ -2,6 +2,10 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.28
+- Clear the Last fight report with a key. Ctrl+Shift+F6 clears the report at once (change it on the Keys page or use the button in the GRAVITAS menu); your Past combats stay untouched, and the report says which key clears it. The hints at the bottom of the windows now show the keys you really set, and no key text at all for a job that has no key (before, they always showed fixed Ctrl+Shift+F-keys, even when nothing was set).
+- Tidier settings: every dropdown, switch and button of the same kind now has the same size and lines up on its right edge, on every page and in the in-game menu. The Key Bindings rows keep their place when you pick Custom, and the Updates page is as wide as the others.
+
 ## 0.9.27
 - The Combat report now explains Claims. The report counts only that fight, while Claims hold every bounty you have not cashed in yet. When Claims hold more, the report adds one line with the exact amount from before the fight, so the two numbers can be read side by side. There is a switch for it in the Claims card (on by default).
 

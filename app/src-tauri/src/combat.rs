@@ -965,3 +965,121 @@ mod claims_note_tests {
         assert!(note(&on).contains("569,701"));
     }
 }
+
+#[cfg(test)]
+mod key_hint_tests {
+    use super::*;
+
+    fn hints(pairs: &[(&str, &str)]) -> Hints { pairs.iter().map(|(a, b)| (a.to_string(), b.to_string())).collect() }
+    fn bounty_note(tr: &I18n, h: Option<&Hints>) -> String {
+        let b = json!({"cr": 1000, "n": 2, "claim": [0, [], 0, [], false], "bonds": 5, "bounties": 7});
+        bounty_h(tr, Some(&b), false, h)["note"].as_str().unwrap_or("").to_string()
+    }
+    fn report_model(tr: &I18n, h: Option<&Hints>) -> Value {
+        let mut v = sample_report(1_000_000.0);
+        v["on"] = json!(false);
+        let opts = Opts { bounty: Some(json!({"cr": 0})), report_on: true, report_s: 60.0, report_left: 7, hints: h.cloned(), ..Default::default() };
+        model(tr, "report", &v, v["ep"]["t1"].as_f64().unwrap() + 1000.0, &opts).expect("a report")
+    }
+    fn unit(m: &Value) -> String { m["count"][2].as_str().unwrap().to_string() }
+    fn note(m: &Value) -> String { m["note"].as_str().unwrap_or("").to_string() }
+    fn keys_card(tr: &I18n, h: Option<&Hints>) -> Option<Value> {
+        let opts = Opts { keys_on: true, keys_left: 5, hints: h.cloned(), ..Default::default() };
+        model(tr, "shortcuts", &json!({}), 0.0, &opts)
+    }
+
+    /// The plugin's footers (what the parity tests compare): no hints = the fixed Ctrl+Shift+F7..F12, no clear line.
+    #[test]
+    fn without_hints_the_footers_are_the_plugins() {
+        let tr = I18n::new("en");
+        assert!(bounty_note(&tr, None).ends_with("Ctrl+Shift+F9: Reset Current Fight"));
+        let m = report_model(&tr, None);
+        assert_eq!(unit(&m), "s · Ctrl+Shift+F8: Close");
+        assert!(!note(&m).contains("Clear this report"));
+        let rows: Vec<String> = keys_card(&tr, None).unwrap()["sections"][0][2].as_array().unwrap().iter().map(|r| r[0].as_str().unwrap().to_string()).collect();
+        assert_eq!(rows, ["Ctrl+Shift+F7", "Ctrl+Shift+F8", "Ctrl+Shift+F9", "Ctrl+Shift+F10", "Ctrl+Shift+F11", "Ctrl+Shift+F12"]);
+    }
+
+    /// The key the player set is the key the footer shows, and a changed key changes the text; the same on the Keys card.
+    #[test]
+    fn a_footer_shows_the_key_that_is_set_and_follows_a_change() {
+        for lang in ["en", "de", "es", "fr", "pt-br", "ru"] {
+            let tr = I18n::new(lang);
+            let h = hints(&[("reset", "Ctrl+Alt+K"), ("report", "Ctrl+Alt+J"), ("report_clear", "Ctrl+Shift+F6")]);
+            let n = bounty_note(&tr, Some(&h));
+            assert!(n.ends_with(&tr.t("bounty.tail.key", &[("key", json!("Ctrl+Alt+K"))])) && !n.contains("F9"), "{lang}: {n}");
+            let m = report_model(&tr, Some(&h));
+            assert!(unit(&m).contains("Ctrl+Alt+J") && !unit(&m).contains("F8"), "{lang}: {}", unit(&m));
+            assert!(note(&m).ends_with(&tr.t("report.clear.hint", &[("key", json!("Ctrl+Shift+F6"))])) && note(&m).contains("Ctrl+Shift+F6"), "{lang}: {}", note(&m));
+            // changed keys
+            let h2 = hints(&[("reset", "Win+Q"), ("report", "Shift+F1"), ("report_clear", "Alt+X")]);
+            assert!(bounty_note(&tr, Some(&h2)).contains("Win+Q") && !bounty_note(&tr, Some(&h2)).contains("Ctrl+Alt+K"));
+            let m2 = report_model(&tr, Some(&h2));
+            assert!(unit(&m2).contains("Shift+F1") && note(&m2).contains("Alt+X") && !note(&m2).contains("Ctrl+Shift+F6"), "{lang}");
+            // the Keys card lists exactly the jobs that have a key, with that key
+            let rows: Vec<String> = keys_card(&tr, Some(&h)).unwrap()["sections"][0][2].as_array().unwrap().iter().map(|r| r[0].as_str().unwrap().to_string()).collect();
+            assert_eq!(rows, ["Ctrl+Alt+J", "Ctrl+Alt+K", "Ctrl+Shift+F6"], "{lang}");
+        }
+    }
+
+    /// No key set for a job: its footer says nothing about a key (no stale Ctrl+Shift+F9, no dangling separator), the Keys card has nothing to list.
+    #[test]
+    fn a_job_with_no_key_has_no_key_text() {
+        for lang in ["en", "de", "es", "fr", "pt-br", "ru"] {
+            let tr = I18n::new(lang);
+            let h = hints(&[]);
+            let n = bounty_note(&tr, Some(&h));
+            assert!(!n.contains("Ctrl") && !n.contains("F9") && !n.trim_end().ends_with('·') && !n.ends_with(' '), "{lang}: {n:?}");
+            assert!(n.contains("bounties 7"), "{lang}: the rest of the footer stays: {n:?}");
+            let m = report_model(&tr, Some(&h));
+            assert_eq!(unit(&m), tr.t0("unit.s"), "{lang}");
+            assert!(!note(&m).contains("Ctrl") && !note(&m).contains("F8"), "{lang}");
+            assert!(keys_card(&tr, Some(&h)).is_none(), "{lang}: an empty Keys card is not shown");
+            // a plain counter with no bonds line and no key: no empty footer line at all
+            let plain = bounty_h(&tr, Some(&json!({"cr": 5})), false, Some(&h));
+            assert!(!note(&plain).ends_with('\n'), "{lang}");
+            // only the clear key set: the countdown has no close key, the clear line is there
+            let only = hints(&[("report_clear", "Ctrl+Shift+F6")]);
+            let m = report_model(&tr, Some(&only));
+            assert_eq!(unit(&m), tr.t0("unit.s"), "{lang}");
+            assert!(note(&m).contains("Ctrl+Shift+F6"), "{lang}");
+        }
+    }
+
+    /// The report card with and without the clear line (research/app-golden/out/keyhint_<lang>_<tag>.png, by eye) and how much taller it gets.
+    #[test]
+    fn the_clear_line_does_not_make_the_report_much_taller() {
+        let out = crate::host::parity::golden_dir().join("../out");
+        let _ = std::fs::create_dir_all(&out);
+        let (w, h) = (2560.0, 1440.0);
+        let s = crate::hud::pieces::scale(h, 1.0);
+        for lang in ["en", "de", "ru", "fr", "es", "pt-br"] {
+            let tr = I18n::new(lang);
+            let mut heights = Vec::new();
+            for (tag, hs) in [("plugin", None), ("keys", Some(hints(&[("report", "Ctrl+Shift+F8"), ("report_clear", "Ctrl+Shift+F6")]))), ("none", Some(hints(&[])))] {
+                let m = report_model(&tr, hs.as_ref());
+                let mut canvas = tiny_skia::Pixmap::new(w as u32, h as u32).unwrap();
+                canvas.fill(tiny_skia::Color::from_rgba8(30, 40, 60, 255));
+                let pv: Vec<Value> = vec![json!("top"), json!(0.115)];
+                let v0 = crate::hud::place::cursor_key(&pv).and_then(|_| crate::hud::place::start_of(&pv, w, h));
+                let p = crate::hud::place::paint(&tr, &m, 0.0, 0.0, "#ff7100", (0.0, 0, 100, 100), Some(&pv), v0, s, w, h, false, true, 190).expect("no picture");
+                let src = tiny_skia::PixmapRef::from_bytes(&p.pic.rgba, p.pic.w, p.pic.h).unwrap();
+                canvas.draw_pixmap(p.pic.x, p.pic.y, src, &tiny_skia::PixmapPaint::default(), tiny_skia::Transform::identity(), None);
+                canvas.save_png(out.join(format!("keyhint_{lang}_{tag}.png"))).unwrap();
+                heights.push((tag, p.pic.w, p.pic.h));
+            }
+            println!("{lang}: {heights:?}");
+            let (plugin, keys) = (heights[0].2 as f64, heights[1].2 as f64);
+            assert!(keys - plugin < 40.0, "{lang}: the report grew from {plugin} to {keys} px");
+        }
+    }
+
+    /// The footer comes from the hints only: a made-up key text shows exactly that text and nothing of the plugin's.
+    #[test]
+    fn the_text_comes_from_the_hints_only() {
+        let tr = I18n::new("en");
+        let h = hints(&[("reset", "ZZZ")]);
+        assert_eq!(bounty_note(&tr, Some(&h)).rsplit('\n').next().unwrap().rsplit(" · ").next().unwrap(), "ZZZ: Reset Current Fight");
+        assert!(!bounty_note(&tr, Some(&h)).contains("Ctrl+Shift"));
+    }
+}

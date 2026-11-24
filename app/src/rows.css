@@ -3,33 +3,34 @@
    .rw   = a row with several controls: title on the left, its controls grouped on the right in a fixed order, built from .cg groups
    .cg   = one control with its label next to it (On, Perspective, Shows with, Colour)
    .hdrow = a card header: title and text on the left, the card's main action on the right (below on a narrow window) */
-.opt{min-height:54px;padding:10px 0;gap:8px 18px;flex-wrap:wrap}
+.opt{min-height:56px;padding:10px 0;gap:8px 18px;flex-wrap:wrap}
 .opt>div:first-child{flex:1 1 220px;min-width:0}
 .opt>:last-child:not(:first-child){flex:none;margin-left:auto}
 .opt small{max-width:60ch}
-.opt select.sel{max-width:min(280px,100%)}
+.opt select.sel{width:420px;max-width:100%}   /* every one-control select is the same width and its right edge lines up (v0.9.28) */
 /* a row that is only buttons: they sit together on the left, no fixed height */
 .opt:has(>.btn:first-child){min-height:0;justify-content:flex-start;gap:8px}
 .opt:has(>.btn:first-child)>:last-child{margin-left:0}
 
-.rw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;min-height:54px;padding:10px 0;border-top:1px solid var(--line)}
+.rw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;min-height:56px;padding:10px 0;border-top:1px solid var(--line)}
 .rw-t{flex:1 1 150px;min-width:0}
 .rw-t .wname{font-weight:600;min-width:0}
 .rw-c{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 18px;margin-left:auto;max-width:100%}
 .cg{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
 .cg small{font-size:12px;color:var(--dim)}
-.cg select.sel{max-width:190px}
+.cg select.sel{width:190px;max-width:190px}
 .rw-c .cg:nth-child(1){min-width:76px}
 .rw-c .cg:nth-child(2){min-width:128px}
 .btn.ghost{background:transparent;border-color:var(--line)}
 .btn.ghost:hover{background:rgba(255,255,255,.07)}
-.btn.sm{padding:4px 10px;font-size:12px;border-radius:9px;min-height:26px}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:9px;min-height:28px;height:28px}
 
 .hdrow{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
 .hdrow .hd-l{flex:1 1 300px;min-width:0}
 .hdrow .hd-l h2{margin:0 0 4px}
 .hdrow .note{margin:0}
-.hdrow>.btn{flex:none}
+.hdrow>.btn{flex:none;margin-left:auto}
+.opt>.btn.go{margin-left:auto}
 
 /* the Sync card of the Modes page: the same header pattern */
 .card.sync .syncrow{flex-wrap:wrap}

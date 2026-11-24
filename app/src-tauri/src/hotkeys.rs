@@ -53,6 +53,8 @@ pub fn is_map_hold(job: &str) -> bool { matches!(job, "map_up" | "map_left" | "m
 pub fn default_text(job: &str) -> &'static str {
     match job {
         "menu" => "Ctrl+Shift+K",
+        // v0.9.28: clears the Last fight report. Free in the game's own bindings (the F7..F12 row clashes with other programs, this one does not)
+        "report_clear" => "Ctrl+Shift+F6",
         // the System map over the game: Ctrl+Shift and the number pad, 8 up, 4 left, 5 down, 6 right (like WASD), + and - zoom, 0 shows the whole system
         "map_up" => "Ctrl+Shift+Num8",
         "map_left" => "Ctrl+Shift+Num4",
@@ -186,6 +188,7 @@ mod tests {
         assert_eq!(k.text_of("menu"), "Ctrl+Shift+K");
         assert_eq!(Keys::new(&[("menu".into(), "Ctrl+Shift+G".into())]).text_of("menu"), "Ctrl+Shift+K", "the retired G becomes K");
         assert_eq!(k.text_of("reset"), "");
+        assert_eq!(k.text_of("report_clear"), "Ctrl+Shift+F6", "the clear key (v0.9.28) is the one other default besides the menu and the map keys");
         assert!(k.pressed(&st(&[VK_CTRL, VK_SHIFT, 0x78])).is_empty(), "no key for reset until one is set");
         assert_eq!(k.pressed(&st(&[VK_CTRL, VK_SHIFT, 'K' as u32])), vec!["menu"]);
     }
@@ -218,5 +221,21 @@ mod tests {
         let st = |vk: u32| [VK_CTRL, VK_ALT, 'K' as u32].contains(&vk);
         assert_eq!(k.pressed(&st), vec!["reset"]);
         assert_eq!(k.text_of("hide"), "", "a key that cannot be read keeps its default (none)");
+    }
+
+    /// What the footers name: only the jobs that have a key, written the way the Keys page writes it.
+    #[test]
+    fn the_footers_get_the_keys_the_player_set() {
+        let none = Keys::new(&[]).hint_texts();   // nothing set: only the defaults speak (the clear key; the menu key is named by no footer)
+        assert_eq!(none.len(), 1, "only the clear key has a default that a footer names");
+        assert_eq!(none.get("report_clear").map(String::as_str), Some("Ctrl+Shift+F6"));
+        let k = Keys::new(&[("report_clear".into(), "ctrl+shift+f6".into()), ("reset".into(), "Alt+K".into()), ("hide".into(), "".into())]);
+        let h = k.hint_texts();
+        assert_eq!(h.get("report_clear").map(String::as_str), Some("Ctrl+Shift+F6"));
+        assert_eq!(h.get("reset").map(String::as_str), Some("Alt+K"));
+        assert!(!h.contains_key("hide") && !h.contains_key("menu"));
+        let mut k = Keys::new(&[("report_clear".into(), "Ctrl+Shift+F6".into())]);
+        let st = |s: &'static [u32]| move |vk: u32| s.contains(&vk);
+        assert_eq!(k.pressed(&st(&[VK_CTRL, VK_SHIFT, 0x75])), vec!["report_clear"]);
     }
 }
