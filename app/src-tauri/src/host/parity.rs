@@ -131,6 +131,7 @@ fn engine_run(name: &str) -> Result<usize, String> {
     host.set.wing_bonus_on = false; // (likewise: the app counts the wing bonus on by default)
     host.set.claim_bonds = false; // (the plugin's Claims never counted bonds)
     host.set.claims_note = false; // (the plugin's report has no Claims note)
+    host.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
     match fx.doc["variant"].as_str() {
         Some("wing") => {
             host.set.bonds = true;
@@ -224,6 +225,7 @@ fn engine_run_tail(name: &str) -> Result<usize, String> {
     host.set.wing_bonus_on = false; // (likewise: the app counts the wing bonus on by default)
     host.set.claim_bonds = false; // (the plugin's Claims never counted bonds)
     host.set.claims_note = false; // (the plugin's report has no Claims note)
+    host.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
     match fx.doc["variant"].as_str() {
         Some("wing") => {
             host.set.bonds = true;

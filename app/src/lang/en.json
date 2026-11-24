@@ -338,6 +338,8 @@
   "tip.act.report": "Show or hide the report of the last fight.",
   "tip.act.hide": "Hide all windows, or bring them back.",
   "tip.act.claims": "Draw a line under Claims: money earned before it stops counting.",
+  "menu.act.report_clear": "Clear the last fight report",
+  "tip.act.report_clear": "Hide the last fight report and forget it, so the report key does not bring it back. Fight history keeps it.",
   "tip.w.auto": "Windows lean and narrow to fit the game's own panels.",
   "tip.w.bg": "A dark ground behind each window, so the text is easier to read.",
   "tip.w.defaults": "Put every window back to its starting place and colour.",

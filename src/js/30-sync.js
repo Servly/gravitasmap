@@ -509,7 +509,7 @@ function tgtMapTick() {
     $("syncGo").onclick = () => { if (SYNC.pend) syncFollow(SYNC.pend, false); };
     $("syncAuto").onchange = e => { SYNC.auto = e.target.checked; syncLS("auto", SYNC.auto ? "1" : "0"); if (SYNC.auto && SYNC.pend && !S) syncFollow(SYNC.pend, false); };
     $("syncDir").onclick = () => APP_WINDOW ? toast("The GRAVITAS app reads your Journal folder itself: there is nothing to choose.") : syncDialog(true);
-    $("syncPlug").onclick = () => openNews("GRAVITAS APP", "plugin");   // v0.93: Show me is on the map (Find me); here: the plugin
+    // v0.99.19: the App button of this card is gone: the "Get the Windows app" card of the main screen (49-app-promo.js) opens the app page
     syncShow();
     // last visit had it on: resume quietly when the browser still allows reading the folder, else wait for a click
     if (SYNC.ok && syncLS("on") === "1") syncLoadDir().then(async h => {

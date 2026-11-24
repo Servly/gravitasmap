@@ -81,6 +81,10 @@
   "key.clear": "Limpar alvos por valor",
   "key.hud": "Mostrar/ocultar o HUD",
   "key.claims": "Reiniciar resgates",
+  "bounty.tail.key": "{key}: Reiniciar combate atual",
+  "report.count.unit.key": "s · {key}: Fechar",
+  "report.clear.hint": "{key}: Limpar este relatório",
+  "key.report_clear": "Limpar o último relatório",
 
   "banner.text": "COMBATE",
   "banner.sub": "primeiros disparos",

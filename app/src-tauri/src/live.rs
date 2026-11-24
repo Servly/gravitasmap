@@ -225,6 +225,7 @@ fn run() {
                     h.set.removed = vec!["target"]; // the Target card is gone: the game's own is used
                     profiles = crate::profiles::Profiles::from_json(&saved);
                     if let Some(b) = saved.get("claims_base").and_then(Value::as_str) { h.claims.set_base(b); }
+                    h.key_texts = hotkeys.hint_texts(); // (the footers name the keys the player set)
                     host = Some(h);
                 }
                 Err(e) => {
@@ -406,6 +407,7 @@ fn run() {
                         crate::store::set(&[("hotkeys", Value::Object(saved.clone()))]);
                         let custom: Vec<(String, String)> = saved.iter().filter_map(|(k, v)| v.as_str().map(|s| (k.clone(), s.to_string()))).collect();
                         hotkeys = crate::hotkeys::Keys::new(&custom);
+                        h.key_texts = hotkeys.hint_texts(); // (the footers show the new key at once)
                     }
                 }
                 _ => {}
@@ -465,6 +467,7 @@ fn run() {
             if pressed.iter().any(|k| k == "app") { crate::menu::request_show_main(); }
             pressed.retain(|k| k != "menu" && k != "app" && !k.starts_with("map_"));
             if let Ok(mut a) = ACTIONS.lock() { pressed.extend(a.drain(..)); }
+            if h.set.keys && pressed.iter().any(|k| k == "report_clear") { h.shown = None; } // (a past report shown from Past combats goes with it; its list is not touched)
             let mouse = crate::rawmouse::take();
             let front = matches!(overlay::game_rect(), Game::Window { front: true, .. });
             let menu_now = crate::menu::is_open();
@@ -507,6 +510,7 @@ fn run() {
                         crate::store::set(&[("claims_base", Value::String(base))]);
                     }
                     Out::EngineClear => h.eng.clear(),
+                    Out::ReportClear => h.shown = None,
                 }
             }
             h.looking = ctl.looking;

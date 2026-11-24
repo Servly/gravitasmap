@@ -81,6 +81,10 @@
   "key.clear": "Vider les cibles par valeur",
   "key.hud": "Afficher/masquer le HUD",
   "key.claims": "Réinitialiser les réclamations",
+  "bounty.tail.key": "{key} : Réinitialiser le combat actuel",
+  "report.count.unit.key": "s · {key} : Fermer",
+  "report.clear.hint": "{key} : Effacer ce rapport",
+  "key.report_clear": "Effacer le dernier rapport",
 
   "banner.text": "COMBAT",
   "banner.sub": "premiers tirs",

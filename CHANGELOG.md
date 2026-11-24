@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.19 · minor · 24 Nov 2026
+- The "Get the Windows app" card on the main screen now stays where it is (it no longer hides after you use it, and nothing is remembered in your browser). The App button of the Sync card is gone, because the card replaces it.
+
 ### v0.99.18 · minor · 24 Nov 2026
 - A small "Get the Windows app" card on the main screen, between GRAVITAS MODES and Sync. It opens the app page (the installer, its checksum and scan result). It does not show inside the GRAVITAS app, on a paired phone or on small screens, and you can hide it: your browser then remembers that for 90 days, on this device only.
 

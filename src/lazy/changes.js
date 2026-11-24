@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.19", k: "minor", d: "24 Nov 2026", t: [
+      "The \"Get the Windows app\" card on the main screen now stays where it is (it no longer hides after you use it, and nothing is remembered in your browser). The App button of the Sync card is gone, because the card replaces it.",
+    ] },
     { v: "v0.99.18", k: "minor", d: "24 Nov 2026", t: [
       "A small \"Get the Windows app\" card on the main screen, between GRAVITAS MODES and Sync. It opens the app page (the installer, its checksum and scan result). It does not show inside the GRAVITAS app, on a paired phone or on small screens, and you can hide it: your browser then remembers that for 90 days, on this device only.",
     ] },

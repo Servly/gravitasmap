@@ -338,6 +338,8 @@
   "tip.act.report": "Affiche ou masque le rapport du dernier combat.",
   "tip.act.hide": "Masque toutes les fenêtres ou les ramène.",
   "tip.act.claims": "Tire un trait sous Claims : l'argent gagné avant ne compte plus.",
+  "menu.act.report_clear": "Effacer le dernier rapport",
+  "tip.act.report_clear": "Masque le rapport du dernier combat et l'oublie : la touche du rapport ne le ramène pas. L'historique des combats le garde.",
   "tip.w.auto": "Les fenêtres s'inclinent et se resserrent comme les panneaux du jeu.",
   "tip.w.bg": "Un fond sombre derrière chaque fenêtre pour mieux lire.",
   "tip.w.defaults": "Remet chaque fenêtre à sa place et sa couleur de départ.",

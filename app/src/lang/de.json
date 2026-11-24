@@ -338,6 +338,8 @@
   "tip.act.report": "Bericht des letzten Kampfs ein- oder ausblenden.",
   "tip.act.hide": "Alle Fenster ausblenden oder wieder einblenden.",
   "tip.act.claims": "Einen Strich unter Claims ziehen: Früheres zählt nicht mehr.",
+  "menu.act.report_clear": "Letzten Kampfbericht löschen",
+  "tip.act.report_clear": "Blendet den Bericht des letzten Kampfs aus und vergisst ihn, die Berichtstaste holt ihn nicht zurück. Der Kampfverlauf behält ihn.",
   "tip.w.auto": "Fenster neigen und verengen sich passend zu den Panels des Spiels.",
   "tip.w.bg": "Dunkler Grund hinter jedem Fenster für bessere Lesbarkeit.",
   "tip.w.defaults": "Alle Fenster auf Startplatz und -farbe zurücksetzen.",

@@ -74,6 +74,16 @@ pub struct Opts {
     pub keys_left: i64,
     pub report_on: bool,
     pub report_left: i64,
+    /// The keys the player set for the jobs the footers name (job -> key text, only the jobs that have one). None = the plugin's footers, with its fixed
+    /// Ctrl+Shift+F7..F12 (what the parity tests compare); Some = every footer shows the key set for its job, and nothing for a job that has no key.
+    pub hints: Option<Hints>,
+}
+
+pub type Hints = std::collections::HashMap<String, String>;
+
+/// The text of a footer with the player's key in it: None while that job has no key.
+fn with_key(tr: &I18n, h: &Hints, job: &str, text_key: &str) -> Option<String> {
+    h.get(job).filter(|k| !k.is_empty()).map(|k| tr.t(text_key, &[("key", json!(k))]))
 }
 
 // ------------------------------------------------------------------------------------------------ small helpers
@@ -216,9 +226,15 @@ fn drop_lost(pri: Vec<Value>, opts: &Opts) -> Vec<Value> {
         .collect()
 }
 
-pub fn keys_help(tr: &I18n) -> Vec<(&'static str, String)> {
-    vec![("Ctrl+Shift+F7", tr.t0("key.free_look")), ("Ctrl+Shift+F8", tr.t0("key.report")), ("Ctrl+Shift+F9", tr.t0("key.bounty")),
-         ("Ctrl+Shift+F10", tr.t0("key.clear")), ("Ctrl+Shift+F11", tr.t0("key.hud")), ("Ctrl+Shift+F12", tr.t0("key.claims"))]
+/// The Keys card's rows (key, what it does). The plugin's six fixed keys when `hints` is None; else the keys the player set, only the jobs that have one.
+pub fn keys_help(tr: &I18n, hints: Option<&Hints>) -> Vec<(String, String)> {
+    match hints {
+        None => vec![("Ctrl+Shift+F7", tr.t0("key.free_look")), ("Ctrl+Shift+F8", tr.t0("key.report")), ("Ctrl+Shift+F9", tr.t0("key.bounty")),
+                     ("Ctrl+Shift+F10", tr.t0("key.clear")), ("Ctrl+Shift+F11", tr.t0("key.hud")), ("Ctrl+Shift+F12", tr.t0("key.claims"))]
+            .into_iter().map(|(k, w)| (k.to_string(), w)).collect(),
+        Some(h) => [("flip", "key.free_look"), ("report", "key.report"), ("reset", "key.bounty"), ("clear", "key.clear"), ("hide", "key.hud"), ("claims", "key.claims"), ("report_clear", "key.report_clear")]
+            .iter().filter_map(|(job, text)| h.get(*job).filter(|k| !k.is_empty()).map(|k| (k.clone(), tr.t0(text)))).collect(),
+    }
 }
 
 pub(crate) fn intd(tr: &I18n, st: Option<&Value>) -> (String, String, &'static str) {
@@ -237,6 +253,10 @@ pub(crate) fn intd(tr: &I18n, st: Option<&Value>) -> (String, String, &'static s
 // ------------------------------------------------------------------------------------------------ the Bounty counter
 
 pub fn bounty(tr: &I18n, b: Option<&Value>, in_op: bool) -> Value {
+    bounty_h(tr, b, in_op, None)
+}
+
+pub fn bounty_h(tr: &I18n, b: Option<&Value>, in_op: bool, hints: Option<&Hints>) -> Value {
     let empty = json!({});
     let b = match b {
         Some(v) if truthy(Some(v)) => v,
@@ -290,14 +310,20 @@ pub fn bounty(tr: &I18n, b: Option<&Value>, in_op: bool) -> Value {
     if truthy(b.get("claim_reset")) {
         lines.push(format!("• {}", tr.t("bounty.reset", &[("t", b["claim_reset"].clone())])));
     }
-    let mut tail = tr.t0("bounty.tail");
+    // the footer names the key set for "Reset Current Fight" (nothing when none is set); the plugin's footer has its fixed F9
+    let mut tail = match hints { None => tr.t0("bounty.tail"), Some(h) => with_key(tr, h, "reset", "bounty.tail.key").unwrap_or_default() };
     if b.get("bonds").map(|v| !v.is_null()).unwrap_or(false) {
         tail = tr.t("bounty.tail.bounties", &[("bounties", json!(num(b.get("bounties")))), ("bonds", json!(num(b.get("bonds"))))]) + &tail;
     }
     if truthy(b.get("lost")) {
         tail = tr.t("bounty.lost", &[("amount", json!(num(b.get("lost"))))]) + &tail;
     }
-    lines.push(tail);
+    if hints.is_some() {
+        tail = tail.trim_end_matches(" · ").to_string(); // (the lines before the key end with a separator: no key, no dangling dot)
+    }
+    if hints.is_none() || !tail.is_empty() {
+        lines.push(tail);
+    }
     if truthy(b.get("brief")) {
         // in brief: the two money tiles only (this fight, Claims)
         let keep = vec![tiles[0].clone(), tiles[2].clone()];
@@ -499,18 +525,33 @@ pub fn model(tr: &I18n, key: &str, v: &Value, now_ms: f64, opts: &Opts) -> Optio
             if !opts.keys_on {
                 return None;
             }
-            let rows: Vec<Value> = keys_help(tr).into_iter().map(|(k, what)| json!([k, what, ""])).collect();
+            let rows: Vec<Value> = keys_help(tr, opts.hints.as_ref()).into_iter().map(|(k, what)| json!([k, what, ""])).collect();
+            if rows.is_empty() {
+                return None; // (live key hints and no key set for any job: nothing to list)
+            }
             Some(json!({"kind": "card", "title": tr.t0("keys.title"), "head2": tr.t0("keys.head2"), "sections": [["", "feed", rows]],
                 "count": [tr.t0("keys.count"), opts.keys_left, tr.t0("unit.s")]}))
         }
-        "bounty" => Some(bounty(tr, opts.bounty.as_ref(), truthy(Some(op)))),
+        "bounty" => Some(bounty_h(tr, opts.bounty.as_ref(), truthy(Some(op)), opts.hints.as_ref())),
         "report" => {
             if !opts.report_on || !truthy(ep.get("t0")) {
                 return None;
             }
             let extra = if opts.claims_note { claims_before(v, opts.bounty.as_ref(), wing_on) } else { 0.0 };
             let mut m = report(tr, v, now_ms, wing_on, extra);
-            m["count"] = json!([tr.t0("report.count"), opts.report_left, tr.t0("report.count.unit")]);
+            match opts.hints.as_ref() {
+                None => m["count"] = json!([tr.t0("report.count"), opts.report_left, tr.t0("report.count.unit")]),
+                Some(h) => {
+                    // "closes in 10 s · <key>: Close" (the close key is the one set for the report key; no key set: just the countdown), and under it how to clear it
+                    let unit = with_key(tr, h, "report", "report.count.unit.key").unwrap_or_else(|| tr.t0("unit.s"));
+                    m["count"] = json!([tr.t0("report.count"), opts.report_left, unit]);
+                    if let Some(c) = with_key(tr, h, "report_clear", "report.clear.hint") {
+                        let note = m.get("note").and_then(Value::as_str).unwrap_or("").to_string();
+                        m["note"] = json!(if note.is_empty() { c } else { format!("{note}
+{c}") });
+                    }
+                }
+            }
             Some(m)
         }
         "banner" => {

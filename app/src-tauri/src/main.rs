@@ -335,10 +335,10 @@ fn combat_setting(key: String, value: serde_json::Value) {
     if let Ok(mut c) = live::CHANGES.lock() { c.push((key, value)); }
 }
 
-/// One of the keys' jobs done from a button: flip, report, reset, clear, hide, claims.
+/// One of the keys' jobs done from a button: flip, report, reset, clear, hide, claims, report_clear.
 #[tauri::command]
 fn combat_action(name: String) {
-    if ["flip", "report", "reset", "clear", "hide", "claims"].contains(&name.as_str()) {
+    if ["flip", "report", "reset", "clear", "hide", "claims", "report_clear"].contains(&name.as_str()) {
         if let Ok(mut a) = live::ACTIONS.lock() { a.push(name); }
     }
 }

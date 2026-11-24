@@ -81,6 +81,10 @@
   "key.clear": "Ziele nach Wert leeren",
   "key.hud": "HUD umschalten",
   "key.claims": "Ansprüche zurücksetzen",
+  "bounty.tail.key": "{key}: Aktuelles Gefecht zurücksetzen",
+  "report.count.unit.key": "s · {key}: Schließen",
+  "report.clear.hint": "{key}: Diesen Bericht löschen",
+  "key.report_clear": "Letzten Kampfbericht löschen",
 
   "banner.text": "KAMPF",
   "banner.sub": "erste Schüsse gefallen",

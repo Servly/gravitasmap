@@ -338,6 +338,8 @@
   "tip.act.report": "Mostra ou oculta o relatório do último combate.",
   "tip.act.hide": "Oculta todas as janelas ou as traz de volta.",
   "tip.act.claims": "Traça uma linha em Claims: o que foi ganho antes deixa de contar.",
+  "menu.act.report_clear": "Limpar o último relatório",
+  "tip.act.report_clear": "Oculta o relatório do último combate e o esquece: a tecla do relatório não o traz de volta. O histórico de combates o mantém.",
   "tip.w.auto": "As janelas se inclinam e estreitam como os painéis do jogo.",
   "tip.w.bg": "Um fundo escuro atrás de cada janela para ler melhor.",
   "tip.w.defaults": "Volta cada janela ao lugar e cor iniciais.",

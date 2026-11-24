@@ -82,6 +82,10 @@
   "key.clear": "Очистить цели по ценности",
   "key.hud": "Показать/скрыть HUD",
   "key.claims": "Сбросить «К получению»",
+  "bounty.tail.key": "{key}: Сбросить текущий бой",
+  "report.count.unit.key": "с · {key}: Закрыть",
+  "report.clear.hint": "{key}: Очистить этот отчёт",
+  "key.report_clear": "Очистить последний отчёт",
 
   "banner.text": "БОЙ",
   "banner.sub": "первые выстрелы",

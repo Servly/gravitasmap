@@ -13,7 +13,10 @@ const VK_RWIN: u32 = 0x5C;
 /// The jobs, in the plugin's order. Only the menu has a key to begin with (Ctrl+Shift+K: the game uses no K, and G, the first default, got in the way of
 /// the game's own G binds): the others are in the menu as buttons, and a key for any of them can be set under Key Bindings (and taken away again). The plugin's own
 /// keys were Ctrl+Shift+F7 to F12 (offered there as each job's default choice).
-pub const JOBS: [&str; 17] = ["flip", "report", "reset", "clear", "hide", "claims", "menu", "app", "map_up", "map_left", "map_down", "map_right", "map_zin", "map_zout", "map_fit", "map_show", "map_site"];
+pub const JOBS: [&str; 18] = ["flip", "report", "reset", "clear", "hide", "claims", "report_clear", "menu", "app", "map_up", "map_left", "map_down", "map_right", "map_zin", "map_zout", "map_fit", "map_show", "map_site"];
+
+/// The jobs the windows' footers and the Keys card talk about (the key a footer shows is always the one set for its job).
+pub const HINT_JOBS: [&str; 7] = ["flip", "report", "reset", "clear", "hide", "claims", "report_clear"];
 
 /// The map keys move or zoom the System map while they are held (read by mapwin.rs every 30 ms), they are not "pressed once" jobs.
 /// Shift turns the number pad's digits into the arrow and navigation keys while Num Lock is on (and back while it is off): a key bound to Num8 with Shift is
@@ -126,6 +129,11 @@ impl Keys {
         self.binds.iter().filter(|(n, _)| is_map_hold(n)).filter(|(_, (ctrl, shift, alt, win, vk))| {
             (!ctrl || state(VK_CTRL)) && shift_ok(state, *shift, *vk) && (!alt || state(VK_ALT)) && (!win || state(VK_LWIN) || state(VK_RWIN)) && key_is_down(state, *vk)
         }).map(|(n, _)| n.clone()).collect()
+    }
+
+    /// The keys the HUD's footers name, as the player set them now (job -> text, only the jobs that have a key): the same text the Keys page shows.
+    pub fn hint_texts(&self) -> HashMap<String, String> {
+        HINT_JOBS.iter().filter_map(|j| { let t = self.text_of(j); if t.is_empty() { None } else { Some((j.to_string(), t)) } }).collect()
     }
 
     pub fn text_of(&self, name: &str) -> String {

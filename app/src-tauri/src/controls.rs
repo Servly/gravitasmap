@@ -34,6 +34,8 @@ pub enum Out {
     CounterReset,
     ClaimsReset,
     EngineClear,
+    /// the Last fight report was cleared: a past report shown from Past combats goes too (Past combats itself is not touched)
+    ReportClear,
 }
 
 #[derive(Default)]
@@ -45,6 +47,8 @@ pub struct Controls {
     pub report_until: f64,
     pub report_auto: bool,
     pub last_view: Option<Value>,
+    /// the fight (its start time) whose report was cleared: the report key does not bring it back from the engine
+    pub cleared: Option<String>,
 }
 
 pub struct In<'a> {
@@ -62,6 +66,10 @@ pub struct In<'a> {
     pub engine_ok: bool,
     /// the focus machine's guess (set when free look ends over a side panel)
     pub guess: &'a mut Option<(i64, f64)>,
+}
+
+fn t0_text(v: &Value) -> Option<String> {
+    if truthy_t0(v) { v.get("ep").and_then(|e| e.get("t0")).map(|t| t.to_string()) } else { None }
 }
 
 fn truthy_t0(v: &Value) -> bool {
@@ -106,6 +114,7 @@ impl Controls {
                             lv = cur.filter(|c| {
                                 let on = crate::pyval::truthy(c.get("on"));
                                 !c.is_null() && c.as_object().is_some_and(|m| !m.is_empty()) && !on && truthy_t0(c)
+                                    && (self.cleared.is_none() || t0_text(c) != self.cleared) // (a report that was cleared stays cleared)
                             });
                         }
                         if lv.is_some() {
@@ -113,6 +122,21 @@ impl Controls {
                             self.report_until = i.wall + cfg.report_s;
                             self.report_auto = false;
                         }
+                    }
+                }
+                "report_clear" => {
+                    // hide the report now and forget the fight, so the report key does not bring it back; nothing to clear = nothing happens
+                    let up = i.wall < self.report_until;
+                    let kept = self.last_view.as_ref().and_then(t0_text).or_else(|| {
+                        if !i.engine_ok { return None; }
+                        (i.engine_view)().filter(|c| !crate::pyval::truthy(c.get("on"))).and_then(|c| t0_text(&c)).filter(|t| self.cleared.as_ref() != Some(t))
+                    });
+                    if up || kept.is_some() {
+                        self.report_until = 0.0;
+                        self.report_auto = false;
+                        self.last_view = None;
+                        if kept.is_some() { self.cleared = kept; }
+                        o.push(Out::ReportClear);
                     }
                 }
                 _ => {}
@@ -219,6 +243,7 @@ mod tests {
                         Out::CounterReset => rec.push(json!(["counter_reset"])),
                         Out::ClaimsReset => { rec.push(json!(["claims_reset"])); rec.push(json!(["claims_base", "BASE"])); }
                         Out::EngineClear => rec.push(json!(["engine_clear"])),
+                        Out::ReportClear => rec.push(json!(["report_clear"])),
                     }
                 }
                 let got = json!({"rec": rec, "looking": ctl.looking, "look_toggle": ctl.look_toggle, "look_held": ctl.look_held, "guess": guess.map(|(g, t)| json!([g, t])),
@@ -230,5 +255,48 @@ mod tests {
         }
         println!("free look and keys: {} scripts, {steps} steps, {} differences", scripts.len(), bad.len());
         assert!(bad.is_empty(), "{}", bad.iter().take(4).cloned().collect::<Vec<_>>().join("\n"));
+    }
+
+    fn press(ctl: &mut Controls, key: &str, wall: f64, engine: Option<Value>) -> Vec<Out> {
+        let cfg = Cfg { keys_on: true, report_s: 10.0, report_win_on: true, ..Default::default() };
+        let keys = vec![key.to_string()];
+        let st = |_: u32| 0u16;
+        let ev = || engine.clone();
+        let mut guess = None;
+        let mut i = In { front: true, gui: 0, in_cockpit: true, keys: &keys, mouse: &[], state: &st, perf: wall, wall, engine_view: &ev, engine_ok: true, guess: &mut guess };
+        ctl.step(&cfg, &mut i)
+    }
+
+    /// The report key brings the last fight's report back; the clear key hides it, forgets it and the report key does not bring it back (a new fight's report still comes).
+    #[test]
+    fn the_clear_key_forgets_the_last_report() {
+        let fight = json!({"on": false, "ep": {"t0": 1000, "t1": 2000, "n": 3}});
+        let mut ctl = Controls { last_view: Some(fight.clone()), report_until: 1_700_000_050.0, report_auto: true, ..Default::default() };
+        let outs = press(&mut ctl, "report_clear", 1_700_000_010.0, Some(fight.clone()));
+        assert!(outs.contains(&Out::ReportClear), "{outs:?}");
+        assert_eq!((ctl.report_until, ctl.last_view.is_none(), ctl.report_auto), (0.0, true, false));
+        // the report key: the engine still has the fight, but it was cleared
+        press(&mut ctl, "report", 1_700_000_020.0, Some(fight.clone()));
+        assert_eq!(ctl.report_until, 0.0, "a cleared report does not come back");
+        assert!(ctl.last_view.is_none());
+        // a clear with nothing to clear does nothing
+        assert!(!press(&mut ctl, "report_clear", 1_700_000_030.0, Some(fight.clone())).contains(&Out::ReportClear));
+        // the next fight's report is not affected
+        let next = json!({"on": false, "ep": {"t0": 5000, "t1": 6000, "n": 1}});
+        press(&mut ctl, "report", 1_700_000_040.0, Some(next.clone()));
+        assert_eq!(ctl.report_until, 1_700_000_050.0);
+        assert_eq!(ctl.last_view, Some(next));
+    }
+
+    /// No report at all (nothing kept, nothing on the engine): the clear key shows and forgets nothing. A kept report that was already closed is forgotten too.
+    #[test]
+    fn the_clear_key_with_no_report_does_nothing() {
+        let mut ctl = Controls::default();
+        assert!(!press(&mut ctl, "report_clear", 1_700_000_000.0, None).contains(&Out::ReportClear));
+        assert!(ctl.cleared.is_none());
+        let fight = json!({"on": false, "ep": {"t0": 1000, "t1": 2000, "n": 3}});
+        let mut ctl = Controls { last_view: Some(fight.clone()), ..Default::default() }; // (closed already, still kept for the report key)
+        assert!(press(&mut ctl, "report_clear", 1_700_000_000.0, Some(fight)).contains(&Out::ReportClear));
+        assert!(ctl.last_view.is_none());
     }
 }

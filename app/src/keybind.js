@@ -5,7 +5,9 @@
   var H = function () { return GVC.h; };
   var MODS = [["", "kb.nomod"], ["Ctrl", "Ctrl"], ["Shift", "Shift"], ["Alt", "Alt"], ["Win", "Windows"]];
   // the plugin's own keys (the default choice of each combat job)
-  var PLUGIN = { flip: "Ctrl+Shift+F7", report: "Ctrl+Shift+F8", reset: "Ctrl+Shift+F9", clear: "Ctrl+Shift+F10", hide: "Ctrl+Shift+F11", claims: "Ctrl+Shift+F12" };
+  var PLUGIN = { flip: "Ctrl+Shift+F7", report: "Ctrl+Shift+F8", reset: "Ctrl+Shift+F9", clear: "Ctrl+Shift+F10", hide: "Ctrl+Shift+F11", claims: "Ctrl+Shift+F12",
+    // (not the plugin's: the next free one in its row, offered like the others, bound only when chosen; the game's own use of it is shown by the conflict note)
+    report_clear: "Ctrl+Shift+F6" };
   var DEFAULTS = { menu: "Ctrl+Shift+K", app: "", map_up: "Ctrl+Shift+Num8", map_left: "Ctrl+Shift+Num4", map_down: "Ctrl+Shift+Num5", map_right: "Ctrl+Shift+Num6", map_zin: "Ctrl+Shift+NumAdd", map_zout: "Ctrl+Shift+NumSub", map_fit: "Ctrl+Shift+Num0", map_show: "", map_site: "" };
   var ALTS = {};
   var current = {};
@@ -94,7 +96,7 @@
   }
 
   GVC.add("kbmain", section(["menu", "app"], "kb.main.h", true));
-  GVC.add("kbcombat", section(["reset", "clear", "report", "hide", "claims", "flip"], "kb.combat.h", false));
+  GVC.add("kbcombat", section(["reset", "clear", "report", "report_clear", "hide", "claims", "flip"], "kb.combat.h", false));
   GVC.add("kbmap", section(["map_up", "map_left", "map_down", "map_right", "map_zin", "map_zout", "map_fit", "map_show", "map_site"], "kb.map.h", false));
   GVC.add("kbsoon", function (p) { var h = H(), c = h.card(null, p); c.appendChild(h.mk("p", "note", h.tr("kb.soon"))); });
 })();

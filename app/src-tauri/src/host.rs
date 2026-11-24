@@ -62,6 +62,9 @@ pub struct Settings {
     pub keys: bool,
     pub look_btn: String,
     pub look_hold: bool,
+    /// the footers and the Keys card name the keys the player set (Host.key_texts); off = the plugin's fixed Ctrl+Shift+F7..F12 texts (the parity tests).
+    /// Not saved: always on in the app.
+    pub live_key_hints: bool,
     pub win: Vec<(&'static str, WinCfg)>,
 }
 
@@ -77,7 +80,7 @@ impl Default for Settings {
         Settings {
             combat_on: true, calm_s: 60, sc_ends: true, report_s: 10.0, drop_lost: true, hide_maps: true, look_hide: true, bonds: false, rows: 6,
             sort: "v".into(), order: combat::DEFAULT_ORDER.iter().map(|s| s.to_string()).collect(), wing_bonus_on: true, brief: false, feed_rows: 6,
-            wing_bonus_op: false, claim_bonds: true, claims_note: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, win,
+            wing_bonus_op: false, claim_bonds: true, claims_note: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, live_key_hints: true, win,
         }
     }
 }
@@ -129,6 +132,8 @@ pub struct Host {
     /// Preview: made-up fights on the windows (from the settings), and when it was turned on (the COMBAT banner shows first)
     pub preview: bool,
     pub preview_t0: f64,
+    /// the keys the player set for the jobs the footers name (job -> key text), kept up to date by live.rs
+    pub key_texts: HashMap<String, String>,
     /// the windows boot up as holograms the next time they show (after the HUD was away: not in the cockpit, nothing to show)
     pub need_boot: bool,
     /// a window being placed from the menu or the window (its name, or "*" for all): shown with made-up data while it is edited, whatever else is on
@@ -196,6 +201,7 @@ impl Host {
             shown: None,
             preview: false,
             preview_t0: 0.0,
+            key_texts: HashMap::new(),
             need_boot: true,
             edit: None,
             finished: Vec::new(),
@@ -436,6 +442,7 @@ impl Host {
             bounty: Some(if preview { combat::sample_bounty() } else { bounty }), wing_bonus_on: s.wing_bonus_on, wing_bonus_op: s.wing_bonus_op, claims_note: s.claims_note, rows: s.rows, feed_rows: s.feed_rows,
             keys_on: preview || now < self.keys_until, keys_left: if preview { combat::KEYS_S as i64 } else { ((self.keys_until - now).ceil() as i64).max(0) },
             report_on: preview || shown || now < self.report_until,
+            hints: if s.live_key_hints { Some(self.key_texts.clone()) } else { None },
             report_left: if preview { combat::REPORT_DEMO_S } else { ((if shown { self.shown.as_ref().map(|x| x.1).unwrap_or(0.0) } else { self.report_until } - now).ceil() as i64).max(0) },
         };
         let asked = shown || (now < self.report_until && !self.report_auto);

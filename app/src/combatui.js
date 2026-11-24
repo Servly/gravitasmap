@@ -51,7 +51,7 @@
   // the PVP page's own window
   var PWINS = [["pvp", "PVP mode chip"]];
   // the keys' jobs that are worth a button (flip free look is not: the game's own button does that)
-  var ACTS = [["reset", "menu.act.reset"], ["clear", "menu.act.clear"], ["report", "menu.act.report"], ["hide", "menu.act.hide"], ["claims", "menu.act.claims"]];
+  var ACTS = [["reset", "menu.act.reset"], ["clear", "menu.act.clear"], ["report", "menu.act.report"], ["hide", "menu.act.hide"], ["claims", "menu.act.claims"], ["report_clear", "menu.act.report_clear"]];
   // behaviour switches (the wing ones, the dark ground and the Bounty counter's brief mode have their own places)
   var FLAGS = [["always", "menu.k.always"], ["hide_maps", "menu.k.maps"], ["look_hide", "menu.k.look"], ["bonds", "menu.k.bonds"], ["front", "menu.k.front"],
                ["drop_lost", "menu.k.droplost"], ["sc_ends", "menu.k.scends"]];
