@@ -98,8 +98,9 @@ function layoutLeft() {
     if (innerWidth >= 1300 && !isPhone()) { const H = Math.max(...row.map(e => e.offsetHeight)); row.forEach(e => e.style.minHeight = H + "px"); } const r = document.documentElement.style; r.setProperty("--timeH", $("time").offsetHeight + "px");
     r.setProperty("--listTop", ($("top").offsetHeight + 20) + "px"); r.setProperty("--newsH", $("newsBtn").offsetHeight + "px"); r.setProperty("--tiltH", $("mapMode").offsetHeight + "px"); r.setProperty("--credH", $("credits").offsetHeight + "px"); const sy = $("sync") && $("sync").offsetHeight, mo = $("modes") && $("modes").offsetHeight;
     // v0.92.4: Bodies, then GRAVITAS MODES, then Sync, then the credits and About at the bottom
-    const base = $("credits").offsetHeight + $("newsBtn").offsetHeight + 28 + (sy ? sy + 8 : 0); r.setProperty("--modesB", base + "px");
-    r.setProperty("--listBottom", (base + (mo ? mo + 8 : 0)) + "px"); });
+    const ap = $("apPromo"), ah = ap && ap.offsetHeight ? ap.offsetHeight + 8 : 0;   // v0.99.18: the app card stands on top of Sync, Modes above it
+    const base = $("credits").offsetHeight + $("newsBtn").offsetHeight + 28 + (sy ? sy + 8 : 0); r.setProperty("--apB", base + "px"); r.setProperty("--modesB", (base + ah) + "px");
+    r.setProperty("--listBottom", (base + ah + (mo ? mo + 8 : 0)) + "px"); });
 }
 addEventListener("resize", layoutLeft);
 if (window.ResizeObserver) new ResizeObserver(layoutLeft).observe($("time"));      // v0.52: the buttons beside it follow its height

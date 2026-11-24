@@ -1456,3 +1456,23 @@ body.paired #sync .plinkrow, body.pfull #sync .plinkrow { display:none !importan
 #news .apScan[hidden] { display:none; }
 #news .apScan .apIc { width:16px; height:16px; color:var(--land); flex:none; }
 #news .apScan a { color:var(--accent,#5ee0ff); }
+
+/* v0.99.18 "Get the Windows app" card on the main screen (not in the app, not on a paired phone). Hidden by src/js/49-app-promo.js inside the app. */
+#apPromo[hidden], #apRow { display:none; }
+#apPromo { left:12px; bottom:var(--apB, 250px); width:300px; box-sizing:border-box; padding:8px 6px 8px 10px; border-radius:12px; display:flex; align-items:center; gap:9px; font-size:12px; color:var(--text); background:linear-gradient(180deg, rgba(22,13,40,.93), rgba(12,8,24,.93)); }
+#apPromo:hover { border-color:rgba(255,106,213,.5); }
+#apPromo .apIcon { width:30px; height:30px; border-radius:8px; flex:none; box-shadow:0 0 0 1px rgba(255,106,213,.35), 0 0 14px -5px rgba(255,106,213,.6); }
+#apPromo .apT, #apRow .apT { min-width:0; flex:1 1 auto; line-height:1.3; }
+#apPromo .apT b, #apRow .apT b { display:block; font-size:10.5px; letter-spacing:.09em; color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#apPromo .apT span, #apRow .apT span { display:block; font-size:11px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#apPromo .apGo, #apRow .apGo { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:8px; font:700 11px/1.2 inherit; letter-spacing:.03em; color:#0b0618; background:linear-gradient(135deg,#6ae8ff,#a77bff); border:0; cursor:pointer; white-space:nowrap; box-shadow:0 4px 16px -8px #6ae8ff; flex:none; }
+#apPromo .apGo:hover, #apRow .apGo:hover { filter:brightness(1.12); }
+#apPromo .apGo:focus-visible, #apPromo .apX:focus-visible, #apRow .apGo:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+#apPromo .apX { flex:none; width:20px; height:20px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; background:transparent; border:0; color:var(--dim); cursor:pointer; }
+#apPromo .apX:hover { color:var(--text); background:rgba(255,255,255,.08); }
+#sync.remote ~ #apPromo, body.paired #apPromo { display:none !important; }   /* a paired phone or tablet */
+@media (max-height:860px) { #apPromo { padding:5px 6px 5px 8px; } #apPromo .apT span { display:none; } #apPromo .apIcon { width:22px; height:22px; } }
+@media (max-height:720px) { #apPromo { display:none !important; } }
+@media (max-width:760px) { #apPromo { display:none !important; } }
+body.pfull #apPromo { display:none !important; }
+body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; padding:7px 7px 7px 9px; border:1px solid rgba(255,106,213,.3); border-radius:10px; background:linear-gradient(135deg, rgba(255,106,213,.08), rgba(106,232,255,.05)); }
