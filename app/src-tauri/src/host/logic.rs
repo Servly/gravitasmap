@@ -271,6 +271,7 @@ fn preview_and_shown_match_the_plugin() {
         h.set.always = se["always"].as_bool().unwrap();
         h.set.claims_note = false; // (the plugin has no Claims note)
         h.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
+        h.set.keep_hidden_in_panel = false; // (the plugin showed the windows again at the end of a free look over a panel)
         h.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
         h.set.show_gone = se["show_gone"].as_bool().unwrap();
         h.set.hide_maps = se["hide_maps"].as_bool().unwrap();

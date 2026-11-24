@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.30
+- Free look over an open game panel no longer brings your windows back. When you opened a cockpit panel (for example the left panel with 1) and then used the free look key over it, the GRAVITAS windows appeared again on top of the panel. They now stay hidden for as long as the panel is open, and come back when you close it.
+
 ## 0.9.29
 - The fight numbers now agree. The Last fight card shows the same credits as the Combat report (the bounties plus the estimated wing bonus), where before one card left the bonus out. And the game sometimes writes the same bounty line twice: GRAVITAS now counts it once (before, such a kill counted twice in kills, credits and Claims). The wing bonus stays an estimate of 7.5 % on what you earn in a wing: checked against the game's own Claims panel it was within a few credits in most fights, and 0.14 % high in one operation.
 

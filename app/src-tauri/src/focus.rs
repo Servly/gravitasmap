@@ -25,6 +25,10 @@ pub struct Focus {
     pub hud_gui: i64,
     /// the panel guessed from its key, and when
     pub guess: Option<(i64, f64)>,
+    /// keep_hidden_in_panel (the app's rule, off in the plugin-parity runs)
+    pub keep: bool,
+    /// a free look began over this open side panel: the game then reports "no panel" (or the end of the look would put the windows ahead), the panel is still open
+    pub hold: Option<i64>,
 }
 
 fn is_map(g: i64) -> bool {
@@ -44,6 +48,13 @@ impl Focus {
         let mut a = Vec::new();
         if gui == self.gui {
             return a; // (Status.json is written for many things: one written before the game opened the panel a key asked for must not undo the guess)
+        }
+        if self.hold.is_some() {
+            if gui == 0 {
+                self.gui = 0; // free look over an open panel: the game says "no panel", the panel is still there, the windows stay away
+                return a;
+            }
+            self.hold = None; // a panel (or a map) says itself: the normal rules again
         }
         if gui == 0 && (1..=4).contains(&self.gui) && self.guess.is_none() {
             // a panel closed by the game itself, not by its key (a map chosen in the left panel): nothing shows in between
@@ -81,12 +92,20 @@ impl Focus {
     /// A panel key was just pressed in the ship: the windows go now, before Status.json says so.
     pub fn guessed(&mut self, g: i64, now: f64) -> Vec<Act> {
         let mut a = Vec::new();
+        self.hold = None; // a panel key (or Back) was pressed: that is the player's own word on the panel
         self.guess = Some((g, now));
         self.set_focus(g, &mut a);
         if is_map(g) {
             a.push(Act::Draw);
         }
         a
+    }
+
+    /// Free look began. With a side panel open (what the windows go with now) the panel is remembered: free look must not bring the windows back over it.
+    pub fn look_started(&mut self) {
+        if self.keep && (1..=4).contains(&self.hud_gui) {
+            self.hold = Some(self.hud_gui);
+        }
     }
 
     /// A guess Status.json has not confirmed in time is taken back.

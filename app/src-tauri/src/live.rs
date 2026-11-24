@@ -281,6 +281,7 @@ fn run() {
                             h.flags = sin.flags;
                             h.flags2 = sin.flags2;
                             let acts = focus.set_gui(sin.gui, t_start.elapsed().as_secs_f64());
+                            if crate::devenv::var_os("GRAVITAS_TRACE").is_some() { crate::store::log(&format!("trace GuiFocus {} -> hud_gui {} hold {:?} looking {}", sin.gui, focus.hud_gui, focus.hold, h.looking)); }
                             carry_out(&acts, &mut last_draw, &mut settle_at);
                             rec.status(Some(&v), now_secs());
                             h.th.status(h.flags, now_secs());
@@ -446,6 +447,7 @@ fn run() {
         // free look and the keys (load.py look_loop, every 50 ms)
         if last_look.elapsed() >= Duration::from_millis(50) {
             last_look = Instant::now();
+            focus.keep = h.set.keep_hidden_in_panel;
             if h.set.look_hide { crate::rawmouse::start(); }
             // the game's free look binding is read again every 3 s: a change in the game's options (Toggle to Hold) is taken at once, no restart
             if hl_read.elapsed() >= Duration::from_secs(3) {
@@ -459,7 +461,7 @@ fn run() {
             }).clone();
             let cfg = crate::controls::Cfg {
                 look_on: h.set.look_hide, look_btn: h.set.look_btn.clone(), look_hold: h.set.look_hold, keys_on: h.set.keys, report_s: h.set.report_s,
-                report_win_on: h.set.win.iter().any(|(k, w)| *k == "report" && w.on), headlook: hl, mouse_ok: crate::rawmouse::ok(),
+                report_win_on: h.set.win.iter().any(|(k, w)| *k == "report" && w.on), headlook: hl, mouse_ok: crate::rawmouse::ok(), hold_panel: focus.hold.is_some(),
             };
             let mut pressed = hotkeys.pressed(&crate::panelkeys::key_down);
             crate::menu::guard();
@@ -514,6 +516,7 @@ fn run() {
                     Out::ReportClear => h.shown = None,
                 }
             }
+            if ctl.looking && !h.looking { focus.look_started(); if crate::devenv::var_os("GRAVITAS_TRACE").is_some() { crate::store::log(&format!("trace free look began: gui {} hud_gui {} hold {:?}", focus.gui, focus.hud_gui, focus.hold)); } } // (free look just began: an open side panel is remembered)
             h.looking = ctl.looking;
             h.key_hidden = ctl.key_hidden;
             if let Ok(mut li) = LOOKINFO.lock() {

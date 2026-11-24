@@ -30,6 +30,8 @@ pub struct Settings {
     pub hide_maps: bool,
     /// free look hides the HUD (the plugin's settings.look == "hide")
     pub look_hide: bool,
+    /// a game panel (left, right, comms, role) stays open over a free look: the windows stay hidden, free look must not bring them back (the plugin did)
+    pub keep_hidden_in_panel: bool,
     pub bonds: bool,
     pub rows: i64,
     pub sort: String,
@@ -80,7 +82,7 @@ impl Default for Settings {
             })
             .collect();
         Settings {
-            combat_on: true, calm_s: 60, sc_ends: true, report_s: 10.0, drop_lost: true, hide_maps: true, look_hide: true, bonds: false, rows: 6,
+            combat_on: true, calm_s: 60, sc_ends: true, report_s: 10.0, drop_lost: true, hide_maps: true, look_hide: true, keep_hidden_in_panel: true, bonds: false, rows: 6,
             sort: "v".into(), order: combat::DEFAULT_ORDER.iter().map(|s| s.to_string()).collect(), wing_bonus_on: true, brief: false, feed_rows: 6,
             wing_bonus_op: false, claim_bonds: true, claims_note: true, claims_dedupe: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, live_key_hints: true, win,
         }

@@ -24,6 +24,8 @@ pub struct Cfg {
     /// the game's own free look (None: unread, the settings' button and way are used)
     pub headlook: Option<HeadLook>,
     pub mouse_ok: bool,
+    /// a side panel is held open over a free look (focus.rs hold): the end of the look does not put the windows ahead
+    pub hold_panel: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -182,7 +184,7 @@ impl Controls {
         }
         if looking != self.looking {
             self.looking = looking;
-            if !looking && (1..=4).contains(&i.gui) && i.in_cockpit {
+            if !looking && !cfg.hold_panel && (1..=4).contains(&i.gui) && i.in_cockpit {
                 // looking at a side panel in free look puts the game's focus on it; free look over, the head goes back ahead and the game says so
                 // a moment later: ahead is taken at once, as with a panel key (given 2 s: the head comes back slowly)
                 *i.guess = Some((0, i.perf + 1.0));
@@ -209,7 +211,7 @@ mod tests {
             let c = &s[0];
             let headlook = hls[c["headlook"].as_u64().unwrap() as usize].map(|(m, vk, toggle)| HeadLook { mouse: if m.is_empty() { None } else { Some(m.to_string()) }, vk, toggle, label: String::new() });
             let cfg = Cfg { look_on: c["look"] == "hide", look_btn: c["look_btn"].as_str().unwrap().into(), look_hold: c["look_how"] == "hold", keys_on: c["keys"].as_bool().unwrap(),
-                            report_s: c["report_s"].as_f64().unwrap(), report_win_on: c["report_on"].as_bool().unwrap(), headlook, mouse_ok: c["mouse_ok"].as_bool().unwrap() };
+                            report_s: c["report_s"].as_f64().unwrap(), report_win_on: c["report_on"].as_bool().unwrap(), headlook, mouse_ok: c["mouse_ok"].as_bool().unwrap(), hold_panel: false };
             let mut ctl = Controls::default();
             let mut guess: Option<(i64, f64)> = None;
             for (k, st) in s[1].as_array().unwrap().iter().enumerate() {
@@ -298,5 +300,86 @@ mod tests {
         let mut ctl = Controls { last_view: Some(fight.clone()), ..Default::default() }; // (closed already, still kept for the report key)
         assert!(press(&mut ctl, "report_clear", 1_700_000_000.0, Some(fight)).contains(&Out::ReportClear));
         assert!(ctl.last_view.is_none());
+    }
+
+    /// The game's side panel is open (windows hidden), then the player presses the free look button (Mouse 3, HOLD in the owner's Bindings) over it.
+    /// The windows must stay away at every step (owner's recording 25 Nov: they came back over the open left panel). Same glue as live.rs.
+    struct Rig { ctl: Controls, f: crate::focus::Focus, gui: i64, t: f64, cfg: Cfg }
+    impl Rig {
+        fn new(keep: bool) -> Rig {
+            let hl = HeadLook { mouse: Some("m3".into()), vk: None, toggle: false, label: String::new() };
+            let mut f = crate::focus::Focus::default();
+            f.keep = keep;
+            Rig { ctl: Controls::default(), f, gui: 0, t: 100.0, cfg: Cfg { look_on: true, headlook: Some(hl), mouse_ok: true, ..Default::default() } }
+        }
+        /// what the game's Status.json says
+        fn status(&mut self, gui: i64) { self.gui = gui; let _ = self.f.set_gui(gui, self.t); self.t += 0.1; }
+        /// one 50 ms look with these mouse events (what live.rs does)
+        fn look(&mut self, mouse: &[(bool, u32)]) {
+            let down = button_flags("m3").0;
+            let ev: Vec<(bool, u32)> = mouse.iter().map(|(d, _)| (*d, down)).collect();
+            let st = |_: u32| 0u16;
+            let eng = || None;
+            self.cfg.hold_panel = self.f.hold.is_some();
+            let was = self.ctl.looking;
+            let mut guess = self.f.guess;
+            let outs = {
+                let mut i = In { front: true, gui: self.f.gui, in_cockpit: true, keys: &[], mouse: &ev, state: &st, perf: self.t, wall: self.t, engine_view: &eng, engine_ok: true, guess: &mut guess };
+                self.ctl.step(&self.cfg, &mut i)
+            };
+            self.f.guess = guess;
+            for o in outs { if let Out::SetFocus(g) = o { let mut a = Vec::new(); self.f.set_focus(g, &mut a); } }
+            if self.ctl.looking && !was { self.f.look_started(); }
+            self.t += 0.05;
+        }
+        /// the windows of the front group show (not looking, no panel in the HUD's mind)
+        fn visible(&self) -> bool { !self.ctl.looking && self.f.hud_gui == 0 }
+    }
+
+    fn panel_sequence(keep: bool, game_says_no_panel: bool) -> Vec<bool> {
+        let mut r = Rig::new(keep);
+        let mut seen = vec![r.visible()];                       // GuiFocus 0, windows visible
+        r.status(2); seen.push(r.visible());                    // the left panel opens: hidden
+        r.look(&[(true, 0)]); seen.push(r.visible());           // free look button down: hidden (looking)
+        if game_says_no_panel { r.status(0); }                  // (the game may drop the panel focus while the head looks)
+        for _ in 0..8 { r.look(&[]); }
+        seen.push(r.visible());
+        r.look(&[(false, 0)]); seen.push(r.visible());          // button up: the windows must not come back over the open panel
+        for _ in 0..40 { r.look(&[]); }                          // 2 s on (guess expiry)
+        if let Some(g) = Some(r.t) { let _ = r.f.expire(g + 5.0); }
+        seen.push(r.visible());
+        r.f.settle();
+        seen.push(r.visible());
+        seen
+    }
+
+    #[test]
+    fn free_look_over_an_open_panel_keeps_the_windows_away() {
+        for says_zero in [false, true] {
+            let seen = panel_sequence(true, says_zero);
+            assert_eq!(seen, vec![true, false, false, false, false, false, false], "game says no panel: {says_zero}");
+        }
+    }
+
+    /// Without the rule (the plugin's way) the windows do come back: the new test is not empty.
+    #[test]
+    fn without_the_rule_the_windows_come_back_over_the_panel() {
+        let seen = panel_sequence(false, false);
+        assert_eq!(seen[4], true, "{seen:?}");
+    }
+
+    /// The panel is closed by its key again: the windows come back (the rule does not hold them forever).
+    #[test]
+    fn the_panel_key_ends_the_hold() {
+        let mut r = Rig::new(true);
+        r.status(2);
+        r.look(&[(true, 0)]); r.status(0); r.look(&[(false, 0)]);
+        assert!(!r.visible());
+        let _ = r.f.guessed(0, r.t); // its key pressed again (panelkeys::guess answers 0)
+        assert!(r.f.hold.is_none() && r.visible());
+        // and a free look over nothing (no panel open) behaves as before: windows ahead after it
+        let mut r = Rig::new(true);
+        r.look(&[(true, 0)]); assert!(!r.visible());
+        r.look(&[(false, 0)]); assert!(r.visible());
     }
 }

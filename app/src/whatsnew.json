@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.30",
+      "en": [
+        "Free look over an open game panel no longer brings your windows back. When you opened a cockpit panel (for example the left panel with 1) and then used the free look key over it, the GRAVITAS windows appeared again on top of the panel. They now stay hidden for as long as the panel is open, and come back when you close it."
+      ],
+      "de": [
+        "Freies Umsehen über einem geöffneten Spielpanel bringt deine Fenster nicht mehr zurück. Wenn du ein Cockpit-Panel geöffnet hattest (zum Beispiel das linke mit 1) und dann die Taste fürs freie Umsehen benutzt hast, erschienen die GRAVITAS-Fenster wieder über dem Panel. Jetzt bleiben sie versteckt, solange das Panel offen ist, und kommen zurück, wenn du es schließt."
+      ],
+      "es": [
+        "Mirar libremente sobre un panel abierto del juego ya no devuelve tus ventanas. Si abrías un panel de la cabina (por ejemplo el izquierdo con 1) y luego usabas la tecla de mirar libremente sobre él, las ventanas de GRAVITAS volvían a aparecer encima del panel. Ahora permanecen ocultas mientras el panel esté abierto y vuelven cuando lo cierras."
+      ],
+      "fr": [
+        "Le regard libre au-dessus d'un panneau du jeu ouvert ne ramène plus vos fenêtres. Quand vous ouvriez un panneau du cockpit (par exemple celui de gauche avec 1) puis utilisiez la touche de regard libre dessus, les fenêtres GRAVITAS réapparaissaient par-dessus le panneau. Elles restent maintenant masquées tant que le panneau est ouvert et reviennent quand vous le fermez."
+      ],
+      "pt-br": [
+        "Olhar livremente sobre um painel aberto do jogo não traz mais suas janelas de volta. Quando você abria um painel da cabine (por exemplo o esquerdo com 1) e depois usava a tecla de olhar livre sobre ele, as janelas do GRAVITAS apareciam de novo por cima do painel. Agora elas ficam escondidas enquanto o painel estiver aberto e voltam quando você o fecha."
+      ],
+      "ru": [
+        "Свободный обзор над открытой панелью игры больше не возвращает ваши окна. Раньше, когда вы открывали панель кабины (например, левую клавишей 1), а затем использовали клавишу свободного обзора над ней, окна GRAVITAS снова появлялись поверх панели. Теперь они остаются скрытыми, пока панель открыта, и возвращаются, когда вы её закрываете."
+      ]
+    },
+    {
       "v": "0.9.29",
       "en": [
         "The fight numbers now agree. The Last fight card shows the same credits as the Combat report (the bounties plus the estimated wing bonus), where before one card left the bonus out. And the game sometimes writes the same bounty line twice: GRAVITAS now counts it once (before, such a kill counted twice in kills, credits and Claims). The wing bonus stays an estimate of 7.5 % on what you earn in a wing: checked against the game's own Claims panel it was within a few credits in most fights, and 0.14 % high in one operation."
