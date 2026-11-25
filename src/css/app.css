@@ -1484,3 +1484,5 @@ body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; p
 #sync[data-k="away"] .scard { opacity:.62; filter:saturate(.35); }
 #sync[data-k="away"] #syncGo { background:#3a3f63; border-color:#a4a9c4; color:#fff; }
 #sync[data-k="away"] .sx { flex-wrap:wrap; row-gap:6px; } #sync[data-k="away"] #syncMsg { white-space:normal; flex:1 1 100%; } #sync[data-k="away"] #syncGo { margin-left:auto; }
+
+#syncDlg .act { flex-wrap:wrap; } #syncDlg .again { border-color:#6ae8ff; color:#6ae8ff; }

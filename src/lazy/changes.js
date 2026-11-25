@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.23", k: "minor", d: "25 Nov 2026", t: [
+      "Fix: with Sync remembered from an earlier visit, pressing the switch could do nothing at all when the browser's own folder-permission bubble did not show. The switch now never waits for that bubble: a folder the browser still allows starts Sync at once, otherwise the Sync window opens, with a Use the folder I chose before button that asks for the permission from a fresh click."
+    ] },
     { v: "v0.99.22", k: "minor", d: "25 Nov 2026", t: [
       "Sync with the game never fails silently any more: when the browser refuses the Journal folder or something goes wrong while Sync starts, the page now says what happened (a message under the folder button, or a notice) instead of doing nothing."
     ] },

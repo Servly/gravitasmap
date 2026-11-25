@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.23 · minor · 25 Nov 2026
+- Fix: with Sync remembered from an earlier visit, pressing the switch could do nothing at all when the browser's own folder-permission bubble did not show. The switch now never waits for that bubble: a folder the browser still allows starts Sync at once, otherwise the Sync window opens, with a Use the folder I chose before button that asks for the permission from a fresh click.
+
 ### v0.99.22 · minor · 25 Nov 2026
 - Sync with the game never fails silently any more: when the browser refuses the Journal folder or something goes wrong while Sync starts, the page now says what happened (a message under the folder button, or a notice) instead of doing nothing.
 

@@ -74,9 +74,17 @@ function syncToggle2() {
 async function syncStartFlow(change) {
   if (APP_WINDOW && window.__gravitasApp && __gravitasApp.dir) { if (__gravitasApp.ready()) return syncStart(__gravitasApp.dir(), true); toast("Waiting for the GRAVITAS app to hand over the Journal…"); return; }   // the app is the folder
   // with a remembered answer and a folder chosen before, starting only asks the browser for permission again
+  // v0.99.23: this path never waits on the browser's own permission bubble (it can stay hidden, and the click then seemed dead). A folder the browser still
+  // allows starts at once; otherwise the dialog opens, and its "Use the folder I chose before" button asks for permission from a fresh click
+  SYNC.dirAsk = null;
   if (!change && syncLS("consent") === "1") {
-    const h = SYNC.dir || await syncLoadDir();
-    if (h) { try { if (await h.requestPermission({ mode: "read" }) === "granted") return syncStart(h, true); } catch (e) { try { console.warn("Sync: the remembered folder could not be used:", e); } catch (x) {} } }
+    const nap = (ms, v) => new Promise(r => setTimeout(() => r(v), ms));
+    let h = SYNC.dir; if (!h) { try { h = await Promise.race([syncLoadDir(), nap(2000, null)]); } catch (e) { h = null; } }
+    if (h) {
+      let st = "prompt"; try { st = await Promise.race([h.queryPermission({ mode: "read" }), nap(1500, "prompt")]); } catch (e) { try { console.warn("Sync: the remembered folder could not be checked:", e); } catch (x) {} }
+      if (st === "granted") return syncStart(h, true);
+      SYNC.dirAsk = h;
+    }
   }
   syncDialog(change);
 }
@@ -92,7 +100,7 @@ function syncDialog(change) {
       <label class="ck"><input type="checkbox" class="agree"> I understand and agree</label>
       <label class="ck"><input type="checkbox" class="rem"> Remember my answer</label>
       <p class="warn" style="display:none"></p>
-      <div class="act"><button class="pick" disabled>Choose Journal folder and start</button><button class="no">Cancel</button></div></div></div>`;
+      <div class="act"><button class="pick" disabled>Choose Journal folder and start</button><button class="again" style="display:none">Use the folder I chose before</button><button class="no">Cancel</button></div></div></div>`;
     document.body.appendChild(d);
     const close = () => { d.style.display = "none"; };
     d.querySelector(".x").onclick = close; d.querySelector(".no").onclick = close;
@@ -100,6 +108,12 @@ function syncDialog(change) {
     addEventListener("keydown", e => { if (e.key === "Escape" && d.style.display === "flex") close(); });
     d.querySelector(".agree").onchange = e => { d.querySelector(".pick").disabled = !e.target.checked; };
     d.querySelector(".cp").onclick = async () => { try { await navigator.clipboard.writeText(SYNC_PATH); toast("Folder path copied"); } catch (e) { prompt("Copy this path:", SYNC_PATH); } };
+    d.querySelector(".again").onclick = async () => {
+      const warn = d.querySelector(".warn"), h = SYNC.dirAsk; warn.style.display = "none"; if (!h) return;
+      let st = "denied"; try { st = await h.requestPermission({ mode: "read" }); } catch (e) { st = "denied"; }
+      if (st === "granted") { syncLS("consent", "1"); close(); syncStart(h, true).catch(e => { try { console.error("Sync start:", e); } catch (x) {} toast("Sync could not start: " + (e && (e.message || e.name) || "unknown error")); }); return; }
+      warn.textContent = "The browser did not give permission for that folder. Choose the folder again with the first button."; warn.style.display = "block";
+    };
     d.querySelector(".pick").onclick = async () => {
       const warn = d.querySelector(".warn"); warn.style.display = "none";
       let h; try { h = await window.showDirectoryPicker({ id: "gravitas-journal", mode: "read", startIn: "documents" }); } catch (e) {
@@ -114,6 +128,7 @@ function syncDialog(change) {
   }
   d.querySelector(".agree").checked = syncLS("consent") === "1"; d.querySelector(".rem").checked = syncLS("consent") === "1";
   d.querySelector(".pick").disabled = !d.querySelector(".agree").checked; d.querySelector(".warn").style.display = "none";
+  d.querySelector(".again").style.display = SYNC.dirAsk ? "" : "none";
   d.style.display = "flex";
 }
 async function syncHasJournal(h) {
