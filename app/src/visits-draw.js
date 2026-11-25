@@ -170,13 +170,13 @@
     var sc = Math.exp(cam.ls), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch), ox = cam.ox, oy = cam.oy, W = s.W, H = s.H;
     makeTiles(); renderBg(s);
     var c = s.fg; c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0); c.clearRect(0, 0, W, H); c.lineCap = "round"; c.lineJoin = "round";
-    if (!D || R.i1 <= R.i0) return;
+    if (!D || R.i1 <= R.i0) { if (D) G.dockDraw(s); return; }
     var L = chooseLevel(s), lv = buildLevel(s, L); s.lvCur = lv;
     var lodInfo = L === null ? s.tr("vis.lod.ind", { n: f.n(R.i1 - R.i0) }) : s.tr("vis.lod.grp", { c: f.n(Math.pow(2, L)), g: f.n(lv.nc), n: f.n(R.i1 - R.i0) });
     var nr = R.i1 - R.i0, nc = lv.nc, filtered = !!s.M, q, k, b;
     var px = lv.px, py = lv.py, cx = lv.cx, cy = lv.cy, cz = lv.cz;
     for (q = 0; q < nc; q++) { px[q] = ox + (cx[q] - cam.cx) * sc; py[q] = oy + ((cz[q] - cam.cz) * cp - (cy[q] - cam.cy) * sp) * sc; }
-    drawGrid(s, c, sc, cp);
+    drawGrid(s, c, sc, cp); G.drawIdxDust(s, c, sc, cp);
     if (R.i0 > 0 || R.i1 < D.n) {                       // dust: the stops outside the page
       var du = buildDust(s, L === null ? Math.ceil(Math.log2(38 / sc)) : L); c.fillStyle = "rgba(167,123,255,.5)";
       for (q = 0; q < du.x.length; q++) { var X = ox + (du.x[q] - cam.cx) * sc, Y = oy + ((du.z[q] - cam.cz) * cp - (du.y[q] - cam.cy) * sp) * sc; if (X < -4 || X > W + 4 || Y < -4 || Y > H + 4) continue; var r = .9 + Math.min(1.6, Math.log10(du.n[q] + 1) * .9); c.globalAlpha = .25 + .3 * Math.min(1, Math.log10(du.n[q] + 1) / 2); c.fillRect(X - r, Y - r, r * 2, r * 2); }
@@ -257,46 +257,6 @@
     if (s.perfOn) s.ui.perf();
     G.dockDraw(s);
   };
-
-  /* ---------- timeline: a histogram of all stops, the page is the lit window ---------- */
-  function tlRange(s) { var D = s.D, sp = D.tmax - D.tmin; return [D.tmin - sp * .02 - 3.6e6, D.tmax + sp * .02 + 3.6e6]; }
-  G.tlX = function (s, t) { var r = tlRange(s); return (t - r[0]) / (r[1] - r[0]) * s.tlW; };
-  G.tlT = function (s, x) { var r = tlRange(s); return r[0] + x / s.tlW * (r[1] - r[0]); };
-  function buildHist(s) {
-    var D = s.D, M = s.M, nb = Math.max(20, (s.tlW / 3) | 0), h = { nb: nb, c: new Float32Array(nb), m: new Float32Array(nb), mx: 1 }, a = G.tlT(s, 0), b = G.tlT(s, s.tlW);
-    for (var i = 0; i < D.n; i++) { var k = Math.min(nb - 1, Math.max(0, ((D.T[i] - a) / (b - a) * nb) | 0)); h.c[k]++; if (M && M[i]) h.m[k]++; else if (!M && D.F[i]) h.m[k]++; }
-    for (var j = 0; j < nb; j++) h.mx = Math.max(h.mx, h.c[j]); s.hist = h; s.histDirty = false;
-  }
-  G.dockDraw = function (s) {
-    var D = s.D, R = s.R; if (!D) return; if (s.histDirty || !s.hist) buildHist(s);
-    var c = s.tl, hist = s.hist, tlW = s.tlW, f = s.f; c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0); var h = 54; c.clearRect(0, 0, tlW, h);
-    var bw = tlW / hist.nb, base = h - 14, bh = base - 4, x0 = G.tlX(s, R.ta), x1 = G.tlX(s, R.tb), k;
-    for (k = 0; k < hist.nb; k++) {
-      var v = hist.c[k]; if (!v) continue; var x = k * bw, inR = x + bw > x0 && x < x1, hh = Math.max(1.5, Math.sqrt(v / hist.mx) * bh), col = G.ramp(k / hist.nb);
-      c.fillStyle = "rgba(" + col[0] + "," + col[1] + "," + col[2] + "," + (inR ? .9 : .32) + ")"; c.fillRect(x, base - hh, Math.max(1, bw - .6), hh);
-      var mv = hist.m[k]; if (mv) { var mh = Math.max(1.5, Math.sqrt(mv / hist.mx) * bh); c.fillStyle = inR ? "rgba(125,255,155,.95)" : "rgba(125,255,155,.45)"; c.fillRect(x, base - mh, Math.max(1, bw - .6), Math.min(mh, hh)); }
-    }
-    c.strokeStyle = "rgba(190,120,255,.3)"; c.lineWidth = 1; c.beginPath(); c.moveTo(0, base + .5); c.lineTo(tlW, base + .5); c.stroke();
-    c.fillStyle = "rgba(157,140,192,.9)"; c.font = '10px "Segoe UI",system-ui,sans-serif'; c.textBaseline = "top";
-    var span = G.tlT(s, tlW) - G.tlT(s, 0), pxPerDay = tlW / (span / 864e5), unit = pxPerDay > 60 ? 1 : pxPerDay > 12 ? 7 : pxPerDay > 4 ? 30 : pxPerDay > 1.2 ? 91 : 365;
-    var t = new Date(G.tlT(s, 0)); t = unit === 1 ? new Date(t.getFullYear(), t.getMonth(), t.getDate()) : new Date(t.getFullYear(), unit >= 365 ? 0 : t.getMonth(), 1);
-    var lastLabel = -99;
-    for (var g = 0; g < 400; g++) {
-      var tx = G.tlX(s, +t); if (tx > tlW) break;
-      if (tx >= 0 && tx - lastLabel > 54) { c.fillRect(tx, base, 1, 3); c.fillText(unit === 365 || (t.getMonth() === 0 && unit >= 30) ? String(t.getFullYear()) : unit >= 30 ? f.mon(+t) : f.d(+t), tx + 3, base + 2); lastLabel = tx; }
-      t = unit === 1 ? new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1) : unit === 7 ? new Date(t.getFullYear(), t.getMonth(), t.getDate() + 7) : unit === 30 ? new Date(t.getFullYear(), t.getMonth() + 1, 1) : unit === 91 ? new Date(t.getFullYear(), t.getMonth() + 3, 1) : new Date(t.getFullYear() + 1, 0, 1);
-    }
-    if (D.ses.length <= 500) { c.fillStyle = "rgba(106,232,255,.55)"; for (k = 0; k < D.ses.length; k++) c.fillRect(G.tlX(s, D.T[D.ses[k]]), base - 3, 1, 3); }
-    c.fillStyle = "rgba(167,123,255,.16)"; c.strokeStyle = "rgba(106,232,255,.85)"; c.lineWidth = 1.3; var bx = Math.max(0, x0), bx2 = Math.min(tlW, Math.max(x1, x0 + 3));
-    c.beginPath(); c.roundRect(bx + .5, 1.5, bx2 - bx - 1, base - 1, 5); c.fill(); c.stroke();
-    c.fillStyle = "#6ae8ff"; c.beginPath(); c.roundRect(bx - 1, base / 2 - 9, 4, 18, 2); c.fill(); c.beginPath(); c.roundRect(bx2 - 3, base / 2 - 9, 4, 18, 2); c.fill();
-    if (s.replay) { var rx = G.tlX(s, D.T[R.i0 + Math.min(R.i1 - R.i0 - 1, Math.floor(s.replay.p * (R.i1 - R.i0)))]); c.fillStyle = "#fff"; c.fillRect(rx - .5, 0, 1.5, base); }
-    if (s.tlHover >= 0) {
-      c.fillStyle = "rgba(255,255,255,.35)"; c.fillRect(s.tlHover, 0, 1, base); var tt = f.dy(G.tlT(s, s.tlHover)); c.font = '600 10.5px "Segoe UI",system-ui,sans-serif';
-      var w = c.measureText(tt).width + 10, lx = clamp(s.tlHover - w / 2, 0, tlW - w); c.fillStyle = "rgba(10,6,22,.92)"; c.fillRect(lx, 1, w, 15); c.fillStyle = "#e9ddff"; c.fillText(tt, lx + 5, 3);
-    }
-  };
-  G.invalidateDock = function (s) { if (s.dockQ || !s.on) return; s.dockQ = requestAnimationFrame(function () { s.dockQ = 0; G.raf++; G.dockDraw(s); }); };
 
   /* ---------- the loop: a frame is asked for only when something changes ---------- */
   G.attachLoop = function (s) {

@@ -413,9 +413,15 @@ fn pair_open_browser(app: tauri::AppHandle) -> bool {
 }
 #[tauri::command(async)]
 fn visits_list() -> Vec<serde_json::Value> { visits::list() }
-/// The travel history: what is stored at once, the scan runs in the background (see visits.rs). `rev` = the number of the last answer: nothing new = "same".
+/// The travel history archive (see visits.rs): the index (months and their summaries; the scan runs in the background). `rev` = the number of the last answer: nothing new = "same".
 #[tauri::command(async)]
-fn visits_get(rev: Option<u64>) -> serde_json::Value { visits::get(rev) }
+fn visits_index(rev: Option<u64>) -> serde_json::Value { visits::index(rev) }
+/// The stops of one month ("YYYY-MM"), oldest first.
+#[tauri::command(async)]
+fn visits_month(m: String) -> serde_json::Value { visits::month(&m) }
+/// Search system, station and goods names in the archive, newest first.
+#[tauri::command(async)]
+fn visits_find(q: String, limit: Option<u32>) -> serde_json::Value { visits::find(&q, limit) }
 #[tauri::command(async)]
 fn visits_forget() -> bool { visits::forget() }
 #[tauri::command]
@@ -766,7 +772,7 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, combat_op, combat_extra, editor_rects, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_get, visits_forget, visits_keep_set, diagnostic_report, send_feedback, prefs_get, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
+        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, combat_op, combat_extra, editor_rects, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, diagnostic_report, send_feedback, prefs_get, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
         .run(tauri::generate_context!())
         .expect("error while running GRAVITAS");
 }

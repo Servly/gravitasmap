@@ -41,6 +41,8 @@ export async function run(g) {
       const s = box($("syncSt")), pr = box(p);
       add("Sync", `title with "${w}"`, b.scrollWidth <= b.clientWidth + 1 && s.right <= pr.right + 1 && s.width > 0, `title ${b.clientWidth}/${b.scrollWidth} px${p.classList.contains("stDown") ? ", state under it" : ""}`);
     }
+    // v0.99.21: a page address with ?system= (every page has one after its first load) must never stop Sync from following the ship: only the app window pins
+    add("Sync", "an address with ?system= does not pin outside the app", !SYNC.pin, `pin = ${SYNC.pin}, address has system = ${/[?&]system=/.test(location.search)}`);
     // auto-jump: a system the visitor opened stays; one opened by nobody (a late answer) goes back to the ship's
     const ship = "Sol", other = NAMES[0];
     SYNC.auto = true; SYNC.loading = false; SYNC.miss = ""; SYNC.on = true;
@@ -51,7 +53,9 @@ export async function run(g) {
     // v0.99.20: a system pinned by a link or by the app's Visits is never taken back, even when nobody "opened" it by hand
     await g.loadSystem(other); SYNC.here = ship; SYNC.pin = true; await wait(300);
     add(other, "pinned view: Sync does not take the map back", !g.syncWouldReturn(), `pin = ${SYNC.pin}`);
-    SYNC.pin = false;
+    // v0.99.21: looking at another system than the ship's: the Sync card is grey and says VIEWING, with a button back to the ship
+    SYNC.pin = false; SYNC.here = ship; SYNC.closed = false; SYNC.err = 0; g.syncShow(); await wait(60);
+    add(other, "away: the Sync card says VIEWING", g.syncAway() && $("sync").dataset.k === "away" && /VIEWING/.test($("syncSt").textContent) && $("syncGo").style.display !== "none", `k = ${$("sync").dataset.k}, word = ${$("syncSt").textContent}`);
   } catch (e) { add("Sync", "ran to the end", false, e.message); }
   Object.assign(SYNC, saved); g.yahUpdate(); if (word != null) g.syncStWord(word);
   return rep;

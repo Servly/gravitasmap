@@ -45,6 +45,7 @@ function syncK() {
   if (SYNC.err > 0) return ["lost", "NO FOLDER", "The Journal folder cannot be read right now."];
   if (SYNC.closed) return ["wait", "GAME CLOSED", "The game is closed. Your last place is kept."];
   if (!SYNC.here) return ["wait", "WAITING", "Waiting for the game…"];
+  if (syncAway()) return ["away", "VIEWING", "You are looking at another system. Your ship is in " + SYNC.here + ". Press To my ship to follow it again."];   // v0.99.21
   return ["live", "LIVE", ""];
 }
 const syncBodyName = n => { n = String(n || ""); const s = SYNC.here || ""; return s && n.toLowerCase().startsWith(s.toLowerCase()) ? (n.slice(s.length).trim() || n) : n; };

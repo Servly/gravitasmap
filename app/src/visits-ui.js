@@ -1,10 +1,8 @@
 "use strict";
 // GRAVITAS Visits, part 4 of 4: the page itself. mount() builds the elements, wires the mouse and the keys, and keeps the data fresh:
-// visits_get is asked every ~6 s (every 1.5 s while the Rust side is still scanning the Journals), ONLY while the Visits tab is on screen and the
-// window is visible. New stops are merged without touching the camera, the selection or the page. Nothing runs when the tab or the window is hidden.
+// the data (index, months, archive, polling) lives in visits-store.js and visits-feed.js. Nothing runs when the tab or the window is hidden.
 (function () {
   var G = window.GVV, esc = G.esc, clamp = G.clamp, cur = null;
-  G.last = null;                                       // the last answer of visits_get: a language change builds the page again and starts from it
   G.slowShown = false;
 
   var SVG = {
@@ -21,7 +19,7 @@
 
   G.mount = function (parent, h) {
     if (cur) cur.destroy();
-    var s = cur = makeState(h); build(s, parent); G.attachLoop(s); G.attachPanel(s); wire(s); start(s);
+    var s = cur = makeState(h); build(s, parent); G.attachLoop(s); G.attachPanel(s); G.attachArch(s); G.attachFind(s); expose(s); wire(s); start(s);
     return s;
   };
 
@@ -29,7 +27,7 @@
     var lang = h.lang ? h.lang() : (document.documentElement.lang || "en");
     var s = {
       h: h, dead: false, on: false, tr: function (k, v) { return h.tr(k, v); }, f: G.makeFmt(lang),
-      D: null, R: { i0: 0, i1: 0, unit: "all", ta: 0, tb: 0 }, M: null, mask: 0, query: "", matchId: 0, sel: -1, hov: -1, hovC: -1, resp: null, sig: "",
+      D: null, idx: null, mon: G.last && G.last.mon ? G.last.mon : new Map(), arch: null, gen: 0, rbDirty: false, pumping: false, pendLast: 0, pendSel: null, R: { i0: 0, i1: 0, unit: "all", ta: 0, tb: 0 }, M: null, mask: 0, query: "", matchId: 0, sel: -1, hov: -1, hovC: -1, resp: null, sig: "",
       cam: { cx: 0, cz: 0, cy: 0, ls: Math.log(.05), ox: 0, oy: 0, pitch: 0 }, tgt: null, accPan: [0, 0], cache: new Map(), lvCur: null, indiv: false, replay: null, raf: 0, dockQ: 0, lastTs: 0,
       W: 600, H: 400, dpr: 1, tlW: 600, histDirty: true, hist: null, tlHover: -1, staticBg: false, panelOpen: true, panelInit: false, topInset: 84, touched: false,
       perf: { ring: new Float32Array(240), n: 0, nodes: 0, segs: 0, renders: 0 }, perfOn: /perf=1/.test(location.search),
@@ -52,7 +50,7 @@
     var t = function (k) { return esc(tr(k)); };
     var tools = [["fit", "bFit"], ["replay", "bReplay"], ["tilt", "bTilt"], ["panel", "bPanel"], ["help", "bHelp"]].map(function (a) {
       return '<button class="vs-tb vs-gl" data-r="' + a[1] + '" title="' + t("tip.vis." + a[0]) + '" aria-label="' + t("tip.vis." + a[0]) + '">' + SVG[a[0]] + "</button>"; }).join("");
-    var units = ["session", "day", "week", "month", "all"].map(function (u) { return '<button data-u="' + u + '" title="' + t("tip.vis.u." + u) + '">' + t("vis.u." + u) + "</button>"; }).join("");
+    var units = ["session", "day", "week", "month", "year", "all"].map(function (u) { return '<button data-u="' + u + '" title="' + t("tip.vis.u." + u) + '">' + t("vis.u." + u) + "</button>"; }).join("");
     var help = HELP.map(function (r) { return "<div>" + t("vis.help." + r[0]) + "<kbd>" + t("vis.help." + r[0] + ".k") + "</kbd></div>"; }).join("");
     root.innerHTML =
       '<div class="vs-top"><div class="vs-stats" aria-live="polite"></div><span class="vs-last" data-r="lastBox"><span>' + t("vis.last.l1") + '</span><input type="text" inputmode="numeric" maxlength="7" data-r="lastIn" placeholder="' + t("vis.u.all") + '" title="' + t("tip.vis.last") + '" aria-label="' + t("tip.vis.last") + '"><span>' + t("vis.last.l2") + '</span><button class="vs-btn" data-r="lastGo" title="' + t("tip.vis.last.apply") + '">' + t("vis.last.apply") + '</button>' + [10, 50, 100, 500].map(function (n) { return '<button class="vs-pre" data-n="' + n + '" title="' + esc(tr("tip.vis.last.preset", { n: n })) + '">' + n + "</button>"; }).join("") + '<span class="vs-bad" data-r="lastBad" role="alert"></span></span></div>' +
@@ -63,8 +61,9 @@
       '<aside class="vs-panel vs-gl"><div class="vs-pbody"></div></aside>' +
       '<div class="vs-help vs-gl"><h4>' + t("vis.help.h") + "</h4>" + help + "</div>" +
       '<div class="vs-hud"><div class="vs-scale"><i></i><span></span></div><div class="vs-lod"></div></div><div class="vs-perf"' + (s.perfOn ? "" : " hidden") + "></div>" +
-      '<div class="vs-dock vs-gl"><div class="vs-pg"><button class="vs-pgb" data-r="pOld" title="' + t("tip.vis.older") + '" aria-label="' + t("tip.vis.older") + '">' + SVG.old + '</button><button class="vs-pgb" data-r="pNew" title="' + t("tip.vis.newer") + '" aria-label="' + t("tip.vis.newer") + '">' + SVG.nw + '</button><span class="vs-seg" data-r="unitSeg">' + units + '</span><span class="vs-pgl"></span></div><canvas class="vs-tlc" title="' + t("tip.vis.timeline") + '"></canvas></div>' +
+      '<div class="vs-dock vs-gl"><div class="vs-pg"><button class="vs-pgb" data-r="pOld" title="' + t("tip.vis.older") + '" aria-label="' + t("tip.vis.older") + '">' + SVG.old + '</button><button class="vs-pgb" data-r="pNew" title="' + t("tip.vis.newer") + '" aria-label="' + t("tip.vis.newer") + '">' + SVG.nw + '</button><span class="vs-seg" data-r="unitSeg">' + units + '</span><span class="vs-pgl"></span></div><canvas class="vs-tlc" title="' + t("tip.vis.timeline") + '"></canvas><div class="vs-arch" hidden><span class="vs-ach vs-gl" data-r="archChip" title="' + t("tip.vis.arch") + '"><span class="vs-al"></span><button class="vs-ax" data-r="archX" title="' + t("tip.vis.arch.x") + '" aria-label="' + t("tip.vis.arch.x") + '">&times;</button></span><span class="vs-an vs-gl" role="status" hidden></span></div></div>' +
       '<div class="vs-toast vs-gl" role="status"><span>' + t("vis.toast.slow") + '</span><button class="vs-btn go" data-r="toastBtn" title="' + t("tip.vis.toast.reduce") + '">' + t("vis.toast.reduce") + '</button><button class="vs-btn" data-r="toastX" title="' + t("tip.vis.toast.no") + '">' + t("vis.toast.no") + "</button></div>" +
+      '<div class="vs-ldv vs-gl" hidden role="status"><b></b><span class="vs-lbar"><i></i></span></div>' +
       '<div class="vs-tip vs-gl"></div>' +
       '<div class="vs-none"><div class="vs-nc vs-gl"><div class="ico">' + SVG.globe + '</div><h3></h3><p></p><div class="vs-prog"><i></i></div><div class="vs-log"></div></div></div></section>' +
       '<div class="vs-foot"><div class="vs-st" aria-live="polite"></div>' + '<span class="vs-fxr" data-r="fxr" title="' + t("tip.vis.fx") + '"><button class="sw" role="switch" aria-checked="false" data-r="fx" aria-label="' + t("vis.fx") + '"></button><span>' + t("vis.fx") + '</span></span><span class="vs-keep" data-r="keepr" title="' + t("tip.vis.keep") + '"><button class="sw" role="switch" aria-checked="true" data-r="keep" aria-label="' + t("vis.keep.h") + '"></button><span>' + t("vis.keep.h") + '</span></span>' +
@@ -78,12 +77,18 @@
     e.main = root; e.stage = q(".vs-stage"); e.bg = q(".vs-bg"); e.fg = q(".vs-fg"); e.tlc = q(".vs-tlc"); e.tl = q(".vs-tl"); e.stats = q(".vs-stats"); e.q = q(".vs-search input"); e.search = q(".vs-search");
     e.res = q(".vs-res"); e.chips = q(".vs-chips"); e.tools = q(".vs-tools"); e.panel = q(".vs-panel"); e.pbody = q(".vs-pbody"); e.help = q(".vs-help"); e.dock = q(".vs-dock"); e.pgl = q(".vs-pgl");
     e.tip = q(".vs-tip"); e.toast = q(".vs-toast"); e.perf = q(".vs-perf"); e.lod = q(".vs-lod"); e.scBar = q(".vs-scale i"); e.scTxt = q(".vs-scale span"); e.st = q(".vs-st");
-    e.none = q(".vs-none"); e.prog = q(".vs-prog i"); e.plog = q(".vs-log"); e.noneH = q(".vs-nc h3"); e.noneP = q(".vs-nc p"); e.hud = q(".vs-hud");
-    ["bFit", "bReplay", "bTilt", "bPanel", "bHelp", "pOld", "pNew", "unitSeg", "fx", "fxr", "keep", "keepr", "forget", "fconf", "fyes", "fno", "toastBtn", "toastX", "qx", "lastBox", "lastIn", "lastGo", "lastBad"].forEach(function (r) { e[r] = q('[data-r="' + r + '"]'); });
+    e.arch = q(".vs-arch"); e.ach = q(".vs-ach"); e.al = q(".vs-al"); e.an = q(".vs-an"); e.ldv = q(".vs-ldv"); e.ldb = q(".vs-ldv b"); e.ldp = q(".vs-ldv i"); e.none = q(".vs-none"); e.prog = q(".vs-prog i"); e.plog = q(".vs-log"); e.noneH = q(".vs-nc h3"); e.noneP = q(".vs-nc p"); e.hud = q(".vs-hud");
+    ["bFit", "bReplay", "bTilt", "bPanel", "bHelp", "pOld", "pNew", "unitSeg", "fx", "fxr", "keep", "keepr", "forget", "fconf", "fyes", "fno", "toastBtn", "toastX", "qx", "lastBox", "lastIn", "lastGo", "lastBad", "archX"].forEach(function (r) { e[r] = q('[data-r="' + r + '"]'); });
     e.keep2 = off.querySelector('[data-r="keep2"]');
     s.bg = e.bg.getContext("2d", { alpha: false }); s.fg = e.fg.getContext("2d"); s.tl = e.tlc.getContext("2d");
     e.fx.setAttribute("aria-checked", s.FX ? "false" : "true");
   }
+
+  function expose(s) {            // what the store and the feed need from this file
+    s.x = { select: select, goTo: goTo, startReplay: startReplay, applyPanel: applyPanel, layout: layout, pageChanged: pageChanged, slow: slowStart };
+    s.ui.setKeep = function (on) { setKeep(s, on); };
+  }
+  function slowStart(s) { if (!s.slowTimer) { s.slowTimer = setTimeout(function () { s.slowTimer = 0; checkSlow(s); }, 2500); s.clearTimers.push(function () { clearTimeout(s.slowTimer); }); } }
 
   /* ---------- state helpers ---------- */
   function layout(s) {            // the space under the search box and the chips is free for the map
@@ -114,7 +119,7 @@
     }
   }
   function goTo(s, i) {           // select a stop anywhere, bring its page into view, fly there
-    if (i < s.R.i0 || i >= s.R.i1) { if (s.R.unit === "all") G.setRange(s, 0, s.D.n, "all"); else G.setUnit(s, s.R.unit, i); }
+    if (i < s.R.i0 || i >= s.R.i1) { if (s.R.unit === "all") G.setRange(s, 0, s.D.n, "all", s.R.ta, s.R.tb); else G.setUnit(s, s.R.unit === "last" ? "month" : s.R.unit, i); }
     select(s, i, true);
   }
   function setFX(s, on) {
@@ -137,10 +142,10 @@
     });
     s.clearTimers.push(function () { clearTimeout(qT); });
     on(e.qx, "click", function () { e.q.value = ""; s.query = ""; e.search.classList.remove("has"); G.recomputeMatch(s); s.ui.closeRes(); s.ui.summaryLater(); });
-    on(e.res, "click", function (ev) { var b = ev.target.closest("button"); if (!b) return; var o = s.resItems[+b.dataset.j]; s.ui.closeRes(); if (o) { touch(); goTo(s, o.i); } });
+    on(e.res, "click", function (ev) { var b = ev.target.closest("button"); if (!b) return; var o = s.resItems[+b.dataset.j]; s.ui.closeRes(); if (o) { touch(); s.ui.pick(o); } });
     on(e.q, "keydown", function (ev) {
       if (ev.key === "ArrowDown" || ev.key === "ArrowUp") { ev.preventDefault(); if (!s.resItems.length) return; s.resAct = clamp(s.resAct + (ev.key === "ArrowDown" ? 1 : -1), 0, s.resItems.length - 1); Array.prototype.forEach.call(e.res.querySelectorAll("button"), function (b, j) { b.classList.toggle("act", j === s.resAct); }); }
-      else if (ev.key === "Enter") { var o = s.resItems[s.resAct >= 0 ? s.resAct : 0]; if (o) { s.ui.closeRes(); touch(); goTo(s, o.i); } }
+      else if (ev.key === "Enter") { var o = s.resItems[s.resAct >= 0 ? s.resAct : 0]; if (o) { s.ui.closeRes(); touch(); s.ui.pick(o); } }
       else if (ev.key === "Escape") { ev.stopPropagation(); s.ui.closeRes(); e.q.blur(); e.stage.focus(); }
     });
     onDoc("pointerdown", function (ev) { if (!ev.target.closest || !ev.target.closest(".vs-search")) s.ui.closeRes(); });
@@ -180,21 +185,29 @@
     on(tlc, "pointerdown", function (ev) {
       if (!s.D) return; touch(); cancelReplay(s); var x = ev.offsetX, x0 = G.tlX(s, s.R.ta), x1 = G.tlX(s, s.R.tb); tlc.setPointerCapture(ev.pointerId);
       var mode = "new"; if (Math.abs(x - x0) < 8) mode = "l"; else if (Math.abs(x - x1) < 8) mode = "r"; else if (x > x0 && x < x1) mode = "m";
-      s.tlDrag = { mode: mode, x: x, ta: s.R.ta, tb: s.R.tb }; if (mode === "new") { var w = Math.max(s.R.tb - s.R.ta, 864e5); G.setBrush(s, G.tlT(s, x) - w / 2, G.tlT(s, x) + w / 2); }
+      if (s.R.unit === "all") mode = "new";                         // All is the whole axis: a click picks a place, it does not move the window
+      s.tlDrag = { mode: mode, x: x, ta: s.R.ta, tb: s.R.tb, moved: 0 };
+      if (mode === "new") { var tt = G.tlT(s, x);
+        if (G.store.olderAt(s, tt)) s.tlDrag.mode = "sel"; else { var w = s.R.unit === "all" ? 30 * 864e5 : Math.max(s.R.tb - s.R.ta, 864e5); G.setBrush(s, tt - w / 2, tt + w / 2); } }
     });
     on(tlc, "pointermove", function (ev) {
       var x = ev.offsetX, d = s.tlDrag; s.tlHover = d ? -1 : x;
-      if (d) { var dt = G.tlT(s, x) - G.tlT(s, d.x);
-        if (d.mode === "m") G.setBrush(s, d.ta + dt, d.tb + dt); else if (d.mode === "l") G.setBrush(s, Math.min(d.ta + dt, d.tb - 36e5), d.tb); else if (d.mode === "r") G.setBrush(s, d.ta, Math.max(d.tb + dt, d.ta + 36e5));
+      if (d) { d.moved = Math.max(d.moved, Math.abs(x - d.x)); var dt = G.tlT(s, x) - G.tlT(s, d.x);
+        if (d.mode === "sel") { if (d.moved > 4) { var ta = G.tlT(s, d.x), tb = G.tlT(s, x); G.setBrush(s, Math.min(ta, tb), Math.max(ta, tb)); } }
+        else if (d.mode === "m") G.setBrush(s, d.ta + dt, d.tb + dt); else if (d.mode === "l") G.setBrush(s, Math.min(d.ta + dt, d.tb - 36e5), d.tb); else if (d.mode === "r") G.setBrush(s, d.ta, Math.max(d.tb + dt, d.ta + 36e5));
         else { var w = d.tb - d.ta; G.setBrush(s, G.tlT(s, x) - w / 2, G.tlT(s, x) + w / 2); } }
       else if (s.D) { var a = G.tlX(s, s.R.ta), b = G.tlX(s, s.R.tb); tlc.style.cursor = (Math.abs(x - a) < 8 || Math.abs(x - b) < 8) ? "ew-resize" : (x > a && x < b) ? "grab" : "pointer"; }
       G.invalidateDock(s);
     });
-    on(tlc, "pointerup", function () { if (s.tlDrag) { s.tlDrag = null; G.fit(s, false); } });
+    on(tlc, "pointerup", function (ev) {
+      var d = s.tlDrag; if (!d) return; s.tlDrag = null;
+      if (d.mode === "sel" && d.moved <= 4) { var mo = G.store.monthAt(s, G.tlT(s, ev.offsetX)); if (mo) G.store.goMonth(s, mo); return; }     // a click on an older month opens it
+      if (s.R.unit === "custom") G.store.openRange(s, "custom", s.R.ta, s.R.tb); G.fit(s, false);
+    });
     on(tlc, "pointerleave", function () { s.tlHover = -1; G.invalidateDock(s); });
     on(tlc, "wheel", function (ev) {
       ev.preventDefault(); if (!s.D) return; touch(); cancelReplay(s); var f = Math.exp(ev.deltaY * .0015), t = G.tlT(s, ev.offsetX), a = t - (t - s.R.ta) * f, b = t + (s.R.tb - t) * f; if (b - a < 36e5) return;
-      G.setBrush(s, a, b); clearTimeout(wT); wT = setTimeout(function () { if (!s.dead && s.on) G.fit(s, false); }, 250);
+      G.setBrush(s, a, b); clearTimeout(wT); wT = setTimeout(function () { if (!s.dead && s.on) { if (s.R.unit === "custom") G.store.openRange(s, "custom", s.R.ta, s.R.tb); G.fit(s, false); } }, 250);
     }, { passive: false });
     s.clearTimers.push(function () { clearTimeout(wT); });
     // "Show my last N visits": one more kind of page
@@ -202,7 +215,8 @@
       var v = String(txt == null ? e.lastIn.value : txt).trim(), D = s.D; e.lastBad.textContent = ""; if (!D) return;
       if (v === "") { s.lastN = 0; touch(); G.setUnit(s, "all"); pageChanged(s); return; }
       var n = /^[0-9]+$/.test(v) ? parseInt(v, 10) : 0;
-      if (n < 1 || n > D.n) { e.lastBad.textContent = s.tr("vis.last.bad", { max: s.f.n(D.n) }); e.lastIn.setAttribute("aria-invalid", "true"); return; }
+      if (n > D.n) { e.lastBad.textContent = s.tr("vis.last.loaded", { max: s.f.n(D.n) }); e.lastIn.setAttribute("aria-invalid", "true"); return; }
+      if (n < 1) { e.lastBad.textContent = s.tr("vis.last.bad", { max: s.f.n(D.n) }); e.lastIn.setAttribute("aria-invalid", "true"); return; }
       e.lastIn.removeAttribute("aria-invalid"); s.lastN = n; touch(); s.sel = -1; G.setUnit(s, "last"); pageChanged(s);
     }
     on(e.lastGo, "click", function () { applyLast(); });
@@ -218,6 +232,7 @@
     on(e.pOld, "click", function () { touch(); if (G.stepPage(s, -1)) pageChanged(s); });
     on(e.pNew, "click", function () { touch(); if (G.stepPage(s, 1)) pageChanged(s); });
     on(e.unitSeg, "click", function (ev) { var b = ev.target.closest("button"); if (!b || !s.D) return; touch(); var u = b.dataset.u; e.lastBad.textContent = ""; G.setUnit(s, u, u === "all" ? null : (s.sel >= 0 ? s.sel : null)); pageChanged(s); });
+    on(e.archX, "click", function () { touch(); s.sel = -1; G.setUnit(s, "all"); pageChanged(s); });
     on(e.fxr, "click", function () { setFX(s, !s.FX); });
     on(e.toastBtn, "click", function () { setFX(s, false); e.toast.classList.remove("on"); }); on(e.toastX, "click", function () { e.toast.classList.remove("on"); });
     // keys: only while the focus is inside this page
@@ -237,13 +252,13 @@
       if (used) { ev.preventDefault(); s.invalidate(); }
     });
     // footer: the history switch and forgetting it
-    function keepSet(on) { s.h.invoke("visits_keep_set", { on: on }).then(function () { poll(s); }).catch(function () { }); setKeep(s, on); }
+    function keepSet(on) { s.h.invoke("visits_keep_set", { on: on }).then(function () { G.poll(s); }).catch(function () { }); setKeep(s, on); }
     on(e.keepr, "click", function () { keepSet(e.keep.getAttribute("aria-checked") !== "true"); }); on(e.keep2, "click", function () { keepSet(true); });
     on(e.forget, "click", function () { e.forget.hidden = true; e.fconf.hidden = false; e.fno.focus(); clearTimeout(s.forgetT); s.forgetT = setTimeout(endForget, 8000); });
     function endForget() { clearTimeout(s.forgetT); e.fconf.hidden = true; e.forget.hidden = false; }
     on(e.fno, "click", endForget);
     on(e.fyes, "click", function () {
-      endForget(); s.h.invoke("visits_forget").then(function () { G.last = null; s.sig = ""; s.rev = null; apply(s, { stops: [], total: 0, scanning: false, keep: true }); if (s.h.toast) s.h.toast(s.tr("vis.forgot")); poll(s); }).catch(function () { });
+      endForget(); s.h.invoke("visits_forget").then(function () { G.last = null; s.rev = null; s.mon.clear(); s.arch = null; s.gen++; s.D = null; G.onIndex(s, { months: [], scanning: false, keep: true }); if (s.h.toast) s.h.toast(s.tr("vis.forgot")); G.poll(s); }).catch(function () { });
     });
     s.clearTimers.push(function () { clearTimeout(s.forgetT); });
   }
@@ -257,67 +272,11 @@
   }
   function setKeep(s, on) { s.e.keep.setAttribute("aria-checked", on ? "true" : "false"); s.e.keep2.setAttribute("aria-checked", on ? "true" : "false"); }
 
-  /* ---------- the data: first answer, merging, polling ---------- */
-  function showState(s) {
-    var e = s.e, r = s.resp, D = s.D, tr = s.tr, f = s.f, none = !D || D.n === 0;
-    e.stage.classList.toggle("none", none); s.root.classList.toggle("vs-zero", none);
-    if (none) {
-      var ld = !r || !!r.scanning;
-      e.none.classList.toggle("ld", ld);
-      if (r && r.scanning) { e.noneH.textContent = tr("vis.loading"); e.noneP.textContent = tr("vis.loading.sub"); e.plog.textContent = tr("vis.scan", { n: f.n(r.scanned || 0), m: f.n(r.files || 0) }); e.prog.style.width = Math.max(4, Math.min(100, Math.round(100 * (r.scanned || 0) / Math.max(1, r.files || 1)))) + "%"; }
-      else if (r) { e.noneH.textContent = tr("vis.empty.h"); e.noneP.textContent = tr("vis.empty.p"); }
-      else { e.noneH.textContent = tr("vis.loading"); e.noneP.textContent = tr("vis.loading.sub"); e.plog.textContent = ""; e.prog.style.width = "4%"; }
-    }
-    var st = "";
-    if (r && r.scanning) st = tr("vis.scan", { n: f.n(r.scanned || 0), m: f.n(r.files || 0) });
-    else if (r && r.since) { var t = typeof r.since === "number" ? r.since : Date.parse(r.since); if (t) st = tr("vis.since", { d: f.dy(t) }); }
-    if (e.st.textContent !== st) e.st.textContent = st;
-    e.forget.disabled = !D || D.n === 0;
-  }
-  function rebindRange(s, old, oldD) {       // the new data is a longer list: keep the page the player was looking at
-    var D = s.D, R = old;
-    if (R.unit === "all") G.setRange(s, 0, D.n, "all", D.tmin, D.tmax + 1);
-    else if (R.unit === "last" && oldD && R.i1 >= oldD.n) G.setUnit(s, "last");
-    else if (R.unit === "session") { var anchor = oldD && R.i0 < oldD.n ? G.lb(D.T, oldD.T[R.i0], D.n) : D.n - 1; G.setUnit(s, "session", clamp(anchor, 0, D.n - 1)); }
-    else G.setRange(s, G.lb(D.T, R.ta, D.n), G.lb(D.T, R.tb, D.n), R.unit, R.ta, R.tb);
-  }
-  function apply(s, resp) {
-    if (s.dead || !resp) return;
-    var stops = resp.stops || [], n = stops.length, sig = n + "|" + (n ? stops[0].t + stops[n - 1].t + stops[n - 1].sys : "") + "|" + resp.scanning + "|" + resp.scanned + "|" + resp.total + "|" + resp.keep + "|" + resp.since;
-    if (resp.rev != null) s.rev = resp.rev;
-    if (sig === s.sig) return; s.sig = sig; s.resp = resp; G.last = resp; s.scanning = !!resp.scanning;
-    var keep = resp.keep !== false; setKeep(s, keep); s.root.hidden = !keep; s.off.hidden = keep;
-    if (!keep) return;
-    var oldD = s.D, oldR = s.R, selKey = oldD && s.sel >= 0 ? G.keyOf(oldD.v[s.sel]) : null, first = !oldD || oldD.n === 0;
-    if (!n) { s.D = null; s.sel = -1; s.M = null; s.hist = null; s.cache.clear(); s.lvCur = null; showState(s); s.ui.stats(); s.invalidate(); return; }
-    s.D = G.prep(stops); s.histDirty = true; s.hist = null;
-    if (!G.resize(s)) { /* hidden: the size is taken when the tab shows */ }
-    if (first) {
-      s.sel = -1; s.mask = 0; s.query = ""; s.M = null; s.restoring = true;
-      var want = parseInt(G.lsGet("gvVisitsLast") || "0", 10); if (want >= 1 && want <= s.D.n) { s.lastN = want; G.setUnit(s, "last"); } else G.setUnit(s, "all");
-      s.restoring = false; layout(s);
-      if (!s.panelInit) { s.panelInit = true; s.panelOpen = false; applyPanel(s); }
-      G.fit(s, true);
-      if (!s.scanning && !G.introDone) { G.introDone = true; startReplay(s); }
-    } else {
-      s.sel = selKey ? G.indexOfKey(s.D, selKey) : -1; rebindRange(s, oldR, oldD); G.recomputeMatch(s);
-      if (!s.touched && s.R.unit === "all") G.fit(s, false);
-      if (!s.scanning && !G.introDone && !s.touched) { G.introDone = true; startReplay(s); }
-    }
-    showState(s); s.ui.stats(); s.ui.unit(); s.ui.panel(); s.invalidate();
-    if (!s.slowTimer) { s.slowTimer = setTimeout(function () { s.slowTimer = 0; checkSlow(s); }, 2500); s.clearTimers.push(function () { clearTimeout(s.slowTimer); }); }
-  }
+  /* ---------- the data: see visits-store.js and visits-feed.js ---------- */
   function checkSlow(s) {
     if (s.dead || !s.on || G.slowShown || !s.FX || s.perf.n < 40) return; G.slowShown = true;
     var a = Array.prototype.slice.call(s.perf.ring, 0, 40).sort(function (x, y) { return x - y; }); if (a[20] > 14) s.e.toast.classList.add("on");
   }
-  function poll(s) {
-    if (s.dead || !s.on || s.busy) return; s.busy = true; clearTimeout(s.pt);
-    var p; try { p = s.h.invoke("visits_get", s.rev != null && !s.scanning ? { rev: s.rev } : {}); } catch (_) { p = Promise.reject(); }
-    p.then(function (r) { s.busy = false; if (s.dead) return; if (r && r.same) { schedule(s); return; } apply(s, r); schedule(s); }).catch(function () { s.busy = false; if (!s.dead) { if (!s.resp) { s.resp = { stops: [], keep: true }; showState(s); } schedule(s, 6000); } });
-  }
-  function schedule(s, ms) { clearTimeout(s.pt); if (s.dead || !s.on) return; s.pt = setTimeout(function () { poll(s); }, ms || (s.resp && s.resp.scanning ? 1500 : 6000)); }
-
   /* ---------- when the tab is on screen ---------- */
   function viewVisible(s) {
     var v = s.root.closest(".view"), p = s.root.closest(".pane");
@@ -326,14 +285,14 @@
   function sync(s) {
     if (s.dead) return; var on = viewVisible(s); if (on === s.on) return; s.on = on;
     if (on) {
-      G.resize(s); layout(s); if (s.D && !s.touched) G.fit(s, true); s.invalidate(); G.invalidateDock(s); poll(s);
+      G.resize(s); layout(s); if (s.D && !s.touched) G.fit(s, true); s.invalidate(); G.invalidateDock(s); G.poll(s);
     } else {                                           // hidden: no frame, no request, no timer
       cancelAnimationFrame(s.raf); s.raf = 0; cancelAnimationFrame(s.dockQ); s.dockQ = 0; clearTimeout(s.pt);
     }
   }
   function start(s) {
     var e = s.e; e.fx.setAttribute("aria-checked", s.FX ? "false" : "true");
-    if (G.last) { s.resp = null; } showState(s);
+    G.showState(s);
     var ro = new ResizeObserver(function () {
       if (s.dead || !G.resize(s)) return; layout(s);
       if (s.D) { if (!s.touched) G.fit(s, true); else applyPanel(s); } s.invalidate(); G.invalidateDock(s);
@@ -344,7 +303,7 @@
     s.offs.push(function () { mo.disconnect(); });
     var vc = function () { sync(s); }; document.addEventListener("visibilitychange", vc); s.offs.push(function () { document.removeEventListener("visibilitychange", vc); });
     s.ui.chips();
-    if (G.last) apply(s, G.last);                      // a language change: show what we had at once, the next poll refreshes it
+    if (G.last) G.onIndex(s, G.last.resp);             // a language change: show what we had at once, the next poll refreshes it
     sync(s);
     window.__visits = { state: function () { return cur; }, raf: function () { return G.raf; }, bench: function (a, b, c) { return G.bench(cur, a, b, c); } };
   }

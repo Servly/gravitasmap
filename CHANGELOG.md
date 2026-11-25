@@ -4,6 +4,10 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.21 · minor · 25 Nov 2026
+- When Sync is on but the map shows a different system than your ship's (a visit opened from the GRAVITAS app, a search, a link), the Sync card now turns grey and says VIEWING, with the line "Viewing X · ship in Y" and a To my ship button. It goes back to LIVE by itself as soon as you look at your ship's system again.
+- Fix: since v0.99.20 a page whose address already had ?system= (every reload or restored tab has one) could stop Sync from taking the map along with your ship, and showed a Go button instead. Sync follows your ship again as before. Only a system opened on purpose from the GRAVITAS app's Visits page stays on screen.
+
 ### v0.99.20 · minor · 25 Nov 2026
 - A system you open on purpose now stays on screen while Sync is on: from a shared link, or with Show on the map in the GRAVITAS app's Visits page. Sync still shows where your ship is and offers a Go button, but it no longer takes the map back there by itself. It follows your ship again when you press Go.
 

@@ -1,35 +1,60 @@
-//! Visits: your travel history. Every system you arrived at (jump, carrier jump, or where the game started) with its place in the galaxy and what you
-//! did there (docked, sold, bought, explored, vouchers, missions), kept in visits.json in the app's data folder, read from the Journal files on this PC.
-//! The file never leaves the PC. It holds no FID, no commander name, no ship name and no mission id. The player can switch it off (setting visits_keep)
-//! and "Forget" deletes it and its backup copy. Details: visits/parse.rs (one file's text -> stops), visits/hist.rs (the stored history and the scan).
+//! Visits: your travel history, kept as an ARCHIVE. Every system you arrived at (jump, carrier jump, or where the game started) with its place in the
+//! galaxy and what you did there (docked, sold, bought, explored, vouchers, missions), read from the Journal files on this PC and kept in the folder
+//! `visits/` of the app's data folder: `index.json` (which months exist and a small summary of each) and one file per UTC month (`m-YYYY-MM.json`).
+//! Only the small index is in memory. The window asks for one month at a time. Nothing leaves the PC. The files hold no FID, no commander name, no ship
+//! name and no mission id. The player can switch it off (setting visits_keep) and "Forget" deletes everything. All of it can be built again from the
+//! Journals. Details: visits/parse.rs (one file's text -> stops), arch.rs (the files), summary.rs (a month's summary), hist.rs (what the window asks for),
+//! scan.rs (the scan).
 use serde_json::{json, Value};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
+pub mod arch;
 pub mod hist;
 pub mod parse;
+mod scan;
+pub mod summary;
 #[cfg(test)]
 mod hist_tests;
+#[cfg(test)]
+mod archive_tests;
+#[cfg(test)]
+mod stress_tests;
 
 static HIST: OnceLock<Arc<hist::Hist>> = OnceLock::new();
 
 fn hist() -> &'static Arc<hist::Hist> {
-    HIST.get_or_init(|| Arc::new(hist::Hist::new(crate::store::dir().map(|d| d.join("visits.json")), None)))
+    HIST.get_or_init(|| {
+        let d = crate::store::dir();
+        Arc::new(hist::Hist::new(d.as_ref().map(|d| d.join("visits")), d.as_ref().map(|d| d.join("visits.json")), None))
+    })
 }
 
 /// The setting (default ON): the travel history is built and kept.
 pub fn keep_on() -> bool { crate::store::read().get("visits_keep").and_then(Value::as_bool).unwrap_or(true) }
 
-/// The stored history at once, and the scan started in the background when needed (see hist::Hist::get).
-pub fn get(rev: Option<u64>) -> Value {
+/// The index at once (months and their summaries), and the scan started in the background when needed (see hist::Hist::index).
+pub fn index(rev: Option<u64>) -> Value {
     if !keep_on() {
         if let Some(h) = HIST.get() { h.set_keep(false); }
-        return hist::empty_reply(false);
+        return hist::empty_index(false);
     }
     let h = hist();
     h.set_keep(true);
-    h.get(crate::journal::saved_games(), rev)
+    h.index(crate::journal::saved_games(), rev)
+}
+
+/// The stops of one month ("YYYY-MM"), read from the archive.
+pub fn month(m: &str) -> Value {
+    if !keep_on() { return json!({"m": m, "r": 0, "stops": []}); }
+    hist().month(m)
+}
+
+/// Search system, station and goods names, newest first.
+pub fn find(q: &str, limit: Option<u32>) -> Value {
+    if !keep_on() { return json!({"items": [], "done": true}); }
+    hist().find(q, limit.unwrap_or(30) as usize)
 }
 
 pub fn forget() -> bool { hist().forget() }
@@ -39,7 +64,7 @@ pub fn keep_set(on: bool) {
     if let Some(h) = HIST.get() { h.set_keep(on); }
 }
 
-// ---- the older list (systems only, newest first; still used until the page switches to visits_get) ----
+// ---- the older list (systems only, newest first; still used kept for the older callers) ----
 /// at most this many visits are returned
 const LIMIT: usize = 200;
 /// at most this many Journal files are looked at (newest first)

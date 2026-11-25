@@ -308,7 +308,7 @@
       var a = mk("a", "btn", "gravitasmap.com"); a.href = "https://gravitasmap.com"; a.setAttribute("data-ext", ""); tip(a, "tip.map.link");
       h.appendChild(l); h.appendChild(a); c.appendChild(h);
     },
-    /** Visits: the retrospective travel map (visits*.js builds it, the Rust side sends the stops with visits_get) */
+    /** Visits: the retrospective travel map (visits*.js builds it, the Rust side sends an index (visits_index) and one month at a time (visits_month)) */
     visits: function (p) { if (window.GVV) GVV.mount(p, window.GVC.h); },
     /** the Debrief page: its mode switch and the one for its observations */
     dbmode: function (p) {

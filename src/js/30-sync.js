@@ -10,7 +10,7 @@ const SYNC = {
   here: "", at: null, jumping: "", pend: null, miss: "", missN: 0, missT: 0, auto: true, err: 0,
 };
 const SYNC_LINKED = new URLSearchParams(location.search).has("system");   // v0.75.6: read at once (the page rewrites its address later)
-SYNC.pin = SYNC_LINKED;                                             // v0.99.20: a system opened from a link or from the app's Visits stays on screen: Sync tells you where the ship is but does not take the map there until you press Go
+SYNC.pin = APP_WINDOW && SYNC_LINKED;                              // v0.99.20: a system the GRAVITAS app opened on purpose (Visits > Show on the map) stays on screen: Sync tells you where the ship is but does not take the map there until you press the button. (v0.99.21: only in the app window: an ordinary page address carries ?system= after every load, and that must never switch Sync off)
 const SYNC_MISS_WAIT = [30, 60, 120, 300];                           // v0.99.9: seconds between searches for a system Spansh does not know yet (at most 4 retries)
 const SYNC_ARRIVE_MS = 60000;                                         // v0.76: how long the arrival star keeps "You are here"
 const SYNC_PATH = "%USERPROFILE%\\Saved Games\\Frontier Developments\\Elite Dangerous";
@@ -44,6 +44,7 @@ function syncShow() {
   if (SYNC.on) {
     if (SYNC.jumping) msg = `Jumping to <b>${esc(SYNC.jumping)}</b>…`;
     else if (SYNC.miss) msg = `<b>${esc(SYNC.miss)}</b> is not in Spansh yet. Trying again soon.`;
+    else if (syncAway()) { msg = `Viewing <b>${esc(S.sys.name)}</b> · ship in <b>${esc(SYNC.here)}</b>`; go = true; }   // v0.99.21: the map shows another system than the ship's
     else if (SYNC.pend) { msg = `You are in <b>${esc(SYNC.pend)}</b>`; go = true; }
     else if (SYNC.here && SYNC.closed) msg = `Last seen in <b>${esc(SYNC.here)}</b> · the game is closed`;
     else if (rem && !PAIR.ws) msg = "Connecting to your computer…";
@@ -53,7 +54,7 @@ function syncShow() {
     else if (SYNC.here) msg = "";
     else msg = rem ? "Waiting for your computer…" : "Waiting for the game…";
   } else if (SYNC.paused) msg = SYNC.ask ? "Click the switch to resume. When Chrome asks, choose <b>Allow on every visit</b> and Sync starts by itself next time." : "Click the switch to resume.";
-  $("syncMsg").innerHTML = msg; $("syncGo").style.display = go ? "" : "none";
+  $("syncMsg").innerHTML = msg; $("syncGo").style.display = go ? "" : "none"; $("syncGo").textContent = syncAway() ? "To my ship" : "Go";
   yahUpdate();
   p.classList.toggle("ping", go);
   if (PAIR_ON) pairUi();                                             // v0.76: the 📱 Phone button follows Sync's state
@@ -303,6 +304,8 @@ function syncLine(ln, replay) {
 }
 const syncSame = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
 const syncViewing = () => !!(S && syncSame(S.sys.name, SYNC.here));
+// v0.99.21: following, but looking at another system than the ship's (a visit from the app's history, a search, a link): the Sync card turns grey and says so
+const syncAway = () => !!(SYNC.on && SYNC.here && S && !syncViewing() && !SYNC.jumping && !SYNC.miss && !SYNC.loading);
 // arrived in a system: follow when the visitor was looking at their own system (or at nothing yet), else tell them
 function syncArrive(first) {
   if (!SYNC.here) return syncShow();
@@ -507,7 +510,7 @@ function tgtMapTick() {
   if (p) {
     $("syncSw").onclick = syncToggle;
     $("syncSw").title = SYNC.ok ? "GRAVITAS follows your jumps in Elite Dangerous" : "Sync with the game needs Chrome or Edge on a computer";
-    $("syncGo").onclick = () => { if (SYNC.pend) syncFollow(SYNC.pend, false); };
+    $("syncGo").onclick = () => { const n = SYNC.pend || SYNC.here; if (n) syncFollow(n, false); };
     $("syncAuto").onchange = e => { SYNC.auto = e.target.checked; syncLS("auto", SYNC.auto ? "1" : "0"); if (SYNC.auto && SYNC.pend && !S) syncFollow(SYNC.pend, false); };
     $("syncDir").onclick = () => APP_WINDOW ? toast("The GRAVITAS app reads your Journal folder itself: there is nothing to choose.") : syncDialog(true);
     // v0.99.19: the App button of this card is gone: the "Get the Windows app" card of the main screen (49-app-promo.js) opens the app page

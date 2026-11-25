@@ -30,6 +30,8 @@
     var d3 = new Intl.DateTimeFormat(loc, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
     var d4 = new Intl.DateTimeFormat(loc, { month: "long", year: "numeric" });
     var d5 = new Intl.DateTimeFormat(loc, { month: "short" });
+    var d6 = new Intl.DateTimeFormat(loc, { month: "short", year: "numeric" }), d7 = new Intl.DateTimeFormat(loc, { year: "numeric" });
+    var d8 = new Intl.DateTimeFormat(loc, { month: "short", year: "numeric", timeZone: "UTC" }), d9 = new Intl.DateTimeFormat(loc, { year: "numeric", timeZone: "UTC" });
     var rtf; try { rtf = new Intl.RelativeTimeFormat(loc, { numeric: "auto" }); } catch (e) { rtf = null; }
     f.n = function (n) { return nf.format(Math.round(n)); };
     f.c = function (n) { n = Math.abs(n); return n >= 1e3 ? cf.format(n) : nf.format(n); };            // credits: 1.2M
@@ -40,6 +42,10 @@
     f.full = function (t) { return d3.format(t); };
     f.month = function (t) { return d4.format(t); };
     f.mon = function (t) { return d5.format(t); };
+    f.my = function (t) { return d6.format(t); };       // Mar 2018 (local)
+    f.yr = function (t) { return d7.format(t); };
+    f.myu = function (t) { return d8.format(t); };      // the same for a month key (UTC)
+    f.yu = function (t) { return d9.format(t); };
     f.ago = function (t) {
       var d = (Date.now() - t) / 864e5;
       if (!rtf || d >= 700) return d2.format(t);
@@ -95,31 +101,40 @@
     var d = new Date(t);
     if (unit === "day") { var a = new Date(d.getFullYear(), d.getMonth(), d.getDate()); return [+a, +new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)]; }
     if (unit === "week") { var dow = (d.getDay() + 6) % 7, w = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dow); return [+w, +new Date(w.getFullYear(), w.getMonth(), w.getDate() + 7)]; }
+    if (unit === "year") return [+new Date(d.getFullYear(), 0, 1), +new Date(d.getFullYear() + 1, 0, 1)];
     var m = new Date(d.getFullYear(), d.getMonth(), 1); return [+m, +new Date(d.getFullYear(), d.getMonth() + 1, 1)];
   };
+  /** page by unit. Day, Week, Month and Year may live in an older period: G.store.openRange loads it as the archive and shows it when it is there */
   G.setUnit = function (s, u, anchor) {
     var D = s.D, R = s.R; if (!D) return;
-    if (u === "all") { G.setRange(s, 0, D.n, "all", D.tmin, D.tmax + 1); return; }
+    if (u === "all") { G.store.closeArchive(s, true); D = s.D; var b = G.bounds(s); G.setRange(s, 0, D.n, "all", b[0], b[1] + 1); return; }   // All = the active window (the last 12 months) and the older history as dust
     if (u === "last") { var N = clamp(s.lastN | 0, 1, D.n); G.setRange(s, D.n - N, D.n, "last"); return; }
     if (anchor == null) anchor = (R.unit === "all" || R.i1 <= R.i0) ? D.n - 1 : clamp(R.i1 - 1, 0, D.n - 1);
     if (u === "session") { var k = G.sessionOf(D, anchor); G.setRange(s, D.ses[k], D.ses[k + 1] != null ? D.ses[k + 1] : D.n, "session"); return; }
-    var p = G.periodOf(D.T[anchor], u); G.setRange(s, G.lb(D.T, p[0], D.n), G.lb(D.T, p[1], D.n), u, p[0], p[1]);
+    var p = G.periodOf(D.T[anchor], u); G.store.openRange(s, u, p[0], p[1]);
+  };
+  G.canStep = function (s, dir) {
+    var D = s.D, R = s.R; if (!D) return false; var u = R.unit;
+    if (u === "all") return dir < 0 && D.n >= 2;
+    if (u === "last") return dir < 0 ? R.i0 > 0 : R.i1 < D.n;
+    if (u === "custom") { var b = G.bounds(s); return dir < 0 ? R.ta > b[0] : R.tb <= b[1]; }
+    return G.store.neighbour(s, dir) != null;
   };
   G.stepPage = function (s, dir) {
     var D = s.D, R = s.R; if (!D) return false; var u = R.unit;
     if (u === "all") { if (dir < 0) G.setUnit(s, "week", D.n - 1); else return false; return true; }
     if (u === "last") { var N = clamp(s.lastN | 0, 1, D.n); if (dir < 0) { if (R.i0 <= 0) return false; G.setRange(s, Math.max(0, R.i0 - N), R.i0, "last"); } else { if (R.i1 >= D.n) return false; G.setRange(s, R.i1, Math.min(D.n, R.i1 + N), "last"); } return true; }
-    if (u === "session") { var k = G.sessionOf(D, R.i0) + dir; if (k < 0 || k >= D.ses.length) return false; G.setUnit(s, "session", D.ses[k]); }
-    else if (u === "custom") { var w = R.tb - R.ta; if (dir < 0 && R.ta <= D.tmin || dir > 0 && R.tb > D.tmax) return false; G.setBrush(s, R.ta + dir * w, R.tb + dir * w); }
-    else { var i = dir < 0 ? G.lb(D.T, R.ta, D.n) - 1 : G.lb(D.T, R.tb, D.n); if (i < 0 || i >= D.n) return false; G.setUnit(s, u, i); }   // the nearest stop before or after, so empty weeks are skipped
-    return true;
+    if (u === "custom") { var w = R.tb - R.ta; if (!G.canStep(s, dir)) return false; G.setBrush(s, R.ta + dir * w, R.tb + dir * w, true); return true; }
+    var t = G.store.neighbour(s, dir); if (t == null) return false;      // the nearest stop before or after, so empty weeks are skipped (looked up in the index when that month is not held)
+    G.store.goAnchor(s, u, t, dir); return true;
   };
-  /** the timeline window (a custom page) */
-  G.setBrush = function (s, a, b) {
-    var D = s.D; if (!D) return; var w = b - a, lo = D.tmin, hi = D.tmax + 1;
+  /** the timeline window (a custom page). While it is dragged only the held stops are shown, settle = true loads an older period at once */
+  G.setBrush = function (s, a, b, settle) {
+    var D = s.D; if (!D) return; var w = b - a, bd = G.bounds(s), lo = bd[0], hi = bd[1] + 1;
     if (a < lo) { a = lo; if (b < a + w) b = Math.min(hi, a + w); } if (b > hi) { b = hi; if (a > b - w) a = Math.max(lo, b - w); }
     a = Math.max(a, lo); b = Math.min(b, hi); if (b - a < 36e5) return;
-    var sameAll = a <= D.tmin && b > D.tmax; G.setRange(s, G.lb(D.T, a, D.n), G.lb(D.T, b, D.n), sameAll ? "all" : "custom", a, b);
+    var sameAll = a <= lo && b >= hi; if (sameAll) { G.setUnit(s, "all"); return; }
+    G.setRange(s, G.lb(D.T, a, D.n), G.lb(D.T, b, D.n), "custom", a, b); if (settle) G.store.openRange(s, "custom", a, b);
   };
 
   /* ---------- filters and search: M[i] = 1 when stop i matches (null = no filter) ---------- */

@@ -17,10 +17,12 @@
     var e = s.e, f = s.f, tr = s.tr, ui = s.ui = s.ui || {};
 
     ui.stats = function () {
-      var D = s.D, r = s.resp || {}; if (!D) { e.stats.textContent = ""; return; }
-      var h = "<span>" + bold(s, "vis.stat.stops", f.n(D.n)) + "</span><span>" + bold(s, "vis.stat.systems", f.n(D.systems)) + "</span><span>" + bold(s, "vis.stat.ly", f.n(D.dist)) + "</span><span>" + bold(s, "vis.stat.cr", f.c(D.PE[D.n])) + "</span>";
-      h += "<span>" + esc(f.dy(D.tmin)) + " &ndash; " + esc(f.dy(D.tmax)) + "</span>";
-      if (r.total > D.n) h += "<span>" + esc(tr("vis.stat.newest", { n: f.n(D.n), t: f.n(r.total) })) + "</span>";
+      var D = s.D, ix = s.idx; if (!D || !ix) { e.stats.textContent = ""; return; }
+      var older = G.store.hasOlder(s), all = G.store.months(s).active >= ix.months.filter(function (mo) { return G.store.isActive(ix, mo); }).length && !older;
+      var sysTxt = ix.sysExact || !all ? (ix.sysExact ? bold(s, "vis.stat.systems", f.n(ix.sysTot)) : bold(s, "vis.stat.systems.est", f.n(ix.sysTot))) : bold(s, "vis.stat.systems", f.n(D.systems));
+      var h = "<span>" + bold(s, "vis.stat.stops", f.n(ix.nTot)) + "</span><span>" + sysTxt + "</span><span>" + bold(s, "vis.stat.ly", f.n(ix.lyTot)) + "</span><span>" + bold(s, "vis.stat.cr", f.c(ix.crTot)) + "</span>";
+      h += "<span>" + esc(f.dy(ix.lo)) + " &ndash; " + esc(f.dy(ix.hi)) + "</span>";
+      if (older && !s.arch) h += "<span>" + esc(tr("vis.stat.detail")) + "</span>";
       e.stats.innerHTML = h;
     };
     ui.chips = function () {
@@ -35,46 +37,25 @@
       var D = s.D, R = s.R; if (!D) return;
       Array.prototype.forEach.call(e.unitSeg.querySelectorAll("button"), function (b) { var on = b.dataset.u === R.unit; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
       var n = R.i1 - R.i0, lab;
-      if (R.unit === "all") lab = f.dy(D.tmin) + " – " + f.dy(D.tmax);
+      if (R.unit === "all") lab = f.dy(R.ta) + " – " + f.dy(R.tb - 1);
       else if (R.unit === "session") lab = tr("vis.pg.session", { a: f.n(G.sessionOf(D, R.i0) + 1), b: f.n(D.ses.length), d: f.full(D.T[R.i0]) });
       else if (R.unit === "last") lab = R.i1 >= D.n ? tr("vis.pg.last", { n: f.n(n) }) : f.d(R.ta) + " – " + f.d(R.tb);
       else if (R.unit === "day") lab = f.dy(R.ta);
       else if (R.unit === "week") lab = tr("vis.pg.week", { d: f.d(R.ta) });
       else if (R.unit === "month") lab = f.month(R.ta);
+      else if (R.unit === "year") lab = f.yr(R.ta);
       else lab = f.d(R.ta) + " – " + f.d(R.tb);
-      e.pgl.innerHTML = esc(lab) + "<small>" + esc(tr("vis.pg.stops", { n: f.n(n) })) + "</small>";
+      e.pgl.innerHTML = esc(lab) + "<small>" + esc(tr(R.unit === "all" && G.store.hasOlder(s) ? "vis.pg.alldetail" : "vis.pg.stops", { n: f.n(n) })) + "</small>";
       if (R.unit === "last") { e.lastIn.value = String(s.lastN); } else if (document.activeElement !== e.lastIn) e.lastIn.value = "";
       e.lastBox.classList.toggle("on", R.unit === "last");
       if (R.unit === "last") G.lsSet("gvVisitsLast", String(s.lastN)); else if (!s.restoring) { try { localStorage.removeItem("gvVisitsLast"); } catch (_) { } }
-      e.pOld.disabled = R.unit === "all" ? D.n < 2 : R.i0 <= 0; e.pNew.disabled = R.unit === "all" || R.i1 >= D.n;
+      e.pOld.disabled = !G.canStep(s, -1); e.pNew.disabled = !G.canStep(s, 1);
       ui.chips();
     };
     ui.caption = function (i) { var D = s.D; e.pgl.innerHTML = esc(tr("vis.pg.replay", { d: f.full(D.T[i]) })) + "<small>" + esc(D.v[i].sys) + "</small>"; };
     ui.perf = function () {
       var p = s.perf, a = Array.prototype.slice.call(p.ring, 0, Math.min(p.n, 240)).sort(function (x, y) { return x - y; });
       e.perf.textContent = "draw " + (a[a.length >> 1] || 0).toFixed(1) + " ms med  " + (a[Math.floor(a.length * .95)] || 0).toFixed(1) + " p95\ngroups " + p.nodes + "  segments " + p.segs + "  renders " + p.renders + "  rAF " + G.raf;
-    };
-
-    /* ---------- search ---------- */
-    s.resItems = []; s.resAct = -1;
-    ui.closeRes = function () { e.res.classList.remove("on"); e.q.setAttribute("aria-expanded", "false"); s.resItems = []; s.resAct = -1; };
-    ui.showRes = function () {
-      var D = s.D; if (!D || !s.query) { ui.closeRes(); return; }
-      var out = [], q = s.query;
-      for (var i = D.n - 1; i >= 0 && out.length < 7; i--) {
-        if (s.mask && !(D.F[i] & s.mask)) continue; if (D.S[i].indexOf(q) < 0) continue;
-        var acts = D.v[i].acts || [], hit = null;
-        for (var j = 0; j < acts.length; j++) { var c = acts[j]; if (String(c.what || "").toLowerCase().indexOf(q) >= 0 || String(c.st || "").toLowerCase().indexOf(q) >= 0) { hit = c; break; } }
-        out.push({ i: i, c: hit });
-      }
-      s.resItems = out; s.resAct = -1;
-      e.res.innerHTML = out.length ? out.map(function (o, j) {
-        var v = D.v[o.i], c = o.c, col = c ? KCOL[c.k] : "#9d8cc0", title;
-        if (!c) title = v.sys; else if (c.k === "sell") title = tr("vis.r.sold", { n: c.n || "", what: c.what || "" }); else if (c.k === "buy") title = tr("vis.r.bought", { n: c.n || "", what: c.what || "" });
-        else if (c.k === "dock") title = tr("vis.r.docked", { st: c.st || "" }); else title = tr("vis.k." + c.k);
-        return '<button role="option" data-j="' + j + '"><span class="d" style="background:' + col + ";box-shadow:0 0 8px " + col + '"></span><span class="t"><b>' + esc(title.replace(/\s+/g, " ").trim()) + "</b><small>" + esc(v.sys) + (c && c.st && c.k !== "dock" ? " · " + esc(c.st) : "") + '</small></span><span class="w">' + esc(f.ago(D.T[o.i])) + "</span></button>";
-      }).join("") : '<div class="none">' + esc(tr("vis.search.none")) + "</div>";
-      e.res.classList.add("on"); e.q.setAttribute("aria-expanded", "true");
     };
 
     /* ---------- hover card ---------- */
@@ -124,8 +105,19 @@
         var bs = el.querySelectorAll("[data-do]"); setTip(s, bs[0], "tip.vis.show"); setTip(s, bs[1], "tip.vis.copy"); setTip(s, bs[2], "tip.vis.summary");
         return;
       }
-      var n = R.i1 - R.i0, sold = new Map(), bought = new Map(), st = new Map(), systems = new Set(), x, y;
-      for (x = R.i0; x < R.i1; x++) {
+      var n = R.i1 - R.i0, sold = new Map(), bought = new Map(), st = new Map(), systems = new Set(), x, y, wide = null, ix = s.idx;
+      if (ix) { var wm = G.store.monthsFor(ix, R.ta, R.tb); if (wm.some(function (mo) { return !G.store.loaded(s, mo.m); })) wide = wm; }
+      if (wide) {                  // the page is wider than what is held: add up the month summaries (the top lists are approximate)
+        n = 0; var wsys = 0, wly = 0, wcr = 0;
+        wide.forEach(function (mo) {
+          n += mo.n; wsys += mo.sys; wly += mo.ly; wcr += mo.cr;
+          mo.sell.forEach(function (p) { var o = sold.get(p[0]) || { cr: 0, n: 0 }; o.cr += p[1] || 0; sold.set(p[0], o); });
+          mo.buy.forEach(function (p) { var o = bought.get(p[0]) || { cr: 0, n: 0 }; o.cr += p[1] || 0; bought.set(p[0], o); });
+          mo.dock.forEach(function (p) { st.set(p[0], (st.get(p[0]) || 0) + (p[1] || 0)); });
+        });
+        wide = { sys: wsys, ly: wly, cr: wcr };
+      }
+      for (x = wide ? R.i1 : R.i0; x < R.i1; x++) {
         systems.add(D.v[x].sys); var as = D.v[x].acts || [];
         for (y = 0; y < as.length; y++) { var c = as[y];
           if (c.k === "sell" || c.k === "buy") { var m = c.k === "sell" ? sold : bought, o = m.get(c.what) || { cr: 0, n: 0 }; o.cr += c.cr || 0; o.n += c.n || 0; m.set(c.what, o); }
@@ -141,7 +133,7 @@
       var dist = D.PD[R.i1] - D.PD[R.i0] - (R.i0 < D.n ? D.DIST[R.i0] : 0);
       var back = s.lastSel >= 0 && s.lastSel < D.n ? '<div class="vs-row2" style="margin:0 0 8px"><button class="vs-btn go" data-do="resume" title="' + esc(tr("tip.vis.backstop")) + '">' + esc(tr("vis.btn.backstop", { name: D.v[s.lastSel].sys })) + "</button></div>" : "";
       el.innerHTML = back + "<h2>" + esc(tr("vis.sum.h")) + "</h2><h3>" + esc(tr("vis.pg.stops", { n: f.n(n) })) + '</h3><div class="vs-sub">' + esc(f.dy(R.ta)) + " – " + esc(f.dy(Math.max(R.ta, R.tb - 1))) + "</div>" +
-        '<div class="vs-kv">' + kv(tr("vis.kv.systems"), f.n(systems.size)) + kv(tr("vis.kv.flown"), f.ly(Math.max(0, dist)) + " ly") + kv(tr("vis.kv.earned"), f.c(D.PE[R.i1] - D.PE[R.i0])) + "</div>" +
+        '<div class="vs-kv">' + kv(tr("vis.kv.systems"), f.n(wide ? wide.sys : systems.size)) + kv(tr("vis.kv.flown"), f.ly(wide ? wide.ly : Math.max(0, dist)) + " ly") + kv(tr("vis.kv.earned"), f.c(wide ? wide.cr : D.PE[R.i1] - D.PE[R.i0])) + "</div>" + (wide ? '<div class="vs-empty">' + esc(tr("vis.sum.months")) + "</div>" : "") +
         '<div class="vs-sec"><span>' + esc(tr("vis.sec.sold")) + "</span></div>" + chip(top(sold), KCOL.sell) +
         '<div class="vs-sec"><span>' + esc(tr("vis.sec.bought")) + "</span></div>" + chip(top(bought), KCOL.buy) +
         '<div class="vs-sec"><span>' + esc(tr("vis.sec.docked")) + "</span></div>" + (sts.length ? sts.map(function (p) { return '<div class="vs-act thin" style="--c:' + KCOL.dock + '"><span class="m"><b>' + esc(p[0]) + '</b></span><span class="cr">' + esc(tr("vis.dockx", { n: f.n(p[1]) })) + "</span></div>"; }).join("") : '<div class="vs-empty">' + esc(tr("vis.none.dock")) + "</div>") +

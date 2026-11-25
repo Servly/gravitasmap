@@ -214,7 +214,7 @@ function build(data) {
   resetView(true);
   if (MAPMODE) smapBuild();                      // the system map follows a newly loaded system
   else if (SMAP_WANT) { SMAP_WANT = false; setMap(true, false); }
-  try { yahUpdate(); } catch (e) {}                 // v0.71: You are here, when this is the ship's system
+  try { yahUpdate(); if (typeof SYNC !== "undefined" && SYNC.on) syncShow(); } catch (e) {}                 // v0.71: You are here, when this is the ship's system (v0.99.21: and the Sync card says when you look at another one)
   try { arriveCardCheck(); } catch (e) {}           // v0.78: the arrival card after a jump
 }
 function computeWorld(t) {

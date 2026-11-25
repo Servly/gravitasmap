@@ -123,7 +123,7 @@ More in the [FAQ](docs/faq.md) and [docs/app.md](docs/app.md).
 
 - GRAVITAS reads the **Journal and Status.json** that Elite Dangerous writes on your PC, read-only.
 - **The Journal is not uploaded.** What leaves your computer because of it is the **name of a star system**, so the map can show it (the same request as typing it in the search box).
-- **Travel history:** the app keeps the list of systems you arrived at, with what you did there (docked, traded, explored, missions), in `visits.json` on your PC. It holds no commander name, FID or ship name, it is never uploaded, you can switch it off, and Forget deletes it (details in [PRIVACY.md](PRIVACY.md)).
+- **Travel history:** the app keeps the list of systems you arrived at, with what you did there (docked, traded, explored, missions), as a small archive on your PC: one file per month and a summary index in the folder `visits\` of the app's data folder. It holds no commander name, FID or ship name, it is never uploaded, it can always be rebuilt from your Journals, you can switch it off, and Forget deletes all of it (details in [PRIVACY.md](PRIVACY.md)).
 - The app's own network calls are the update check (and the installer download when you update), and, only while you have a phone or tablet pairing, the list of paired devices. If the WebView2 runtime is missing, the app opens Microsoft's download page in your browser, only if you click Yes in its message box. The map window is the website, so the website's calls apply there.
 - Phone pairing, the team board and problem reports send data **only when you switch them on or send them**, and only what [PRIVACY.md](PRIVACY.md) lists.
 - No accounts, no ads, no analytics, no cookies.

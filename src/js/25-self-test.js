@@ -90,7 +90,7 @@ async function runSelfTest(names) {
   // v0.99.3: ?selftest=sync: Sync's states on screen (src/lazy/synctest.js, loaded only here)
   if (SYNCTEST) { show(false);
     try { const m = await import("./__LAZY_SYNCTEST__");
-      rep.push(...await m.run({ get S() { return S; }, SYNC, YAH, get LOAD() { return LOAD; }, SYNC_ARRIVE_MS, $, loadSystem, yahUpdate, syncStWord, syncWouldReturn })); }
+      rep.push(...await m.run({ get S() { return S; }, SYNC, YAH, get LOAD() { return LOAD; }, SYNC_ARRIVE_MS, $, loadSystem, yahUpdate, syncStWord, syncWouldReturn, syncAway, syncShow, syncUi })); }
     catch (e) { add("Sync", "the Sync test loads", false, e.message); } }
   removeEventListener("error", onErr); removeEventListener("unhandledrejection", onErr);
   show(true); console.table(rep); window.__selftest = rep;

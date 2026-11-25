@@ -3,6 +3,10 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.21", k: "minor", d: "25 Nov 2026", t: [
+      "When Sync is on but the map shows a different system than your ship's (a visit opened from the GRAVITAS app, a search, a link), the Sync card now turns grey and says VIEWING, with the line \"Viewing X · ship in Y\" and a To my ship button. It goes back to LIVE by itself as soon as you look at your ship's system again.",
+      "Fix: since v0.99.20 a page whose address already had ?system= (every reload or restored tab has one) could stop Sync from taking the map along with your ship, and showed a Go button instead. Sync follows your ship again as before. Only a system opened on purpose from the GRAVITAS app's Visits page stays on screen."
+    ] },
     { v: "v0.99.20", k: "minor", d: "25 Nov 2026", t: [
       "A system you open on purpose now stays on screen while Sync is on: from a shared link, or with Show on the map in the GRAVITAS app's Visits page. Sync still shows where your ship is and offers a Go button, but it no longer takes the map back there by itself. It follows your ship again when you press Go."
     ] },

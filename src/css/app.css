@@ -1476,3 +1476,11 @@ body.paired #sync .plinkrow, body.pfull #sync .plinkrow { display:none !importan
 @media (max-width:760px) { #apPromo { display:none !important; } }
 body.pfull #apPromo { display:none !important; }
 body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; padding:7px 7px 7px 9px; border:1px solid rgba(255,106,213,.3); border-radius:10px; background:linear-gradient(135deg, rgba(255,106,213,.08), rgba(106,232,255,.05)); }
+
+/* v0.99.21: Sync is on but the map shows another system than the ship's: the card goes grey and says VIEWING */
+[data-k="away"] { --sk:#a4a9c4; }
+#sync[data-k="away"] { border-color:#a4a9c455; background:rgba(58,60,78,.62); box-shadow:none; }
+[data-k="away"] .sdot { background:var(--sk); box-shadow:none; animation:none; }
+#sync[data-k="away"] .scard { opacity:.62; filter:saturate(.35); }
+#sync[data-k="away"] #syncGo { background:#3a3f63; border-color:#a4a9c4; color:#fff; }
+#sync[data-k="away"] .sx { flex-wrap:wrap; row-gap:6px; } #sync[data-k="away"] #syncMsg { white-space:normal; flex:1 1 100%; } #sync[data-k="away"] #syncGo { margin-left:auto; }

@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.34
+- Visits now works like an archive, so even a history of hundreds of thousands of jumps stays light and fast. GRAVITAS keeps only a small index of your whole history in memory and loads the last 12 months in detail. Click an older month or year on the timeline and just that period is loaded, and it is dropped again when you open another one. The timeline shows your whole history, there is a new Year page, older travels appear as faint dust on the map, and the search finds where you sold or bought something across all your years. A very large archive reads in a few seconds the first time, newest months first, and a new jump in the game updates in an instant. GRAVITAS still only reads your Journal files and never changes them.
+
 ## 0.9.33
 - Visits is smoother. While your Journals are read for the first time you now see a loading screen with a progress bar, instead of a short "no visits" message. The "last N visits" box takes any number, including 10, 20 and 30. The map keys now follow the usual game layout: W A S D move the map, Q and E zoom, F fits the view, R replays, T tilts, X switches reduced effects and C shows or hides the panel. The details panel opens when you click a stop and closes when you click empty space, and from the summary a Back button takes you to the stop you were looking at.
 - Show on the map now keeps the system you picked even when Sync is on. The map still tells you where your ship is and offers a Go button, and it follows your ship again when you press it.

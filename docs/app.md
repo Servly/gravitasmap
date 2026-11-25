@@ -42,11 +42,11 @@ Windows **Settings > Apps > Installed apps > GRAVITAS > Uninstall**.
 | What | Where |
 |---|---|
 | Program | `%LOCALAPPDATA%\GRAVITAS` |
-| Settings, past fights, recordings, PVP files, travel history (`visits.json`) | `%APPDATA%\com.gravitasmap.app\` |
+| Settings, past fights, recordings, PVP files, travel history (folder `visits\`) | `%APPDATA%\com.gravitasmap.app\` |
 | Second copy of your settings and history | `%LOCALAPPDATA%\GRAVITAS-backup\` |
 | Log | `gravitas.log` in the app's data folder |
 
-The travel history (`visits.json`, the Visits page) lists the systems you arrived at and what you did there: time, system, its place in the galaxy, docked stations, trades, exploration and mission credits. It holds no commander name, FID or ship name. You can switch it off, and **Forget** deletes it and its backup copy.
+The travel history (the Visits page) lists the systems you arrived at and what you did there: time, system, its place in the galaxy, docked stations, trades, exploration and mission credits. It is kept as an archive in the folder `visits\`: one file per month and a small index with a summary of each month (counts, credits, top goods and stations, a coarse density map). The page loads the last twelve months and an older month only when you open it. It holds no commander name, FID or ship name, and it can be rebuilt from your Journals at any time. You can switch it off, and **Forget** deletes all of it.
 
 All of it stays on your computer. Delete the folders by hand if you want nothing left. If the app cannot read one of its own files it keeps it as `<name>.bad-<time>` and uses the backup copy.
 
