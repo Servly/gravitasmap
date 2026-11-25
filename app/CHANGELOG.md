@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.31
+- The installer now takes care of the Microsoft WebView2 Runtime that GRAVITAS needs. Microsoft's small WebView2 installer travels inside the GRAVITAS installer and runs by itself when a PC does not have WebView2 yet, so nobody has to install it first. If GRAVITAS ever starts without a usable WebView2, it shows one clear message in your language (English when your language is not one of GRAVITAS's six) with a button to open Microsoft's download page, instead of a hard error. The installer's own texts follow your Windows language too.
+
 ## 0.9.30
 - Free look over an open game panel no longer brings your windows back. When you opened a cockpit panel (for example the left panel with 1) and then used the free look key over it, the GRAVITAS windows appeared again on top of the panel. They now stay hidden for as long as the panel is open, and come back when you close it.
 

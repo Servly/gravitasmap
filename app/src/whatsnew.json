@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.31",
+      "en": [
+        "The installer now takes care of the Microsoft WebView2 Runtime that GRAVITAS needs. Microsoft's small WebView2 installer travels inside the GRAVITAS installer and runs by itself when a PC does not have WebView2 yet, so nobody has to install it first. If GRAVITAS ever starts without a usable WebView2, it shows one clear message in your language (English when your language is not one of GRAVITAS's six) with a button to open Microsoft's download page, instead of a hard error. The installer's own texts follow your Windows language too."
+      ],
+      "de": [
+        "Der Installer kümmert sich jetzt um die Microsoft WebView2 Runtime, die GRAVITAS braucht. Das kleine WebView2-Installationsprogramm von Microsoft steckt im GRAVITAS-Installer und läuft von selbst, wenn ein PC WebView2 noch nicht hat, niemand muss es vorher installieren. Falls GRAVITAS jemals ohne nutzbares WebView2 startet, zeigt es eine klare Meldung in deiner Sprache (Englisch, wenn deine Sprache nicht zu den sechs von GRAVITAS gehört) mit einer Schaltfläche zur Download-Seite von Microsoft statt eines harten Fehlers. Auch die Texte des Installers folgen deiner Windows-Sprache."
+      ],
+      "es": [
+        "El instalador ahora se ocupa del Microsoft WebView2 Runtime que GRAVITAS necesita. El pequeño instalador de WebView2 de Microsoft viaja dentro del instalador de GRAVITAS y se ejecuta solo cuando un PC aún no tiene WebView2, así que nadie tiene que instalarlo antes. Si GRAVITAS arranca alguna vez sin un WebView2 utilizable, muestra un mensaje claro en tu idioma (inglés cuando tu idioma no es uno de los seis de GRAVITAS) con un botón para abrir la página de descarga de Microsoft, en lugar de un error brusco. Los textos del propio instalador también siguen el idioma de tu Windows."
+      ],
+      "fr": [
+        "L'installateur s'occupe maintenant du Microsoft WebView2 Runtime dont GRAVITAS a besoin. Le petit installateur WebView2 de Microsoft voyage dans l'installateur de GRAVITAS et se lance tout seul quand un PC n'a pas encore WebView2, personne n'a à l'installer avant. Si GRAVITAS démarre un jour sans WebView2 utilisable, il affiche un message clair dans votre langue (en anglais si votre langue n'est pas l'une des six de GRAVITAS) avec un bouton pour ouvrir la page de téléchargement de Microsoft, au lieu d'une erreur brutale. Les textes de l'installateur suivent aussi la langue de votre Windows."
+      ],
+      "pt-br": [
+        "O instalador agora cuida do Microsoft WebView2 Runtime que o GRAVITAS precisa. O pequeno instalador do WebView2 da Microsoft vai dentro do instalador do GRAVITAS e roda sozinho quando um PC ainda não tem o WebView2, ninguém precisa instalá-lo antes. Se o GRAVITAS um dia iniciar sem um WebView2 utilizável, mostra uma mensagem clara no seu idioma (inglês quando seu idioma não é um dos seis do GRAVITAS) com um botão para abrir a página de download da Microsoft, em vez de um erro seco. Os textos do próprio instalador também seguem o idioma do seu Windows."
+      ],
+      "ru": [
+        "Установщик теперь сам заботится о Microsoft WebView2 Runtime, который нужен GRAVITAS. Маленький установщик WebView2 от Microsoft находится внутри установщика GRAVITAS и запускается сам, если на ПК ещё нет WebView2, поэтому ставить его заранее не нужно. Если GRAVITAS когда-нибудь запустится без работающего WebView2, он покажет понятное сообщение на вашем языке (на английском, если вашего языка нет среди шести языков GRAVITAS) с кнопкой для открытия страницы загрузки Microsoft вместо грубой ошибки. Тексты самого установщика тоже следуют языку вашего Windows."
+      ]
+    },
+    {
       "v": "0.9.30",
       "en": [
         "Free look over an open game panel no longer brings your windows back. When you opened a cockpit panel (for example the left panel with 1) and then used the free look key over it, the GRAVITAS windows appeared again on top of the panel. They now stay hidden for as long as the panel is open, and come back when you close it."

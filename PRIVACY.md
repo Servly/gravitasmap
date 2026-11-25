@@ -66,6 +66,8 @@ is signed (ed25519, the public key is inside the app) and the installer's SHA-25
 as the app is opened; while it is open the app only says "new version" and you press Update. The server can never change how the app behaves, switch
 features on or off, or send code or settings. The code is open (app/src-tauri/src/updater.rs).
 
+The installer carries Microsoft's small WebView2 bootstrapper inside it (nothing is downloaded by the installer for it from us; the bootstrapper itself may contact Microsoft when it installs the runtime). If the app starts on a PC where the WebView2 runtime is missing or unusable, it shows one message box in your Windows language (English when that language is not one of the app's six) and opens a Microsoft download page (`https://go.microsoft.com/fwlink/p/?LinkId=2124703`) in your default browser only if you click Yes; the app itself makes no network call for this (`app/src-tauri/src/webview_check.rs`).
+
 While Thargoids are about (a Thargoid music track, a Nonhuman signal source or a systems shutdown in your Journal) the app writes a recording of what Status.json shows and of the Journal
 events that matter into a file on your own computer (`%APPDATA%\com.gravitasmap.app\thargoid-rec\`), so a fight can be studied afterwards. These files never leave your computer
 and are never sent anywhere: you can read, copy or delete them yourself (app/src-tauri/src/thargoid_rec.rs). One recording stops growing at 20 MB, and only the newest 30 recordings are kept (the app removes older ones).

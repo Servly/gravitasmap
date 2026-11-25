@@ -1,6 +1,6 @@
 {
   "name": "gravitas",
-  "version": "0.9.30",
+  "version": "0.9.31",
   "private": true,
   "description": "GRAVITAS, a free fan-made companion for Elite Dangerous",
   "scripts": {

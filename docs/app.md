@@ -19,7 +19,7 @@ A free, fan-made Windows companion for Elite Dangerous. Built with Tauri 2 and t
 
 ## Requirements
 
-Windows 10 or 11 (64-bit). Elite Dangerous in **Borderless** or **Windowed** mode. The WebView2 runtime (part of current Windows).
+Windows 10 or 11 (64-bit). Elite Dangerous in **Borderless** or **Windowed** mode. The WebView2 runtime (part of current Windows; the installer brings Microsoft's small bootstrapper along, and the app shows a message with a Microsoft download link if the runtime is still missing).
 
 ## Install
 

@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod devenv;
+mod webview_check;
 mod card;
 #[allow(dead_code)]
 mod bonds;
@@ -593,6 +594,7 @@ fn only_one() -> bool {
 }
 
 fn main() {
+    webview_check::require(); // (no WebView2: one message box, then leave)
     guard::install_panic_log();
     if !only_one() {
         return;
