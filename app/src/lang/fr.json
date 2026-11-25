@@ -905,5 +905,7 @@
   "vis.pg.alldetail": "{n} étapes en détail · historique plus ancien en poussière",
   "vis.last.loaded": "Seules {max} étapes sont chargées. Choisis une période plus ancienne sur la frise pour en voir plus.",
   "vis.search.busy": "Recherche dans tout ton historique…",
-  "vis.sum.months": "Additionné à partir des résumés mensuels. Les classements sont approximatifs."
+  "vis.sum.months": "Additionné à partir des résumés mensuels. Les classements sont approximatifs.",
+  "vis.ill": "Spirale : illustration, pas une carte stellaire",
+  "tip.vis.ill": "La spirale discrète derrière la carte n'est qu'une décoration. Vos étapes, la route et les trois repères (Sol, Colonia, Sagittarius A*) utilisent de vraies coordonnées."
 }

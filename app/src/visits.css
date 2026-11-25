@@ -170,3 +170,5 @@
 .vs-lbar{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
 .vs-lbar i{display:block;height:100%;width:6%;border-radius:6px;background:linear-gradient(90deg,#6ae8ff,#a77bff,#ff6ad5);transition:width .4s ease}
 @media (prefers-reduced-motion:reduce){.vs-lbar i{transition-duration:.01ms}}
+
+.vs-ill{font-size:10.5px;color:var(--faint);font-style:italic;opacity:.85}

@@ -60,7 +60,7 @@
       '<div class="vs-tools">' + tools + "</div>" +
       '<aside class="vs-panel vs-gl"><div class="vs-pbody"></div></aside>' +
       '<div class="vs-help vs-gl"><h4>' + t("vis.help.h") + "</h4>" + help + "</div>" +
-      '<div class="vs-hud"><div class="vs-scale"><i></i><span></span></div><div class="vs-lod"></div></div><div class="vs-perf"' + (s.perfOn ? "" : " hidden") + "></div>" +
+      '<div class="vs-hud"><div class="vs-scale"><i></i><span></span></div><div class="vs-lod"></div><div class="vs-ill"></div></div><div class="vs-perf"' + (s.perfOn ? "" : " hidden") + "></div>" +
       '<div class="vs-dock vs-gl"><div class="vs-pg"><button class="vs-pgb" data-r="pOld" title="' + t("tip.vis.older") + '" aria-label="' + t("tip.vis.older") + '">' + SVG.old + '</button><button class="vs-pgb" data-r="pNew" title="' + t("tip.vis.newer") + '" aria-label="' + t("tip.vis.newer") + '">' + SVG.nw + '</button><span class="vs-seg" data-r="unitSeg">' + units + '</span><span class="vs-pgl"></span></div><canvas class="vs-tlc" title="' + t("tip.vis.timeline") + '"></canvas><div class="vs-arch" hidden><span class="vs-ach vs-gl" data-r="archChip" title="' + t("tip.vis.arch") + '"><span class="vs-al"></span><button class="vs-ax" data-r="archX" title="' + t("tip.vis.arch.x") + '" aria-label="' + t("tip.vis.arch.x") + '">&times;</button></span><span class="vs-an vs-gl" role="status" hidden></span></div></div>' +
       '<div class="vs-toast vs-gl" role="status"><span>' + t("vis.toast.slow") + '</span><button class="vs-btn go" data-r="toastBtn" title="' + t("tip.vis.toast.reduce") + '">' + t("vis.toast.reduce") + '</button><button class="vs-btn" data-r="toastX" title="' + t("tip.vis.toast.no") + '">' + t("vis.toast.no") + "</button></div>" +
       '<div class="vs-ldv vs-gl" hidden role="status"><b></b><span class="vs-lbar"><i></i></span></div>' +
@@ -76,7 +76,7 @@
     var q = function (sel) { return root.querySelector(sel); }, e = s.e;
     e.main = root; e.stage = q(".vs-stage"); e.bg = q(".vs-bg"); e.fg = q(".vs-fg"); e.tlc = q(".vs-tlc"); e.tl = q(".vs-tl"); e.stats = q(".vs-stats"); e.q = q(".vs-search input"); e.search = q(".vs-search");
     e.res = q(".vs-res"); e.chips = q(".vs-chips"); e.tools = q(".vs-tools"); e.panel = q(".vs-panel"); e.pbody = q(".vs-pbody"); e.help = q(".vs-help"); e.dock = q(".vs-dock"); e.pgl = q(".vs-pgl");
-    e.tip = q(".vs-tip"); e.toast = q(".vs-toast"); e.perf = q(".vs-perf"); e.lod = q(".vs-lod"); e.scBar = q(".vs-scale i"); e.scTxt = q(".vs-scale span"); e.st = q(".vs-st");
+    e.tip = q(".vs-tip"); e.toast = q(".vs-toast"); e.perf = q(".vs-perf"); e.lod = q(".vs-lod"); e.ill = q(".vs-ill"); e.ill.textContent = tr("vis.ill"); e.ill.title = tr("tip.vis.ill"); e.scBar = q(".vs-scale i"); e.scTxt = q(".vs-scale span"); e.st = q(".vs-st");
     e.arch = q(".vs-arch"); e.ach = q(".vs-ach"); e.al = q(".vs-al"); e.an = q(".vs-an"); e.ldv = q(".vs-ldv"); e.ldb = q(".vs-ldv b"); e.ldp = q(".vs-ldv i"); e.none = q(".vs-none"); e.prog = q(".vs-prog i"); e.plog = q(".vs-log"); e.noneH = q(".vs-nc h3"); e.noneP = q(".vs-nc p"); e.hud = q(".vs-hud");
     ["bFit", "bReplay", "bTilt", "bPanel", "bHelp", "pOld", "pNew", "unitSeg", "fx", "fxr", "keep", "keepr", "forget", "fconf", "fyes", "fno", "toastBtn", "toastX", "qx", "lastBox", "lastIn", "lastGo", "lastBad", "archX"].forEach(function (r) { e[r] = q('[data-r="' + r + '"]'); });
     e.keep2 = off.querySelector('[data-r="keep2"]');

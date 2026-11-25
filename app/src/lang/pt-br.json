@@ -905,5 +905,7 @@
   "vis.pg.alldetail": "{n} paradas em detalhe · histórico mais antigo como poeira",
   "vis.last.loaded": "Só há {max} paradas carregadas. Escolha um período mais antigo na linha do tempo para ver mais.",
   "vis.search.busy": "Pesquisando em todo o seu histórico…",
-  "vis.sum.months": "Somado a partir dos resumos mensais. As listas de destaques são aproximadas."
+  "vis.sum.months": "Somado a partir dos resumos mensais. As listas de destaques são aproximadas.",
+  "vis.ill": "Espiral: ilustração, não um mapa estelar",
+  "tip.vis.ill": "A espiral tênue atrás do mapa é só decoração. Suas paradas, a rota e os três pontos de referência (Sol, Colonia, Sagittarius A*) usam coordenadas reais."
 }

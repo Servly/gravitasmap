@@ -905,5 +905,7 @@
   "vis.pg.alldetail": "{n} Stopps im Detail · ältere Historie als Staub",
   "vis.last.loaded": "Es sind nur {max} Stopps geladen. Wähle auf der Zeitleiste einen älteren Zeitraum, um mehr zu sehen.",
   "vis.search.busy": "Dein gesamter Verlauf wird durchsucht…",
-  "vis.sum.months": "Aus den Monatszusammenfassungen addiert. Die Toplisten sind Näherungswerte."
+  "vis.sum.months": "Aus den Monatszusammenfassungen addiert. Die Toplisten sind Näherungswerte.",
+  "vis.ill": "Spirale: Illustration, keine Sternkarte",
+  "tip.vis.ill": "Die schwache Spirale hinter der Karte ist nur Dekoration. Deine Stopps, die Route und die drei Orientierungspunkte (Sol, Colonia, Sagittarius A*) nutzen echte Koordinaten."
 }

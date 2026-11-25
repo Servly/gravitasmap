@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.36
+- The Visits map now faces the same way as the game's Galaxy Map. It was a mirror image before: Colonia sat on the left, and in the game it is on the right of Sagittarius A*. Your stops, the route, the three landmarks and the faint dust of older years all follow the corrected direction. The soft spiral behind the map is decoration only, and the page now says so (Spiral: illustration, not a star map).
+
 ## 0.9.35
 - Fix: the GRAVITAS MAP window said "Waiting for the game…" while the game was running, when you had stayed in one system for a long time. The map found your position only in the newest part of the Journal, and after a long session without a jump that part held no position. GRAVITAS now also looks further back in the Journal (read only, as always) for your last position, so the map follows you right away.
 

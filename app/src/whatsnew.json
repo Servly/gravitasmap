@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.36",
+      "en": [
+        "The Visits map now faces the same way as the game's Galaxy Map. It was a mirror image before: Colonia sat on the left, and in the game it is on the right of Sagittarius A*. Your stops, the route, the three landmarks and the faint dust of older years all follow the corrected direction. The soft spiral behind the map is decoration only, and the page now says so (Spiral: illustration, not a star map)."
+      ],
+      "de": [
+        "Die Karte der Besuche zeigt jetzt in dieselbe Richtung wie die Galaxiekarte des Spiels. Vorher war sie ein Spiegelbild: Colonia lag links, im Spiel liegt es rechts von Sagittarius A*. Deine Stopps, die Route, die drei Orientierungspunkte und der schwache Staub älterer Jahre folgen der korrigierten Richtung. Die weiche Spirale hinter der Karte ist nur Dekoration, und die Seite sagt das jetzt auch (Spirale: Illustration, keine Sternkarte)."
+      ],
+      "es": [
+        "El mapa de Visitas ahora mira en la misma dirección que el Mapa de la Galaxia del juego. Antes era una imagen en espejo: Colonia estaba a la izquierda y en el juego está a la derecha de Sagittarius A*. Tus paradas, la ruta, los tres puntos de referencia y el polvo tenue de años anteriores siguen la dirección corregida. La espiral suave detrás del mapa es solo decoración, y la página ahora lo dice (Espiral: ilustración, no un mapa estelar)."
+      ],
+      "fr": [
+        "La carte des Visites est maintenant orientée comme la carte de la galaxie du jeu. Elle était avant une image en miroir : Colonia était à gauche, alors que dans le jeu elle est à droite de Sagittarius A*. Vos étapes, la route, les trois repères et la poussière légère des années anciennes suivent la direction corrigée. La spirale douce derrière la carte n'est qu'une décoration, et la page le dit maintenant (Spirale : illustration, pas une carte stellaire)."
+      ],
+      "pt-br": [
+        "O mapa de Visitas agora aponta para o mesmo lado que o Mapa da Galáxia do jogo. Antes era uma imagem espelhada: Colonia ficava à esquerda e no jogo ela fica à direita de Sagittarius A*. Suas paradas, a rota, os três pontos de referência e a poeira tênue de anos antigos seguem a direção corrigida. A espiral suave atrás do mapa é só decoração, e a página agora diz isso (Espiral: ilustração, não um mapa estelar)."
+      ],
+      "ru": [
+        "Карта «Посещений» теперь повёрнута так же, как Карта галактики в игре. Раньше она была зеркальной: Colonia стояла слева, а в игре она справа от Sagittarius A*. Ваши остановки, маршрут, три ориентира и слабая пыль прошлых лет следуют исправленному направлению. Мягкая спираль за картой это только украшение, и страница теперь так и пишет (Спираль: иллюстрация, не звёздная карта)."
+      ]
+    },
+    {
       "v": "0.9.35",
       "en": [
         "Fix: the GRAVITAS MAP window said \"Waiting for the game…\" while the game was running, when you had stayed in one system for a long time. The map found your position only in the newest part of the Journal, and after a long session without a jump that part held no position. GRAVITAS now also looks further back in the Journal (read only, as always) for your last position, so the map follows you right away."

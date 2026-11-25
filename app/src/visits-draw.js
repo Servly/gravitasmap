@@ -125,7 +125,8 @@
     g = bg.createRadialGradient(W * .5, H * .45, 20, W * .5, H * .45, Math.max(W, H) * .75); g.addColorStop(0, "#160e2c"); g.addColorStop(.6, "#0a0618"); g.addColorStop(1, "#04030a"); bg.fillStyle = g; bg.fillRect(0, 0, W, H);
     if (!disc) makeDisc();
     var da = clamp((0.3 - sc) / 0.28, 0, 1) * .9;
-    if (da > 0.02) { bg.save(); bg.globalAlpha = da; bg.translate(cam.ox + (25 - cam.cx) * sc, cam.oy + (25899 - cam.cz) * cp * sc); bg.scale(sc, sc * cp); bg.drawImage(disc, -48000, -48000, 96000, 96000); bg.restore(); }
+    if (s.e && s.e.ill) s.e.ill.style.display = da > 0.02 ? "" : "none";   // the spiral is decoration: say so while it shows
+    if (da > 0.02) { bg.save(); bg.globalAlpha = da; bg.translate(cam.ox + (-25 - cam.cx) * sc, cam.oy + (25899 - cam.cz) * cp * sc); bg.scale(sc, sc * cp); bg.drawImage(disc, -48000, -48000, 96000, 96000); bg.restore(); }
     for (var ti = 0; ti < tiles.length; ti++) { var t = tiles[ti], ox = ((s.accPan[0] * t.f) % TILE + TILE) % TILE, oy = ((s.accPan[1] * t.f) % TILE + TILE) % TILE; for (var x = ox - TILE; x < W; x += TILE) for (var y = oy - TILE; y < H; y += TILE) bg.drawImage(t.c, x | 0, y | 0); }
   }
   function pickKind(kc, q) { for (var i = 0; i < PRI.length; i++) if (kc[q * 6 + PRI[i]] > 0) return PRI[i]; return 0; }

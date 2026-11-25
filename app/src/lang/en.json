@@ -905,5 +905,7 @@
   "vis.pg.alldetail": "{n} stops in detail · older history as dust",
   "vis.last.loaded": "Only {max} stops are loaded. Pick an older period on the timeline to see more.",
   "vis.search.busy": "Searching your whole history…",
-  "vis.sum.months": "Added up from the monthly summaries. The top lists are approximate."
+  "vis.sum.months": "Added up from the monthly summaries. The top lists are approximate.",
+  "vis.ill": "Spiral: illustration, not a star map",
+  "tip.vis.ill": "The faint spiral behind the map is only decoration. Your stops, the route and the three landmarks (Sol, Colonia, Sagittarius A*) use real coordinates."
 }
