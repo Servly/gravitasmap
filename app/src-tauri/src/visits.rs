@@ -1,9 +1,45 @@
-//! Visits: the systems you jumped to (or started the game in), newest first, read from the Journal files on this PC when the page asks.
-//! Nothing is stored or sent: it is read again each time, so there is no second copy of your Journal anywhere.
+//! Visits: your travel history. Every system you arrived at (jump, carrier jump, or where the game started) with its place in the galaxy and what you
+//! did there (docked, sold, bought, explored, vouchers, missions), kept in visits.json in the app's data folder, read from the Journal files on this PC.
+//! The file never leaves the PC. It holds no FID, no commander name, no ship name and no mission id. The player can switch it off (setting visits_keep)
+//! and "Forget" deletes it and its backup copy. Details: visits/parse.rs (one file's text -> stops), visits/hist.rs (the stored history and the scan).
 use serde_json::{json, Value};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, OnceLock};
 
+pub mod hist;
+pub mod parse;
+#[cfg(test)]
+mod hist_tests;
+
+static HIST: OnceLock<Arc<hist::Hist>> = OnceLock::new();
+
+fn hist() -> &'static Arc<hist::Hist> {
+    HIST.get_or_init(|| Arc::new(hist::Hist::new(crate::store::dir().map(|d| d.join("visits.json")), None)))
+}
+
+/// The setting (default ON): the travel history is built and kept.
+pub fn keep_on() -> bool { crate::store::read().get("visits_keep").and_then(Value::as_bool).unwrap_or(true) }
+
+/// The stored history at once, and the scan started in the background when needed (see hist::Hist::get).
+pub fn get(rev: Option<u64>) -> Value {
+    if !keep_on() {
+        if let Some(h) = HIST.get() { h.set_keep(false); }
+        return hist::empty_reply(false);
+    }
+    let h = hist();
+    h.set_keep(true);
+    h.get(crate::journal::saved_games(), rev)
+}
+
+pub fn forget() -> bool { hist().forget() }
+
+pub fn keep_set(on: bool) {
+    crate::store::set(&[("visits_keep", json!(on))]);
+    if let Some(h) = HIST.get() { h.set_keep(on); }
+}
+
+// ---- the older list (systems only, newest first; still used until the page switches to visits_get) ----
 /// at most this many visits are returned
 const LIMIT: usize = 200;
 /// at most this many Journal files are looked at (newest first)

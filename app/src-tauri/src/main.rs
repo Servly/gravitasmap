@@ -2,6 +2,8 @@
 
 mod devenv;
 mod webview_check;
+mod feedback;
+mod appprefs;
 mod card;
 #[allow(dead_code)]
 mod bonds;
@@ -204,6 +206,50 @@ fn diagnostic_report() -> String {
     drift::report_text(env!("CARGO_PKG_VERSION"), drift::game_info())
 }
 
+/// Feedback (About page): sends one message, only when the player presses Send (see feedback.rs for exactly what goes). The reply is the report id or a short reason.
+#[tauri::command(async)]
+fn send_feedback(args: serde_json::Value) -> Result<String, String> {
+    let diag = args.get("diag").and_then(|v| v.as_bool()).unwrap_or(false).then(diagnostic_report);
+    let body = feedback::body(&args, env!("CARGO_PKG_VERSION"), diag)?;
+    feedback::send(&body, env!("CARGO_PKG_VERSION"))
+}
+
+/// Settings page: what the extras are now set to. autostart.supported is false in the Store build (the Store has its own way to start an app).
+#[tauri::command(async)]
+fn prefs_get() -> serde_json::Value {
+    serde_json::json!({
+        "autostart": { "supported": !cfg!(feature = "store"), "on": !cfg!(feature = "store") && appprefs::autostart_on() },
+        "minimize_to_tray": appprefs::minimize_to_tray(),
+        "close_to_tray": appprefs::close_to_tray(),
+        "folders": appprefs::folders(),
+    })
+}
+
+/// Start with Windows on or off (current user only). Returns whether it is now as asked.
+#[tauri::command(async)]
+fn autostart_set(on: bool) -> bool { !cfg!(feature = "store") && appprefs::autostart_set(on) }
+
+/// The two tray switches (nothing else can be set through here).
+#[tauri::command]
+fn tray_pref_set(name: String, on: bool) -> bool {
+    match name.as_str() {
+        "minimize_to_tray" | "close_to_tray" => { store::set(&[(name.as_str(), serde_json::json!(on))]); true }
+        _ => false,
+    }
+}
+
+/// Saves the settings as a file in Documents and shows it in Explorer. Returns the full path.
+#[tauri::command(async)]
+fn settings_export() -> Result<String, String> { appprefs::export_file() }
+
+/// Takes the text of a settings file made by settings_export. Returns how many settings were taken.
+#[tauri::command(async)]
+fn settings_import(text: String) -> Result<usize, String> { appprefs::import_text(&text) }
+
+/// Opens the data, backup or Journal folder in Explorer.
+#[tauri::command]
+fn folder_open(which: String) -> bool { appprefs::open_folder(&which) }
+
 /// A cheap yes/no for the Modes page note: did the game write something this version does not know?
 #[tauri::command]
 fn drift_flag() -> bool {
@@ -367,6 +413,13 @@ fn pair_open_browser(app: tauri::AppHandle) -> bool {
 }
 #[tauri::command(async)]
 fn visits_list() -> Vec<serde_json::Value> { visits::list() }
+/// The travel history: what is stored at once, the scan runs in the background (see visits.rs). `rev` = the number of the last answer: nothing new = "same".
+#[tauri::command(async)]
+fn visits_get(rev: Option<u64>) -> serde_json::Value { visits::get(rev) }
+#[tauri::command(async)]
+fn visits_forget() -> bool { visits::forget() }
+#[tauri::command]
+fn visits_keep_set(on: bool) { visits::keep_set(on) }
 
 #[tauri::command]
 fn hotkeys_get() -> Vec<(String, String)> {
@@ -500,7 +553,10 @@ fn menu_raise(app: tauri::AppHandle) { let a = app.clone(); let _ = app.run_on_m
 /// The app's window goes to the Windows tray (by the clock and the volume), the app keeps running.
 #[tauri::command]
 fn hide_to_tray(app: tauri::AppHandle) {
-    if let Some(w) = app.get_webview_window("main") { let _ = w.hide(); menu::set_visible(&w, false); }
+    if let Some(w) = app.get_webview_window("main") {
+        if !appprefs::minimize_to_tray() { let _ = w.minimize(); return; }   // (the player turned the tray off: a normal minimise)
+        let _ = w.hide(); menu::set_visible(&w, false);
+    }
 }
 
 /// The Thargoid and On Foot modes on or off (the Combat one is combat_set).
@@ -609,6 +665,9 @@ fn main() {
         .setup(move |app| {
             let handle = app.handle().clone();
             let _ = menu::APP.set(handle.clone());
+            if appprefs::started_hidden() {   // started by Windows at sign-in: stay in the tray until the player opens the window
+                if let Some(w) = app.get_webview_window("main") { let _ = w.hide(); menu::set_visible(&w, false); }
+            }
             updater::start(handle.clone(), true);
             {
                 use tauri::menu::{MenuBuilder, MenuItemBuilder};
@@ -693,6 +752,7 @@ fn main() {
             // the app's window is never destroyed: the close button and Alt+F4 take it to the tray (Quit is in the tray's menu)
             if window.label() == "main" {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    if !appprefs::close_to_tray() { window.app_handle().exit(0); return; }   // (the player turned "keep running in the tray" off: closing quits)
                     api.prevent_close();
                     let _ = window.hide();
                     if let Some(w) = window.app_handle().get_webview_window("main") { menu::set_visible(&w, false); }
@@ -706,7 +766,7 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, combat_op, combat_extra, editor_rects, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, diagnostic_report, drift_flag, open_licences])
+        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, combat_op, combat_extra, editor_rects, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_get, visits_forget, visits_keep_set, diagnostic_report, send_feedback, prefs_get, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
         .run(tauri::generate_context!())
         .expect("error while running GRAVITAS");
 }

@@ -42,9 +42,11 @@ Windows **Settings > Apps > Installed apps > GRAVITAS > Uninstall**.
 | What | Where |
 |---|---|
 | Program | `%LOCALAPPDATA%\GRAVITAS` |
-| Settings, past fights, recordings, PVP files | `%APPDATA%\com.gravitasmap.app\` |
+| Settings, past fights, recordings, PVP files, travel history (`visits.json`) | `%APPDATA%\com.gravitasmap.app\` |
 | Second copy of your settings and history | `%LOCALAPPDATA%\GRAVITAS-backup\` |
 | Log | `gravitas.log` in the app's data folder |
+
+The travel history (`visits.json`, the Visits page) lists the systems you arrived at and what you did there: time, system, its place in the galaxy, docked stations, trades, exploration and mission credits. It holds no commander name, FID or ship name. You can switch it off, and **Forget** deletes it and its backup copy.
 
 All of it stays on your computer. Delete the folders by hand if you want nothing left. If the app cannot read one of its own files it keeps it as `<name>.bad-<time>` and uses the backup copy.
 
@@ -55,3 +57,5 @@ The app uses Windows calls that read key states and the mouse (to hide panels wh
 ## Diagnostics
 
 **About > Copy diagnostic report** copies counts of what the game wrote that this version did not know. It holds no names or paths and sends nothing.
+
+**About > Send feedback** opens a form for a problem, an idea or a question. You can add up to 3 screenshots and tick *Attach the diagnostic report* (you can read it first). Nothing is sent until you press Send. It goes to the developers through `https://gravitasmap.com/api/report`, with the app version and your Windows version, and never includes your Journal or FID.

@@ -293,12 +293,12 @@
     fillPane("keys-main", ["kbmain"]);   fillPane("keys-map", ["kbmap"]);
     fillPane("keys-combat", ["kbcombat"]); fillPane("keys-thargoid", ["kbsoon"]); fillPane("keys-foot", ["kbsoon"]);
     fillPane("combat-past", ["past"]);
+    fillPane("prefs-x", ["prefsx"]);
     fillPane("map-overview", ["mapopen", "mapov", "mapsite"]);          fillPane("map-past", ["visits"]);
     fillPane("thargoid-overview", ["thwin", "threc"]); fillPane("thargoid-past", ["thpast"]);
     fillPane("debrief-overview", ["dbmode", "dbwin", "dbbinds"]);   // (the Past debriefs list is not reachable from the UI for now: SEC.dbpast and the db_* commands stay)
     fillPane("pvp-overview", ["pvpmode", "pvpwin"]); fillPane("pvp-past", ["pvpfights"]); fillPane("pvp-cmp", ["pvpcompare"]);
     fillPane("foot-overview", [["soon", "nav.foot"]]);         fillPane("foot-past", [["soon", "tab.past.foot"]]);
-    fillPane("prefs-tests", ["tests"]);
   }
   /* ---------- updates: only "a newer version exists" ever comes from the server (updater.rs) ---------- */
   var upd = {};
@@ -371,6 +371,7 @@
     if (!invoke) return;
     invoke("diagnostic_report").then(copyText).then(function () { toast(t("toast.diag.copied")); }).catch(function () { toast(t("toast.diag.fail")); });
   };
+  if ($("#fbOpen")) $("#fbOpen").onclick = function () { if (window.GVFeedback) GVFeedback.open(); };
   if ($("#licOpen")) $("#licOpen").onclick = function () {
     if (invoke) invoke("open_licences").catch(function (e) { toast(t("toast.lic.fail", { err: String(e) })); });
   };

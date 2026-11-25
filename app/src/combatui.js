@@ -61,7 +61,7 @@
   function pastList(p, o) {
     var c = card(o.h, p), pre = o.pre;
     c.appendChild(mk("p", "note", tr(o.note)));
-    var sel = mk("select", "sel"); sel.size = 6; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel);
+    var sel = mk("select", "sel"); sel.size = 8; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel);
     var bar = mk("div", "opt"), b1 = mk("button", "btn", tr("past.copy")), b2 = mk("button", "btn", tr("past.show")), b5 = tip(mk("button", "btn", tr("past.fav")), "tip.past.fav"), b3 = mk("button", "btn", tr("past.del")), b4 = mk("button", "btn", tr("past.undo"));
     tip(sel, o.tip); tip(b1, "tip.past.copy"); tip(b2, "tip.past.show"); tip(b3, "tip.past.del"); tip(b4, "tip.past.undo"); b4.hidden = true;
     [b1, b2, b5, b3, b4].forEach(function (b) { bar.appendChild(b); }); c.appendChild(bar);
@@ -308,32 +308,8 @@
       var a = mk("a", "btn", "gravitasmap.com"); a.href = "https://gravitasmap.com"; a.setAttribute("data-ext", ""); tip(a, "tip.map.link");
       h.appendChild(l); h.appendChild(a); c.appendChild(h);
     },
-    /** Visits: the systems you jumped to, newest first, read from the Journal when the page opens (nothing is stored) */
-    visits: function (p) {
-      var c = card("visits.h", p);
-      c.appendChild(mk("p", "note", tr("visits.note")));
-      var sel = mk("select", "sel"); sel.size = 10; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel); tip(sel, "tip.visits.list");
-      var bar = mk("div", "opt"), b1 = tip(mk("button", "btn go map", tr("visits.show")), "tip.visits.show"), b2 = tip(mk("button", "btn", tr("visits.refresh")), "tip.visits.refresh");
-      bar.appendChild(b1); bar.appendChild(b2); c.appendChild(bar);
-      var items = [];
-      function chosen() { var i = sel.selectedIndex; return i >= 0 ? items[i] : null; }
-      function fill() {
-        if (!invoke) return;
-        invoke("visits_list").then(function (a) {
-          items = a || []; sel.innerHTML = "";
-          if (!items.length) { sel.appendChild(mk("option", null, tr("visits.none"))); b1.disabled = true; return; }
-          items.forEach(function (it, i) {
-            var d = new Date(it.time), when = isNaN(d) ? "?" : d.toLocaleString(undefined, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-            var o = mk("option", null, when + "  " + it.system + (it.how === "carrier" ? "  · " + tr("visits.carrier") : "")); o.value = i; sel.appendChild(o);
-          });
-          sel.selectedIndex = 0; b1.disabled = false;
-        }).catch(function () {});
-      }
-      b1.onclick = function () { var x = chosen(); if (x && invoke) invoke("map_open_site", { mode: null, system: x.system }); };
-      sel.ondblclick = b1.onclick;
-      b2.onclick = fill;
-      fill();
-    },
+    /** Visits: the retrospective travel map (visits*.js builds it, the Rust side sends the stops with visits_get) */
+    visits: function (p) { if (window.GVV) GVV.mount(p, window.GVC.h); },
     /** the Debrief page: its mode switch and the one for its observations */
     dbmode: function (p) {
       var c = card("db.mode.h", p);
@@ -369,7 +345,7 @@
     dbpast: function (p) {
       var c = card("db.past.h", p);
       c.appendChild(mk("p", "note", tr("db.past.note")));
-      var sel = mk("select", "sel"); sel.size = 6; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel); tip(sel, "tip.db.past.list");
+      var sel = mk("select", "sel"); sel.size = 8; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel); tip(sel, "tip.db.past.list");
       var bar = mk("div", "opt"), b2 = mk("button", "btn", tr("past.show")), b5 = tip(mk("button", "btn", tr("past.fav")), "tip.past.fav"), b3 = mk("button", "btn", tr("past.del")), b4 = mk("button", "btn", tr("past.undo"));
       tip(b2, "tip.db.past.show"); tip(b3, "tip.past.del"); tip(b4, "tip.past.undo"); b4.hidden = true;
       [b2, b5, b3, b4].forEach(function (b) { bar.appendChild(b); }); c.appendChild(bar);
@@ -422,7 +398,7 @@
     pvpfights: function (p) {
       var c = card("pvp.list.h", p);
       c.appendChild(mk("p", "note", tr("pvp.list.note")));
-      var sel = mk("select", "sel"); sel.size = 6; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel); tip(sel, "tip.pvp.list");
+      var sel = mk("select", "sel"); sel.size = 8; sel.style.cssText = "width:100%;margin:8px 0"; c.appendChild(sel); tip(sel, "tip.pvp.list");
       c.appendChild(mk("p", "note", tr("pvp.next")));
       var view = mk("div"); c.appendChild(view);
       var items = [], sig = null;
@@ -558,7 +534,7 @@
     /** the page was translated again: the controls are built again by the caller */
     reset: function () { renders = []; },
     /** what keybind.js needs to build its cards the same way */
-    h: { mk: mk, card: card, row: row, tip: tip, sw: sw, op: op, set: set, tr: function (k, v) { return tr(k, v); }, invoke: function (n, a) { return invoke ? invoke(n, a) : Promise.reject(); }, S: function () { return S; } },
+    h: { lang: function () { return getLang(); }, toast: function (m) { toast(m); }, mk: mk, card: card, row: row, tip: tip, sw: sw, op: op, set: set, tr: function (k, v) { return tr(k, v); }, invoke: function (n, a) { return invoke ? invoke(n, a) : Promise.reject(); }, S: function () { return S; } },
     /** another file adds a section */
     add: function (name, fn) { SEC[name] = fn; },
     poll: poll,

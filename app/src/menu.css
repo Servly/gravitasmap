@@ -23,6 +23,8 @@ html,body{background:transparent}
 select.sel{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line-2);border-radius:12px;padding:6px 10px;font:inherit}
 select.sel,.txt{box-sizing:border-box;height:35px}
 select.sel option{background:#1a1030}
+select.sel[size]{height:auto;padding:6px;line-height:1.6}
+select.sel[size] option{padding:4px 8px;border-radius:8px}
 .mbody{scrollbar-gutter:stable}
 .kbctl{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
 .kbcustom{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}

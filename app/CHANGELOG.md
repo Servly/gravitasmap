@@ -2,6 +2,10 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.32
+- Visits is now a travel diary on a galaxy map. Your route is drawn through the real star positions with glowing lines. Old stops gather into numbered groups so even a very long history stays smooth, and you can page back by session, day, week or month, or ask for your last N visits. Click a stop to see what you did there, or search for where you last sold or bought something. GRAVITAS keeps this history on your PC only (never sent) and you can switch it off or forget it at any time.
+- New in About: Send feedback, a form for a problem, an idea or a question, with up to 3 screenshots and an optional diagnostic report. Nothing is sent until you press Send. Settings gained Start with Windows, tray choices, a settings file you can save and load on another PC, and the folders where your data lives. The history lists are taller, the Tests page is gone, and the installer file has the GRAVITAS icon.
+
 ## 0.9.31
 - The installer now takes care of the Microsoft WebView2 Runtime that GRAVITAS needs. Microsoft's small WebView2 installer travels inside the GRAVITAS installer and runs by itself when a PC does not have WebView2 yet, so nobody has to install it first. If GRAVITAS ever starts without a usable WebView2, it shows one clear message in your language (English when your language is not one of GRAVITAS's six) with a button to open Microsoft's download page, instead of a hard error. The installer's own texts follow your Windows language too.
 

@@ -7,7 +7,9 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="rows.css">
 <link rel="stylesheet" href="about.css">
+<link rel="stylesheet" href="feedback.css">
 <link rel="stylesheet" href="debrief.css">
+<link rel="stylesheet" href="visits.css">
 </head>
 <body>
 <div class="win" id="win">
@@ -97,13 +99,11 @@
 
     <section class="view" id="v-prefs" aria-label="Settings">
       <div class="head rise" style="--i:0"><div><h2 data-i18n="prefs.h2"></h2><h1 data-i18n="prefs.h1"></h1></div></div>
-      <nav class="tabs" data-scope="prefs"><button class="tab on" data-i18n-title="tip.tab.general" data-tab="general" data-i18n="tab.general"></button><button class="tab" data-i18n-title="tip.tab.tests" data-tab="tests" data-i18n="tab.tests"></button></nav>
       <div class="pane on" id="prefs-general"><div class="narrow">
         <h2 class="rise" style="--i:1" data-i18n="prefs.lang"></h2>
         <div class="list rise" style="--i:2" id="langs" role="radiogroup"></div>
         <p class="note rise" style="--i:3" data-i18n="prefs.lang.note"></p>
-      </div></div>
-      <div class="pane" id="prefs-tests"></div>
+      </div><div class="narrow" id="prefs-x"></div></div>
     </section>
 
     <section class="view" id="v-updates" aria-label="Updates">
@@ -120,7 +120,7 @@
             <p class="sub" data-i18n="about.tagline"></p>
             <p class="ab-text" data-i18n="about.text"></p>
             <div class="ab-ver"><span class="badge" id="ver"></span></div>
-            <div class="links"><button class="btn" id="wnOpen" data-i18n-title="tip.wn.open" data-i18n="wn.open"></button><button class="btn" id="diagCopy" data-i18n-title="tip.about.diag" data-i18n="about.diag"></button><button class="btn" id="licOpen" data-i18n-title="tip.about.lic" data-i18n="about.lic"></button><a class="btn ghost" data-i18n-title="tip.github" href="https://github.com/Servly/gravitasmap" data-ext>GitHub</a><a class="btn ghost" data-i18n-title="tip.site" href="https://gravitasmap.com" data-ext>gravitasmap.com</a></div>
+            <div class="links"><button class="btn" id="wnOpen" data-i18n-title="tip.wn.open" data-i18n="wn.open"></button><button class="btn go" id="fbOpen" data-i18n-title="tip.about.fb" data-i18n="fb.open"></button><button class="btn" id="diagCopy" data-i18n-title="tip.about.diag" data-i18n="about.diag"></button><button class="btn" id="licOpen" data-i18n-title="tip.about.lic" data-i18n="about.lic"></button><a class="btn ghost" data-i18n-title="tip.github" href="https://github.com/Servly/gravitasmap" data-ext>GitHub</a><a class="btn ghost" data-i18n-title="tip.site" href="https://gravitasmap.com" data-ext>gravitasmap.com</a></div>
           </div>
         </div>
         <div class="card rise" style="--i:1"><h2 data-i18n="about.thanks.h"></h2><ul class="ab-list" id="thanks"></ul>
@@ -136,8 +136,14 @@
 <div class="upd" id="upd" hidden><span id="updText"></span><button class="btn" id="updBtn"></button></div>
 <script src="dbgraph.js"></script>
 <script src="dbpair.js"></script>
+<script src="visits-data.js"></script>
+<script src="visits-draw.js"></script>
+<script src="visits-panel.js"></script>
+<script src="visits-ui.js"></script>
 <script src="combatui.js"></script>
 <script src="keybind.js"></script>
+<script src="feedback.js"></script>
+<script src="prefsx.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
