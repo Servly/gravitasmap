@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.35
+- Fix: the GRAVITAS MAP window said "Waiting for the game…" while the game was running, when you had stayed in one system for a long time. The map found your position only in the newest part of the Journal, and after a long session without a jump that part held no position. GRAVITAS now also looks further back in the Journal (read only, as always) for your last position, so the map follows you right away.
+
 ## 0.9.34
 - Visits now works like an archive, so even a history of hundreds of thousands of jumps stays light and fast. GRAVITAS keeps only a small index of your whole history in memory and loads the last 12 months in detail. Click an older month or year on the timeline and just that period is loaded, and it is dropped again when you open another one. The timeline shows your whole history, there is a new Year page, older travels appear as faint dust on the map, and the search finds where you sold or bought something across all your years. A very large archive reads in a few seconds the first time, newest months first, and a new jump in the game updates in an instant. GRAVITAS still only reads your Journal files and never changes them.
 

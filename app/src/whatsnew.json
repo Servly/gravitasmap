@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.35",
+      "en": [
+        "Fix: the GRAVITAS MAP window said \"Waiting for the game…\" while the game was running, when you had stayed in one system for a long time. The map found your position only in the newest part of the Journal, and after a long session without a jump that part held no position. GRAVITAS now also looks further back in the Journal (read only, as always) for your last position, so the map follows you right away."
+      ],
+      "de": [
+        "Korrektur: Das Fenster GRAVITAS MAP zeigte „Waiting for the game…“, obwohl das Spiel lief, wenn du lange im selben System geblieben warst. Die Karte fand deine Position nur im neuesten Teil des Journals, und nach einer langen Sitzung ohne Sprung enthielt dieser Teil keine Position. GRAVITAS sucht jetzt auch weiter zurück im Journal (wie immer nur lesend) nach deiner letzten Position, sodass die Karte dir sofort folgt."
+      ],
+      "es": [
+        "Corrección: la ventana GRAVITAS MAP decía «Waiting for the game…» con el juego en marcha cuando llevabas mucho tiempo en el mismo sistema. El mapa solo buscaba tu posición en la parte más reciente del Journal, y tras una sesión larga sin saltos esa parte no tenía ninguna posición. Ahora GRAVITAS también busca más atrás en el Journal (solo lectura, como siempre) tu última posición, así que el mapa te sigue al instante."
+      ],
+      "fr": [
+        "Correction : la fenêtre GRAVITAS MAP affichait « Waiting for the game… » alors que le jeu tournait, quand vous étiez resté longtemps dans le même système. La carte ne cherchait votre position que dans la partie la plus récente du Journal, et après une longue session sans saut cette partie ne contenait aucune position. GRAVITAS cherche maintenant aussi plus loin dans le Journal (en lecture seule, comme toujours) votre dernière position, et la carte vous suit tout de suite."
+      ],
+      "pt-br": [
+        "Correção: a janela GRAVITAS MAP dizia «Waiting for the game…» com o jogo aberto quando você ficava muito tempo no mesmo sistema. O mapa só procurava sua posição na parte mais recente do Journal, e depois de uma sessão longa sem saltos essa parte não tinha nenhuma posição. Agora o GRAVITAS também procura mais atrás no Journal (somente leitura, como sempre) a sua última posição, e o mapa te acompanha na hora."
+      ],
+      "ru": [
+        "Исправление: окно GRAVITAS MAP показывало «Waiting for the game…» при запущенной игре, если вы долго оставались в одной системе. Карта искала вашу позицию только в самой новой части Журнала, а после долгой сессии без прыжков в этой части позиции не было. Теперь GRAVITAS ищет вашу последнюю позицию и глубже в Журнале (только чтение, как всегда), и карта сразу следует за вами."
+      ]
+    },
+    {
       "v": "0.9.34",
       "en": [
         "Visits now works like an archive, so even a history of hundreds of thousands of jumps stays light and fast. GRAVITAS keeps only a small index of your whole history in memory and loads the last 12 months in detail. Click an older month or year on the timeline and just that period is loaded, and it is dropped again when you open another one. The timeline shows your whole history, there is a new Year page, older travels appear as faint dust on the map, and the search finds where you sold or bought something across all your years. A very large archive reads in a few seconds the first time, newest months first, and a new jump in the game updates in an instant. GRAVITAS still only reads your Journal files and never changes them."

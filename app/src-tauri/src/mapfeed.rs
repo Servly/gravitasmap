@@ -165,7 +165,53 @@ pub fn open_feed(path: &Path) -> Option<Feed> {
     if len > TAIL { if let Some(i) = text.find('\n') { text = text[i + 1..].to_string(); } }
     // a half line at the very end waits for the rest
     let (done, rest) = match text.rfind('\n') { Some(i) => (text[..=i].to_string(), text[i + 1..].as_bytes().to_vec()), None => (String::new(), text.into_bytes()) };
-    Some(Feed { name, pos: len, rest, acc: filtered(&done) })
+    let mut acc = filtered(&done);
+    // The page finds where the ship is from the last Location / FSDJump / CarrierJump line. A long session in one system (no jump for a long time) has that
+    // line far above the tail, so the page waited for the game forever: when the tail has none, the newest one is looked for in the part above it (read only).
+    if len > TAIL && !has_position(&acc) {
+        if let Some(front) = earlier_position(path, len - TAIL) { acc = front + &acc; }
+    }
+    Some(Feed { name, pos: len, rest, acc })
+}
+
+/// Does this text hold a line that says where the ship is?
+fn has_position(text: &str) -> bool {
+    text.contains("\"event\":\"Location\"") || text.contains("\"event\":\"FSDJump\"") || text.contains("\"event\":\"CarrierJump\"")
+}
+
+/// Bytes `a..b` of a file (read only).
+fn read_range(path: &Path, a: u64, b: u64) -> Option<Vec<u8>> {
+    let mut f = fs::File::open(path).ok()?;
+    f.seek(SeekFrom::Start(a)).ok()?;
+    let mut v = Vec::new();
+    f.take(b.saturating_sub(a)).read_to_end(&mut v).ok()?;
+    Some(v)
+}
+
+/// In the bytes `0..end` of the Journal: the newest position line and the newest Loadout line (for the jump range), already filtered, or None.
+/// Looks back in pieces of 4 MB, at most 64 MB, so a huge file costs little. Read only.
+fn earlier_position(path: &Path, end: u64) -> Option<String> {
+    const STEP: u64 = 4 * 1024 * 1024;
+    const LIMIT: u64 = 64 * 1024 * 1024;
+    let nl = '\n';
+    let mut hi = end;
+    let mut loadout: Option<String> = None;
+    while hi > 0 && end - hi < LIMIT {
+        let lo = hi.saturating_sub(STEP);
+        let b = read_range(path, lo, hi)?;
+        let text = String::from_utf8_lossy(&b).into_owned();
+        // a piece that starts in the middle of the file starts in the middle of a line: that first part is left out
+        let body: &str = if lo > 0 { match text.find(nl) { Some(k) => &text[k + 1..], None => "" } } else { &text };
+        if loadout.is_none() { loadout = body.lines().rev().find(|l| l.contains("\"event\":\"Loadout\"")).map(str::to_string); }
+        if let Some(pos) = body.lines().rev().find(|l| has_position(l)) {
+            let mut raw = String::new();
+            if let Some(x) = &loadout { raw.push_str(x); raw.push(nl); }
+            raw.push_str(pos); raw.push(nl);
+            return Some(filtered(&raw));
+        }
+        hi = lo;
+    }
+    None
 }
 
 /// The newest lines up to CAP: older ones go from the front, at a line start.
@@ -331,6 +377,33 @@ mod tests {
         let site: Vec<&str> = line[open..close].split('|').collect();
         assert_eq!(site.len(), EVENTS.len(), "different number of events");
         for e in EVENTS { assert!(site.contains(e), "{e} is not in the site's list"); }
+    }
+
+    #[test]
+    fn a_long_session_without_a_jump_still_hands_over_the_last_position() {
+        let dir = tmp("far");
+        let p = dir.join("Journal.2026-11-24T120000.01.log");
+        let mut body = String::new();
+        body.push_str("{ \"event\":\"Loadout\", \"Ship\":\"python\" }
+");
+        body.push_str("{ \"event\":\"Location\", \"StarSystem\":\"Far Away\" }
+");
+        let filler = "{ \"event\":\"ReservoirReplenished\", \"FuelMain\":1.0, \"pad\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\" }
+";
+        while (body.len() as u64) < TAIL + 400_000 { body.push_str(filler); }
+        fs::write(&p, &body).unwrap();
+        let f = open_feed(&p).unwrap();
+        assert!(f.acc.contains("Far Away"), "the last position above the tail is handed over");
+        assert!(f.acc.contains("Loadout"));
+        assert!(f.acc.len() < 1_000, "and the page still gets only what the Sync needs");
+        // a tail that has a position is left alone
+        let mut body2 = body.clone();
+        body2.push_str("{ \"event\":\"FSDJump\", \"StarSystem\":\"Near\" }
+");
+        fs::write(&p, &body2).unwrap();
+        let f2 = open_feed(&p).unwrap();
+        assert!(f2.acc.contains("Near") && !f2.acc.contains("Far Away"));
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]
