@@ -63,6 +63,9 @@ function syncShow() {
   if (typeof layoutLeft === "function") layoutLeft();
 }
 function syncToggle() {
+  try { syncToggle2(); } catch (e) { try { console.error("Sync switch:", e); } catch (x) {} toast("Sync could not start: " + (e && (e.message || e.name) || "unknown error") + ". Please reload the page and try again."); }   // v0.99.22: never a silent click
+}
+function syncToggle2() {
   if (SYNC.remote) { pairLeave(); return; }                           // v0.76: stop following the other computer
   if (!SYNC.ok) { const i = document.querySelector("#sync .pjoin input"); if (i) { i.focus(); toast("Sync with the game needs Chrome or Edge on a computer. To follow one, type the code it shows under Devices."); } else toast("Sync with the game needs Chrome or Edge on a computer."); return; }
   if (SYNC.on) { syncStop(); syncLS("on", "0"); return; }
@@ -73,7 +76,7 @@ async function syncStartFlow(change) {
   // with a remembered answer and a folder chosen before, starting only asks the browser for permission again
   if (!change && syncLS("consent") === "1") {
     const h = SYNC.dir || await syncLoadDir();
-    if (h) { try { if (await h.requestPermission({ mode: "read" }) === "granted") return syncStart(h, true); } catch (e) {} }
+    if (h) { try { if (await h.requestPermission({ mode: "read" }) === "granted") return syncStart(h, true); } catch (e) { try { console.warn("Sync: the remembered folder could not be used:", e); } catch (x) {} } }
   }
   syncDialog(change);
 }
@@ -99,10 +102,14 @@ function syncDialog(change) {
     d.querySelector(".cp").onclick = async () => { try { await navigator.clipboard.writeText(SYNC_PATH); toast("Folder path copied"); } catch (e) { prompt("Copy this path:", SYNC_PATH); } };
     d.querySelector(".pick").onclick = async () => {
       const warn = d.querySelector(".warn"); warn.style.display = "none";
-      let h; try { h = await window.showDirectoryPicker({ id: "gravitas-journal", mode: "read", startIn: "documents" }); } catch (e) { return; }   // cancelled
+      let h; try { h = await window.showDirectoryPicker({ id: "gravitas-journal", mode: "read", startIn: "documents" }); } catch (e) {
+        if (e && e.name === "AbortError") return;                       // cancelled
+        // v0.99.22: anything else (the browser refused this folder, no permission, a blocked API) is said out loud, not swallowed
+        warn.textContent = "Your browser did not allow this: " + (e && (e.name + (e.message ? " - " + e.message : "")) || "unknown error") + ". Try choosing the folder shown above again, or use Chrome or Edge on a computer."; warn.style.display = "block"; return;
+      }
       if (!await syncHasJournal(h)) { warn.textContent = "This folder has no Journal files. Choose the folder shown above, where files named Journal….log are."; warn.style.display = "block"; return; }
       syncLS("consent", d.querySelector(".rem").checked ? "1" : "0");
-      close(); syncSaveDir(h); syncStart(h, true);
+      close(); syncSaveDir(h); syncStart(h, true).catch(e => { try { console.error("Sync start:", e); } catch (x) {} toast("Sync could not start: " + (e && (e.message || e.name) || "unknown error")); });
     };
   }
   d.querySelector(".agree").checked = syncLS("consent") === "1"; d.querySelector(".rem").checked = syncLS("consent") === "1";
