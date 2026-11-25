@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.20 · minor · 25 Nov 2026
+- A system you open on purpose now stays on screen while Sync is on: from a shared link, or with Show on the map in the GRAVITAS app's Visits page. Sync still shows where your ship is and offers a Go button, but it no longer takes the map back there by itself. It follows your ship again when you press Go.
+
 ### v0.99.19 · minor · 24 Nov 2026
 - The "Get the Windows app" card on the main screen now stays where it is (it no longer hides after you use it, and nothing is remembered in your browser). The App button of the Sync card is gone, because the card replaces it.
 

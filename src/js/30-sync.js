@@ -10,6 +10,7 @@ const SYNC = {
   here: "", at: null, jumping: "", pend: null, miss: "", missN: 0, missT: 0, auto: true, err: 0,
 };
 const SYNC_LINKED = new URLSearchParams(location.search).has("system");   // v0.75.6: read at once (the page rewrites its address later)
+SYNC.pin = SYNC_LINKED;                                             // v0.99.20: a system opened from a link or from the app's Visits stays on screen: Sync tells you where the ship is but does not take the map there until you press Go
 const SYNC_MISS_WAIT = [30, 60, 120, 300];                           // v0.99.9: seconds between searches for a system Spansh does not know yet (at most 4 retries)
 const SYNC_ARRIVE_MS = 60000;                                         // v0.76: how long the arrival star keeps "You are here"
 const SYNC_PATH = "%USERPROFILE%\\Saved Games\\Frontier Developments\\Elite Dangerous";
@@ -307,7 +308,7 @@ function syncArrive(first) {
   if (!SYNC.here) return syncShow();
   if (syncViewing()) { SYNC.pend = null; if (S) { SYNC.shown = S.sys.name; syncLS("last", S.sys.name); } syncShow(); syncBody(); return; }
   // v0.75.6: resumed by itself on a page that no link pointed elsewhere: follow the ship, like a click on the switch
-  const own = !S || (first && (SYNC.byClick || SYNC.resume)) || syncSame(S.sys.name, SYNC.prev) || syncSame(S.sys.name, SYNC.shown);   // turned on just now, or was looking at their own system
+  const own = !SYNC.pin && (!S || (first && (SYNC.byClick || SYNC.resume)) || syncSame(S.sys.name, SYNC.prev) || syncSame(S.sys.name, SYNC.shown));   // turned on just now, or was looking at their own system
   if (SYNC.auto && own) syncFollow(SYNC.here, false);
   else { SYNC.pend = SYNC.here; syncShow(); if (!first) toast(`Jumped to ${SYNC.here}`); }
 }
@@ -318,7 +319,7 @@ function syncPrefetch(name) {
 }
 async function syncFollow(name, retry) {
   if (SYNC.loading === name) return;
-  SYNC.loading = name; SYNC.pend = null; SYNC.miss = ""; syncShow();
+  SYNC.pin = false; SYNC.loading = name; SYNC.pend = null; SYNC.miss = ""; syncShow();
   const pre = SYNC.pre && syncSame(SYNC.pre.name, name) ? SYNC.pre.req : null; SYNC.pre = null;
   let ok = false;
   try { ok = await loadSystem(name, { pre, sync: true }); } catch (e) {}
@@ -373,7 +374,7 @@ function yahWhat(atStation) {
 }
 // v0.90.8 (v0.99.3: its own function, for the self-test too): auto-jump takes the map back to the ship's system only
 // when what is on screen was not opened by the visitor
-function syncWouldReturn() { return !!(SYNC.auto && SYNC.here && !SYNC.loading && !SYNC.miss && S && !syncViewing() && LOAD.by !== "user"); }
+function syncWouldReturn() { return !!(SYNC.auto && !SYNC.pin && SYNC.here && !SYNC.loading && !SYNC.miss && S && !syncViewing() && LOAD.by !== "user"); }
 function yahUpdate() {
   if (PFULL) queueMicrotask(pfullTitle);                            // v0.77: "● here" on the top bar
   const sys = SYNC.on && syncViewing(), L = sys ? SYNC.live : null;

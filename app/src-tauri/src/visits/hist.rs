@@ -112,6 +112,7 @@ impl Hist {
         self.load(&mut g);
         if g.last_scan.map_or(true, |t| t.elapsed() >= SCAN_EVERY) && !self.running.swap(true, Ordering::SeqCst) {
             g.last_scan = Some(Instant::now());
+            if g.files.is_empty() && dir.is_some() { g.scanning = true; }   // (nothing stored yet: the page says "reading your Journals" from the very first answer, not "no visits")
             let me = Arc::clone(self);
             let spawned = std::thread::Builder::new().name("GRAVITAS visits".into()).spawn(move || {
                 let _r = Running(&me.running);
@@ -123,7 +124,7 @@ impl Hist {
                     }
                 }
             });
-            if spawned.is_err() { self.running.store(false, Ordering::SeqCst); }
+            if spawned.is_err() { self.running.store(false, Ordering::SeqCst); g.scanning = false; }
         }
         let same = rev == Some(g.rev) && rev.is_some() && !g.scanning;   // (a scan in progress always answers in full, so the page sees the flag flip)
         let (scanning, done, total) = (g.scanning, g.done, g.total);

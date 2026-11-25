@@ -1,6 +1,33 @@
 {
   "versions": [
     {
+      "v": "0.9.33",
+      "en": [
+        "Visits is smoother. While your Journals are read for the first time you now see a loading screen with a progress bar, instead of a short \"no visits\" message. The \"last N visits\" box takes any number, including 10, 20 and 30. The map keys now follow the usual game layout: W A S D move the map, Q and E zoom, F fits the view, R replays, T tilts, X switches reduced effects and C shows or hides the panel. The details panel opens when you click a stop and closes when you click empty space, and from the summary a Back button takes you to the stop you were looking at.",
+        "Show on the map now keeps the system you picked even when Sync is on. The map still tells you where your ship is and offers a Go button, and it follows your ship again when you press it."
+      ],
+      "de": [
+        "Besuche läuft jetzt runder. Beim ersten Einlesen deiner Journals siehst du einen Ladebildschirm mit Fortschrittsbalken statt einer kurzen Meldung „keine Besuche“. Das Feld „letzte N Besuche“ nimmt jede Zahl an, auch 10, 20 und 30. Die Kartentasten folgen jetzt dem üblichen Spiele-Layout: W A S D bewegen die Karte, Q und E zoomen, F passt die Ansicht ein, R spielt die Route ab, T kippt die Karte, X schaltet reduzierte Effekte um und C zeigt oder verbirgt das Fenster. Das Detailfenster öffnet sich beim Klick auf einen Stopp und schließt sich beim Klick auf leeren Raum, und aus der Zusammenfassung führt ein Zurück-Knopf zum zuletzt angesehenen Stopp.",
+        "Auf der Karte zeigen behält jetzt das gewählte System, auch wenn Sync an ist. Die Karte sagt dir weiter, wo dein Schiff ist, und bietet einen Los-Knopf an. Sie folgt deinem Schiff wieder, wenn du ihn drückst."
+      ],
+      "es": [
+        "Visitas va más fluido. Mientras tus Journals se leen por primera vez ves una pantalla de carga con barra de progreso, en vez de un breve mensaje de «sin visitas». El cuadro de «últimas N visitas» acepta cualquier número, incluidos 10, 20 y 30. Las teclas del mapa siguen ahora la disposición habitual de los juegos: W A S D mueven el mapa, Q y E hacen zoom, F ajusta la vista, R repite la ruta, T inclina, X activa los efectos reducidos y C muestra u oculta el panel. El panel de detalles se abre al hacer clic en una parada y se cierra al hacer clic en un espacio vacío, y desde el resumen un botón Volver lleva a la parada que mirabas.",
+        "Mostrar en el mapa ahora mantiene el sistema que elegiste aunque Sync esté activado. El mapa sigue diciéndote dónde está tu nave y ofrece un botón Ir, y vuelve a seguir tu nave cuando lo pulsas."
+      ],
+      "fr": [
+        "Visites est plus fluide. Pendant la première lecture de vos Journals, vous voyez un écran de chargement avec une barre de progression au lieu d'un bref message « aucune visite ». La case « N dernières visites » accepte n'importe quel nombre, y compris 10, 20 et 30. Les touches de la carte suivent maintenant la disposition habituelle des jeux : W A S D déplacent la carte, Q et E zooment, F cadre la vue, R rejoue, T incline, X active les effets réduits et C affiche ou masque le panneau. Le panneau de détails s'ouvre au clic sur une étape et se ferme au clic dans le vide, et depuis le résumé un bouton Retour ramène à l'étape que vous regardiez.",
+        "Afficher sur la carte garde maintenant le système choisi même quand Sync est activé. La carte vous indique toujours où est votre vaisseau et propose un bouton Aller, et elle suit de nouveau votre vaisseau quand vous l'appuyez."
+      ],
+      "pt-br": [
+        "Visitas ficou mais fluido. Enquanto seus Journals são lidos pela primeira vez, você vê uma tela de carregamento com barra de progresso, em vez de uma rápida mensagem de «sem visitas». A caixa de «últimas N visitas» aceita qualquer número, inclusive 10, 20 e 30. As teclas do mapa agora seguem o layout usual dos jogos: W A S D movem o mapa, Q e E dão zoom, F ajusta a vista, R repete a rota, T inclina, X liga os efeitos reduzidos e C mostra ou oculta o painel. O painel de detalhes abre ao clicar em uma parada e fecha ao clicar em um espaço vazio, e do resumo um botão Voltar leva à parada que você estava vendo.",
+        "Mostrar no mapa agora mantém o sistema que você escolheu mesmo com o Sync ligado. O mapa continua dizendo onde sua nave está e oferece um botão Ir, e volta a seguir sua nave quando você o aperta."
+      ],
+      "ru": [
+        "Раздел «Посещения» стал плавнее. Пока ваши Журналы читаются в первый раз, вы видите экран загрузки с полосой прогресса вместо короткого сообщения «нет посещений». В поле «последние N посещений» можно вводить любое число, включая 10, 20 и 30. Клавиши карты теперь соответствуют привычной раскладке игр: W A S D двигают карту, Q и E масштабируют, F вписывает вид, R воспроизводит маршрут, T наклоняет, X включает сокращённые эффекты, а C показывает или скрывает панель. Панель сведений открывается по щелчку на остановке и закрывается по щелчку на пустом месте, а из сводки кнопка «Назад» возвращает к остановке, которую вы смотрели.",
+        "«Показать на карте» теперь сохраняет выбранную систему, даже когда включена Синхронизация. Карта по-прежнему показывает, где ваш корабль, и предлагает кнопку «Перейти», и снова следует за кораблём, когда вы её нажмёте."
+      ]
+    },
+    {
       "v": "0.9.32",
       "en": [
         "Visits is now a travel diary on a galaxy map. Your route is drawn through the real star positions with glowing lines. Old stops gather into numbered groups so even a very long history stays smooth, and you can page back by session, day, week or month, or ask for your last N visits. Click a stop to see what you did there, or search for where you last sold or bought something. GRAVITAS keeps this history on your PC only (never sent) and you can switch it off or forget it at any time.",

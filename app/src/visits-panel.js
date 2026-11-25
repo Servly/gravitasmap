@@ -139,7 +139,8 @@
         sh += '<button class="vs-ses" data-ses="' + D.ses[k] + '" title="' + esc(tr("tip.vis.ses")) + '">' + esc(f.full(D.T[D.ses[k]])) + "<span>" + esc(tr("vis.ses.row", { n: f.n(ib - ia), cr: f.c(D.PE[ib] - D.PE[ia]) })) + "</span></button>";
       }
       var dist = D.PD[R.i1] - D.PD[R.i0] - (R.i0 < D.n ? D.DIST[R.i0] : 0);
-      el.innerHTML = "<h2>" + esc(tr("vis.sum.h")) + "</h2><h3>" + esc(tr("vis.pg.stops", { n: f.n(n) })) + '</h3><div class="vs-sub">' + esc(f.dy(R.ta)) + " – " + esc(f.dy(Math.max(R.ta, R.tb - 1))) + "</div>" +
+      var back = s.lastSel >= 0 && s.lastSel < D.n ? '<div class="vs-row2" style="margin:0 0 8px"><button class="vs-btn go" data-do="resume" title="' + esc(tr("tip.vis.backstop")) + '">' + esc(tr("vis.btn.backstop", { name: D.v[s.lastSel].sys })) + "</button></div>" : "";
+      el.innerHTML = back + "<h2>" + esc(tr("vis.sum.h")) + "</h2><h3>" + esc(tr("vis.pg.stops", { n: f.n(n) })) + '</h3><div class="vs-sub">' + esc(f.dy(R.ta)) + " – " + esc(f.dy(Math.max(R.ta, R.tb - 1))) + "</div>" +
         '<div class="vs-kv">' + kv(tr("vis.kv.systems"), f.n(systems.size)) + kv(tr("vis.kv.flown"), f.ly(Math.max(0, dist)) + " ly") + kv(tr("vis.kv.earned"), f.c(D.PE[R.i1] - D.PE[R.i0])) + "</div>" +
         '<div class="vs-sec"><span>' + esc(tr("vis.sec.sold")) + "</span></div>" + chip(top(sold), KCOL.sell) +
         '<div class="vs-sec"><span>' + esc(tr("vis.sec.bought")) + "</span></div>" + chip(top(bought), KCOL.buy) +

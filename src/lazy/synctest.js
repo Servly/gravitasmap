@@ -48,6 +48,10 @@ export async function run(g) {
     add(other, "auto-jump: opened by you, it stays", !g.syncWouldReturn(), `LOAD.by = ${g.LOAD.by}`);
     await g.loadSystem(other); SYNC.here = ship; await wait(300);
     add(other, "auto-jump: opened by nobody, back to the ship", g.syncWouldReturn(), `LOAD.by = ${g.LOAD.by}`);
+    // v0.99.20: a system pinned by a link or by the app's Visits is never taken back, even when nobody "opened" it by hand
+    await g.loadSystem(other); SYNC.here = ship; SYNC.pin = true; await wait(300);
+    add(other, "pinned view: Sync does not take the map back", !g.syncWouldReturn(), `pin = ${SYNC.pin}`);
+    SYNC.pin = false;
   } catch (e) { add("Sync", "ran to the end", false, e.message); }
   Object.assign(SYNC, saved); g.yahUpdate(); if (word != null) g.syncStWord(word);
   return rep;

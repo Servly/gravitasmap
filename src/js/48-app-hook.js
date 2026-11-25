@@ -42,7 +42,7 @@ Object.assign(window.__gravitasApp, {
     if (!APP_WINDOW || !/^(Status|NavRoute)\.json$/.test(name) || typeof text !== "string") return false;
     APPF.files[name] = { blob: new Blob([text]), m: Date.now() }; return true;
   },
-  openSystem(name) { if (typeof name !== "string" || !name.trim() || name.length > 80) return false; loadSystem(name.trim(), { user: true }); return true; },   // from the app's Visits list: opened by you, so Sync does not take it back
+  openSystem(name) { if (typeof name !== "string" || !name.trim() || name.length > 80) return false; SYNC.pin = true; loadSystem(name.trim(), { user: true }); return true; },   // from the app's Visits list: opened by you, so Sync does not take it back
   openTool(tab) { if (tab === "Devices") return pairShow(); if (/^(Sonification|Lenses|Collisions)$/.test(tab)) { openNews(tab, "modes"); return true; } return false; },
   // the phones and tablets that follow (33-pair-manage.js): the app keeps the pairing, this window holds it in memory only.
   //   pairIn(room, key)   the app hands over its copy (null, null = it has none)      pairClear(room)  that pairing ended: drop it here

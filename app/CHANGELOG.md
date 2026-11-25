@@ -2,6 +2,10 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.33
+- Visits is smoother. While your Journals are read for the first time you now see a loading screen with a progress bar, instead of a short "no visits" message. The "last N visits" box takes any number, including 10, 20 and 30. The map keys now follow the usual game layout: W A S D move the map, Q and E zoom, F fits the view, R replays, T tilts, X switches reduced effects and C shows or hides the panel. The details panel opens when you click a stop and closes when you click empty space, and from the summary a Back button takes you to the stop you were looking at.
+- Show on the map now keeps the system you picked even when Sync is on. The map still tells you where your ship is and offers a Go button, and it follows your ship again when you press it.
+
 ## 0.9.32
 - Visits is now a travel diary on a galaxy map. Your route is drawn through the real star positions with glowing lines. Old stops gather into numbered groups so even a very long history stays smooth, and you can page back by session, day, week or month, or ask for your last N visits. Click a stop to see what you did there, or search for where you last sold or bought something. GRAVITAS keeps this history on your PC only (never sent) and you can switch it off or forget it at any time.
 - New in About: Send feedback, a form for a problem, an idea or a question, with up to 3 screenshots and an optional diagnostic report. Nothing is sent until you press Send. Settings gained Start with Windows, tray choices, a settings file you can save and load on another PC, and the folders where your data lives. The history lists are taller, the Tests page is gone, and the installer file has the GRAVITAS icon.

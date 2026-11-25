@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.20", k: "minor", d: "25 Nov 2026", t: [
+      "A system you open on purpose now stays on screen while Sync is on: from a shared link, or with Show on the map in the GRAVITAS app's Visits page. Sync still shows where your ship is and offers a Go button, but it no longer takes the map back there by itself. It follows your ship again when you press Go."
+    ] },
     { v: "v0.99.19", k: "minor", d: "24 Nov 2026", t: [
       "The \"Get the Windows app\" card on the main screen now stays where it is (it no longer hides after you use it, and nothing is remembered in your browser). The App button of the Sync card is gone, because the card replaces it.",
     ] },

@@ -66,7 +66,7 @@
       '<div class="vs-dock vs-gl"><div class="vs-pg"><button class="vs-pgb" data-r="pOld" title="' + t("tip.vis.older") + '" aria-label="' + t("tip.vis.older") + '">' + SVG.old + '</button><button class="vs-pgb" data-r="pNew" title="' + t("tip.vis.newer") + '" aria-label="' + t("tip.vis.newer") + '">' + SVG.nw + '</button><span class="vs-seg" data-r="unitSeg">' + units + '</span><span class="vs-pgl"></span></div><canvas class="vs-tlc" title="' + t("tip.vis.timeline") + '"></canvas></div>' +
       '<div class="vs-toast vs-gl" role="status"><span>' + t("vis.toast.slow") + '</span><button class="vs-btn go" data-r="toastBtn" title="' + t("tip.vis.toast.reduce") + '">' + t("vis.toast.reduce") + '</button><button class="vs-btn" data-r="toastX" title="' + t("tip.vis.toast.no") + '">' + t("vis.toast.no") + "</button></div>" +
       '<div class="vs-tip vs-gl"></div>' +
-      '<div class="vs-none"><div class="vs-nc vs-gl"><div class="ico">' + SVG.globe + '</div><h3></h3><p></p></div></div></section>' +
+      '<div class="vs-none"><div class="vs-nc vs-gl"><div class="ico">' + SVG.globe + '</div><h3></h3><p></p><div class="vs-prog"><i></i></div><div class="vs-log"></div></div></div></section>' +
       '<div class="vs-foot"><div class="vs-st" aria-live="polite"></div>' + '<span class="vs-fxr" data-r="fxr" title="' + t("tip.vis.fx") + '"><button class="sw" role="switch" aria-checked="false" data-r="fx" aria-label="' + t("vis.fx") + '"></button><span>' + t("vis.fx") + '</span></span><span class="vs-keep" data-r="keepr" title="' + t("tip.vis.keep") + '"><button class="sw" role="switch" aria-checked="true" data-r="keep" aria-label="' + t("vis.keep.h") + '"></button><span>' + t("vis.keep.h") + '</span></span>' +
       '<span class="vs-forget"><button class="vs-btn" data-r="forget" title="' + t("tip.vis.forget") + '">' + t("vis.forget") + '</button><span data-r="fconf" hidden>' + t("vis.forget.ask") + ' <button class="vs-btn warn" data-r="fyes" title="' + t("tip.vis.forget.yes") + '">' + t("vis.forget.yes") + '</button> <button class="vs-btn" data-r="fno" title="' + t("tip.vis.forget.no") + '">' + t("vis.forget.no") + "</button></span></span></div>";
     parent.appendChild(root);
@@ -78,7 +78,7 @@
     e.main = root; e.stage = q(".vs-stage"); e.bg = q(".vs-bg"); e.fg = q(".vs-fg"); e.tlc = q(".vs-tlc"); e.tl = q(".vs-tl"); e.stats = q(".vs-stats"); e.q = q(".vs-search input"); e.search = q(".vs-search");
     e.res = q(".vs-res"); e.chips = q(".vs-chips"); e.tools = q(".vs-tools"); e.panel = q(".vs-panel"); e.pbody = q(".vs-pbody"); e.help = q(".vs-help"); e.dock = q(".vs-dock"); e.pgl = q(".vs-pgl");
     e.tip = q(".vs-tip"); e.toast = q(".vs-toast"); e.perf = q(".vs-perf"); e.lod = q(".vs-lod"); e.scBar = q(".vs-scale i"); e.scTxt = q(".vs-scale span"); e.st = q(".vs-st");
-    e.none = q(".vs-none"); e.noneH = q(".vs-nc h3"); e.noneP = q(".vs-nc p"); e.hud = q(".vs-hud");
+    e.none = q(".vs-none"); e.prog = q(".vs-prog i"); e.plog = q(".vs-log"); e.noneH = q(".vs-nc h3"); e.noneP = q(".vs-nc p"); e.hud = q(".vs-hud");
     ["bFit", "bReplay", "bTilt", "bPanel", "bHelp", "pOld", "pNew", "unitSeg", "fx", "fxr", "keep", "keepr", "forget", "fconf", "fyes", "fno", "toastBtn", "toastX", "qx", "lastBox", "lastIn", "lastGo", "lastBad"].forEach(function (r) { e[r] = q('[data-r="' + r + '"]'); });
     e.keep2 = off.querySelector('[data-r="keep2"]');
     s.bg = e.bg.getContext("2d", { alpha: false }); s.fg = e.fg.getContext("2d"); s.tl = e.tlc.getContext("2d");
@@ -101,7 +101,7 @@
   }
   function cancelReplay(s) { if (s.replay) { s.replay = null; s.ui.unit(); s.invalidate(); } }
   function select(s, i, fly) {
-    var D = s.D, R = s.R; s.sel = i; s.ui.panel(); s.invalidate();
+    var D = s.D, R = s.R; s.sel = i; if (i >= 0) { s.lastSel = i; if (!s.panelOpen) { s.panelOpen = true; applyPanel(s); } } s.ui.panel(); s.invalidate();
     if (i >= 0 && fly) {
       if (!s.panelOpen) { s.panelOpen = true; applyPanel(s); }
       var z = Math.max(Math.exp(s.tgt.ls), .05), fr = G.freeRect(s), cp = Math.cos(s.tgt.pitch);       // zoom in until this stop stands on its own, never zoom out
@@ -149,7 +149,8 @@
       var D = s.D, g = ev.target.closest("[data-go]"); if (g) { touch(); goTo(s, +g.dataset.go); return; }
       var q = ev.target.closest("[data-q]"); if (q) { e.q.value = q.dataset.q; s.query = q.dataset.q.toLowerCase(); e.search.classList.add("has"); G.recomputeMatch(s); s.ui.showRes(); return; }
       var ss = ev.target.closest("[data-ses]"); if (ss) { touch(); s.sel = -1; G.setUnit(s, "session", +ss.dataset.ses); pageChanged(s); return; }
-      var d = ev.target.closest("[data-do]"); if (!d || !D || s.sel < 0) return; var name = D.v[s.sel].sys;
+      var d = ev.target.closest("[data-do]"); if (d && D && d.dataset.do === "resume" && s.lastSel >= 0 && s.lastSel < D.n) { touch(); select(s, s.lastSel, false); return; }
+      if (!d || !D || s.sel < 0) return; var name = D.v[s.sel].sys;
       if (d.dataset.do === "back") select(s, -1);
       else if (d.dataset.do === "show") { s.h.invoke("map_open_site", { mode: null, system: name }).catch(function () { }); }      // the same call the old Visits list made
       else if (d.dataset.do === "copy") {
@@ -168,7 +169,7 @@
     on(fg, "pointerup", function (ev) {
       fg.classList.remove("drag"); var dr = s.drag; if (!dr) return; s.drag = null; if (dr.moved > 3 || !s.D) return;
       var r = fg.getBoundingClientRect(), q = hitAt(s, ev.clientX - r.left, ev.clientY - r.top);
-      if (q < 0) { if (s.sel >= 0) select(s, -1); return; }
+      if (q < 0) { if (s.panelOpen) { s.panelOpen = false; applyPanel(s); } if (s.sel >= 0) select(s, -1); return; }   // an empty spot closes the panel
       var lv = s.lvCur; if (lv.n[q] === 1) select(s, s.R.i0 + lv.first[q], false); else zoomToGroup(s, q);
     });
     on(fg, "pointerleave", function () { if (s.hovC !== -1) { s.hovC = -1; s.invalidate(); } e.tip.classList.remove("on"); });
@@ -221,15 +222,15 @@
     on(e.toastBtn, "click", function () { setFX(s, false); e.toast.classList.remove("on"); }); on(e.toastX, "click", function () { e.toast.classList.remove("on"); });
     // keys: only while the focus is inside this page
     on(s.root, "keydown", function (ev) {
-      if (ev.target === e.q || ev.ctrlKey || ev.metaKey || ev.altKey || !s.D) return; var k = ev.key, t = s.tgt, pan = 70 / Math.exp(t.ls), used = true;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName) || ev.ctrlKey || ev.metaKey || ev.altKey || !s.D) return; var k = ev.key, t = s.tgt, pan = 70 / Math.exp(t.ls), used = true;
       if (k === "Escape") { e.help.classList.remove("on"); if (s.sel >= 0) select(s, -1); ev.preventDefault(); return; }
       if (ev.target.tagName === "BUTTON" && (k === " " || k === "Enter")) return;
       cancelReplay(s); s.touched = true;
-      if (k === "ArrowLeft") t.cx -= pan; else if (k === "ArrowRight") t.cx += pan; else if (k === "ArrowUp") t.cz -= pan / Math.cos(t.pitch); else if (k === "ArrowDown") t.cz += pan / Math.cos(t.pitch);
-      else if (k === "+" || k === "=") G.zoomAt(s, t.ox, t.oy, 1.4); else if (k === "-" || k === "_") G.zoomAt(s, t.ox, t.oy, 1 / 1.4);
-      else if (k === "f" || k === "F" || k === "0") G.fit(s, false); else if (k === "r" || k === "R") startReplay(s);
-      else if (k === "t" || k === "T") toggleTilt(s); else if (k === "d" || k === "D") { s.panelOpen = !s.panelOpen; applyPanel(s); }
-      else if (k === "e" || k === "E") setFX(s, !s.FX); else if (k === "?") e.help.classList.toggle("on");
+      if (k === "ArrowLeft" || k === "a" || k === "A") t.cx -= pan; else if (k === "ArrowRight" || k === "d" || k === "D") t.cx += pan; else if (k === "ArrowUp" || k === "w" || k === "W") t.cz -= pan / Math.cos(t.pitch); else if (k === "ArrowDown" || k === "s" || k === "S") t.cz += pan / Math.cos(t.pitch);
+      else if (k === "+" || k === "=" || k === "e" || k === "E") G.zoomAt(s, t.ox, t.oy, 1.4); else if (k === "-" || k === "_" || k === "q" || k === "Q") G.zoomAt(s, t.ox, t.oy, 1 / 1.4);
+      else if (k === "f" || k === "F") G.fit(s, false); else if (k === "r" || k === "R") startReplay(s);
+      else if (k === "t" || k === "T") toggleTilt(s); else if (k === "c" || k === "C") { s.panelOpen = !s.panelOpen; applyPanel(s); }
+      else if (k === "x" || k === "X") setFX(s, !s.FX); else if (k === "?") e.help.classList.toggle("on");
       else if (k === "/") { e.q.focus(); } else if (k === "[") { if (G.stepPage(s, -1)) pageChanged(s); } else if (k === "]") { if (G.stepPage(s, 1)) pageChanged(s); }
       else if (k === "." || k === ",") { var d = k === "." ? 1 : -1, i = s.sel < 0 ? (d > 0 ? s.R.i0 : s.R.i1 - 1) : s.sel + d; if (i >= 0 && i < s.D.n) goTo(s, i); }
       else used = false;
@@ -261,9 +262,11 @@
     var e = s.e, r = s.resp, D = s.D, tr = s.tr, f = s.f, none = !D || D.n === 0;
     e.stage.classList.toggle("none", none); s.root.classList.toggle("vs-zero", none);
     if (none) {
-      if (r && r.scanning) { e.noneH.textContent = tr("vis.loading"); e.noneP.textContent = tr("vis.scan", { n: f.n(r.scanned || 0), m: f.n(r.files || 0) }); }
+      var ld = !r || !!r.scanning;
+      e.none.classList.toggle("ld", ld);
+      if (r && r.scanning) { e.noneH.textContent = tr("vis.loading"); e.noneP.textContent = tr("vis.loading.sub"); e.plog.textContent = tr("vis.scan", { n: f.n(r.scanned || 0), m: f.n(r.files || 0) }); e.prog.style.width = Math.max(4, Math.min(100, Math.round(100 * (r.scanned || 0) / Math.max(1, r.files || 1)))) + "%"; }
       else if (r) { e.noneH.textContent = tr("vis.empty.h"); e.noneP.textContent = tr("vis.empty.p"); }
-      else { e.noneH.textContent = tr("vis.loading"); e.noneP.textContent = ""; }
+      else { e.noneH.textContent = tr("vis.loading"); e.noneP.textContent = tr("vis.loading.sub"); e.plog.textContent = ""; e.prog.style.width = "4%"; }
     }
     var st = "";
     if (r && r.scanning) st = tr("vis.scan", { n: f.n(r.scanned || 0), m: f.n(r.files || 0) });
@@ -293,7 +296,7 @@
       s.sel = -1; s.mask = 0; s.query = ""; s.M = null; s.restoring = true;
       var want = parseInt(G.lsGet("gvVisitsLast") || "0", 10); if (want >= 1 && want <= s.D.n) { s.lastN = want; G.setUnit(s, "last"); } else G.setUnit(s, "all");
       s.restoring = false; layout(s);
-      if (!s.panelInit) { s.panelInit = true; s.panelOpen = s.e.stage.clientWidth >= 900; applyPanel(s); }
+      if (!s.panelInit) { s.panelInit = true; s.panelOpen = false; applyPanel(s); }
       G.fit(s, true);
       if (!s.scanning && !G.introDone) { G.introDone = true; startReplay(s); }
     } else {
