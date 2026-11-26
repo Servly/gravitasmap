@@ -5,6 +5,7 @@
 //! shots (finding files, Journal times), snapstore (saved snapshots, CSV), names (known system names, CSV import), settings, model, timeutil.
 //! The Tauri commands are thin wrappers in main.rs. Every function returns JSON with `ok`.
 pub mod crops;
+pub mod csvimport;
 pub mod decode;
 pub mod gates;
 pub mod glyphs;
@@ -31,6 +32,8 @@ mod tests2;
 mod tests3;
 #[cfg(test)]
 pub mod tests4;
+#[cfg(test)]
+mod tests5;
 
 use model::{Proposal, Skipped, Snapshot};
 use serde_json::{json, Value};
@@ -308,6 +311,24 @@ pub fn names_import_csv(text: &str) -> Value {
 
 pub fn export_csv() -> Value {
     match store() { Some(s) => json!({"ok": true, "csv": s.csv(), "filename": "gravitas-bgs.csv"}), None => err("the BGS folder is not available") }
+}
+
+/// Import CSV: the file the Export CSV button writes. apply = false only reports what would happen, apply = true saves the new snapshots.
+pub fn import_csv(text: &str, apply: bool) -> Value {
+    let Some(st) = store() else { return err("the BGS folder is not available") };
+    let known = names_of(&names_dir()).names;
+    let window_s = (settings::get().window_min.max(1) as i64) * 60;
+    let plan = match csvimport::plan(text, &st, &known, window_s) { Ok(p) => p, Err(e) => return err(e) };
+    let mut out = csvimport::summary(&plan);
+    out["ok"] = json!(true);
+    out["applied"] = json!(false);
+    if apply {
+        match csvimport::apply(&plan, &st, known.len()) {
+            Ok(ids) => { out["applied"] = json!(true); out["ids"] = json!(ids); }
+            Err(e) => return err(e),
+        }
+    }
+    out
 }
 
 /// forgets every snapshot, the known names and the learned glyph shapes, with the .bad copies of its own files (the settings stay)

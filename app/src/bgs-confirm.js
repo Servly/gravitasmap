@@ -16,7 +16,7 @@
 
   function section(parent, h) {
     var mk = h.mk, tr = h.tr, g = null, sc = { busy: false, res: null, sel: 0, rows: null, note: "", err: "" };
-    var c = h.card("bgs.scan.h", parent), top = mk("div", "bg-btns"), go = h.tip(mk("button", "btn go", tr("bgs.scan.btn")), "tip.bgs.scan"), body = mk("div");
+    var c = h.card("bgs.scan.h", parent); c.classList.add("bg-scan"); var top = mk("div", "bg-btns"), go = h.tip(mk("button", "btn go", tr("bgs.scan.btn")), "tip.bgs.scan"), body = mk("div");
     go.type = "button"; top.appendChild(go); c.appendChild(top); c.appendChild(body);
     function state() { return g && g.settings && g.settings.on; }
     go.onclick = function () {

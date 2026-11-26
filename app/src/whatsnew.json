@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.39",
+      "en": [
+        "BGS WATCH: Import CSV reads a CSV that Export CSV wrote (for example from a friend who read the screenshots on his PC). Each snapshot is placed at the time it was read, after a summary you confirm, and rows the sender did not check stay marked. The button that reads the screenshots is now at the top of Setup and is called Import from screenshots. The Inara box takes the whole page address or just the number and shows no example number."
+      ],
+      "de": [
+        "BGS WATCH: CSV importieren liest eine CSV, die Export CSV geschrieben hat (zum Beispiel von einem Freund, der die Screenshots auf seinem PC gelesen hat). Jede Momentaufnahme wird zu ihrer Lesezeit eingeordnet, nach einer Übersicht, die du bestätigst, und Zeilen, die der Absender nicht geprüft hat, bleiben markiert. Die Schaltfläche, die die Screenshots liest, steht jetzt oben im Setup und heißt Aus Screenshots einlesen. Das Inara-Feld nimmt die ganze Seitenadresse oder nur die Nummer und zeigt keine Beispielnummer."
+      ],
+      "es": [
+        "BGS WATCH: Importar CSV lee un CSV escrito por Export CSV (por ejemplo de un amigo que leyó las capturas en su PC). Cada instantánea se coloca en la hora en que se leyó, tras un resumen que confirmas, y las filas que el remitente no comprobó siguen marcadas. El botón que lee las capturas está ahora arriba en Setup y se llama Importar desde capturas. El campo de Inara acepta la dirección completa de la página o solo el número y no muestra un número de ejemplo."
+      ],
+      "fr": [
+        "BGS WATCH : Importer un CSV lit un CSV écrit par Export CSV (par exemple d'un ami qui a lu les captures sur son PC). Chaque instantané est placé à l'heure où il a été lu, après un résumé que vous confirmez, et les lignes que l'expéditeur n'a pas vérifiées restent marquées. Le bouton qui lit les captures est maintenant en haut de Setup et s'appelle Importer depuis les captures. Le champ Inara accepte l'adresse complète de la page ou seulement le numéro et n'affiche plus de numéro d'exemple."
+      ],
+      "pt-br": [
+        "BGS WATCH: Importar CSV lê um CSV escrito por Export CSV (por exemplo de um amigo que leu as capturas no PC dele). Cada instantâneo é colocado na hora em que foi lido, depois de um resumo que você confirma, e as linhas que o remetente não conferiu continuam marcadas. O botão que lê as capturas agora fica no topo do Setup e se chama Importar das capturas. O campo do Inara aceita o endereço completo da página ou só o número e não mostra mais um número de exemplo."
+      ],
+      "ru": [
+        "BGS WATCH: Импорт CSV читает CSV, записанный кнопкой Export CSV (например от друга, который прочитал скриншоты на своём ПК). Каждый снимок ставится на время чтения, после сводки, которую вы подтверждаете, а строки, которые отправитель не проверил, остаются отмеченными. Кнопка чтения скриншотов теперь вверху Setup и называется Импорт из скриншотов. Поле Inara принимает адрес страницы целиком или только номер и больше не показывает пример номера."
+      ]
+    },
+    {
       "v": "0.9.38",
       "en": [
         "BGS WATCH (new, preview, off by default). Take the pages of your faction's system list in the game with F10 and GRAVITAS reads the influence values from the pictures (it only reads them, nothing is written to the game's folders and nothing is sent anywhere). You confirm doubtful cells with one click, and your confirmed snapshots become charts: what to defend, what is too high, how fast systems move, a tick estimate and a report you can paste into Discord. The system names are checked against a list you load once from the CSV file of your faction's Inara page. KEYS: Custom keys are now set by pressing the keys in a small window. Key Bindings moved into Settings, and every mode page has a Key Bindings button. New jobs: Show claims (the total on the screen for a few seconds) and Restore claims (takes back every Claims reset and works Claims out again from your Journals). THEMES: Settings has an Appearance card with the game's orange and other colour themes, or any colour you pick. EDIT HUD: fixes against the page hanging when windows overlap (the bars lie above the boxes, the menu stays above the editor, and Edit HUD closes itself if the editor stops answering)."

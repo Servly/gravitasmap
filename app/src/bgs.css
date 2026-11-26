@@ -91,3 +91,8 @@ html.calm .bg-prog i{animation:none;margin-left:0;width:100%}
 .bg-danger{border-color:rgba(var(--bad-rgb),.6)!important;color:var(--bad)}
 @media(max-width:1000px){.bg-drawer{width:100vw}}
 .bg-crop{display:inline-block;height:22px;max-width:160px;vertical-align:middle;margin-right:6px;border:1px solid var(--line-2);border-radius:4px;image-rendering:pixelated}
+/* Setup: the mode switch first, then the import from screenshots, then the rest */
+#bgs-setup{display:flex;flex-direction:column}
+#bgs-setup > .bg-mode{order:-2}
+#bgs-setup > .bg-scan{order:-1}
+.bg-imp{margin-top:8px}

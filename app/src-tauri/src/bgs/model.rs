@@ -48,6 +48,9 @@ pub struct Snapshot {
     pub rows: Vec<StoredRow>,
     #[serde(default)]
     pub reader: String,
+    /// read from an imported CSV (for example a friend's export), not from this PC's own screenshots
+    #[serde(default)]
+    pub imported: bool,
     /// the proposal this snapshot was made from (never stored): lets the backend know which rows were flagged and what was read
     #[serde(default, skip_serializing)]
     pub proposal_id: String,

@@ -35,7 +35,7 @@
       return n ? tr("bgs.names.n", { n: n }) : tr("bgs.names.none");
     }
     // ----- card 1: mode switch -----
-    var c1 = h.card("bgs.set.mode.h", parent);
+    var c1 = h.card("bgs.set.mode.h", parent); c1.classList.add("bg-mode");
     c1.appendChild(h.row(tr("bgs.on"), h.sw(function () { return !!(g && g.settings && g.settings.on); }, function (on) {
       invoke("bgs_settings_set", { key: "on", value: on }).then(function (r) { if (r && r.ok) (g || (g = {})).settings = r.settings; else msg(c1, BG.errText(r && r.error), "err"); });
     }), tr("bgs.on.d"), "tip.bgs.on"));
@@ -43,13 +43,22 @@
     // ----- card 2: system names -----
     var c2 = h.card("bgs.names.h", parent), cnt = mk("p", "bg-msg ok"), idIn = mk("input", "txt bg-idin");
     c2.appendChild(mk("p", "note", tr("bgs.names.intro")));
-    var pf = mk("div", "bg-prefix"); pf.appendChild(mk("span", "bg-pfx", "https://inara.cz/elite/minorfaction-presence/"));
-    idIn.type = "text"; idIn.inputMode = "numeric"; idIn.maxLength = 12; idIn.placeholder = "78295"; h.tip(idIn, "tip.bgs.inara_id");
-    idIn.oninput = function () { var v = idIn.value.replace(/\D/g, ""); if (v !== idIn.value) idIn.value = v; };
-    idIn.onchange = function () { invoke("bgs_settings_set", { key: "inara_id", value: idIn.value }).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c2, tr("bgs.saved"), "ok"); } }).catch(function () {}); };   // (the number is only a helper for the link: if the backend does not keep it, it stays in the box while the page is open)
+    var pf = mk("div", "bg-prefix");
+    idIn.type = "text"; idIn.maxLength = 200; idIn.placeholder = tr("bgs.inara.ph"); h.tip(idIn, "tip.bgs.inara_id");
+    // the number is taken from a pasted page address (.../minorfaction-presence/123456/) or typed as it is
+    function idOf(v) { var m = /minorfaction-presence\/(\d{1,12})/.exec(v) || /^\s*(\d{1,12})\s*$/.exec(v); return m ? m[1] : ""; }
+    idIn.onchange = function () {
+      var id = idOf(idIn.value);
+      if (idIn.value.trim() && !id) { msg(c2, tr("bgs.inara.badid"), "err"); return; }
+      idIn.value = id;
+      invoke("bgs_settings_set", { key: "inara_id", value: id }).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c2, tr("bgs.saved"), "ok"); } }).catch(function () {});
+    };
     pf.appendChild(idIn);
     var open = h.tip(mk("button", "btn", tr("bgs.inara.open")), "tip.bgs.inara_open"); open.type = "button";
-    open.onclick = function () { var id = idIn.value.replace(/\D/g, ""); if (!id) { msg(c2, tr("bgs.inara.needid"), "err"); return; } BG.openUrl("https://inara.cz/elite/minorfaction-presence/" + id + "/"); };
+    open.onclick = function () {
+      var id = idOf(idIn.value);
+      if (id) BG.openUrl("https://inara.cz/elite/minorfaction-presence/" + id + "/"); else BG.openUrl("https://inara.cz/");
+    };
     pf.appendChild(open); c2.appendChild(pf);
     c2.appendChild(mk("p", "note", tr("bgs.inara.steps")));
     var file = document.createElement("input"); file.type = "file"; file.accept = ".csv,text/csv"; file.hidden = true;
@@ -121,7 +130,48 @@
       clearTimeout(ft); ft = 0; fg.textContent = tr("bgs.forget"); fg.classList.remove("bg-danger");
       invoke("bgs_forget").then(function (r) { if (r && r.ok) { msg(c5, tr("bgs.forget.done", { n: r.files_removed || 0 }), "ok"); BG.dirty = true; refresh(); } else msg(c5, BG.errText(r && r.error), "err"); });
     };
-    bx.appendChild(ex); bx.appendChild(fg); c5.appendChild(bx); c5.appendChild(mk("p", "note", tr("bgs.data.note")));
+    // Import CSV: the file Export CSV wrote (for example from a friend). First it is only read and reported, nothing is saved until the player confirms.
+    var impFile = document.createElement("input"); impFile.type = "file"; impFile.accept = ".csv,text/csv"; impFile.hidden = true;
+    var impBtn = h.tip(mk("button", "btn", tr("bgs.imp.btn")), "tip.bgs.imp"); impBtn.type = "button";
+    var impBox = mk("div", "bg-imp");
+    impBtn.onclick = function () { impFile.value = ""; impFile.click(); };
+    function impShow(text, r) {
+      impBox.textContent = "";
+      var gs = r.groups || [], skipped = r.to_skip || 0;
+      impBox.appendChild(mk("p", "bg-msg", tr("bgs.imp.sum", { n: r.snapshots, a: r.to_add, s: skipped, b: r.bad_rows || 0 })));
+      var list = mk("ul", "bg-issues");
+      gs.forEach(function (x) {
+        var when = BG.calc ? BG.calc.dt(Date.parse(x.data_utc)) + " UTC" : x.data_utc;
+        list.appendChild(mk("li", x.action === "add" ? "" : "blk", when + ": " + x.rows + " " + tr("bgs.imp.rows") + (x.action === "add" ? "" : " (" + tr("bgs.imp.have") + ")") + (x.unchecked_rows ? ", " + tr("bgs.imp.unchecked", { n: x.unchecked_rows }) : "") + (x.not_in_list_count ? ", " + tr("bgs.imp.names", { n: x.not_in_list_count, list: (x.not_in_list || []).slice(0, 6).join(", ") }) : "")));
+      });
+      impBox.appendChild(list);
+      if (!r.to_add) { impBox.appendChild(mk("p", "note", tr("bgs.imp.none"))); return; }
+      var go = h.tip(mk("button", "btn go", tr("bgs.imp.go", { a: r.to_add })), "tip.bgs.imp_go"); go.type = "button";
+      var no = h.tip(mk("button", "btn", tr("bgs.imp.cancel")), "tip.bgs.imp_cancel"); no.type = "button";
+      go.onclick = function () {
+        go.disabled = true;
+        invoke("bgs_import_csv", { text: text, apply: true }).then(function (r2) {
+          if (r2 && r2.ok && r2.applied) { impBox.textContent = ""; msg(c5, tr("bgs.imp.done", { a: (r2.ids || []).length }), "ok"); BG.dirty = true; refresh(); }
+          else { impBox.appendChild(mk("p", "bg-msg err", BG.errText(r2 && r2.error) || tr("bgs.imp.fail"))); go.disabled = false; }
+        }).catch(function () { impBox.appendChild(mk("p", "bg-msg err", tr("bgs.imp.fail"))); go.disabled = false; });
+      };
+      no.onclick = function () { impBox.textContent = ""; };
+      var bb = mk("div", "bg-btns"); bb.appendChild(go); bb.appendChild(no); impBox.appendChild(bb);
+    }
+    impFile.onchange = function () {
+      var f = impFile.files && impFile.files[0]; if (!f) return;
+      if (f.size > 20e6) { msg(c5, tr("bgs.csv.big"), "err"); return; }
+      var rd = new FileReader();
+      rd.onload = function () {
+        var text = String(rd.result || "");
+        invoke("bgs_import_csv", { text: text, apply: false }).then(function (r) {
+          if (r && r.ok) impShow(text, r); else { impBox.textContent = ""; impBox.appendChild(mk("p", "bg-msg err", BG.errText(r && r.error) || tr("bgs.imp.fail"))); }
+        }).catch(function () { impBox.textContent = ""; impBox.appendChild(mk("p", "bg-msg err", tr("bgs.imp.fail"))); });
+      };
+      rd.onerror = function () { msg(c5, tr("bgs.imp.fail"), "err"); };
+      rd.readAsText(f);
+    };
+    bx.appendChild(ex); bx.appendChild(impBtn); bx.appendChild(impFile); bx.appendChild(fg); c5.appendChild(bx); c5.appendChild(impBox); c5.appendChild(mk("p", "note", tr("bgs.imp.note"))); c5.appendChild(mk("p", "note", tr("bgs.data.note")));
     function show() {
       if (!g || !g.settings) return; var s = g.settings;
       Object.keys(inputs).forEach(function (k) { if (document.activeElement !== inputs[k] && s[k] != null) inputs[k].value = s[k]; });

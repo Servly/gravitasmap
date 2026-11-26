@@ -19,7 +19,7 @@
     });
     a.forEach(function (sn, i) {
       order.forEach(function (o) { o.v[i] = null; o.f[i] = ""; });
-      sn.rows.forEach(function (r) { var o = by[r.system]; if (r.inf_x10 != null) { o.v[i] = r.inf_x10 / 10; o.f[i] = r.confirmed && r.conf != null && r.conf < 0.6 ? "w" : ""; } });
+      sn.rows.forEach(function (r) { var o = by[r.system]; if (r.inf_x10 != null) { o.v[i] = r.inf_x10 / 10; o.f[i] = (r.confirmed && r.conf != null && r.conf < 0.6) || r.accepted_unchecked ? "w" : ""; } });
     });
     return { squad: "", snaps: snaps, sys: order };
   }

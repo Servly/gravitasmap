@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.39
+- BGS WATCH: Import CSV reads a CSV that Export CSV wrote (for example from a friend who read the screenshots on his PC). Each snapshot is placed at the time it was read, after a summary you confirm, and rows the sender did not check stay marked. The button that reads the screenshots is now at the top of Setup and is called Import from screenshots. The Inara box takes the whole page address or just the number and shows no example number.
+
 ## 0.9.38
 - BGS WATCH (new, preview, off by default). Take the pages of your faction's system list in the game with F10 and GRAVITAS reads the influence values from the pictures (it only reads them, nothing is written to the game's folders and nothing is sent anywhere). You confirm doubtful cells with one click, and your confirmed snapshots become charts: what to defend, what is too high, how fast systems move, a tick estimate and a report you can paste into Discord. The system names are checked against a list you load once from the CSV file of your faction's Inara page. KEYS: Custom keys are now set by pressing the keys in a small window. Key Bindings moved into Settings, and every mode page has a Key Bindings button. New jobs: Show claims (the total on the screen for a few seconds) and Restore claims (takes back every Claims reset and works Claims out again from your Journals). THEMES: Settings has an Appearance card with the game's orange and other colour themes, or any colour you pick. EDIT HUD: fixes against the page hanging when windows overlap (the bars lie above the boxes, the menu stays above the editor, and Edit HUD closes itself if the editor stops answering).
 

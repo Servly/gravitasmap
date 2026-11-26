@@ -457,6 +457,9 @@ fn bgs_settings_set(key: String, value: serde_json::Value) -> serde_json::Value 
 fn bgs_export_csv() -> serde_json::Value { bgs::export_csv() }
 #[tauri::command(async)]
 fn bgs_forget() -> serde_json::Value { bgs::forget() }
+/// Import CSV (the file Export CSV writes): apply = false reports, apply = true saves the new snapshots.
+#[tauri::command(async)]
+fn bgs_import_csv(text: String, apply: bool) -> serde_json::Value { bgs::import_csv(&text, apply) }
 /// Saves the BGS CSV into the Documents folder (name made here). Returns the path.
 #[tauri::command(async)]
 fn save_text_file(kind: String, text: String) -> Result<String, String> { appprefs::save_text_file(&kind, &text) }
@@ -825,7 +828,7 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, hotkeys_capture, save_text_file, combat_op, combat_extra, editor_rects, editor_ping, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, bgs_get, bgs_scan, bgs_commit, bgs_snapshots, bgs_snapshot, bgs_names_import_csv, bgs_names_set, bgs_names_get, bgs_settings_set, bgs_export_csv, bgs_forget, diagnostic_report, send_feedback, prefs_get, theme_get, theme_set, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
+        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, hotkeys_capture, save_text_file, bgs_import_csv, combat_op, combat_extra, editor_rects, editor_ping, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, bgs_get, bgs_scan, bgs_commit, bgs_snapshots, bgs_snapshot, bgs_names_import_csv, bgs_names_set, bgs_names_get, bgs_settings_set, bgs_export_csv, bgs_forget, diagnostic_report, send_feedback, prefs_get, theme_get, theme_set, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
         .run(tauri::generate_context!())
         .expect("error while running GRAVITAS");
 }

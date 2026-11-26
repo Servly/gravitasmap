@@ -56,7 +56,7 @@ impl Store {
     fn summary(s: &Snapshot) -> Value {
         let known = s.rows.iter().filter(|r| r.inf_x10.is_some()).count();
         json!({"id": s.id, "taken_utc": s.taken_utc, "data_utc": s.data_utc, "rows": s.rows.len(), "with_value": known,
-               "confirmed_rows": s.rows.iter().filter(|r| r.confirmed).count(), "complete": s.complete, "resolution": s.resolution})
+               "confirmed_rows": s.rows.iter().filter(|r| r.confirmed).count(), "complete": s.complete, "resolution": s.resolution, "imported": s.imported})
     }
 
     /// ids of every snapshot, oldest first (from the index, else the folder)
