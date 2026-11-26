@@ -314,7 +314,8 @@
     fillPane("debrief-overview", ["dbmode", "dbwin", "dbbinds"]);   // (the Past debriefs list is not reachable from the UI for now: SEC.dbpast and the db_* commands stay)
     fillPane("pvp-overview", ["pvpmode", "pvpwin"]); fillPane("pvp-past", ["pvpfights"]); fillPane("pvp-cmp", ["pvpcompare"]);
     fillPane("bgs-setup", ["bgssetup", "bgsscan"]);
-    ["defend", "changes", "overview", "trends", "report"].forEach(function (k) { fillPane("bgs-" + k, [["bgsview", k]]); });
+    ["defend", "changes", "overview", "trends", "squad", "report"].forEach(function (k) { fillPane("bgs-" + k, [["bgsview", k]]); });
+    fillPane("bgs-edit", ["bgsedit"]);
     fillPane("foot-overview", [["soon", "nav.foot"]]);         fillPane("foot-past", [["soon", "tab.past.foot"]]);
   }
   /* ---------- updates: only "a newer version exists" ever comes from the server (updater.rs) ---------- */

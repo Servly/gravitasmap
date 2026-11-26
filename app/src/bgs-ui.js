@@ -4,7 +4,7 @@
 (function () {
   var T = window.__TAURI__ || {}, invoke = T.core && T.core.invoke, BG = window.BG = window.BG || {}, S = BG.svg, V = BG.views, C = BG.calc, esc = S.esc;
   var t = function (k, v) { return BG.tr(k, v); };
-  var ui = BG.ui = { base: "prev", minor: 0.3, tickPct: 20, days: 0, msort: "drop", rfilter: "all", tsort: "low", hsort: "low", hmode: "chg", q: "", sel: null, faction: "", rep: { att: 1, drops: 1, gains: 1, cross: 1, tick: 1 } };
+  var ui = BG.ui = { tmode: "top", base: "24h", minor: 0.3, tickPct: 20, days: 0, msort: "drop", rfilter: "all", tsort: "low", hsort: "low", hmode: "chg", q: "", sel: null, faction: "", rep: { att: 1, drops: 1, gains: 1, cross: 1, tick: 1 } };
   var store = BG.store = { sig: "", data: null, M: null, rev: 0, last: 0, busy: false, g: null };
   var panes = [];
 
@@ -93,7 +93,9 @@
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
     var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');
-    return '<div class="bg-pin"><span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + main +
+    var names = M.sys.map(function (x) { return x.n; }).sort();
+    var srch = '<input type="search" id="bgq" class="bg-search" list="bgnames" autocomplete="off" spellcheck="false" placeholder="' + esc(t("bgs.search.ph")) + '" value="' + esc(ui.sq || "") + '" data-tip="' + esc(t("tip.bgs.search")) + '"><datalist id="bgnames">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
+    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + main +
       '<details class="bg-more"><summary data-tip="' + esc(t("tip.bgs.more")) + '">' + t("bgs.more") + '</summary><div class="bg-moreb"><div class="bg-dq">' + head(M) + '</div><div class="bg-bar">' + more + "</div></div></details></div>";
   }
   function empty() {
@@ -124,6 +126,13 @@
     });
     el.addEventListener("change", function (e) {
       var x = e.target, id = x.id;
+      if (id === "bgq") {
+        var q = x.value.trim().toLowerCase(), ns = store.M ? store.M.sys.map(function (s) { return s.n; }) : [];
+        var hit = ns.filter(function (n) { return n.toLowerCase() === q; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) === 0; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) >= 0; })[0];
+        ui.sq = x.value;
+        if (q && hit) { openSys(hit); ui.sq = hit; x.value = hit; } else if (q && BG.toast) BG.toast(t("bgs.search.none", { q: x.value }));
+        return;
+      }
       if (id === "blo" || id === "bhi") {
         var lo = parseFloat(document.getElementById("blo").value), hi = parseFloat(document.getElementById("bhi").value);
         (id === "blo" ? invoke("bgs_settings_set", { key: "low", value: lo }) : invoke("bgs_settings_set", { key: "high", value: hi })).then(function (r) { if (r && r.ok) load(true); else { BG.toast && BG.toast(BG.errText(r && r.error)); load(true); } });

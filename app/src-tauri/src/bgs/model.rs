@@ -17,6 +17,9 @@ pub struct StoredRow {
     /// the player saved this row although it was still marked uncertain and did not look at it (the UI asked first)
     #[serde(default)]
     pub accepted_unchecked: bool,
+    /// the player typed this value in the Edit table (it is a correction, shown as such)
+    #[serde(default)]
+    pub edited: bool,
     /// sent by the UI with a commit: this row was uncertain
     #[serde(default, skip_serializing)]
     pub flagged: bool,

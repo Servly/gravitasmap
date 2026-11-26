@@ -34,6 +34,8 @@ mod tests3;
 pub mod tests4;
 #[cfg(test)]
 mod tests5;
+#[cfg(test)]
+mod tests6;
 
 use model::{Proposal, Skipped, Snapshot};
 use serde_json::{json, Value};
@@ -311,6 +313,49 @@ pub fn names_import_csv(text: &str) -> Value {
 
 pub fn export_csv() -> Value {
     match store() { Some(s) => json!({"ok": true, "csv": s.csv(), "filename": "gravitas-bgs.csv"}), None => err("the BGS folder is not available") }
+}
+
+/// Edit table: the player's corrections. v = {"edits": [{"id": "<snapshot id>", "data_utc": "<new time, optional>", "cells": [{"system": "...", "inf_x10": 687 | null}]}]}.
+/// Everything is checked first and nothing is written unless every edit is valid. A typed cell is a confirmed correction (marked `edited`).
+pub fn edit(v: &Value) -> Value {
+    let Some(st) = store() else { return err("the BGS folder is not available") };
+    edit_in(&st, v)
+}
+
+pub fn edit_in(st: &snapstore::Store, v: &Value) -> Value {
+    let Some(list) = v.get("edits").and_then(Value::as_array) else { return err("no edits") };
+    if list.is_empty() || list.len() > 500 { return err("1 to 500 snapshots can be edited at once"); }
+    let mut plan: Vec<(String, Snapshot)> = Vec::new();
+    for e in list {
+        let Some(id) = e.get("id").and_then(Value::as_str) else { return err("an edit has no snapshot id") };
+        let Some(mut s) = st.get(id) else { return err(format!("snapshot {id} was not found")) };
+        if let Some(t) = e.get("data_utc").and_then(Value::as_str) {
+            if timeutil::parse_iso(t).is_none() { return err("the snapshot time is not valid"); }
+            s.data_utc = t.to_string();
+        }
+        for c in e.get("cells").and_then(Value::as_array).map(|a| a.as_slice()).unwrap_or(&[]) {
+            let Some(name) = c.get("system").and_then(Value::as_str) else { return err("a cell has no system") };
+            let name = name.split_whitespace().collect::<Vec<_>>().join(" ");
+            let val = match c.get("inf_x10") { Some(Value::Null) | None => None, Some(x) => match x.as_i64() { Some(n) if (0..=1000).contains(&n) => Some(n as i32), _ => return err(format!("the value for {name} must be 0.0 to 100.0")) } };
+            if let Some(r) = s.rows.iter_mut().find(|r| snap::norm(&r.system) == snap::norm(&name)) {
+                if r.inf_x10 != val { r.inf_x10 = val; r.edited = true; r.confirmed = true; r.accepted_unchecked = false; r.conf = 1.0; }
+            } else if val.is_some() {
+                if !names::valid(&name) { return err(format!("\"{name}\" is not a valid system name")); }
+                s.rows.push(model::StoredRow { system: name, inf_x10: val, confirmed: true, edited: true, conf: 1.0, ..Default::default() });
+            }
+        }
+        if let Err(e) = snapstore::check_rows(&s.rows) { return err(e); }
+        plan.push((id.to_string(), s));
+    }
+    let mut ids = Vec::new();
+    for (old, s) in plan { match st.replace(&old, s) { Ok(n) => ids.push(n), Err(e) => return err(e) } }
+    json!({"ok": true, "ids": ids})
+}
+
+/// Deletes one stored snapshot.
+pub fn delete_snapshot(id: &str) -> Value {
+    let Some(st) = store() else { return err("the BGS folder is not available") };
+    match st.delete(id) { Ok(()) => json!({"ok": true}), Err(e) => err(e) }
 }
 
 /// Import CSV: the file the Export CSV button writes. apply = false only reports what would happen, apply = true saves the new snapshots.

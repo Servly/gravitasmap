@@ -41,7 +41,7 @@
     }), tr("bgs.on.d"), "tip.bgs.on"));
     c1.appendChild(mk("p", "note", tr("bgs.on.note")));
     // ----- card 2: system names -----
-    var c2 = h.card("bgs.names.h", parent), cnt = mk("p", "bg-msg ok"), idIn = mk("input", "txt bg-idin");
+    var c2 = h.card("bgs.names.h", parent); c2.classList.add("bg-names"); var cnt = mk("p", "bg-msg ok"), idIn = mk("input", "txt bg-idin");
     c2.appendChild(mk("p", "note", tr("bgs.names.intro")));
     var pf = mk("div", "bg-prefix");
     idIn.type = "text"; idIn.maxLength = 200; idIn.placeholder = tr("bgs.inara.ph"); h.tip(idIn, "tip.bgs.inara_id");
@@ -92,7 +92,7 @@
     };
     c2.appendChild(ps);
     // ----- card 3: reading settings -----
-    var c3 = h.card("bgs.read.h", parent), form = mk("div", "bg-form"), inputs = {};
+    var c3 = h.card("bgs.read.h", parent); c3.classList.add("bg-read"); var form = mk("div", "bg-form"), inputs = {};
     function num(key, label, tipKey, min, max, step, small) {
       var l = mk("label"), i = document.createElement("input"); i.type = "number"; i.min = min; i.max = max; i.step = step; h.tip(l, tipKey); inputs[key] = i;
       l.appendChild(mk("span", null, label)); l.appendChild(i);
@@ -114,7 +114,7 @@
     dir.onchange = function () { invoke("bgs_settings_set", { key: "shots_dir", value: dir.value }).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c3, tr("bgs.saved"), "ok"); } else msg(c3, BG.errText(r && r.error), "err"); }); };
     c3.appendChild(dl);
     // ----- card: data (export, forget) -----
-    var c5 = h.card("bgs.data.h", parent), bx = mk("div", "bg-btns");
+    var c5 = h.card("bgs.data.h", parent); c5.classList.add("bg-data"); var bx = mk("div", "bg-btns");
     var ex = h.tip(mk("button", "btn", tr("bgs.export")), "tip.bgs.csv"); ex.type = "button";
     ex.onclick = function () {
       invoke("bgs_export_csv").then(function (r) {

@@ -233,7 +233,7 @@ pub fn snapshot_of(p: &Proposal) -> Snapshot {
     Snapshot {
         v: 1, id: p.id.clone(), taken_utc: p.taken_utc.clone(), data_utc: p.data_utc.clone(), minutes_old: p.minutes_old, resolution: p.resolution.clone(),
         sources: p.files.clone(), pages: p.pages_total, complete: p.complete,
-        rows: p.rows.iter().map(|c| super::model::StoredRow { system: c.system.clone(), inf_x10: c.inf_x10, star: c.star, conf: c.name_conf.min(c.inf_conf), confirmed: false, accepted_unchecked: false, flagged: false, pos: 0 }).collect(),
+        rows: p.rows.iter().map(|c| super::model::StoredRow { system: c.system.clone(), inf_x10: c.inf_x10, star: c.star, conf: c.name_conf.min(c.inf_conf), confirmed: false, accepted_unchecked: false, edited: false, flagged: false, pos: 0 }).collect(),
         reader: "bgs1".into(), imported: false, proposal_id: p.id.clone(),
     }
 }

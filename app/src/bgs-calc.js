@@ -20,7 +20,7 @@
   function baseIdx(snaps, s, li, mode) {
     var j;
     if (mode === "prev") { for (j = li - 1; j >= 0; j--) if (s.v[j] != null) return j; return -1; }
-    var want = snaps[li].t - (mode === "24h" ? DAY : 7 * DAY), tol = mode === "24h" ? 12 * H : 48 * H, best = -1, bd = 1e18;
+    var want = snaps[li].t - (mode === "24h" ? DAY : 7 * DAY), tol = mode === "24h" ? 18 * H : 48 * H, best = -1, bd = 1e18;
     for (j = 0; j < li; j++) if (s.v[j] != null && Math.abs(snaps[j].t - want) < bd) { bd = Math.abs(snaps[j].t - want); best = j; }
     return bd <= tol ? best : -1;
   }
@@ -89,6 +89,14 @@
       if (s.run && s.run.n >= 3 && s.run.sign === (edge === "low" ? -1 : 1)) s2 += 8;
       if (s.d != null && s.d <= -2 && s.zone !== "high") s2 = Math.max(s2, 55);
       s.E = r1(E); s.R = r1(R); s.edge = edge; s.toward = tw; s.score2 = s2;
+      // each system ticks at its own time: the last change was seen between these two readings
+      s.lastChg = null;
+      for (var qi = li; qi > 0 && !s.lastChg; qi--) {
+        if (v[qi] == null) continue;
+        var qj = qi - 1; while (qj >= 0 && v[qj] == null) qj--;
+        if (qj < 0) break;
+        if (v[qi] !== v[qj]) s.lastChg = { a: snaps[qj].t, b: snaps[qi].t };
+      }
       return s;
     }).filter(Boolean);
     var M = { st: st, snaps: snaps, K: K, first: first, sys: sys, nS: nS, squad: data.squad };

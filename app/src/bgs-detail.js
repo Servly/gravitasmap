@@ -22,7 +22,7 @@
     for (var dd = 0; dd <= days; dd += stp) { var tt = t0 + dd * 864e5; o += S.T(X(tt), h - 8, C.dmy(tt), { anchor: "middle", size: 9.5, fill: COL.faint }); }
     var edgeSince = null, edgeZone = s.zone; for (i = s.li; i >= 0; i--) { var vv = s.v[i]; if (vv != null && (edgeZone === "low" ? vv < lo : edgeZone === "high" ? vv > hi : false)) edgeSince = i; else if (vv != null) break; }
     var vs = s.v.filter(function (v) { return v != null; });
-    var stat = [[t("bgs.dt.now"), S.f1(s.last)], [t("bgs.dt.change"), s.d == null ? t("bgs.dt.none") : S.sg(s.d)], [t("bgs.dt.run"), s.run ? t(s.run.sign > 0 ? "bgs.dt.runup" : "bgs.dt.rundn", { n: s.run.n, tot: S.sg(s.run.tot) }) : t("bgs.dt.none")],
+    var stat = [[t("bgs.dt.now"), S.f1(s.last)], [t("bgs.dt.lastchg"), s.lastChg ? C.dt(s.lastChg.a) + " – " + C.dt(s.lastChg.b) + " UTC" : t("bgs.dt.none")], [t("bgs.dt.change"), s.d == null ? t("bgs.dt.none") : S.sg(s.d)], [t("bgs.dt.run"), s.run ? t(s.run.sign > 0 ? "bgs.dt.runup" : "bgs.dt.rundn", { n: s.run.n, tot: S.sg(s.run.tot) }) : t("bgs.dt.none")],
       [t("bgs.dt.trend"), s.slope ? S.sg(s.slope.perDay) + t("bgs.perday") + " (" + t("bgs.est") + ")" : t("bgs.needmore")], [t("bgs.dt.room", { lo: lo }), S.sg(s.last - lo)], [t("bgs.dt.room", { lo: hi }), S.sg(hi - s.last)],
       [t("bgs.dt.lowhigh"), S.f1(Math.min.apply(0, vs)) + " / " + S.f1(Math.max.apply(0, vs))], [t("bgs.dt.step"), s.vol == null ? t("bgs.needmore") : "+/-" + s.vol.toFixed(1)],
       [t(edgeZone === "high" ? "bgs.dt.abovesince" : "bgs.dt.belowsince"), edgeSince == null ? t("bgs.no") : t("bgs.dt.since", { d: C.dt(M.snaps[edgeSince].t) })]];

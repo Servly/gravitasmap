@@ -109,6 +109,39 @@ impl Store {
         Ok(id)
     }
 
+    /// Replaces a stored snapshot by an edited one. When its data time changed it moves to the id of the new time (never onto another snapshot).
+    /// Returns the id it has now. Only this module's own files in the bgs folder are written or removed.
+    pub fn replace(&self, old_id: &str, mut s: Snapshot) -> Result<String, String> {
+        if !id_ok(old_id) || self.get(old_id).is_none() { return Err("snapshot not found".into()); }
+        let t = super::timeutil::parse_iso(&s.data_utc).ok_or("the snapshot time is not valid")?;
+        s.data_utc = super::timeutil::fmt_iso(t);
+        let new_id = super::timeutil::fmt_id(t);
+        if new_id != old_id && (self.snap_path(&new_id).exists() || self.ids().iter().any(|i| *i == new_id)) { return Err("a snapshot already exists at that time".into()); }
+        s.id = new_id.clone();
+        if !self.write(&self.snap_path(&new_id), &serde_json::to_value(&s).map_err(|e| e.to_string())?) { return Err("the snapshot could not be saved".into()); }
+        if new_id != old_id { self.remove_files(old_id); }
+        // the index is rebuilt from what is stored now (the old index still names the old id and not the new one)
+        let mut all: Vec<Snapshot> = self.all().into_iter().filter(|x| x.id != old_id && x.id != new_id).collect();
+        all.push(s);
+        all.sort_by(|a, b| a.data_utc.cmp(&b.data_utc).then(a.id.cmp(&b.id)));
+        self.write_index(&all);
+        Ok(new_id)
+    }
+
+    /// Deletes one stored snapshot (its own file and its backup copy).
+    pub fn delete(&self, id: &str) -> Result<(), String> {
+        if !id_ok(id) || self.get(id).is_none() { return Err("snapshot not found".into()); }
+        self.remove_files(id);
+        let all: Vec<Snapshot> = self.all().into_iter().filter(|x| x.id != id).collect();
+        self.write_index(&all);
+        Ok(())
+    }
+
+    fn remove_files(&self, id: &str) {
+        let p = self.snap_path(id);
+        if std::fs::remove_file(&p).is_ok() { crate::store::unmirror(&p); }
+    }
+
     /// the newest stored snapshot taken before `t` (UTC seconds), else None
     pub fn previous(&self, t: i64) -> Option<Snapshot> {
         self.all().into_iter().filter(|s| parse_iso(&s.taken_utc).map_or(false, |x| x < t)).max_by(|a, b| a.data_utc.cmp(&b.data_utc))
