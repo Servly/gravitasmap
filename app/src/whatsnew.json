@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.49",
+      "en": [
+        "BGS WATCH guesses names like a person would. If a name was read with one wrong letter, a stray dash or space, or a 0 as the letter O, it is matched to the one known system it is closest to and counted as sure, with no \"please look\". It only asks when there is no single closest name, or when two rows want the same name. Tested on real 1080p, 2K and 4K pages: every row read right and none was marked for a look."
+      ],
+      "de": [
+        "BGS WATCH rät Namen wie ein Mensch. Wurde ein Name mit einem falschen Buchstaben, einem verirrten Bindestrich oder Leerzeichen oder einer 0 als Buchstabe O gelesen, wird er dem einen bekannten System zugeordnet, dem er am nächsten kommt, und gilt als sicher, ohne \"bitte prüfen\". Es fragt nur, wenn es keinen einzelnen nächsten Namen gibt oder zwei Zeilen denselben Namen wollen. Mit echten Seiten in 1080p, 2K und 4K getestet: Jede Zeile wurde richtig gelesen und keine zur Prüfung markiert."
+      ],
+      "es": [
+        "BGS WATCH adivina los nombres como lo haría una persona. Si un nombre se leyó con una letra equivocada, un guion o espacio perdido, o un 0 como la letra O, se asigna al único sistema conocido más cercano y cuenta como seguro, sin \"revísalo\". Solo pregunta cuando no hay un único nombre más cercano o cuando dos filas quieren el mismo nombre. Probado con páginas reales en 1080p, 2K y 4K: todas las filas se leyeron bien y ninguna se marcó para revisar."
+      ],
+      "fr": [
+        "BGS WATCH devine les noms comme le ferait une personne. Si un nom a été lu avec une lettre fausse, un tiret ou une espace en trop, ou un 0 lu comme la lettre O, il est associé à l'unique système connu le plus proche et compte comme sûr, sans « à vérifier ». Il ne demande que lorsqu'il n'y a pas un seul nom le plus proche, ou que deux lignes veulent le même nom. Testé sur de vraies pages en 1080p, 2K et 4K : chaque ligne a été bien lue et aucune n'a été marquée à vérifier."
+      ],
+      "pt-br": [
+        "BGS WATCH adivinha nomes como uma pessoa faria. Se um nome foi lido com uma letra errada, um traço ou espaço perdido, ou um 0 como a letra O, ele é ligado ao único sistema conhecido mais próximo e conta como seguro, sem \"confira\". Só pergunta quando não há um único nome mais próximo ou quando duas linhas querem o mesmo nome. Testado com páginas reais em 1080p, 2K e 4K: todas as linhas foram lidas certo e nenhuma foi marcada para conferir."
+      ],
+      "ru": [
+        "BGS WATCH угадывает названия, как это сделал бы человек. Если название прочитано с одной неверной буквой, лишним дефисом или пробелом либо с нулём как буквой O, оно сопоставляется с единственной ближайшей известной системой и считается надёжным, без «проверьте». Программа спрашивает только тогда, когда нет единственного ближайшего названия или две строки хотят одно и то же. Проверено на настоящих страницах в 1080p, 2K и 4K: все строки прочитаны верно и ни одна не помечена для проверки."
+      ]
+    },
+    {
       "v": "0.9.48",
       "en": [
         "BGS WATCH, three small things. A name the reader matched to your faction's list no longer says \"please look\" when it is trusted: it reads \"Matched to a known name\". When every value equals the last saved snapshot, Save asks \"Nothing changed since the last saved snapshot. Save it anyway?\" so you do not store the same reading twice. The compare setting has a new choice, \"the end of yesterday\" (the last reading before 00:00 UTC), next to the previous snapshot, 24 hours and 7 days."

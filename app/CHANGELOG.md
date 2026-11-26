@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.49
+- BGS WATCH guesses names like a person would. If a name was read with one wrong letter, a stray dash or space, or a 0 as the letter O, it is matched to the one known system it is closest to and counted as sure, with no "please look". It only asks when there is no single closest name, or when two rows want the same name. Tested on real 1080p, 2K and 4K pages: every row read right and none was marked for a look.
+
 ## 0.9.48
 - BGS WATCH, three small things. A name the reader matched to your faction's list no longer says "please look" when it is trusted: it reads "Matched to a known name". When every value equals the last saved snapshot, Save asks "Nothing changed since the last saved snapshot. Save it anyway?" so you do not store the same reading twice. The compare setting has a new choice, "the end of yesterday" (the last reading before 00:00 UTC), next to the previous snapshot, 24 hours and 7 days.
 

@@ -58,6 +58,17 @@ pub fn snap_all(read: &[String], known: &[String]) -> Vec<Hit> {
             used[k] = true;
         }
     }
+    // 3b. one character off under the look-alike key (a stray separator and one wrong letter: DURYAMF-AS - for DURYAMPAS): the one nearest unused known name, no tie,
+    //     and two rows that want the same known name take neither
+    let mut c3: Vec<(usize, usize)> = Vec::new();
+    for i in (0..read.len()).filter(|&i| hit[i] == Hit::None && !rn[i].is_empty()).collect::<Vec<_>>() {
+        let r = key(&rn[i]);
+        if r.len() < 6 { continue; }
+        let mut ds: Vec<(usize, usize)> = (0..known.len()).filter(|&k| !used[k]).map(|k| (lev(&r, &kk[k]), k)).collect();
+        ds.sort();
+        if let Some(&(d, k)) = ds.first() { if d <= 1 && ds.get(1).map_or(true, |x| x.0 > d) { c3.push((i, k)); } }
+    }
+    for &(i, k) in &c3 { if c3.iter().filter(|x| x.1 == k).count() == 1 { hit[i] = Hit::Near(k, 2); used[k] = true; } }
     // 4. a garbled name (blurred letters that touch each other become one wrong letter, 'SECTOR' read as 'SEWOR') whose ENDING is still read right:
     //    the last word (a code like B6-5 or C12-9), and when several known names end alike also the word before it, must point to exactly one known name no row took.
     //    Weak on purpose: it is shown as a snapped name that the player confirms.

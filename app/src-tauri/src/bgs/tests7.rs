@@ -179,7 +179,7 @@ fn real_4k_pages() {
     let cy = super::tests4::load_set("cyanidex", "gt_cyanidex.json").unwrap();
     let truth: Vec<(String, String)> = cy.pages.iter().flat_map(|p| p.1.iter().cloned()).collect();
     let names: Vec<String> = truth.iter().map(|r| r.0.clone()).collect();
-    let mut files: Vec<_> = std::fs::read_dir(super::train::root().join("inbox/4k")).unwrap().filter_map(|e| e.ok()).map(|e| e.path()).collect();
+    let mut files: Vec<_> = std::fs::read_dir(super::train::root().join(std::env::var("GV_DIR").unwrap_or("inbox/4k".into()))).unwrap().filter_map(|e| e.ok()).map(|e| e.path()).collect();
     files.sort();
     let mut ins = Vec::new();
     for (i, f) in files.iter().enumerate() {

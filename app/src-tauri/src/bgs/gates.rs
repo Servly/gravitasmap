@@ -154,10 +154,11 @@ fn alts_with(second: &str, differs: bool, alts: &[String]) -> Vec<String> {
 }
 
 /// another known name that differs from this one by exactly one character, both being digits of the look-alike set
-fn has_alike_twin(name: &str, known: &[String]) -> bool {
+/// and that no row has taken: in a complete list a wrong digit would leave a known name without a row (or give one name to two rows), so a twin that already has its own row is no doubt
+fn has_alike_twin(name: &str, known: &[String], taken: &[bool]) -> bool {
     let a: Vec<char> = norm(name).chars().collect();
-    known.iter().any(|o| {
-        if o == name { return false; }
+    known.iter().enumerate().any(|(ki, o)| {
+        if o == name || taken.get(ki).copied().unwrap_or(false) { return false; }
         let b: Vec<char> = norm(o).chars().collect();
         if a.len() != b.len() { return false; }
         let d: Vec<usize> = (0..a.len()).filter(|&i| a[i] != b[i]).collect();
@@ -169,13 +170,15 @@ fn snap_names(cells: &mut [Cell], known: &[String], issues: &mut Vec<Issue>) {
     if known.is_empty() { return; }
     let read: Vec<String> = cells.iter().map(|c| c.read_name.clone()).collect();
     let hits = snap_all(&read, known);
+    let mut taken_k = vec![false; known.len()];
+    for h in &hits { if let Hit::Exact(k) | Hit::Near(k, _) = h { taken_k[*k] = true; } }
     for (c, h) in cells.iter_mut().zip(&hits) {
         match *h {
             Hit::Exact(k) => {
                 let raw = c.name_conf;
                 c.system = known[k].clone(); c.name_state = "exact"; c.name_conf = 1.0; c.reasons.retain(|r| *r != "name_weak");
                 // a known twin that differs by one look-alike digit (B23-5 / B23-6): an exact match is no proof when the reading was not clear
-                if raw < 0.5 && has_alike_twin(&known[k], known) { c.name_state = "snapped"; c.reasons.push("name_twin"); }
+                if raw < 0.5 && has_alike_twin(&known[k], known, &taken_k) { c.name_state = "snapped"; c.reasons.push("name_twin"); }
             }
             Hit::Near(k, d) => {
                 c.system = known[k].clone();

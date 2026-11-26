@@ -620,3 +620,26 @@ fn a_zero_read_as_o_and_a_lost_hyphen_still_snap_to_the_one_known_name() {
     assert!(matches!(h[1], super::snap::Hit::Near(1, _)), "{:?}", h);
     assert_eq!(h[2], super::snap::Hit::Exact(2));
 }
+
+#[test]
+fn a_twin_that_already_has_its_own_row_is_no_doubt_but_an_unclaimed_twin_is() {
+    // B23-5 and B23-6 both known. Read weakly as exact names.
+    let known: Vec<String> = vec!["Col 285 Sector CR-J b23-5".into(), "Col 285 Sector CR-J b23-6".into(), "HIP 1".into()];
+    let mut rows = list(3, 700);
+    rows[0].name = "COL 285 SECTOR CR-J B23-5".into(); rows[1].name = "COL 285 SECTOR CR-J B23-6".into(); rows[2].name = "HIP 1".into();
+    for r in rows.iter_mut() { r.name_cost = 0.3; r.name_margin = 0.05; }
+    let both = build(vec![page(1, 1, 3, rows.clone(), 1000)], &ctx(&known, None));
+    assert!(!both.rows[0].uncertain && !both.rows[1].uncertain, "each twin has its own row: no doubt");
+    let only_one = build(vec![page(1, 1, 2, vec![rows[0].clone(), rows[2].clone()], 1000)], &ctx(&known, None));
+    assert!(only_one.rows[0].uncertain, "the twin has no row: the reading may be the wrong digit");
+}
+
+#[test]
+fn a_stray_separator_and_one_wrong_letter_still_snap_and_two_rows_never_share_a_name() {
+    let known: Vec<String> = vec!["Duryampas".into(), "Serra".into()];
+    let h = super::snap::snap_all(&["DURYAMF-AS -".to_string(), "SERRA".to_string()], &known);
+    assert!(matches!(h[0], super::snap::Hit::Near(0, _)), "{h:?}");
+    let h2 = super::snap::snap_all(&["DURYAMF-AS -".to_string(), "DURYAMQ-AS -".to_string()], &known);
+    assert_eq!(h2[0], super::snap::Hit::None);
+    assert_eq!(h2[1], super::snap::Hit::None);
+}
