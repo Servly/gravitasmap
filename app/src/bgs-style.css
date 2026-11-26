@@ -90,3 +90,9 @@ svg circle[data-tip]:hover,svg rect[data-tip]:not([fill="transparent"]):hover{st
 .bg-wrap .bg-card{max-width:1400px}
 .bg-btns .btn:disabled{opacity:.4;cursor:default;box-shadow:none;filter:saturate(.4)}
 .bg-form input,.bg-form select{box-sizing:border-box;height:36px}
+
+/* Tick tab: one row per system (name, estimated range, confidence with the number of changes seen) */
+.bg-trow { display: grid; grid-template-columns: minmax(150px, 1.3fr) minmax(260px, 2.4fr) minmax(110px, 0.9fr); gap: 12px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--line, rgba(255,255,255,.07)); cursor: pointer; }
+.bg-trow:hover { background: rgba(255,255,255,.04); }
+.bg-trow.bg-th { cursor: default; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .65; position: sticky; top: 0; background: var(--bg, #14101f); }
+.bg-trow.bg-th:hover { background: var(--bg, #14101f); }

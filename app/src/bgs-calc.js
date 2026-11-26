@@ -146,5 +146,35 @@
     out.tight = tight; out.drift = tr("bgs.tick.drift");
     return out;
   }
-  BG.calc = { DEF: DEF, model: model, hhmm: hhmm, dmy: dmy, dt: dt, dtl: dtl, tod: tod, ago: ago, r1: r1, median: median, quant: quant };
+  // Per system tick: every time a system's value changed between two readings, its tick fell inside that window (a tick that changes nothing is invisible).
+  // The windows are laid on the 24 h clock (UTC minutes, circular); the minutes covered by the most windows are the estimate. Windows over 14 h tell too little and are left out
+  // unless they are all there is. The game's panels can be up to 12 h late, so this is a range, never a time.
+  function tickSys(R) {
+    var NARROW = 14 * 60;
+    function cover(ws) {
+      var cov = [], m, i; for (m = 0; m < 1440; m++) cov[m] = 0;
+      ws.forEach(function (w) { var s = Math.floor(tod(w.a)), len = Math.min(1440, Math.max(1, Math.round((w.b - w.a) / 6e4))); for (i = 0; i < len; i++) cov[(s + i) % 1440]++; });
+      var mx = 0; for (m = 0; m < 1440; m++) if (cov[m] > mx) mx = cov[m];
+      var best = null, run = null;
+      for (m = 0; m < 2880; m++) {                                  // two laps find a run that crosses midnight
+        var on = cov[m % 1440] === mx;
+        if (on) { if (!run) run = { s: m, len: 0 }; run.len++; if (run.len > 1440) break; } else { if (run && (!best || run.len > best.len)) best = run; run = null; }
+      }
+      if (run && (!best || run.len > best.len)) best = run;
+      return { mx: mx, s: best ? best.s % 1440 : 0, len: best ? Math.min(best.len, 1440) : 0 };
+    }
+    return R.sys.map(function (s) {
+      var ws = [], pi = -1, i;
+      for (i = 0; i < s.v.length; i++) { if (s.v[i] == null) continue; if (pi >= 0 && s.v[i] !== s.v[pi]) ws.push({ a: R.snaps[pi].t, b: R.snaps[i].t }); pi = i; }
+      var out = { n: s.n, changes: ws.length, win: null, level: 0, used: 0, last: ws.length ? ws[ws.length - 1] : null };
+      if (!ws.length) return out;
+      var narrow = ws.filter(function (w) { return (w.b - w.a) / 6e4 <= NARROW; }), use = narrow.length ? narrow : ws;
+      out.used = use.length; out.wide = !narrow.length;
+      var c = cover(use); out.win = [c.s, (c.s + c.len) % 1440]; out.span = c.len; out.agree = c.mx / use.length;
+      out.level = out.wide || use.length < 2 ? 1 : (use.length >= 3 && c.mx === use.length ? 3 : (c.mx / use.length >= 0.75 ? 2 : 1));
+      if (c.len > 360) out.level = 1; else if (c.len > 180) out.level = Math.min(out.level, 2);   // agreement alone is not precision: a 5 hour range stays low
+      return out;
+    });
+  }
+  BG.calc = { tickSys: tickSys, DEF: DEF, model: model, hhmm: hhmm, dmy: dmy, dt: dt, dtl: dtl, tod: tod, ago: ago, r1: r1, median: median, quant: quant };
 })();

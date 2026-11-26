@@ -1543,5 +1543,16 @@
   "bgs.state.snapped_ok": "Associé à un nom connu",
   "bgs.cf.same": "Rien n'a changé depuis le dernier instantané enregistré. L'enregistrer quand même ?",
   "bgs.cf.same_go": "Enregistrer quand même",
-  "tip.bgs.cf.same_go": "Enregistre cette lecture même si chaque valeur est égale au dernier instantané enregistré."
+  "tip.bgs.cf.same_go": "Enregistre cette lecture même si chaque valeur est égale au dernier instantané enregistré.",
+  "bgs.tick.local": "local",
+  "bgs.tick.sys.h": "Plage du tick par système",
+  "bgs.tick.sys.q": "Quand chaque système fait-il son tick ?",
+  "bgs.tick.sys.note": "Chaque fois que la valeur d'un système a changé entre deux de vos lectures, son tick est tombé dans cette fenêtre. Les fenêtres de plusieurs jours sont superposées, la plage se resserre avec plus d'instantanés. C'est une plage, pas une heure exacte : les panneaux du jeu peuvent avoir jusqu'à 12 heures de retard et un tick qui ne change rien est invisible.",
+  "bgs.tick.sys.sum": "Systèmes par confiance : haute {a}, moyenne {b}, basse {c}, aucun changement vu {d}.",
+  "bgs.tick.sys.none": "aucun changement vu",
+  "bgs.tick.sys.tip": "{c} changements vus, {n} fenêtres utilisables.",
+  "bgs.tick.sys.wide": "Pour l'instant seulement de larges fenêtres : prenez plus d'instantanés.",
+  "bgs.tick.sys.c1": "Système",
+  "bgs.tick.sys.c2": "Plage estimée",
+  "bgs.tick.sys.c3": "Confiance (changements vus)"
 }

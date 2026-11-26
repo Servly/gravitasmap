@@ -53,6 +53,7 @@
     var useDaily = ui.res === "daily" || (ui.res === "auto" && span >= 10 * 864e5);
     var dataIn = useDaily && Object.keys(nDays).length >= 2 ? daily(store.data) : store.data;
     store.M = C.model(dataIn, { lo: s.low == null ? 50 : s.low, hi: s.high == null ? 65 : s.high, minor: ui.minor, base: ui.base, days: ui.days, tickPct: ui.tickPct });
+    store.M.raw = dataIn === store.data ? store.M : C.model(store.data, { lo: s.low == null ? 50 : s.low, hi: s.high == null ? 65 : s.high, minor: ui.minor, base: ui.base, days: ui.days, tickPct: ui.tickPct });
     V.setModel(store.M); BG.M = store.M;
   }
   function load(force) {

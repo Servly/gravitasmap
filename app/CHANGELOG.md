@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.50
+- BGS WATCH has a Tick tab. For every system it shows the range of the day in which that system ticks, worked out from your own snapshots: each time a system's value changed between two readings, its tick fell inside that window, and the windows of several days are laid over each other so the range narrows as you take more snapshots. Systems are listed surest first, in UTC with your local time next to it. It is a range, not an exact time: the game's panels can be up to 12 hours late, and a tick that changes nothing cannot be seen.
+
 ## 0.9.49
 - BGS WATCH guesses names like a person would. If a name was read with one wrong letter, a stray dash or space, or a 0 as the letter O, it is matched to the one known system it is closest to and counted as sure, with no "please look". It only asks when there is no single closest name, or when two rows want the same name. Tested on real 1080p, 2K and 4K pages: every row read right and none was marked for a look.
 

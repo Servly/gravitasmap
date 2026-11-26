@@ -1543,5 +1543,16 @@
   "bgs.state.snapped_ok": "Matched to a known name",
   "bgs.cf.same": "Nothing changed since the last saved snapshot. Save it anyway?",
   "bgs.cf.same_go": "Save anyway",
-  "tip.bgs.cf.same_go": "Saves this reading even though every value equals the last saved snapshot."
+  "tip.bgs.cf.same_go": "Saves this reading even though every value equals the last saved snapshot.",
+  "bgs.tick.local": "local",
+  "bgs.tick.sys.h": "Tick range per system",
+  "bgs.tick.sys.q": "When does each system tick?",
+  "bgs.tick.sys.note": "Every time a system's value changed between two of your readings, its tick fell inside that window. The windows of several days are laid over each other, so the range narrows with more snapshots. It is a range, not an exact time: the game's panels can be up to 12 hours late and a tick that changes nothing is invisible.",
+  "bgs.tick.sys.sum": "Systems by confidence: higher {a}, medium {b}, low {c}, no change seen yet {d}.",
+  "bgs.tick.sys.none": "no change seen yet",
+  "bgs.tick.sys.tip": "{c} changes seen, {n} usable windows.",
+  "bgs.tick.sys.wide": "Only wide windows so far: take more snapshots.",
+  "bgs.tick.sys.c1": "System",
+  "bgs.tick.sys.c2": "Estimated range",
+  "bgs.tick.sys.c3": "Confidence (changes seen)"
 }

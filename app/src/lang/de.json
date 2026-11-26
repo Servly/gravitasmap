@@ -1543,5 +1543,16 @@
   "bgs.state.snapped_ok": "Einem bekannten Namen zugeordnet",
   "bgs.cf.same": "Seit der letzten gespeicherten Momentaufnahme hat sich nichts geändert. Trotzdem speichern?",
   "bgs.cf.same_go": "Trotzdem speichern",
-  "tip.bgs.cf.same_go": "Speichert diese Messung, obwohl jeder Wert dem letzten gespeicherten Snapshot entspricht."
+  "tip.bgs.cf.same_go": "Speichert diese Messung, obwohl jeder Wert dem letzten gespeicherten Snapshot entspricht.",
+  "bgs.tick.local": "lokal",
+  "bgs.tick.sys.h": "Tick-Bereich je System",
+  "bgs.tick.sys.q": "Wann tickt jedes System?",
+  "bgs.tick.sys.note": "Jedes Mal, wenn sich der Wert eines Systems zwischen zwei deiner Messungen änderte, lag sein Tick in diesem Fenster. Die Fenster mehrerer Tage werden übereinandergelegt, der Bereich wird mit mehr Snapshots enger. Es ist ein Bereich, keine genaue Zeit: Die Panels des Spiels können bis zu 12 Stunden zu spät sein, und ein Tick ohne Änderung ist unsichtbar.",
+  "bgs.tick.sys.sum": "Systeme nach Sicherheit: hoch {a}, mittel {b}, niedrig {c}, noch keine Änderung gesehen {d}.",
+  "bgs.tick.sys.none": "noch keine Änderung gesehen",
+  "bgs.tick.sys.tip": "{c} Änderungen gesehen, {n} nutzbare Fenster.",
+  "bgs.tick.sys.wide": "Bisher nur breite Fenster: mehr Snapshots machen.",
+  "bgs.tick.sys.c1": "System",
+  "bgs.tick.sys.c2": "Geschätzter Bereich",
+  "bgs.tick.sys.c3": "Sicherheit (gesehene Änderungen)"
 }

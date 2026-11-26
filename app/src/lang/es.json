@@ -1543,5 +1543,16 @@
   "bgs.state.snapped_ok": "Asignado a un nombre conocido",
   "bgs.cf.same": "Nada ha cambiado desde la última captura guardada. ¿Guardarla de todos modos?",
   "bgs.cf.same_go": "Guardar de todos modos",
-  "tip.bgs.cf.same_go": "Guarda esta lectura aunque cada valor sea igual a la última captura guardada."
+  "tip.bgs.cf.same_go": "Guarda esta lectura aunque cada valor sea igual a la última captura guardada.",
+  "bgs.tick.local": "local",
+  "bgs.tick.sys.h": "Rango del tick por sistema",
+  "bgs.tick.sys.q": "¿Cuándo hace tick cada sistema?",
+  "bgs.tick.sys.note": "Cada vez que el valor de un sistema cambió entre dos de tus lecturas, su tick cayó dentro de esa ventana. Las ventanas de varios días se superponen, así que el rango se estrecha con más capturas. Es un rango, no una hora exacta: los paneles del juego pueden ir hasta 12 horas tarde y un tick que no cambia nada es invisible.",
+  "bgs.tick.sys.sum": "Sistemas por confianza: alta {a}, media {b}, baja {c}, aún sin cambios {d}.",
+  "bgs.tick.sys.none": "aún sin cambios",
+  "bgs.tick.sys.tip": "{c} cambios vistos, {n} ventanas útiles.",
+  "bgs.tick.sys.wide": "Por ahora solo ventanas amplias: toma más capturas.",
+  "bgs.tick.sys.c1": "Sistema",
+  "bgs.tick.sys.c2": "Rango estimado",
+  "bgs.tick.sys.c3": "Confianza (cambios vistos)"
 }

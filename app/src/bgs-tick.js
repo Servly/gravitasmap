@@ -8,7 +8,7 @@
   V.tickMini = function (M) {
     var k = M.ticks; return '<div class="bg-mt-t">' + esc(k.text) + "</div>" + (k.win ? '<div class="bg-lv" data-tip="' + esc(t("tip.bgs.lv")) + '">' + t("bgs.conf") + ": " + lvName(k.level) + "</div>" : "") + '<div class="bg-note">' + t("bgs.tick.mini") + "</div>";
   };
-  V.tick = function (M) {
+  V.tickCharts = function (M) {
     var k = M.ticks;
     if (M.nS < 2) return card(t("bgs.tick.h2"), need(esc(k.text) + " " + t("bgs.tick.one")), { q: t("bgs.tick.q2") });
     var iv = k.iv, w = 640, h = 200, n = iv.length, bw = Math.max(8, Math.min(40, (w - 60) / n - 6)), o = "", X = function (i) { return 40 + i * ((w - 56) / n); }, Yp = function (p) { return 12 + (1 - p / 100) * (h - 56); };
@@ -31,6 +31,23 @@
     });
     var c2 = card(t("bgs.tick.h4"), S.svg(w2, h2, o2, 'id="tsvg2"') + '<div class="bg-est"><b>' + esc(k.text) + "</b>" + (k.win ? '<div class="bg-lv">' + t("bgs.conf") + ": " + lvName(k.level) + "</div>" : "") + '<div class="bg-note">' + esc(k.drift || "") + " " + t("bgs.tick.note2") + "</div></div>", { save: 1, q: t("bgs.tick.q4"), note: t("bgs.tick.note3") });
     return '<div class="bg-two">' + c1 + c2 + "</div>";
+  };
+
+  function mod(m) { return ((Math.round(m) % 1440) + 1440) % 1440; }
+  function loc(m) { var d = new Date(); d.setUTCHours(0, 0, 0, 0); d = new Date(d.getTime() + mod(m) * 6e4); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  function rangeTxt(w) { return C.hhmm(w[0]) + " - " + C.hhmm(w[1]) + " UTC (" + loc(w[0]) + " - " + loc(w[1]) + " " + t("bgs.tick.local") + ")"; }
+  V.tick = function (M) {
+    var R = M.raw || M, T = C.tickSys(R), by = {}, lv = [0, 0, 0, 0];
+    T.forEach(function (x, i) { by[R.sys[i].n] = x; lv[x.level]++; });
+    var rows = T.map(function (x, i) { return { n: R.sys[i].n, x: x }; });
+    rows.sort(function (a, b) { var A = a.x.win ? a.x.win[0] : 9999, Bw = b.x.win ? b.x.win[0] : 9999; return (b.x.level - a.x.level) || (A - Bw) || (a.n < b.n ? -1 : 1); });   // the surest first
+    var head = '<div class="bg-note">' + esc(t("bgs.tick.sys.sum", { a: lv[3], b: lv[2], c: lv[1], d: lv[0] })) + "</div>";
+    var tb = '<div class="bg-rows"><div class="bg-trow bg-th"><span>' + esc(t("bgs.tick.sys.c1")) + "</span><span>" + esc(t("bgs.tick.sys.c2")) + "</span><span>" + esc(t("bgs.tick.sys.c3")) + "</span></div>" + rows.map(function (r) {
+      var x = r.x, txt = x.win ? esc(rangeTxt(x.win)) : '<span class="bg-fl">' + esc(t("bgs.tick.sys.none")) + "</span>";
+      var tip = x.win ? t("bgs.tick.sys.tip", { n: x.used, c: x.changes }) + (x.wide ? " " + t("bgs.tick.sys.wide") : "") : t("bgs.tick.sys.none");
+      return '<div class="bg-trow" data-sys="' + esc(r.n) + '" data-tip="' + esc(tip) + '"><span>' + esc(r.n) + "</span><span>" + txt + '</span><span class="bg-fl">' + (x.win ? esc(lvName(x.level)) + " (" + x.changes + ")" : "") + "</span></div>";
+    }).join("") + "</div>";
+    return V.tickCharts(M) + card(t("bgs.tick.sys.h"), head + tb, { q: t("bgs.tick.sys.q"), note: t("bgs.tick.sys.note") });
   };
 
   // ---------- Report: always English, a fixed-width Discord block under 2,000 characters ----------

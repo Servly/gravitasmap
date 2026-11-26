@@ -1543,5 +1543,16 @@
   "bgs.state.snapped_ok": "Ligado a um nome conhecido",
   "bgs.cf.same": "Nada mudou desde o último snapshot salvo. Salvar mesmo assim?",
   "bgs.cf.same_go": "Salvar mesmo assim",
-  "tip.bgs.cf.same_go": "Salva esta leitura mesmo que cada valor seja igual ao do último snapshot salvo."
+  "tip.bgs.cf.same_go": "Salva esta leitura mesmo que cada valor seja igual ao do último snapshot salvo.",
+  "bgs.tick.local": "local",
+  "bgs.tick.sys.h": "Faixa do tick por sistema",
+  "bgs.tick.sys.q": "Quando cada sistema faz o tick?",
+  "bgs.tick.sys.note": "Toda vez que o valor de um sistema mudou entre duas das suas leituras, o tick dele caiu dentro dessa janela. As janelas de vários dias são sobrepostas, então a faixa estreita com mais snapshots. É uma faixa, não um horário exato: os painéis do jogo podem atrasar até 12 horas e um tick que não muda nada é invisível.",
+  "bgs.tick.sys.sum": "Sistemas por confiança: alta {a}, média {b}, baixa {c}, ainda sem mudança {d}.",
+  "bgs.tick.sys.none": "ainda sem mudança",
+  "bgs.tick.sys.tip": "{c} mudanças vistas, {n} janelas úteis.",
+  "bgs.tick.sys.wide": "Por enquanto só janelas largas: tire mais snapshots.",
+  "bgs.tick.sys.c1": "Sistema",
+  "bgs.tick.sys.c2": "Faixa estimada",
+  "bgs.tick.sys.c3": "Confiança (mudanças vistas)"
 }

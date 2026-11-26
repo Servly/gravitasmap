@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.50",
+      "en": [
+        "BGS WATCH has a Tick tab. For every system it shows the range of the day in which that system ticks, worked out from your own snapshots: each time a system's value changed between two readings, its tick fell inside that window, and the windows of several days are laid over each other so the range narrows as you take more snapshots. Systems are listed surest first, in UTC with your local time next to it. It is a range, not an exact time: the game's panels can be up to 12 hours late, and a tick that changes nothing cannot be seen."
+      ],
+      "de": [
+        "BGS WATCH hat einen Tick-Tab. Für jedes System zeigt er den Bereich des Tages, in dem das System tickt, berechnet aus deinen eigenen Snapshots: Jedes Mal, wenn sich der Wert eines Systems zwischen zwei Messungen änderte, lag sein Tick in diesem Fenster, und die Fenster mehrerer Tage werden übereinandergelegt, sodass der Bereich mit mehr Snapshots enger wird. Die Systeme stehen nach Sicherheit sortiert, in UTC mit deiner Ortszeit daneben. Es ist ein Bereich, keine genaue Zeit: Die Panels des Spiels können bis zu 12 Stunden zu spät sein, und ein Tick ohne Änderung ist nicht sichtbar."
+      ],
+      "es": [
+        "BGS WATCH tiene una pestaña Tick. Para cada sistema muestra el rango del día en que ese sistema hace tick, calculado con tus propias capturas: cada vez que el valor de un sistema cambió entre dos lecturas, su tick cayó dentro de esa ventana, y las ventanas de varios días se superponen para que el rango se estreche al tomar más capturas. Los sistemas aparecen de más a menos seguro, en UTC con tu hora local al lado. Es un rango, no una hora exacta: los paneles del juego pueden ir hasta 12 horas tarde y un tick que no cambia nada no se ve."
+      ],
+      "fr": [
+        "BGS WATCH a un onglet Tick. Pour chaque système, il montre la plage de la journée où ce système fait son tick, calculée à partir de vos propres instantanés : chaque fois que la valeur d'un système a changé entre deux lectures, son tick est tombé dans cette fenêtre, et les fenêtres de plusieurs jours sont superposées pour que la plage se resserre avec plus d'instantanés. Les systèmes sont classés du plus sûr au moins sûr, en UTC avec votre heure locale à côté. C'est une plage, pas une heure exacte : les panneaux du jeu peuvent avoir jusqu'à 12 heures de retard et un tick qui ne change rien est invisible."
+      ],
+      "pt-br": [
+        "BGS WATCH tem uma aba Tick. Para cada sistema ela mostra a faixa do dia em que o sistema faz o tick, calculada com seus próprios snapshots: toda vez que o valor de um sistema mudou entre duas leituras, o tick dele caiu dentro dessa janela, e as janelas de vários dias são sobrepostas para que a faixa estreite com mais snapshots. Os sistemas aparecem do mais seguro ao menos seguro, em UTC com a sua hora local ao lado. É uma faixa, não um horário exato: os painéis do jogo podem atrasar até 12 horas e um tick que não muda nada não pode ser visto."
+      ],
+      "ru": [
+        "В BGS WATCH появилась вкладка Tick. Для каждой системы она показывает диапазон времени суток, когда эта система тикает, по вашим снимкам: каждый раз, когда значение системы менялось между двумя чтениями, её тик попадал в это окно, а окна за несколько дней накладываются друг на друга, поэтому диапазон сужается с каждым снимком. Системы идут от самых надёжных, время в UTC и рядом ваше местное. Это диапазон, а не точное время: панели игры могут запаздывать до 12 часов, а тик, который ничего не меняет, не виден."
+      ]
+    },
+    {
       "v": "0.9.49",
       "en": [
         "BGS WATCH guesses names like a person would. If a name was read with one wrong letter, a stray dash or space, or a 0 as the letter O, it is matched to the one known system it is closest to and counted as sure, with no \"please look\". It only asks when there is no single closest name, or when two rows want the same name. Tested on real 1080p, 2K and 4K pages: every row read right and none was marked for a look."
