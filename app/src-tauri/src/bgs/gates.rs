@@ -2,7 +2,7 @@
 //! snapping to the known names, the sorted order of the values (soft), continuity with the previous snapshot, and the state of every cell.
 //! Nothing here saves anything. A reading is never presented as a fact: a row the reader or a rule doubts is marked uncertain with its alternatives.
 use super::model::{Cell, Issue, Proposal, Snapshot};
-use super::reader::{PageRead, RowRead, T_COST, T_MARGIN};
+use super::reader::{PageRead, RowRead, T_COST, T_MARGIN, T_VAL_MARGIN};
 use super::snap::{lev, norm, snap_all, Hit};
 use super::timeutil::{fmt_id, fmt_iso};
 
@@ -114,6 +114,7 @@ pub fn build(mut pages: Vec<PageIn>, ctx: &Ctx) -> Proposal {
 
     snap_names(&mut cells, ctx.known, &mut issues);
     order_gate(&mut cells, &mut issues);
+    order_clears_look_alikes(&mut cells);
     continuity(&mut cells, ctx, &mut issues, p.complete);
     for c in cells.iter_mut() { finish(c); }
     p.names_known = ctx.known.len();
@@ -128,11 +129,11 @@ fn cell_from(r: &RowRead) -> Cell {
     let mut reasons: Vec<&'static str> = Vec::new();
     let name_weak = r.name.is_empty() || r.name_cost > T_COST || r.name_margin < T_MARGIN;
     // a value is doubtful when the shape is wrong, the match is weak, the second reading disagrees, or the best two digits are close
-    let inf_weak = r.inf_x10.is_none() || r.inf_cost > T_COST || r.inf_margin < T_MARGIN || !r.inf_agree || r.inf_confusable;
+    let inf_weak = r.inf_x10.is_none() || r.inf_cost > T_COST || r.inf_margin < T_VAL_MARGIN || !r.inf_agree || r.inf_confusable;
     if r.inf_x10.is_none() { reasons.push("value_shape"); }
     if r.name.is_empty() { reasons.push("no_name"); }
     if name_weak && !r.name.is_empty() { reasons.push("name_weak"); }
-    if inf_weak && r.inf_x10.is_some() { reasons.push(if !r.inf_agree { "value_disagree" } else if r.inf_confusable && !(r.inf_cost > T_COST || r.inf_margin < T_MARGIN) { "value_confusable" } else { "value_weak" }); }
+    if inf_weak && r.inf_x10.is_some() { reasons.push(if !r.inf_agree { "value_disagree" } else if r.inf_cost > T_COST { "value_weak" } else if r.inf_margin < T_VAL_MARGIN { "value_margin" } else { "value_confusable" }); }
     Cell {
         read_name: r.name.clone(), system: r.name.clone(),
         name_state: if name_weak { "unsure" } else { "ok" },
@@ -152,13 +153,30 @@ fn alts_with(second: &str, differs: bool, alts: &[String]) -> Vec<String> {
     v
 }
 
+/// another known name that differs from this one by exactly one character, both being digits of the look-alike set
+fn has_alike_twin(name: &str, known: &[String]) -> bool {
+    let a: Vec<char> = norm(name).chars().collect();
+    known.iter().any(|o| {
+        if o == name { return false; }
+        let b: Vec<char> = norm(o).chars().collect();
+        if a.len() != b.len() { return false; }
+        let d: Vec<usize> = (0..a.len()).filter(|&i| a[i] != b[i]).collect();
+        d.len() == 1 && "689035".contains(a[d[0]]) && "689035".contains(b[d[0]])
+    })
+}
+
 fn snap_names(cells: &mut [Cell], known: &[String], issues: &mut Vec<Issue>) {
     if known.is_empty() { return; }
     let read: Vec<String> = cells.iter().map(|c| c.read_name.clone()).collect();
     let hits = snap_all(&read, known);
     for (c, h) in cells.iter_mut().zip(&hits) {
         match *h {
-            Hit::Exact(k) => { c.system = known[k].clone(); c.name_state = "exact"; c.name_conf = 1.0; c.reasons.retain(|r| *r != "name_weak"); }
+            Hit::Exact(k) => {
+                let raw = c.name_conf;
+                c.system = known[k].clone(); c.name_state = "exact"; c.name_conf = 1.0; c.reasons.retain(|r| *r != "name_weak");
+                // a known twin that differs by one look-alike digit (B23-5 / B23-6): an exact match is no proof when the reading was not clear
+                if raw < 0.5 && has_alike_twin(&known[k], known) { c.name_state = "snapped"; c.reasons.push("name_twin"); }
+            }
             Hit::Near(k, d) => {
                 c.system = known[k].clone();
                 c.name_state = "snapped";
@@ -215,6 +233,41 @@ fn order_gate(cells: &mut [Cell], issues: &mut Vec<Issue>) {
     }
 }
 
+/// A value that is doubtful only because two look-alike digits (6 8 9 0 3 5) were close is cleared when the list is in order around it and
+/// no swap of one such digit would still fit between its two neighbours: the order of the list is a second, independent proof.
+fn order_clears_look_alikes(cells: &mut [Cell]) {
+    let vals: Vec<Option<i32>> = cells.iter().map(|c| c.inf_x10).collect();
+    if vals.len() < 3 { return; }
+    for i in 0..cells.len() {
+        let c = &cells[i];
+        let alike_only = c.reasons.contains(&"value_confusable");
+        if !c.inf_unsure || !(alike_only || c.reasons.contains(&"value_margin")) || c.reasons.contains(&"value_weak") || c.reasons.contains(&"value_disagree") || c.reasons.contains(&"value_shape") || c.reasons.contains(&"order") { continue; }
+        let Some(v) = vals[i] else { continue };
+        let hi = if i > 0 { vals[i - 1] } else { None };
+        let lo = vals.get(i + 1).copied().flatten();
+        if hi.is_none() && lo.is_none() { continue; }
+        if hi.map_or(false, |h| v > h) || lo.map_or(false, |l| v < l) { continue; }
+        let digits: Vec<u8> = v.to_string().bytes().collect();
+        let mut fits_other = false;
+        for p in 0..digits.len() {
+            let set: &[u8] = if alike_only { b"689035" } else { b"0123456789" };
+            if !set.contains(&digits[p]) { continue; }
+            for &d in set {
+                if d == digits[p] { continue; }
+                let mut t = digits.clone(); t[p] = d;
+                let alt: i32 = String::from_utf8_lossy(&t).parse().unwrap_or(-1);
+                if alt >= 0 && hi.map_or(true, |h| alt <= h) && lo.map_or(true, |l| alt >= l) { fits_other = true; }
+            }
+        }
+        if !fits_other {
+            let c = &mut cells[i];
+            c.inf_unsure = false;
+            c.reasons.retain(|r| *r != "value_confusable" && *r != "value_margin");
+            c.reasons.push("value_fits_order");
+        }
+    }
+}
+
 fn continuity(cells: &mut [Cell], ctx: &Ctx, issues: &mut Vec<Issue>, complete: bool) {
     let Some(prev) = ctx.prev else { return };
     let map: std::collections::HashMap<String, Option<i32>> = prev.rows.iter().map(|r| (norm(&r.system), r.inf_x10)).collect();
@@ -225,7 +278,15 @@ fn continuity(cells: &mut [Cell], ctx: &Ctx, issues: &mut Vec<Issue>, complete: 
         match map.get(&key) {
             Some(Some(pv)) => {
                 c.prev_x10 = Some(*pv);
-                if let Some(v) = c.inf_x10 { if (v - pv).abs() > ctx.jump_x10 { c.reasons.push("jump"); } }
+                if let Some(v) = c.inf_x10 {
+                    if (v - pv).abs() > ctx.jump_x10 { c.reasons.push("jump"); }
+                    else if v == *pv && c.inf_unsure && !c.reasons.contains(&"value_disagree") && !c.reasons.contains(&"value_shape") && matches!(c.name_state, "exact" | "ok" | "snapped") {
+                        // two independent proofs agree: the reading and the same system's value in the last snapshot. A look-alike doubt or a low margin alone is cleared.
+                        c.inf_unsure = false;
+                        c.reasons.retain(|r| *r != "value_confusable" && *r != "value_weak" && *r != "value_margin");
+                        c.reasons.push("value_matches_previous");
+                    }
+                }
             }
             Some(None) => {}
             None => { if c.name_state != "unsure" { c.reasons.push("new_system"); } }
@@ -241,7 +302,7 @@ fn finish(c: &mut Cell) {
     let name_unsure = matches!(c.name_state, "unsure" | "not_in_list");
     c.state = if c.reasons.contains(&"jump") { "jump" } else if c.reasons.contains(&"order") { "order" }
         else if name_unsure || c.inf_unsure { "unsure" } else if c.name_state == "snapped" { "snapped" } else { "sure" };
-    c.uncertain = matches!(c.state, "jump" | "order" | "unsure" | "snapped");
+    c.uncertain = matches!(c.state, "jump" | "order" | "unsure") || (c.state == "snapped" && c.reasons.contains(&"name_twin"));
 }
 
 pub fn snapshot_of(p: &Proposal) -> Snapshot {

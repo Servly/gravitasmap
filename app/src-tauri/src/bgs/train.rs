@@ -100,6 +100,16 @@ pub fn collect_today() -> Vec<Sample> {
     out
 }
 
+/// the friend's 1080p pages (research/bgs/cyanidex): another screen with a bright, blurred background, page tags 17..24
+pub fn collect_cyanidex() -> Vec<Sample> {
+    let Some(t) = super::tests4::load_set("cyanidex", "gt_cyanidex.json") else { return vec![] };
+    let Some(imgs) = super::tests4::load_set_images("cyanidex", &t) else { return vec![] };
+    let gt: Vec<Vec<(String, String)>> = t.pages.iter().map(|p| p.1.clone()).collect();
+    let (mut out, mut skipped) = (Vec::new(), 0);
+    collect_pages("1080", &imgs, &gt, 16, &mut out, &mut skipped);
+    out
+}
+
 fn collect_pages(res: &str, pages: &[Rgb], gt: &[Vec<(String, String)>], offset: usize, out: &mut Vec<Sample>, skipped: &mut usize) {
     for (pi, base) in pages.iter().enumerate() {
         let tag = pi + 1 + offset;

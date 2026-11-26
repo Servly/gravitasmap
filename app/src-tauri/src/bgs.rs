@@ -36,6 +36,8 @@ pub mod tests4;
 mod tests5;
 #[cfg(test)]
 mod tests6;
+#[cfg(test)]
+mod tests7;
 
 use model::{Proposal, Skipped, Snapshot};
 use serde_json::{json, Value};

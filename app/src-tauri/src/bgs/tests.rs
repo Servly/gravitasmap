@@ -16,7 +16,7 @@ pub fn lev(a: &str, b: &str) -> usize {
     p[b.len()]
 }
 
-fn fixtures() -> Option<(Gt, Vec<Rgb>, Vec<Rgb>)> {
+pub(super) fn fixtures() -> Option<(Gt, Vec<Rgb>, Vec<Rgb>)> {
     let gt = load_gt();
     let a = load_pages("1440");
     let b = load_pages("1080");
@@ -33,6 +33,7 @@ fn bgs_build_templates() {
     let Some((gt, a, b)) = fixtures() else { panic!("the fixtures are missing") };
     let (mut samples, skipped) = collect(&[("1440", &a), ("1080", &b)], &gt);
     samples.extend(collect_today());
+    samples.extend(super::train::collect_cyanidex());
     let t = build(&samples, None);
     let bin = encode(&t);
     println!("samples {} skipped lines {} exemplars name {} inf {} page {} file {} bytes", samples.len(), skipped, t.name.ch.len(), t.inf.ch.len(), t.page.ch.len(), bin.len());

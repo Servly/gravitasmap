@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.47",
+      "en": [
+        "BGS WATCH reads other screens with far fewer doubts. It was too cautious: on pages it had never seen, including real 4K (3840x2160), it read every value and name right, yet marked most rows to check. Now a row is marked only when there is a real reason. A look-alike digit (6, 8, 9, 0, 3, 5) is cleared when the list order or the same system's last value agrees. Names with a 0 read as the letter O or a lost hyphen now snap to the one known name. A name that has a twin differing by one look-alike digit is still marked when the reading was not clear."
+      ],
+      "de": [
+        "BGS WATCH liest andere Bildschirme mit viel weniger Zweifeln. Es war zu vorsichtig: Auf nie gesehenen Seiten, auch in echtem 4K (3840x2160), wurden alle Werte und Namen richtig gelesen, aber die meisten Zeilen als zu prüfen markiert. Jetzt wird eine Zeile nur noch bei einem echten Grund markiert. Eine ähnliche Ziffer (6, 8, 9, 0, 3, 5) gilt als geklärt, wenn die Reihenfolge der Liste oder der letzte Wert desselben Systems passt. Namen mit einer 0, die als Buchstabe O gelesen wurde, oder mit verlorenem Bindestrich werden dem einen bekannten Namen zugeordnet. Ein Name mit einem Zwilling, der sich in einer ähnlichen Ziffer unterscheidet, wird bei unklarer Lesung weiterhin markiert."
+      ],
+      "es": [
+        "BGS WATCH lee otras pantallas con muchas menos dudas. Era demasiado cauteloso: en páginas que nunca había visto, incluido 4K real (3840x2160), leyó bien todos los valores y nombres, pero marcó casi todas las filas para revisar. Ahora una fila solo se marca cuando hay una razón real. Un dígito parecido (6, 8, 9, 0, 3, 5) se da por resuelto cuando el orden de la lista o el último valor del mismo sistema coincide. Los nombres con un 0 leído como la letra O o con un guion perdido se asignan al único nombre conocido. Un nombre con un gemelo que difiere en un dígito parecido sigue marcado cuando la lectura no fue clara."
+      ],
+      "fr": [
+        "BGS WATCH lit d'autres écrans avec bien moins de doutes. Il était trop prudent : sur des pages jamais vues, y compris en vrai 4K (3840x2160), toutes les valeurs et tous les noms étaient bien lus, mais la plupart des lignes étaient marquées à vérifier. Désormais une ligne n'est marquée que pour une vraie raison. Un chiffre ressemblant (6, 8, 9, 0, 3, 5) est levé quand l'ordre de la liste ou la dernière valeur du même système concorde. Les noms avec un 0 lu comme la lettre O ou un tiret perdu sont rattachés à l'unique nom connu. Un nom ayant un jumeau qui diffère d'un chiffre ressemblant reste marqué quand la lecture n'était pas nette."
+      ],
+      "pt-br": [
+        "BGS WATCH lê outras telas com muito menos dúvidas. Era cauteloso demais: em páginas que nunca tinha visto, inclusive em 4K real (3840x2160), leu todos os valores e nomes certos, mas marcou a maioria das linhas para conferir. Agora uma linha só é marcada quando há um motivo real. Um dígito parecido (6, 8, 9, 0, 3, 5) é considerado resolvido quando a ordem da lista ou o último valor do mesmo sistema confere. Nomes com um 0 lido como a letra O ou com hífen perdido passam a ser ligados ao único nome conhecido. Um nome com um gêmeo que difere em um dígito parecido continua marcado quando a leitura não foi clara."
+      ],
+      "ru": [
+        "BGS WATCH читает другие экраны с гораздо меньшим числом сомнений. Он был слишком осторожен: на страницах, которых он никогда не видел, включая настоящий 4K (3840x2160), все значения и названия были прочитаны верно, но большинство строк помечалось для проверки. Теперь строка помечается только по реальной причине. Похожая цифра (6, 8, 9, 0, 3, 5) считается подтверждённой, если совпадает порядок списка или прошлое значение той же системы. Названия с нулём, прочитанным как буква O, или с потерянным дефисом привязываются к единственному известному названию. Название с двойником, отличающимся одной похожей цифрой, по-прежнему помечается, если чтение было нечётким."
+      ]
+    },
+    {
       "v": "0.9.46",
       "en": [
         "BGS WATCH fixes. Clicking Looks right no longer throws you back to the top of the list: the page and the table keep their place. A page number the reader confused (a 6 read as 8, so one page looked taken twice and another missing) is now repaired by putting the pages in order by their values, so no page is dropped. The View switch has an Automatic setting, now the default: every snapshot is its own column while your data is under 10 days old, then one column per day."

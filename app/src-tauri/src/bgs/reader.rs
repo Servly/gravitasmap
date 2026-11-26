@@ -9,6 +9,9 @@ use super::tpl::{FontKind, Templates};
 pub const T_COST: f32 = 0.8;
 /// ... and so does a glyph whose second best character is almost as good
 pub const T_MARGIN: f32 = 0.10;
+/// A VALUE is doubted only below this gap to the second best reading. Measured out of sample (24 real pages, each left out of the training in turn, three screens):
+/// 0 wrong values in 308, so the old 0.10 flagged 42 right values for nothing. The second reading, the order of the list, the jump check and the confirm table stay as safety nets.
+pub const T_VAL_MARGIN: f32 = 0.04;
 
 pub struct RowSeg {
     pub star: bool,
@@ -112,7 +115,7 @@ pub fn parse_inf(t: &str) -> Option<i32> {
 }
 
 /// the digits the font makes look alike: if the best two readings of a value glyph are two of them and the gap is below T_CONFUSABLE, the value is not trusted
-pub const T_CONFUSABLE: f32 = 0.12;
+pub const T_CONFUSABLE: f32 = 0.06;
 const ALIKE: &str = "689035";
 
 /// the smallest gap between the best and the second best character over the glyphs where both are look-alike digits (9 when there is none)

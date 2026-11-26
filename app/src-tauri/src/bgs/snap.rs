@@ -31,6 +31,15 @@ pub fn snap_all(read: &[String], known: &[String]) -> Vec<Hit> {
             used[k] = true;
         }
     }
+    // 1b. the same name once the look-alikes are put together: a hyphen read as a space or lost, a zero read as the letter O (B21-0 read as "B21 O").
+    //     The key is the same function on both sides, so it can only join names that are equal under it, and only when exactly one known name has that key.
+    let key = |s: &str| -> String { s.chars().filter(|c| *c != '-' && !c.is_whitespace()).map(|c| if c == 'O' { '0' } else { c }).collect::<String>() };
+    let kk: Vec<String> = kn.iter().map(|k| key(k)).collect();
+    for i in (0..read.len()).filter(|&i| hit[i] == Hit::None && !rn[i].is_empty()).collect::<Vec<_>>() {
+        let r = key(&rn[i]);
+        let c: Vec<usize> = (0..known.len()).filter(|&k| kk[k] == r).collect();
+        if c.len() == 1 && !used[c[0]] { hit[i] = Hit::Near(c[0], 1); used[c[0]] = true; }
+    }
     for maxd in [1usize, 2] {
         // candidates: (distance, row, known) where the known name is the row's unique nearest among the names no row has yet
         let mut cands: Vec<(usize, usize, usize)> = Vec::new();
@@ -47,6 +56,25 @@ pub fn snap_all(read: &[String], known: &[String]) -> Vec<Hit> {
             if want.iter().filter(|&&w| w == k).count() > 1 { continue; }
             hit[i] = Hit::Near(k, d);
             used[k] = true;
+        }
+    }
+    // 4. a garbled name (blurred letters that touch each other become one wrong letter, 'SECTOR' read as 'SEWOR') whose ENDING is still read right:
+    //    the last word (a code like B6-5 or C12-9), and when several known names end alike also the word before it, must point to exactly one known name no row took.
+    //    Weak on purpose: it is shown as a snapped name that the player confirms.
+    let todo: Vec<usize> = (0..read.len()).filter(|&i| hit[i] == Hit::None && !rn[i].is_empty()).collect();
+    for i in todo {
+        let toks: Vec<&str> = rn[i].split(' ').collect();
+        if toks.len() < 2 { continue; }
+        let last = toks[toks.len() - 1];
+        if !last.chars().any(|c| c.is_ascii_digit()) || last.len() < 3 { continue; }
+        let mut c: Vec<usize> = (0..known.len()).filter(|&k| !used[k] && kn[k].split(' ').last() == Some(last)).collect();
+        if c.len() > 1 && toks.len() >= 2 {
+            let prev = toks[toks.len() - 2];
+            c.retain(|&k| { let kt: Vec<&str> = kn[k].split(' ').collect(); kt.len() >= 2 && lev(kt[kt.len() - 2], prev) <= 1 });
+        }
+        if c.len() == 1 && !hit.iter().any(|h| matches!(h, Hit::Near(k, _) if *k == c[0])) {
+            hit[i] = Hit::Near(c[0], 9);
+            used[c[0]] = true;
         }
     }
     hit

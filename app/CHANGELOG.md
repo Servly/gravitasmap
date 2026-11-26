@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.47
+- BGS WATCH reads other screens with far fewer doubts. It was too cautious: on pages it had never seen, including real 4K (3840x2160), it read every value and name right, yet marked most rows to check. Now a row is marked only when there is a real reason. A look-alike digit (6, 8, 9, 0, 3, 5) is cleared when the list order or the same system's last value agrees. Names with a 0 read as the letter O or a lost hyphen now snap to the one known name. A name that has a twin differing by one look-alike digit is still marked when the reading was not clear.
+
 ## 0.9.46
 - BGS WATCH fixes. Clicking Looks right no longer throws you back to the top of the list: the page and the table keep their place. A page number the reader confused (a 6 read as 8, so one page looked taken twice and another missing) is now repaired by putting the pages in order by their values, so no page is dropped. The View switch has an Automatic setting, now the default: every snapshot is its own column while your data is under 10 days old, then one column per day.
 

@@ -12,8 +12,11 @@ pub struct Today {
     pub pages: Vec<(String, Vec<(String, String)>)>,
 }
 
-pub fn load_today() -> Option<Today> {
-    let t = std::fs::read_to_string(root().join("research/bgs/today/gt_today.json")).ok()?;
+pub fn load_today() -> Option<Today> { load_set("today", "gt_today.json") }
+
+/// a set of pages with hand-checked ground truth: research/bgs/<dir>/<gt file> (rows: file, page, row, name, inf)
+pub fn load_set(dir: &str, gt: &str) -> Option<Today> {
+    let t = std::fs::read_to_string(root().join("research/bgs").join(dir).join(gt)).ok()?;
     let v: Value = serde_json::from_str(&t).ok()?;
     let mut by: std::collections::BTreeMap<u64, (String, Vec<(u64, String, String)>)> = Default::default();
     for r in v["rows"].as_array()? {
@@ -23,8 +26,10 @@ pub fn load_today() -> Option<Today> {
     Some(Today { pages: by.into_values().map(|(f, mut rows)| { rows.sort(); (f, rows.into_iter().map(|r| (r.1, r.2)).collect()) }).collect() })
 }
 
-pub fn load_today_images(t: &Today) -> Option<Vec<super::decode::Rgb>> {
-    t.pages.iter().map(|(f, _)| decode_file(&root().join("research/bgs/today").join(f)).ok()).collect()
+pub fn load_today_images(t: &Today) -> Option<Vec<super::decode::Rgb>> { load_set_images("today", t) }
+
+pub fn load_set_images(dir: &str, t: &Today) -> Option<Vec<super::decode::Rgb>> {
+    t.pages.iter().map(|(f, _)| decode_file(&root().join("research/bgs").join(dir).join(f)).ok()).collect()
 }
 
 fn value_flag(r: &RowRead) -> bool { r.inf_x10.is_none() || r.inf_cost > T_COST || r.inf_margin < T_MARGIN || !r.inf_agree }
@@ -85,6 +90,7 @@ fn leave_one_page_out_over_all_real_pages() {
     let timgs = load_today_images(&today).unwrap();
     let (mut samples, _) = super::train::collect(&[("1440", &a), ("1080", &b)], &gt);
     samples.extend(super::train::collect_today());
+    samples.extend(super::train::collect_cyanidex());
     let mut st = [super::tests::Stats::default(), super::tests::Stats::default(), super::tests::Stats::default()];
     let mut margins: Vec<(f32, bool)> = Vec::new();
     let mut lists: [Vec<PageIn>; 3] = Default::default();

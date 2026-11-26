@@ -87,3 +87,10 @@ pub fn learn_cell(learned: &mut Templates, kind: FontKind, read: &[char], truth:
     }
     n
 }
+
+/// Calibration to one screen: every glyph of a confirmed cell is learned under its confirmed character, also the ones the reader got right
+/// (the font is fixed, only the way a screen draws it changes). Near copies of a shape already learned are skipped, so this stays small.
+pub fn learn_cell_all(learned: &mut Templates, kind: FontKind, truth: &[char], glyphs: &[(Vec<u8>, f32)]) -> usize {
+    if truth.len() != glyphs.len() { return 0; }
+    (0..truth.len()).filter(|&i| add(learned, kind, truth[i], glyphs[i].1, &glyphs[i].0)).count()
+}

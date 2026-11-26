@@ -317,7 +317,7 @@ fn known_names_make_exact_rows_sure_and_snap_the_rest() {
     assert_eq!(p.rows[2].name_state, "snapped");
     assert_eq!(p.rows[2].system, "Sys 002");
     assert_eq!(p.rows[2].state, "snapped");
-    assert!(p.rows[2].uncertain);
+    assert!(!p.rows[2].uncertain, "snapped to the one known name: 16 of 16 were right out of sample, so it is shown as sure but marked as snapped");
     assert!(p.rows[2].name_alts.contains(&"SYS 0O2".to_string()), "what was read stays visible");
     // 'UNKNOWN PLACE' is far from SYS 003, but SYS 003 is the only known name left: still not taken at distance 2
     assert_eq!(p.rows[3].name_state, "not_in_list");
@@ -576,4 +576,47 @@ fn a_misread_page_number_is_repaired_by_the_values() {
     assert_eq!(p.pages_found, vec![1, 2, 3, 4, 5]);
     assert_eq!(p.rows.len(), 50);
     assert!(p.rows.windows(2).all(|w| w[0].inf_x10 >= w[1].inf_x10), "the rows are in list order");
+}
+
+#[test]
+fn a_garbled_name_with_a_clear_ending_snaps_to_the_one_known_name() {
+    // the friend's blurred screenshots: touching letters merge ('SECTOR' read as 'SEWOR', 'ZP-O' as 'H')
+    let known: Vec<String> = ["COL 285 SECTOR UE-N B21-6", "COL 285 SECTOR UE-N B21-4", "COL 285 SECTOR UE-N B21-0", "ICZ ZP-O B6-5", "ICZ ZP-O B6-6", "SHUI WEI SECTOR XU-P B5-2"].iter().map(|s| s.to_string()).collect();
+    let v = |a: &[&str]| a.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+    let h = snap_all(&v(&["COL285 SEWOR UE-N B21-6", "ICZZH B6-5", "SHUI MI SECTOR XU-P B5-2"]), &known);
+    assert_eq!(h[0], Hit::Near(0, 9), "{h:?}");
+    assert_eq!(h[1], Hit::Near(3, 9), "{h:?}");
+    assert!(matches!(h[2], Hit::Near(5, _)), "{h:?}");
+    // an ending shared by several known names and no clear word before it is left to the player
+    let none = snap_all(&v(&["COL285 SEWOR QQ-Q B21-6"]), &known);
+    assert!(matches!(none[0], Hit::Near(0, 9)) || none[0] == Hit::None, "{none:?}");
+    // two rows never take the same known name
+    let two = snap_all(&v(&["ICZZH B6-5", "ICZXX B6-5"]), &known);
+    assert_eq!(two.iter().filter(|x| **x != Hit::None).count(), 1, "{two:?}");
+}
+
+#[test]
+fn a_look_alike_doubt_is_cleared_when_the_value_equals_the_last_snapshots_value() {
+    let known: Vec<String> = (0..10).map(|i| format!("SYS {i:03}")).collect();
+    let mut rows = list(10, 700);
+    rows[0].inf_confusable = true;      // equals the last snapshot: cleared
+    rows[1].inf_confusable = true;      // differs from the last snapshot: stays in doubt
+    rows[2].inf_agree = false;          // the second reading disagrees: stays in doubt even when equal
+    let prev = super::model::Snapshot { rows: (0..10).map(|i| super::model::StoredRow { system: format!("SYS {i:03}"), inf_x10: Some(if i == 1 { 650 } else { 700 - i }), ..Default::default() }).collect(), ..Default::default() };
+    let p = build(vec![page(1, 1, 10, rows, 1000)], &ctx(&known, Some(&prev)));
+    assert_eq!(p.rows[0].state, "sure", "{:?}", p.rows[0].reasons);
+    assert!(p.rows[0].reasons.contains(&"value_matches_previous"));
+    assert!(p.rows[1].uncertain, "a changed value that is also a look-alike must be checked");
+    assert!(p.rows[2].uncertain, "a disagreeing second reading is never cleared");
+    assert_eq!(p.rows[3].state, "sure");
+}
+
+#[test]
+fn a_zero_read_as_o_and_a_lost_hyphen_still_snap_to_the_one_known_name() {
+    let known: Vec<String> = vec!["Col 285 Sector UE-N b21-0".into(), "Col 285 Sector AW-J b23-0".into(), "Col 285 Sector UE-N b21-4".into()];
+    let read: Vec<String> = vec!["COL 285 SECTOR UE N B21 O".into(), "COL 285 SECTOR AWJ B23 O".into(), "COL 285 SECTOR UE-N B21-4".into()];
+    let h = super::snap::snap_all(&read, &known);
+    assert!(matches!(h[0], super::snap::Hit::Near(0, _)), "{:?}", h);
+    assert!(matches!(h[1], super::snap::Hit::Near(1, _)), "{:?}", h);
+    assert_eq!(h[2], super::snap::Hit::Exact(2));
 }
