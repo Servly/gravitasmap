@@ -44,23 +44,46 @@
       var parts = []; [m1.value, m2.value].forEach(function (m) { if (m && parts.indexOf(m) < 0) parts.push(m); });
       parts.push(k); return parts.join("+");
     }
+    // press the keys instead of typing them: the modifiers and the key are read from the real key press and applied at once
+    function codeKey(e) {
+      var c = e.code || "", m;
+      if ((m = /^F(\d{1,2})$/.exec(c))) return "F" + m[1];
+      if ((m = /^Numpad(\d)$/.exec(c))) return "Num" + m[1];
+      if (c === "NumpadAdd") return "NumAdd";
+      if (c === "NumpadSubtract") return "NumSub";
+      if ((m = /^Key([A-Z])$/.exec(c))) return m[1];
+      if ((m = /^Digit(\d)$/.exec(c))) return m[1];
+      return "";
+    }
+    key.onkeydown = function (e) {
+      if (e.key === "Tab") return;
+      e.preventDefault(); e.stopPropagation();
+      if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") return;
+      var k = codeKey(e);
+      if (!k) { err.textContent = tr("kb.need"); err.hidden = false; return; }
+      var mods = []; if (e.ctrlKey) mods.push("Ctrl"); if (e.shiftKey) mods.push("Shift"); if (e.altKey) mods.push("Alt"); if (e.metaKey) mods.push("Win");
+      m1.value = mods[0] || ""; m2.value = mods[1] || ""; key.value = k;
+      ap.onclick();
+    };
     sel.onchange = function () {
+      wrap._open = sel.value === "custom";
       box.hidden = sel.value !== "custom";
       if (sel.value === "none") send(""); else if (sel.value === "def") send(def); else if (sel.value === "alt") send(alt);
     };
     ap.onclick = function () {
       var t = text();
       if (!t || !/\+/.test(t)) { err.textContent = tr("kb.need"); err.hidden = false; return; }
-      err.hidden = true; send(t); hostRow.dataset.saved = "1";
+      err.hidden = true; send(t); hostRow.dataset.saved = "1"; wrap._open = false;
     };
     function show(textNow) {
+      if (wrap._open) return; // (Custom was just chosen and not applied yet: the 2.5 s refresh must not take the box away)
       var t = textNow || "";
       if (!t) sel.value = "none"; else if (t === def) sel.value = "def"; else if (t === alt) sel.value = "alt"; else {
         sel.value = "custom"; var p = split(t); m1.value = p.m1; m2.value = p.m2; key.value = p.key;
       }
       box.hidden = sel.value !== "custom";
     }
-    var wrap = mk("div", "kbctl"); wrap.appendChild(sel); wrap.appendChild(box); wrap.appendChild(err);
+    var wrap = mk("div", "kbctl"); wrap._open = false; wrap.appendChild(sel); wrap.appendChild(box); wrap.appendChild(err);
     wrap._show = show;
     return wrap;
   }

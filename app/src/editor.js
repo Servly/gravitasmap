@@ -87,11 +87,15 @@
     var key = JSON.stringify(rects.wins.map(function (w) { var q = placeOf(w); return [w.key, q[0], q[1], w.w, w.h, w.colour, !!free[w.key]]; })) + (popFor || "") + K();
     if (key === built) return;
     built = key; stage.innerHTML = ""; guideLayer(null);
+    // overlapping windows: the boxes are stacked in the same order as the windows on the game (the app sends them bottom to top: the player's To front /
+    // To back first, then the smaller one on top), so what you see is what you grab; a box being dragged is raised
+    var zOf = {};
+    rects.wins.forEach(function (w, i) { zOf[w.key] = 10 + i; });
     rects.wins.forEach(function (w) {
       var q = placeOf(w);
       var box = mk("div", "box" + (free[w.key] ? " free" : "")), x = q[0], y = q[1], bw = w.w * K(), bh = w.h * K();
       var above = y > 42;
-      box.style.cssText = "left:" + x + "px;top:" + y + "px;width:" + bw + "px;height:" + bh + "px";
+      box.style.cssText = "left:" + x + "px;top:" + y + "px;width:" + bw + "px;height:" + bh + "px;z-index:" + (zOf[w.key] || 10);
       var bar = mk("div", "bar");
       if (above) bar.style.bottom = (bh + 6) + "px"; else bar.style.top = (bh + 6) + "px";
       bar.appendChild(mk("b", null, NAMES[w.key] || w.key));
@@ -135,7 +139,7 @@
       }
       box.onpointerdown = function (e) {
         if (!free[w.key] || e.target.closest(".bar,.pop")) return;
-        drag = { key: w.key, box: box, sx: e.clientX, sy: e.clientY, x: x, y: y, w: bw, h: bh, dx: 0, dy: 0 }; box.classList.add("drag"); box.setPointerCapture(e.pointerId);
+        drag = { key: w.key, box: box, sx: e.clientX, sy: e.clientY, x: x, y: y, w: bw, h: bh, dx: 0, dy: 0 }; box.classList.add("drag"); box.style.zIndex = 500; box.setPointerCapture(e.pointerId);
         op("drag_begin", { key: w.key });
       };
       box.onpointermove = function (e) {

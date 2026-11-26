@@ -50,6 +50,8 @@ pub static EDIT: Mutex<Option<(String, Instant)>> = Mutex::new(None);
 /// Where each window is on the game's screen (for the on-screen editor): {"gx","gy","gw","gh","wins":[{key,x,y,w,h,colour,on}]}.
 pub static EDITRECTS: Mutex<Value> = Mutex::new(Value::Null);
 const EDIT_FOR: Duration = Duration::from_secs(20);
+/// Edit HUD shows every window with made-up data for this long at most (it can be switched on again)
+const EDIT_MAX: Duration = Duration::from_secs(600);
 /// What the pages show besides the settings: the profiles (names, the active one) and the note about the Claims reset.
 pub static EXTRA: Mutex<Value> = Mutex::new(Value::Null);
 
@@ -121,6 +123,8 @@ struct Slot {
     hover: f32,
     /// this window's own opacity (0..1), or -1 to follow the setting for all windows
     op: f32,
+    /// the stacking order set by the player (not part of the picture's key)
+    z: i64,
 }
 
 /// What `animate` needs: the panel open, the head's turn, the boot, whether the HUD shows, and the settings that decide how.
@@ -134,6 +138,8 @@ struct Anim {
     opacity: f32,
     hover: bool,
     t: f64,
+    /// the order the shown windows were last stacked in (keys, bottom to top)
+    order: Vec<String>,
 }
 
 fn now_secs() -> f64 {
@@ -179,13 +185,15 @@ fn run() {
     let mut menu_votes = 0u8;
     let mut hl_read = Instant::now();
     let mut hide_all = false;
-    let mut an = Anim { gui: 0, turn: None, turn_hidden: false, boot: None, hud_shown: false, fade_t0: 0.0, opacity: 0.92, hover: true, t: 0.0 };
+    let mut an = Anim { gui: 0, turn: None, turn_hidden: false, boot: None, hud_shown: false, fade_t0: 0.0, opacity: 0.92, hover: true, t: 0.0, order: Vec::new() };
     let mut prev_hud_gui = 0i64;
     let mut hud_lang = String::from("en");
     // a window being snapped to an edge: (window, where, goes left): drawn, measured, shifted, until it is there
     let mut snap: Option<(String, String, u8)> = None;
     // a window being dragged with the mouse: where it was when the drag began (key, dx, dy, x, y)
     let mut drag_base: Option<(String, f64, f64, f64, f64)> = None;
+    let mut set_dirty = true; // (the settings changed since the copy for the pages was made: to_json is built only then)
+    let mut edit_plus_since: Option<Instant> = None; // (Edit HUD showing every window: since when)
     let mut hidden_since = Instant::now();
     let mut map_id = 0u64;
     let mut slots: HashMap<String, Slot> = HashMap::new();
@@ -224,7 +232,7 @@ fn run() {
                     if let Some(c) = saved.get("combat_settings") { h.set.apply_json(c); }
                     h.set.removed = vec!["target"]; // the Target card is gone: the game's own is used
                     profiles = crate::profiles::Profiles::from_json(&saved);
-                    if let Some(b) = saved.get("claims_base").and_then(Value::as_str) { h.claims.set_base(b); }
+                    { let (b, older, src) = crate::store::load_claims_base(); crate::store::log(&format!("claims base: loaded at start '{b}' (from {src}, {} older)", older.len())); if !b.is_empty() { h.claims.set_base(&b); } h.claims.set_older(older); }
                     h.key_texts = hotkeys.hint_texts(); // (the footers name the keys the player set)
                     host = Some(h);
                 }
@@ -247,7 +255,17 @@ fn run() {
         // a window being placed shows (with made-up data) while it is touched and for a while after
         h.edit = EDIT.lock().ok().and_then(|e| e.as_ref().filter(|(_, t)| t.elapsed() < EDIT_FOR).map(|(k, _)| k.clone()));
         // the menu open = the on-screen editor: every window that is on shows (with made-up data) so each can be moved with the mouse
-        if crate::menu::is_open() && crate::menu::edit_hud() && h.edit.as_deref() != Some("*") { h.edit = Some("+".into()); }
+        // (only while the menu window is really on screen, and for 10 minutes at most: made-up data must never stay over a real game)
+        let editing_all = crate::menu::is_open() && crate::menu::edit_hud() && crate::menu::window_visible();
+        if editing_all {
+            let since = *edit_plus_since.get_or_insert_with(Instant::now);
+            if since.elapsed() > EDIT_MAX {
+                edit_plus_since = None;
+                crate::menu::store_edit_hud(false); // (the guard hides the editor layer; Edit HUD can be switched on again)
+                crate::store::log("Edit HUD ended after 10 minutes");
+            } else if h.edit.as_deref() != Some("*") { h.edit = Some("+".into()); }
+        } else { edit_plus_since = None; }
+        h.edit_chip = true;
         h.combat_enabled = ENABLED.load(Ordering::Relaxed);
         h.th_on = THARGOID_ON.load(Ordering::Relaxed);
         h.foot_on = FOOT_ON.load(Ordering::Relaxed);
@@ -256,6 +274,8 @@ fn run() {
         h.pvp.on = PVP_ON.load(Ordering::Relaxed);
         h.pvp.shield_end = PVP_SHIELD.load(Ordering::Relaxed);
         h.pvp.build_in = PVP_BUILD.load(Ordering::Relaxed);
+        // Preview is a look at made-up fights: it turns itself off after 3 minutes, so it can never stay on over a real game by mistake
+        if h.preview && now_secs() - h.preview_t0 > 180.0 { PREVIEW.store(false, Ordering::Relaxed); }
         if PREVIEW.load(Ordering::Relaxed) != h.preview {
             h.preview = !h.preview;
             h.preview_t0 = now_secs(); // the COMBAT banner shows first, then the report
@@ -268,7 +288,7 @@ fn run() {
             if let Ok(md) = std::fs::metadata(&path) {
                 let seen = (md.modified().unwrap_or(UNIX_EPOCH), md.len());
                 status_n = status_n.wrapping_add(1);
-                if Some(seen) != status_seen || status_n % 12 == 0 {
+                if Some(seen) != status_seen || (status_n % 12 == 0 && !matches!(game, Game::NotRunning)) { // (no game: only a changed file is read)
                     if md.len() > 1_000_000 { status_seen = Some(seen); } // (Status.json is a few hundred bytes: a huge file is not ours and is not read)
                     else if let Some(v) = { let r = std::fs::read_to_string(&path).ok().and_then(|t| serde_json::from_str::<Value>(&t).ok()); crate::drift::status_read(r.is_some()); r } {
                         let rewritten = Some(seen) != status_seen; // (a newer file on disk is newer even when the clock went back)
@@ -373,10 +393,11 @@ fn run() {
                     if !name.is_empty() { profiles.save(&name, &h.set); }
                 }
                 "reset" => {
+                    // a real reset of this window: place, colour, when, perspective, ground, size, opacity and stacking order as GRAVITAS starts it
+                    // (on or off stays as it is)
+                    let d = crate::host::Settings::default();
                     if let Some((_, w)) = h.set.win.iter_mut().find(|(k, _)| *k == key.as_str()) {
-                        if let Some((_, x, y)) = crate::combat::WINDOWS.iter().find(|(k, _, _)| *k == key.as_str()) { w.x = *x; w.y = *y; }
-                        w.dx = 0.0;
-                        w.dy = 0.0;
+                        if let Some((_, dw)) = d.win.iter().find(|(dk, _)| *dk == key.as_str()) { reset_window(w, dw); }
                         see(&PREVIEW, &ENABLED);
                     }
                 }
@@ -385,9 +406,16 @@ fn run() {
                     let d = crate::host::Settings::default();
                     h.set.auto = true;
                     for (k, w) in h.set.win.iter_mut() {
-                        if let Some((_, dw)) = d.win.iter().find(|(dk, _)| dk == k) { *w = dw.clone(); }
+                        if let Some((_, dw)) = d.win.iter().find(|(dk, _)| dk == k) { *w = dw.clone(); }  // (everything, z too; on/off as GRAVITAS starts them)
                     }
                     see(&PREVIEW, &ENABLED);
+                }
+                "zorder" => {
+                    let front = v.get("dir").and_then(Value::as_str) != Some("back");
+                    if h.set.win.iter().any(|(k, _)| *k == key.as_str()) {
+                        z_move(&mut h.set.win, &key, front);
+                        see(&PREVIEW, &ENABLED);
+                    }
                 }
                 "snap" => {
                     snap = Some((key.clone(), v["where"].as_str().unwrap_or("centre").to_string(), 4));
@@ -397,8 +425,9 @@ fn run() {
                 "profile.load" => { profiles.load(v.as_str().unwrap_or(""), &mut h.set); }
                 "profile.delete" => profiles.delete(v.as_str().unwrap_or("")),
                 "claims.undo" => {
-                    h.claims.set_base("");
-                    crate::store::set(&[("claims_base", Value::String(String::new()))]);
+                    let b = h.claims.undo_reset(); // the reset before it (a stack of the last 5), or nothing
+                    crate::store::log(&format!("claims base: undo, now '{b}'"));
+                    crate::store::save_claims_base(&b, h.claims.older());
                 }
                 "hotkey" => {
                     let (job, text) = (v["job"].as_str().unwrap_or("").to_string(), v["text"].as_str().unwrap_or("").to_string());
@@ -414,10 +443,11 @@ fn run() {
                 _ => {}
             }
             // every change of a window is kept in the active profile at once
-            if ["move", "drag_to", "nudge", "reset", "defaults"].contains(&name.as_str()) && !profiles.active.is_empty() {
+            if ["move", "drag_to", "nudge", "reset", "defaults", "zorder"].contains(&name.as_str()) && !profiles.active.is_empty() {
                 let a = profiles.active.clone();
                 profiles.save(&a, &h.set);
             }
+            set_dirty = true;
             crate::store::set(&[("combat_settings", h.set.to_json()), ("profiles", profiles.to_json()["profiles"].clone()), ("profile_active", Value::String(profiles.active.clone()))]);
             last_draw = Instant::now() - DRAW_EVERY;
         }
@@ -432,6 +462,7 @@ fn run() {
             for (k, v) in changes { set_path(&mut cur, &k, v); }
             if by_hand { cur["size_auto"] = Value::Bool(false); } // a size set by hand ends Auto
             h.set.apply_json(&cur);
+            set_dirty = true;
             // and kept in the active profile (what you set stays with the profile)
             if !profiles.active.is_empty() { let a = profiles.active.clone(); profiles.save(&a, &h.set); }
             save_at = Some(Instant::now()); // (written when the changes stop: a slider sends about 11 a second, each write is also copied to the backup folder)
@@ -443,7 +474,11 @@ fn run() {
         }
         // a new System map picture (mapcap.rs): the window is painted again at once, not at the next 250 ms look
         { let mid = crate::mapcap::current().map(|c| c.id).unwrap_or(0); if mid != map_id { map_id = mid; last_draw = Instant::now() - DRAW_EVERY; } }
-        { let cur = h.set.to_json(); if let Ok(mut s) = SETTINGS.lock() { if s.is_null() || *s != cur { *s = cur; } } }
+        if set_dirty {
+            set_dirty = false;
+            let cur = h.set.to_json();
+            if let Ok(mut s) = SETTINGS.lock() { if s.is_null() || *s != cur { *s = cur; } }
+        }
         // free look and the keys (load.py look_loop, every 50 ms)
         if last_look.elapsed() >= Duration::from_millis(50) {
             last_look = Instant::now();
@@ -510,7 +545,8 @@ fn run() {
                     Out::CounterReset => h.counter.reset(),
                     Out::ClaimsReset => {
                         let base = h.claims.reset_at(now_secs() as i64); // kept, so a restart does not bring the old figure back
-                        crate::store::set(&[("claims_base", Value::String(base))]);
+                        crate::store::log(&format!("claims base: set by reset key '{base}'"));
+                        crate::store::save_claims_base(&base, h.claims.older());
                     }
                     Out::EngineClear => h.eng.clear(),
                     Out::ReportClear => h.shown = None,
@@ -569,6 +605,7 @@ fn run() {
                     let kind = ships.get(&sh("Ship").unwrap_or("").to_lowercase()).map(String::as_str).or(sh("Ship_Localised")).or(sh("Ship")).unwrap_or("");
                     if let Some(name) = profiles.for_ship(&[Some(kind), sh("ShipName"), sh("ShipIdent"), sh("Ship")]) {
                         if name != profiles.active && profiles.load(&name, &mut h.set) {
+                            set_dirty = true;
                             crate::store::set(&[("combat_settings", h.set.to_json()), ("profile_active", Value::String(name))]);
                             last_draw = Instant::now() - DRAW_EVERY;
                         }
@@ -629,13 +666,15 @@ fn run() {
                 if hidden_since.elapsed() > Duration::from_secs(60) { clear(&mut slots); }
             } else {
                 hide_all = false;
-                if in_front || !slots.is_empty() { layout(&h.tr, &items, size, &mut slots, if h.set.size_auto { pieces::auto_pct(size.1) } else { h.set.size_pct as f64 } / 100.0, h.set.bg, &h.set.win.iter().map(|(k, w)| (k.to_string(), (w.persp, w.ground, w.size, w.opacity))).collect(), &mut an.boot); }
+                if in_front || !slots.is_empty() { layout(&h.tr, &items, size, &mut slots, if h.set.size_auto { pieces::auto_pct(size.1) } else { h.set.size_pct as f64 } / 100.0, h.set.bg, &h.set.win.iter().map(|(k, w)| (k.to_string(), (w.persp, w.ground, w.size, w.opacity, w.z))).collect(), &mut an.boot); }
                 // (written AFTER the layout, so the boxes of the editor are where the windows are NOW: written before it they lagged one move behind)
                 if crate::menu::is_open() && crate::menu::edit_hud() {
                     let g = match game { Game::Window { x, y, w, h, .. } => (x, y, w, h), _ => (0, 0, 0, 0) };
-                    let wins: Vec<Value> = slots.iter().filter(|(_, sl)| sl.own.w > 0).map(|(k, sl)| {
+                    // (in the stacking order, bottom to top: the editor stacks and hit-tests its boxes the same way; the EDIT HUD chip is not a window to move)
+                    let ord = stack_order(slots.iter().filter(|(k, sl)| sl.own.w > 0 && k.as_str() != "editchip").map(|(k, sl)| (k.as_str(), sl.z, sl.own.w as i64 * sl.own.h as i64)).collect());
+                    let wins: Vec<Value> = ord.iter().filter_map(|k| slots.get(k).map(|sl| (k, sl))).map(|(k, sl)| {
                         let col = h.set.win.iter().find(|(wk, _)| *wk == k.as_str()).map(|(_, w)| w.colour.clone()).unwrap_or_default();
-                        serde_json::json!({"key": k, "x": sl.rel.0, "y": sl.rel.1, "w": sl.own.w, "h": sl.own.h, "colour": col})
+                        serde_json::json!({"key": k, "x": sl.rel.0, "y": sl.rel.1, "w": sl.own.w, "h": sl.own.h, "colour": col, "z": sl.z})
                     }).collect();
                     if let Ok(mut r) = EDITRECTS.lock() { *r = serde_json::json!({"gx": g.0, "gy": g.1, "gw": g.2, "gh": g.3, "wins": wins}); }
                 }
@@ -649,6 +688,7 @@ fn run() {
                         let (dx, dy) = match wh.as_str() { "left" => (m - x, 0.0), "right" => (gw - m - iw - x, 0.0), "top" => (0.0, m - y), "bottom" => (0.0, gh - m - ih - y), _ => ((gw - iw) / 2.0 - x, 0.0) };
                         if (dx.abs() >= 2.0 || dy.abs() >= 2.0) && left > 0 {
                             let auto = h.set.auto;
+                            set_dirty = true;
                             if let Some((_, w)) = h.set.win.iter_mut().find(|(wk, _)| *wk == k.as_str()) {
                                 if auto {
                                     w.dx = round1((w.dx + dx / gh * 100.0).clamp(-DX_MAX, DX_MAX));
@@ -752,7 +792,7 @@ fn set_info(windows: usize, shown: usize, gui: i64, error: &str) {
 }
 
 /// Make (or keep) every window's picture. A window is drawn again only when what decides its picture changed.
-fn layout(tr: &crate::i18n::I18n, items: &[Value], size: (f64, f64), slots: &mut HashMap<String, Slot>, user_scale: f64, bg: bool, look: &HashMap<String, (bool, i64, i64, i64)>, boot: &mut Option<Boot>) {
+fn layout(tr: &crate::i18n::I18n, items: &[Value], size: (f64, f64), slots: &mut HashMap<String, Slot>, user_scale: f64, bg: bool, look: &HashMap<String, (bool, i64, i64, i64, i64)>, boot: &mut Option<Boot>) {
     let (w, h) = size;
     let s0 = pieces::scale(h, user_scale);
     let mut cursor: HashMap<String, f64> = HashMap::new();
@@ -773,7 +813,7 @@ fn layout(tr: &crate::i18n::I18n, items: &[Value], size: (f64, f64), slots: &mut
             let ck = place::cursor_key(p)?;
             cursor.get(&ck).copied().or_else(|| place::start_of(p, w, h))
         });
-        let (pe, gl, sz, op) = look.get(k).copied().unwrap_or((true, -1, -1, -1));
+        let (pe, gl, sz, op, zz) = look.get(k).copied().unwrap_or((true, -1, -1, -1, if k == "editchip" { 1000 } else { 0 }));
         // this window's own size, or the one for all windows
         let s = if sz > 0 { pieces::scale(h, sz as f64 / 100.0) } else { s0 };
         // the dark ground of this window: its own level, or the global switch at the plugin's level
@@ -800,6 +840,7 @@ fn layout(tr: &crate::i18n::I18n, items: &[Value], size: (f64, f64), slots: &mut
                     fx: false,
                     hover: 1.0,
                     op: -1.0,
+                    z: 0,
                 }
             });
             slot.own_bgra = bgra.clone();
@@ -816,6 +857,7 @@ fn layout(tr: &crate::i18n::I18n, items: &[Value], size: (f64, f64), slots: &mut
         if let Some(sl) = slots.get_mut(k) {
             sl.group = group;
             sl.op = if op > 0 { op as f32 / 100.0 } else { -1.0 };
+            sl.z = zz;
             if let (Some(p), Some(v)) = (&place_v, sl.vend) {
                 if let Some(ck) = place::cursor_key(p) {
                     cursor.insert(ck, v);
@@ -851,6 +893,7 @@ fn animate(slots: &mut HashMap<String, Slot>, game: Game, an: &mut Anim, dt_ms: 
         let _ = GetCursorPos(&mut cur);
     }
     let mut busy = an.turn.is_some() || (an.hud_shown && fade < 1.0) || an.boot.is_some();
+    let mut newly = false;
     let boot_on = an.boot.is_some();
     for (key, sl) in slots.iter_mut() {
         let (dx, dy, am) = anim::motion(&sl.group, an.gui, an.turn, an.turn_hidden, boot_on, an.t, gh);
@@ -907,10 +950,24 @@ fn animate(slots: &mut HashMap<String, Slot>, game: Game, an: &mut Anim, dt_ms: 
             }
             if !win.shown {
                 let _ = ShowWindow(win.hwnd, SW_SHOWNOACTIVATE);
-                let _ = SetWindowPos(win.hwnd, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
                 win.shown = true;
+                newly = true; // (stacked again below, in the player's order)
             }
         }
+    }
+    // the stacking order: the player's z, then the larger window first so the smaller one ends on top, then the key. The windows are put in that
+    // order (all topmost, each one put on top in turn) only when the order changed or a window just came up
+    let order = stack_order(slots.iter().filter(|(_, s)| s.win.shown).map(|(k, s)| (k.as_str(), s.z, s.own.w as i64 * s.own.h as i64)).collect());
+    if newly || order != an.order {
+        unsafe {
+            for k in &order {
+                if let Some(sl) = slots.get(k) {
+                    let _ = SetWindowPos(sl.win.hwnd, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+                }
+            }
+        }
+        if !order.is_empty() { crate::menu::raise_over_overlays(); }
+        an.order = order;
     }
     if an.boot.as_ref().is_some_and(|b| b.done(an.t)) {
         an.boot = None;
@@ -918,9 +975,67 @@ fn animate(slots: &mut HashMap<String, Slot>, game: Game, an: &mut Anim, dt_ms: 
     busy
 }
 
+/// The windows from the bottom to the top: the player's z first (higher = more in front), then the larger window below the smaller one (so a small
+/// card is never lost under a big one), then the key (so the order is always the same).
+fn stack_order(mut v: Vec<(&str, i64, i64)>) -> Vec<String> {
+    v.sort_by(|a, b| a.1.cmp(&b.1).then(b.2.cmp(&a.2)).then(a.0.cmp(b.0)));
+    v.into_iter().map(|(k, _, _)| k.to_string()).collect()
+}
+
+/// "Default position" of one window: place, colour, when, perspective, ground, size, opacity and stacking order back to GRAVITAS's defaults.
+/// On/off and the shape stay as they are.
+fn reset_window(w: &mut crate::combat::WinCfg, d: &crate::combat::WinCfg) {
+    w.x = d.x; w.y = d.y; w.dx = 0.0; w.dy = 0.0;
+    w.colour = d.colour.clone();
+    w.when = d.when.clone();
+    w.persp = d.persp; w.ground = d.ground; w.size = d.size; w.opacity = d.opacity; w.z = d.z;
+}
+
+/// "To front" / "To back" (the keys' z): one more than the highest, or one less than the lowest, of all the windows. At the end of the range
+/// (-100..100) the others move one step the other way, so the order always holds.
+fn z_move(win: &mut [(&'static str, crate::combat::WinCfg)], key: &str, front: bool) {
+    let others: Vec<i64> = win.iter().filter(|(k, _)| *k != key).map(|(_, w)| w.z).collect();
+    let new = if front { others.iter().copied().max().unwrap_or(0) + 1 } else { others.iter().copied().min().unwrap_or(0) - 1 };
+    let shift = if new > 100 { -1 } else if new < -100 { 1 } else { 0 };
+    for (k, w) in win.iter_mut() {
+        if *k == key { w.z = new.clamp(-100, 100); } else if shift != 0 { w.z = (w.z + shift).clamp(-100, 100); }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn default_position_is_a_real_reset() {
+        let d = crate::host::Settings::default();
+        let mut s = crate::host::Settings::default();
+        let (_, w) = s.win.iter_mut().find(|(k, _)| *k == "fight").unwrap();
+        w.x = 50.0; w.y = 50.0; w.dx = 9.0; w.dy = -9.0; w.colour = "#00ff00".into(); w.when = "always".into(); w.persp = false; w.ground = 40; w.size = 150; w.opacity = 30; w.z = 5; w.on = false;
+        let dw = &d.win.iter().find(|(k, _)| *k == "fight").unwrap().1;
+        reset_window(w, dw);
+        assert_eq!((w.x, w.y, w.dx, w.dy, w.colour.as_str(), w.when.as_str(), w.persp, w.ground, w.size, w.opacity, w.z), (dw.x, dw.y, 0.0, 0.0, "#ff7100", "ext", true, -1, -1, -1, 0));
+        assert!(!w.on, "on/off is not part of the position");
+    }
+
+    #[test]
+    fn z_order_front_back_and_the_comparator() {
+        let mut s = crate::host::Settings::default();
+        z_move(&mut s.win, "targets", true);
+        z_move(&mut s.win, "bounty", true);
+        z_move(&mut s.win, "fight", false);
+        let z = |k: &str| s.win.iter().find(|(n, _)| *n == k).unwrap().1.z;
+        assert_eq!((z("targets"), z("bounty"), z("fight")), (1, 2, -1));
+        // at the end of the range the others give way, the order holds
+        let mut t = crate::host::Settings::default();
+        for (_, w) in t.win.iter_mut() { w.z = 100; }
+        z_move(&mut t.win, "report", true);
+        assert_eq!(t.win.iter().find(|(n, _)| *n == "report").unwrap().1.z, 100);
+        assert!(t.win.iter().filter(|(n, _)| *n != "report").all(|(_, w)| w.z == 99));
+        // by z first, then the larger below the smaller, then the key
+        let o = stack_order(vec![("small", 0, 10), ("big", 0, 100), ("front", 1, 1000), ("back", -1, 1), ("big2", 0, 100)]);
+        assert_eq!(o, vec!["back", "big", "big2", "small", "front"]);
+    }
 
     #[test]
     fn ship_ids_get_the_games_names() {

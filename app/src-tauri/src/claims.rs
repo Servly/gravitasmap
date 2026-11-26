@@ -38,6 +38,8 @@ pub struct Owed {
     in_wing: bool,
     /// ignore a Bounty line that is an exact copy of the Bounty line before it (the game sometimes writes one twice)
     pub dedupe: bool,
+    /// claims_fix: a named cash-in a little below the balance clears it (the game sometimes pays 0.1-0.5 % less)
+    pub fix: bool,
     last_bounty: Option<Value>,
     station: Option<(Value, Value)>,
     pub cashed: Vec<(i64, Value, Value)>,
@@ -121,7 +123,9 @@ impl Owed {
             if !fac.is_empty() {
                 // a cash-in never takes a faction below 0: what does not fit is dropped (the game can pay out more than the Bounty
                 // lines add up to, its +7.5% wing bonus most often)
-                let take = a.min(get(&self.by, &fac).max(0));
+                let held = get(&self.by, &fac).max(0);
+                // (claims_fix) paid within MATCH of what is held: the faction is cleared, no leftover that would never go away
+                let take = if self.fix && held > 0 && (a as f64) >= held as f64 * (1.0 - MATCH) { held } else { a.min(held) };
                 bump(&mut self.by, &fac, -take);
                 let w = (get(&self.wing_by, &fac) - take).max(0);
                 set(&mut self.wing_by, &fac, w);
@@ -270,24 +274,13 @@ fn same_file(a: &Path, b: &Path) -> bool {
 /// The lines of every Journal in `folder` (but `skip`) since the last death, oldest first; whether a death was found (else: everything
 /// ever written); and that death's own timestamp ("" if none).
 pub fn events_since_death(folder: &Path, skip: Option<&Path>) -> (Vec<Value>, bool, String) {
-    let mut files: Vec<(std::time::SystemTime, PathBuf)> = Vec::new();
-    if let Ok(rd) = std::fs::read_dir(folder) {
-        let mut names: Vec<PathBuf> = rd.filter_map(|e| e.ok()).map(|e| e.path()).collect();
-        names.sort();
-        for p in names {
-            let n = p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-            if n.starts_with("Journal.") && n.ends_with(".log") {
-                if let Some(m) = std::fs::metadata(&p).ok().and_then(|m| m.modified().ok()) {
-                    files.push((m, p));
-                }
-            }
-        }
-    }
-    files.sort_by(|a, b| b.0.cmp(&a.0)); // newest first (a stable sort: equal times keep their order)
+    // newest first, by FILE NAME (the same order everywhere: journal::name_key). The modified time is not trusted: an antivirus touches old files.
+    let mut files: Vec<PathBuf> = crate::journal::journal_files(folder);
+    files.reverse();
     let mut kept: Vec<Vec<Value>> = Vec::new();
     let (mut found, mut died_ts) = (false, String::new());
     let mut mine: Option<(Option<String>, Option<bool>)> = None; // (CMDR, legacy) of the newest Journal: another CMDR's are left out
-    for (_, p) in &files {
+    for p in &files {
         let same = skip.map(|s| same_file(p, s)).unwrap_or(false);
         let (ev, who) = events_of(p);
         if mine.is_none() && who.0.is_some() {
@@ -309,7 +302,11 @@ pub fn events_since_death(folder: &Path, skip: Option<&Path>) -> (Vec<Value>, bo
             continue;
         }
         if let Some(&last) = died.last() {
-            kept.push(ev[last + 1..].to_vec());
+            // (claims_fix) the wing and station lines before the death stay: a death does not take you out of your wing, only the money goes.
+            // They are marked "_pre" so that Claims skips them while the flag is off (the old plugin lost the wing state here).
+            let mut after: Vec<Value> = ev[..last].iter().filter(|e| matches!(e.get("event").and_then(Value::as_str), Some("WingJoin" | "WingAdd" | "WingLeave" | "Docked"))).cloned().map(|mut e| { e["_pre"] = Value::Bool(true); e }).collect();
+            after.extend_from_slice(&ev[last + 1..]);
+            kept.push(after);
             found = true;
             died_ts = str_or_empty(ev[last].get("timestamp"));
             break;
@@ -362,6 +359,10 @@ pub struct Claims {
     crev: Option<u64>,
     combined: Option<Owed>,
     dedupe: bool,
+    fix: bool,
+    /// the resets before the current line (newest last, at most 5), for Undo
+    older: Vec<String>,
+    logged: Option<(std::time::Instant, i64)>,
 }
 
 impl Claims {
@@ -421,6 +422,14 @@ impl Claims {
         }
     }
 
+    /// The claims_fix setting (see Owed::fix and the wing state kept over a death).
+    pub fn set_fix(&mut self, on: bool) {
+        if self.fix != on {
+            self.fix = on;
+            self.rev += 1;
+        }
+    }
+
     /// Whether a repeated Bounty line counts once (see Owed::dedupe).
     pub fn set_dedupe(&mut self, on: bool) {
         if self.dedupe != on {
@@ -448,20 +457,33 @@ impl Claims {
     fn combined(&mut self) -> &Owed {
         if self.crev != Some(self.rev) || self.combined.is_none() {
             let base = self.base.clone();
+            let base_t = crate::host::parse_ts(&base);
             let counts = |e: &Value| {
-                base.is_empty()
-                    || !MONEY.contains(&e.get("event").and_then(Value::as_str).unwrap_or(""))
-                    || str_or_empty(e.get("timestamp")) > base
+                if base.is_empty() || !MONEY.contains(&e.get("event").and_then(Value::as_str).unwrap_or("")) { return true; }
+                let ts = str_or_empty(e.get("timestamp"));
+                // times, not text (an offset or a fraction of a second), the text only when one of them does not parse
+                match (crate::host::parse_ts(&ts), base_t) { (Some(t), Some(b)) => t > b, _ => ts > base }
             };
+            let fix = self.fix;
             let mut o = Owed::new();
             o.dedupe = self.dedupe;
+            o.fix = fix;
             let mut today: &[Value] = &self.events;
             if self.died_now {
                 // today's own Died already cleared everything from that point on - the older Journals never mattered again
                 let died = today.iter().rposition(|e| e.get("event").and_then(Value::as_str) == Some("Died")).unwrap_or(0);
+                if fix {
+                    // (claims_fix) a death does not take you out of your wing: the wing and station state before it carries on, money does not
+                    for e in &today[..died] {
+                        if matches!(e.get("event").and_then(Value::as_str), Some("WingJoin" | "WingAdd" | "WingLeave" | "Docked")) {
+                            o.feed(e);
+                        }
+                    }
+                }
                 today = &today[died + 1..];
             } else {
                 for e in self.old.iter().flatten() {
+                    if !fix && e.get("_pre").is_some() { continue; }
                     if counts(e) {
                         o.feed(e);
                     }
@@ -482,6 +504,8 @@ impl Claims {
 
     /// Claims back to 0 by hand: a line, not a wipe. Money lines stamped at or before it stop counting, what comes after counts as always.
     pub fn reset_at(&mut self, epoch_secs: i64) -> String {
+        self.older.push(self.base.clone());
+        if self.older.len() > 5 { self.older.remove(0); }
         self.base = crate::host::format_ts(epoch_secs);
         self.rev += 1;
         self.base.clone()
@@ -491,6 +515,27 @@ impl Claims {
     /// (a note about a reset that no longer matters would only read as stale).
     pub fn base_local(&self) -> String {
         if self.base.is_empty() || self.died_ts > self.base { String::new() } else { local_hhmm(&self.base) }
+    }
+
+    /// Undo the last reset: back to the line before it (the stack keeps the last 5), nothing left = no line at all. Returns the new line.
+    pub fn undo_reset(&mut self) -> String {
+        let b = self.older.pop().unwrap_or_default();
+        self.set_base(&b);
+        b
+    }
+
+    pub fn older(&self) -> &[String] {
+        &self.older
+    }
+
+    /// The older resets loaded at start (newest last).
+    pub fn set_older(&mut self, older: Vec<String>) {
+        let n = older.len().saturating_sub(5);
+        self.older = older[n..].to_vec();
+    }
+
+    pub fn base(&self) -> &str {
+        &self.base
     }
 
     pub fn set_base(&mut self, base: &str) {
@@ -507,7 +552,15 @@ impl Claims {
         if self.old.is_none() && !self.died_now {
             return Value::Null;
         }
-        let o = self.combined();
+        let (nold, nlive, base, died) = (self.old.as_ref().map(Vec::len).unwrap_or(0), self.events.len(), self.base.clone(), self.died_ts.clone());
+        let total = self.combined().total();
+        // the evidence trail for a report ("Claims is wrong"): one line when the total changes, at most one per 5 s
+        let due = self.logged.map(|(t, last)| total != last && t.elapsed() >= std::time::Duration::from_secs(5)).unwrap_or(true);
+        if due {
+            self.logged = Some((std::time::Instant::now(), total));
+            crate::store::log(&format!("claims: total={total} base={base} died_ts={died} old_events={nold} live_events={nlive}"));
+        }
+        let o = self.combined.as_ref().unwrap();
         let cashed: Vec<Value> = o.cashed.iter().map(|(p, s, t)| json!([p, s, t])).collect();
         let facs: Vec<Value> = o.factions().into_iter().map(|(f, v)| json!([f, v])).collect();
         json!([o.total(), facs, o.wing_bonus(), cashed, o.in_wing()])
@@ -630,6 +683,173 @@ mod real_cases {
             c.feed(&line);
             c.feed(&line);
             assert_eq!(c.view()[0].as_i64().unwrap(), if on { 1_308_600 } else { 2_617_200 }, "dedupe {on}");
+        }
+    }
+
+    fn temp_dir(tag: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("gravitas_claims_{tag}_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        std::fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    fn set_mtime(p: &Path, secs: u64) {
+        let f = std::fs::OpenOptions::new().write(true).open(p).unwrap();
+        f.set_modified(std::time::UNIX_EPOCH + std::time::Duration::from_secs(secs)).unwrap();
+    }
+
+    /// An antivirus touches an old Journal: its modified time is newer than the real newest. The order must stay the file names' order.
+    #[test]
+    fn the_older_journals_replay_in_file_name_order_not_by_modified_time() {
+        let d = temp_dir("order");
+        let head = r#"{"timestamp":"2026-11-20T10:00:00Z","event":"Fileheader","gameversion":"4.0.0.1"}"#;
+        let cmdr = r#"{"timestamp":"2026-11-20T10:00:01Z","event":"Commander","Name":"X"}"#;
+        let a = d.join("Journal.2026-11-20T100000.01.log");
+        let b = d.join("Journal.2026-11-21T100000.01.log");
+        std::fs::write(&a, format!("{head}
+{cmdr}
+{}
+", bounty("2026-11-20T10:05:00Z", &[1000], "F"))).unwrap();
+        std::fs::write(&b, format!("{head}
+{cmdr}
+{}
+", r#"{"timestamp":"2026-11-21T10:05:00Z","event":"RedeemVoucher","Type":"bounty","Factions":[{"Faction":"F","Amount":1000}]}"#)).unwrap();
+        // the OLD file looks newer by its modified time
+        set_mtime(&a, 2_000_000_000);
+        set_mtime(&b, 1_000_000_000);
+        let (ev, _, _) = events_since_death(&d, None);
+        let order: Vec<&str> = ev.iter().map(|e| e["event"].as_str().unwrap()).collect();
+        assert_eq!(order, ["Bounty", "RedeemVoucher"]);
+        let mut o = Owed::new();
+        for e in &ev { o.feed(e); }
+        assert_eq!(o.total(), 0, "bounty paid by the later voucher");
+        // and the newest file (the live feed's) is the greatest name, whatever the times say
+        assert_eq!(crate::journal::newest(&d).unwrap(), b);
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    /// The tester's case: two resets, then a restart. What is loaded from the store must give the same figure as the running app.
+    #[test]
+    fn two_resets_and_a_restart_give_the_same_claims() {
+        let lines = [
+            bounty("2026-11-25T15:00:00Z", &[5_000_000], "F"),
+            bounty("2026-11-25T15:40:00Z", &[3_000_000], "F"),
+            bounty("2026-11-25T16:10:00Z", &[400_000], "F"),
+            bounty("2026-11-25T17:00:00Z", &[200_000], "F"),
+        ];
+        let run = |bases: &[&str]| {
+            let mut c = Claims::new();
+            c.start(None, None);
+            for (i, l) in lines.iter().enumerate() {
+                c.feed(l);
+                if i == 1 { c.set_base(bases[0]); }
+                if i == 2 && bases.len() > 1 { c.set_base(bases[1]); }
+            }
+            c.view()[0].as_i64().unwrap()
+        };
+        let running = run(&["2026-11-25T15:50:00Z", "2026-11-25T16:49:00Z"]);
+        assert_eq!(running, 200_000, "only what came after the second reset");
+        // a restart that loads the STALE first base would show the money between the resets again: this is what C1 prevents
+        assert_eq!(run(&["2026-11-25T15:50:00Z"]), 600_000);
+        // a restart that loads the later of the two stored copies equals the running figure
+        let mut c = Claims::new();
+        c.start(None, None);
+        for l in &lines { c.feed(l); }
+        let later = ["2026-11-25T15:50:00Z", "2026-11-25T16:49:00Z"].iter().max().unwrap().to_string();
+        c.set_base(&later);
+        assert_eq!(c.view()[0].as_i64().unwrap(), running);
+    }
+
+    fn ev(s: &str) -> Value { serde_json::from_str(s).unwrap() }
+
+    /// claims_fix: WingJoin, Died, Bounty must still give the 7.5 % estimate; with the flag off it is the old plugin's loss.
+    #[test]
+    fn a_death_keeps_the_wing_state_only_with_the_fix() {
+        for fix in [true, false] {
+            let mut c = Claims::new();
+            c.start(None, None);
+            c.set_fix(fix);
+            c.feed(&ev(r#"{"timestamp":"2026-11-25T10:00:00Z","event":"WingJoin","Others":["x"]}"#));
+            c.feed(&ev(r#"{"timestamp":"2026-11-25T10:01:00Z","event":"Died"}"#));
+            c.feed(&bounty("2026-11-25T10:02:00Z", &[143000], "A"));
+            let v = c.view();
+            assert_eq!(v[0].as_i64().unwrap(), 143000);
+            assert_eq!(v[2].as_i64().unwrap(), if fix { 10725 } else { 0 }, "fix {fix}");
+        }
+    }
+
+    /// the same over a restart: the death is in an older Journal (events_since_death), the wing line before it too
+    #[test]
+    fn the_wing_state_before_a_death_survives_in_the_older_journals() {
+        let d = temp_dir("wingdeath");
+        let head = r#"{"timestamp":"2026-11-20T10:00:00Z","event":"Fileheader","gameversion":"4.0.0.1"}"#;
+        let cmdr = r#"{"timestamp":"2026-11-20T10:00:01Z","event":"Commander","Name":"X"}"#;
+        let a = d.join("Journal.2026-11-20T100000.01.log");
+        let b = d.join("Journal.2026-11-21T100000.01.log");
+        std::fs::write(&a, format!("{head}
+{cmdr}
+{}
+{}
+{}
+{}
+", r#"{"timestamp":"2026-11-20T10:01:00Z","event":"WingJoin","Others":["x"]}"#, bounty("2026-11-20T10:02:00Z", &[1000], "B"), r#"{"timestamp":"2026-11-20T10:03:00Z","event":"Died"}"#, bounty("2026-11-20T10:04:00Z", &[143000], "A"))).unwrap();
+        std::fs::write(&b, format!("{head}
+{cmdr}
+")).unwrap();
+        for fix in [true, false] {
+            let mut c = Claims::new();
+            c.set_fix(fix);
+            c.start(Some(&d), Some(&b));
+            c.wait_for_old();
+            let v = c.view();
+            assert_eq!(v[0].as_i64().unwrap(), 143000);
+            assert_eq!(v[2].as_i64().unwrap(), if fix { 10725 } else { 0 }, "fix {fix}");
+        }
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn a_cash_in_a_little_below_the_balance_clears_it_only_with_the_fix() {
+        for fix in [true, false] {
+            let mut c = Claims::new();
+            c.start(None, None);
+            c.set_fix(fix);
+            c.feed(&bounty("2026-11-25T10:00:00Z", &[1_000_000], "A"));
+            c.feed(&json!({"timestamp":"2026-11-25T10:05:00Z","event":"RedeemVoucher","Type":"bounty","Factions":[{"Faction":"A","Amount":996000}]}));
+            assert_eq!(c.view()[0].as_i64().unwrap(), if fix { 0 } else { 4000 }, "fix {fix}");
+        }
+    }
+
+    #[test]
+    fn undo_goes_back_one_reset_at_a_time() {
+        let mut c = Claims::new();
+        c.start(None, None);
+        c.feed(&bounty("2020-01-01T10:00:00Z", &[1000], "A"));
+        let a = c.reset_at(1_700_000_000);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+        let b = c.reset_at(1_700_001_000);
+        assert!(b > a);
+        assert_eq!(c.undo_reset(), a, "back to the first reset");
+        assert_eq!(c.base(), a);
+        assert_eq!(c.undo_reset(), "", "then no line at all");
+        assert_eq!(c.undo_reset(), "", "an empty stack clears (the old behaviour)");
+        for i in 0..8 { c.reset_at(1_700_000_000 + i * 100); }
+        assert_eq!(c.older().len(), 5, "only the last five are kept");
+        let mut d = Claims::new();
+        d.set_older(c.older().to_vec());
+        assert_eq!(d.older(), c.older());
+    }
+
+    /// the reset line against stamps with an offset or a fraction: times, not text
+    #[test]
+    fn the_reset_line_compares_times_not_text() {
+        let base = "2026-11-25T10:30:00Z";
+        for (ts, counts) in [("2026-11-25T11:00:00+01:00", false), ("2026-11-25T11:45:00+01:00", true), ("2026-11-25T10:30:00.500Z", true), ("2026-11-25T10:29:59.900Z", false), ("2026-11-25T10:30:01Z", true), ("2026-11-25T10:30:00Z", false)] {
+            let mut c = Claims::new();
+            c.start(None, None);
+            c.set_base(base);
+            c.feed(&bounty(ts, &[1000], "A"));
+            assert_eq!(c.view()[0].as_i64().unwrap() == 1000, counts, "{ts}");
         }
     }
 }

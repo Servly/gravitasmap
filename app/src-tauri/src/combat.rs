@@ -26,12 +26,12 @@ pub const WINDOWS: &[(&str, f64, f64)] = &[
     ("thargoid", 2.0, 40.0),
     ("xenoreport", 36.0, 16.0),
     // the card that says which mode came on (Combat, Thargoid, On Foot), at the top for a few seconds
-    ("modecard", 38.0, 3.0),
+    ("modecard", 38.0, 11.5),
     // DEBRIEF: the live input window low in the middle, its report where the Combat report sits
     ("inputs", 36.0, 66.0),
     ("debrief", 36.0, 16.0),
     // PVP mode: the chip that says it is on, at the top
-    ("pvp", 38.0, 4.5),
+    ("pvp", 38.0, 16.5),
 ];
 pub const WINDOWS_OFF: &[&str] = &["status", "alert", "target", "feed", "banner", "sysmap"];
 pub const DEFAULT_WHEN: &[(&str, &str)] = &[("fight", "ext"), ("speed", "int"), ("shortcuts", "main_t")];
@@ -67,6 +67,8 @@ pub struct Opts {
     pub wing_bonus_op: bool,
     /// the report says when Claims hold more than the fight (off = the plugin's report)
     pub claims_note: bool,
+    /// the grey STANDBY chip while nothing is going on (the plugin had it; the app does not: off unless a parity test asks for it)
+    pub standby: bool,
     /// the Last fight / Current fight card's CREDITS include the wing bonus like the report's (off = the plugin's card)
     pub fight_bonus: bool,
     pub rows: i64,
@@ -527,7 +529,8 @@ pub fn model(tr: &I18n, key: &str, v: &Value, now_ms: f64, opts: &Opts) -> Optio
                 let died = truthy(ep.get("died"));
                 return Some(json!({"kind": "chip", "tone": if died { "red" } else { "green" }, "text": if died { tr.t0("st.lost") } else { tr.t0("st.over") }, "sub": totals}));
             }
-            if always {
+            // (the app has no grey STANDBY / NO FIGHT YET chip: it sat on the screen all the time. A tester, 25 Nov: it showed only when a fight began before, and that was better)
+            if always && opts.standby {
                 return Some(json!({"kind": "chip", "tone": "grey", "text": tr.t0("st.standby"),
                     "sub": if truthy(ep.get("t0")) { tr.t("st.standby.last", &[("totals", json!(totals))]) } else { tr.t0("st.standby.none") }}));
             }
@@ -785,12 +788,14 @@ pub struct WinCfg {
     /// this window's own size (percent) and opacity (percent): -1 follows the settings for all windows
     pub size: i64,
     pub opacity: i64,
+    /// the stacking order among the windows: 0 = by size (the smaller on top); "To front" gives max + 1, "To back" min - 1 (-100..100)
+    pub z: i64,
 }
 
 /// A window's default place, as a panel of the game: flat at the top in the middle, on the plane under the comms panel or the INFO panel
 /// ahead, or beside the side panel it is tied to.
 pub fn home(key: &str, w: &WinCfg, i: usize) -> Vec<Value> {
-    let top = [("status", 0.022), ("alert", 0.072), ("report", 0.115), ("banner", 0.27), ("sysmap", 0.012), ("xenoreport", 0.115), ("modecard", 0.03), ("inputs", 0.66), ("debrief", 0.115), ("pvp", 0.045)];
+    let top = [("status", 0.022), ("alert", 0.072), ("report", 0.115), ("banner", 0.27), ("sysmap", 0.012), ("xenoreport", 0.115), ("modecard", 0.115), ("inputs", 0.66), ("debrief", 0.115), ("pvp", 0.165)];
     if let Some((_, t)) = top.iter().find(|(k, _)| *k == key) {
         return vec![json!("top"), json!(t)];
     }

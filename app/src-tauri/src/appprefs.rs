@@ -4,7 +4,7 @@ use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
 
 /// Keys that never leave this PC in an export and are never taken from an import (they belong to this PC or hold a secret).
-const PRIVATE_KEYS: &[&str] = &["pairing", "seen_version", "claims_base", "update_floor"];
+const PRIVATE_KEYS: &[&str] = &["pairing", "seen_version", "claims_base", "claims_base_stack", "update_floor"];
 /// An imported file may not be bigger than this
 const MAX_IMPORT: usize = 2 * 1024 * 1024;
 

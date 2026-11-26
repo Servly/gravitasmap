@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.24", k: "minor", d: "26 Nov 2026", t: [
+      "Much lighter on the graphics card inside the GRAVITAS app's map window: the page's two endless little animations (the logo's orbiting dot and the breathing Sync dot) kept the browser's graphics process busy all the time, about one full processor core on our test PC even while the map drew only three pictures a second. They now stand still in the app's map window, and in any browser while the page is not the one in front. Nothing else on the page changes. The map window of the GRAVITAS app now also slows down whenever it is not the window in front, even with a fast clock or while a system is still loading (before, those kept it drawing 15 to 60 pictures a second next to the game)."
+    ] },
     { v: "v0.99.23", k: "minor", d: "25 Nov 2026", t: [
       "Fix: with Sync remembered from an earlier visit, pressing the switch could do nothing at all when the browser's own folder-permission bubble did not show. The switch now never waits for that bubble: a folder the browser still allows starts Sync at once, otherwise the Sync window opens, with a Use the folder I chose before button that asks for the permission from a fresh click."
     ] },

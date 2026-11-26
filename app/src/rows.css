@@ -48,3 +48,8 @@
 .prefx-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start}
 .prefx-msg{margin:8px 0 0}.prefx-msg.bad{color:#ff8fa3}
 #prefs-x .card{margin-top:14px}
+
+/* the per-window buttons (Default position, To front, To back) keep their text on one line; the row wraps instead */
+.rw-c>.btn.sm{white-space:nowrap}
+/* a button that asks for a second click (Undo the reset) */
+.btn.warn{border-color:var(--warn)}

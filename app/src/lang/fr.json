@@ -282,7 +282,7 @@
   "win.where": "S'affiche avec",
   "win.colour": "Couleur",
   "menu.w.defpos": "Position par défaut",
-  "menu.w.defpos.d": "Remettre cette fenêtre là où GRAVITAS la place au départ",
+  "menu.w.defpos.d": "Remettre cette fenêtre comme GRAVITAS la démarre : place, couleur, affichage, perspective, taille, opacité et ordre",
   "menu.w.g.main": "Vue principale",
   "menu.w.g.left": "Panneau gauche (1)",
   "menu.w.g.comms": "Panneau comms (2)",
@@ -394,7 +394,7 @@
   "tip.kb.on": "Active ou désactive toutes les touches de GRAVITAS.",
   "tip.kb.job": "La touche de cette action. Choisissez Aucune, celle par défaut ou la vôtre.",
   "tip.kb.mod": "Une touche maintenue avec la touche principale.",
-  "tip.kb.key": "La touche principale : lettre, chiffre, touche F ou du pavé numérique (Num0 à Num9, NumAdd, NumSub).",
+  "tip.kb.key": "Cliquez ici et appuyez sur la combinaison voulue (par exemple Ctrl+Alt+K). Elle est appliquée tout de suite. Les touches du pavé numérique et les touches F marchent aussi.",
   "tip.kb.apply": "Enregistre cette touche.",
   "tip.wn.open": "Voir ce qui a changé dans cette version.",
   "tip.github": "Le code source sur GitHub.",
@@ -907,5 +907,10 @@
   "vis.search.busy": "Recherche dans tout ton historique…",
   "vis.sum.months": "Additionné à partir des résumés mensuels. Les classements sont approximatifs.",
   "vis.ill": "Spirale : illustration, pas une carte stellaire",
-  "tip.vis.ill": "La spirale discrète derrière la carte n'est qu'une décoration. Vos étapes, la route et les trois repères (Sol, Colonia, Sagittarius A*) utilisent de vraies coordonnées."
+  "tip.vis.ill": "La spirale discrète derrière la carte n'est qu'une décoration. Vos étapes, la route et les trois repères (Sol, Colonia, Sagittarius A*) utilisent de vraies coordonnées.",
+  "menu.w.front": "Devant",
+  "menu.w.back": "Derrière",
+  "tip.w.front": "Place cette fenêtre devant les autres là où elles se chevauchent.",
+  "tip.w.back": "Place cette fenêtre derrière les autres là où elles se chevauchent.",
+  "menu.claims.undo.sure": "Cliquez encore pour annuler"
 }

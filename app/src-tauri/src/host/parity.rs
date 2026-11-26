@@ -47,7 +47,7 @@ pub fn first_diff(path: &str, a: &Value, b: &Value) -> Option<String> {
 
 fn short(v: &Value) -> String {
     let s = v.to_string();
-    if s.len() > 90 { format!("{}...", &s[..90]) } else { s }
+    if s.chars().count() > 90 { format!("{}...", s.chars().take(90).collect::<String>()) } else { s }
 }
 
 pub struct Fixture {
@@ -130,9 +130,11 @@ fn engine_run(name: &str) -> Result<usize, String> {
     host.set.always = false; // (the plugin's own default; the app's default is on: every window that is on stays up, as the Bounty counter does)
     host.set.wing_bonus_on = false; // (likewise: the app counts the wing bonus on by default)
     host.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
+    host.set.claims_fix = false; // (the plugin lost the wing state on a death and kept a leftover after a slightly lower cash-in)
     host.set.keep_hidden_in_panel = false; // (the plugin showed the windows again at the end of a free look over a panel)
     host.set.claim_bonds = false; // (the plugin's Claims never counted bonds)
     host.set.claims_note = false; // (the plugin's report has no Claims note)
+    host.set.standby_chip = true; // (the plugin has the STANDBY chip)
     host.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
     match fx.doc["variant"].as_str() {
         Some("wing") => {
@@ -226,9 +228,11 @@ fn engine_run_tail(name: &str) -> Result<usize, String> {
     host.set.always = false; // (the plugin's own default; the app's default is on: every window that is on stays up, as the Bounty counter does)
     host.set.wing_bonus_on = false; // (likewise: the app counts the wing bonus on by default)
     host.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
+    host.set.claims_fix = false; // (the plugin lost the wing state on a death and kept a leftover after a slightly lower cash-in)
     host.set.keep_hidden_in_panel = false; // (the plugin showed the windows again at the end of a free look over a panel)
     host.set.claim_bonds = false; // (the plugin's Claims never counted bonds)
     host.set.claims_note = false; // (the plugin's report has no Claims note)
+    host.set.standby_chip = true; // (the plugin has the STANDBY chip)
     host.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
     match fx.doc["variant"].as_str() {
         Some("wing") => {

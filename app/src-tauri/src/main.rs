@@ -562,6 +562,7 @@ fn hide_to_tray(app: tauri::AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
         if !appprefs::minimize_to_tray() { let _ = w.minimize(); return; }   // (the player turned the tray off: a normal minimise)
         let _ = w.hide(); menu::set_visible(&w, false);
+        if menu::is_open() { menu::close_quiet(); }
     }
 }
 
@@ -762,6 +763,15 @@ fn main() {
                     api.prevent_close();
                     let _ = window.hide();
                     if let Some(w) = window.app_handle().get_webview_window("main") { menu::set_visible(&w, false); }
+                    if menu::is_open() { menu::close_quiet(); } // (the menu and Edit HUD end with the window: no made-up data is left on the game)
+                }
+            }
+            // the GRAVITAS MAP window tells its page whether it is the window in front (the page slows its drawing when it is not)
+            if window.label() == "mapsite" {
+                if let tauri::WindowEvent::Focused(f) = event {
+                    if let Some(w) = window.app_handle().get_webview_window("mapsite") {
+                        let _ = w.eval(&format!("window.__gvFocus={f};try{{dispatchEvent(new Event('pointermove'))}}catch(e){{}}"));
+                    }
                 }
             }
             // Alt+F4 on the menu or the editor must not destroy them (the menu would then think it is still open): it closes the menu as the key does

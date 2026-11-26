@@ -282,7 +282,7 @@
   "win.where": "Shows with",
   "win.colour": "Colour",
   "menu.w.defpos": "Default position",
-  "menu.w.defpos.d": "Put this window back where GRAVITAS starts it",
+  "menu.w.defpos.d": "Put this window back as GRAVITAS starts it: place, colour, when it shows, perspective, size, opacity and order",
   "menu.w.g.main": "Main view",
   "menu.w.g.left": "Left panel (1)",
   "menu.w.g.comms": "Comms panel (2)",
@@ -394,7 +394,7 @@
   "tip.kb.on": "Turn all GRAVITAS keys on or off.",
   "tip.kb.job": "The key for this job. Pick None, the default or your own.",
   "tip.kb.mod": "A key held together with the main key.",
-  "tip.kb.key": "The main key: a letter, number, F key, or a number pad key (Num0 to Num9, NumAdd, NumSub).",
+  "tip.kb.key": "Click here and press the key combination you want (for example Ctrl+Alt+K). It is applied at once. A number pad key and an F key work too.",
   "tip.kb.apply": "Save this key.",
   "tip.wn.open": "See what changed in this version.",
   "tip.github": "The source code on GitHub.",
@@ -907,5 +907,10 @@
   "vis.search.busy": "Searching your whole history…",
   "vis.sum.months": "Added up from the monthly summaries. The top lists are approximate.",
   "vis.ill": "Spiral: illustration, not a star map",
-  "tip.vis.ill": "The faint spiral behind the map is only decoration. Your stops, the route and the three landmarks (Sol, Colonia, Sagittarius A*) use real coordinates."
+  "tip.vis.ill": "The faint spiral behind the map is only decoration. Your stops, the route and the three landmarks (Sol, Colonia, Sagittarius A*) use real coordinates.",
+  "menu.w.front": "To front",
+  "menu.w.back": "To back",
+  "tip.w.front": "Put this window in front of the others, where they overlap.",
+  "tip.w.back": "Put this window behind the others, where they overlap.",
+  "menu.claims.undo.sure": "Click again to undo"
 }

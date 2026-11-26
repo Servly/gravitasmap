@@ -282,7 +282,7 @@
   "win.where": "Se muestra con",
   "win.colour": "Color",
   "menu.w.defpos": "Posición predeterminada",
-  "menu.w.defpos.d": "Devolver esta ventana a donde GRAVITAS la coloca al empezar",
+  "menu.w.defpos.d": "Devolver esta ventana a como GRAVITAS la inicia: posición, color, cuándo se muestra, perspectiva, tamaño, opacidad y orden",
   "menu.w.g.main": "Vista principal",
   "menu.w.g.left": "Panel izquierdo (1)",
   "menu.w.g.comms": "Panel de comunicaciones (2)",
@@ -394,7 +394,7 @@
   "tip.kb.on": "Activa o desactiva todas las teclas de GRAVITAS.",
   "tip.kb.job": "La tecla de esta acción. Elige Ninguna, la predeterminada o la tuya.",
   "tip.kb.mod": "Una tecla que se mantiene junto con la tecla principal.",
-  "tip.kb.key": "La tecla principal: letra, número, tecla F o del teclado numérico (Num0 a Num9, NumAdd, NumSub).",
+  "tip.kb.key": "Haz clic aquí y pulsa la combinación que quieras (por ejemplo Ctrl+Alt+K). Se aplica al instante. También sirven las teclas del teclado numérico y las teclas F.",
   "tip.kb.apply": "Guarda esta tecla.",
   "tip.wn.open": "Mira qué cambió en esta versión.",
   "tip.github": "El código fuente en GitHub.",
@@ -907,5 +907,10 @@
   "vis.search.busy": "Buscando en todo tu historial…",
   "vis.sum.months": "Sumado a partir de los resúmenes mensuales. Las listas de lo más frecuente son aproximadas.",
   "vis.ill": "Espiral: ilustración, no un mapa estelar",
-  "tip.vis.ill": "La espiral tenue detrás del mapa es solo decoración. Tus paradas, la ruta y los tres puntos de referencia (Sol, Colonia, Sagittarius A*) usan coordenadas reales."
+  "tip.vis.ill": "La espiral tenue detrás del mapa es solo decoración. Tus paradas, la ruta y los tres puntos de referencia (Sol, Colonia, Sagittarius A*) usan coordenadas reales.",
+  "menu.w.front": "Al frente",
+  "menu.w.back": "Al fondo",
+  "tip.w.front": "Pone esta ventana delante de las demás donde se solapan.",
+  "tip.w.back": "Pone esta ventana detrás de las demás donde se solapan.",
+  "menu.claims.undo.sure": "Haz clic otra vez para deshacer"
 }

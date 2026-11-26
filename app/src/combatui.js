@@ -153,6 +153,10 @@
         var cw = cg(tr("win.colour"), col, "tip.win.colour"); cw.appendChild(okb); cw.appendChild(dfb); tip(okb, "tip.col.apply"); tip(dfb, "tip.col.default"); cs.appendChild(cw);
         renders.push(function () { var w = S.win && S.win[key]; if (w && !pend && document.activeElement !== col) col.value = w.colour; });
         var rs = mk("button", "btn sm ghost", tr("menu.w.defpos")); rs.title = tr("menu.w.defpos.d"); rs.onclick = function () { op("reset", { key: key }); }; cs.appendChild(rs);
+        var zf = mk("button", "btn sm ghost", tr("menu.w.front")), zb = mk("button", "btn sm ghost", tr("menu.w.back"));
+        tip(zf, "tip.w.front"); tip(zb, "tip.w.back");
+        zf.onclick = function () { op("zorder", { key: key, dir: "front" }); }; zb.onclick = function () { op("zorder", { key: key, dir: "back" }); };
+        cs.appendChild(zf); cs.appendChild(zb);
         r.appendChild(tt); r.appendChild(cs); c.appendChild(r);
       });
     },
@@ -218,7 +222,15 @@
     /** the Claims reset line */
     claims: function (p) {
       var c = card("menu.claims.h", p), st = mk("p", "note"), b = mk("button", "btn", tr("menu.claims.undo"));
-      tip(b, "tip.claims.undo"); b.onclick = function () { op("claims.undo", {}); };
+      tip(b, "tip.claims.undo");
+      // a second click within 4 s confirms (no browser dialog): the first one only changes the button
+      var armed = 0, back = null;
+      function disarm() { armed = 0; clearTimeout(back); b.textContent = tr("menu.claims.undo"); b.classList.remove("warn"); }
+      b.onclick = function () {
+        if (armed) { disarm(); op("claims.undo", {}); return; }
+        armed = 1; b.textContent = tr("menu.claims.undo.sure"); b.classList.add("warn");
+        back = setTimeout(disarm, 4000);
+      };
       c.appendChild(row(tr("menu.claims.bonds"), sw(function () { return S.claim_bonds !== false; }, function (n) { set("claim_bonds", n); }), tr("menu.claims.bonds.d"), "tip.claims.bonds"));
       c.appendChild(row(tr("menu.claims.note"), sw(function () { return S.claims_note !== false; }, function (n) { set("claims_note", n); }), tr("menu.claims.note.d"), "tip.claims.note"));
       c.appendChild(st); c.appendChild(b);

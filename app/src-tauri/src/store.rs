@@ -113,13 +113,7 @@ pub fn load_json(path: &std::path::Path) -> Option<Value> {
 
 pub fn read() -> Value {
     let Some(p) = PATH.get() else { return json!({}) };
-    // (writes are atomic, so a half file is not seen; one retry covers a moment when an antivirus holds the file)
-    for attempt in 0..2 {
-        if let Some(v) = file_text(p).and_then(|t| parse(&t)).filter(|v| v.is_object()) { return v; }
-        if attempt == 0 && p.exists() { std::thread::sleep(std::time::Duration::from_millis(15)); }
-    }
-    if p.exists() { if let Some(v) = backup_json(p).filter(|v| v.is_object()) { return v; } }
-    json!({})
+    read_at(p)
 }
 
 /// Writes the whole file at once: to a temporary file next to it, then renamed over it. A crash, a kill or a power cut leaves the old file or the new one, never half.
@@ -131,19 +125,82 @@ pub fn write_atomic(p: &std::path::Path, text: &str) -> bool {
     true
 }
 
-/// Sets these keys (each the whole value) and keeps every other.
-pub fn set(pairs: &[(&str, Value)]) {
-    let Some(p) = PATH.get() else { return };
+/// Sets these keys (each the whole value) and keeps every other. Returns whether the file was written: one retry after 50 ms
+/// (an antivirus or Windows can hold settings.json for a moment, then the rename fails), a failure is logged.
+pub fn set(pairs: &[(&str, Value)]) -> bool {
+    let Some(p) = PATH.get() else { return false };
+    set_at(p, pairs)
+}
+
+fn set_at(p: &std::path::Path, pairs: &[(&str, Value)]) -> bool {
     let _g = LOCK.lock().unwrap_or_else(|e| e.into_inner());
     if let Some(d) = p.parent() {
         let _ = std::fs::create_dir_all(d);
     }
     // a file that cannot be read is kept as .bad-<time> and the backup copy is the base: the player's other settings do not vanish with one new key
-    let mut v = if quarantine(p) { backup_json(p).filter(|v| v.is_object()).unwrap_or_else(|| json!({})) } else { read() };
+    let mut v = if quarantine(p) { backup_json(p).filter(|v| v.is_object()).unwrap_or_else(|| json!({})) } else { read_at(p) };
     for (k, x) in pairs {
         v[*k] = x.clone();
     }
-    if write_atomic(p, &v.to_string()) { mirror(p); }
+    let text = v.to_string();
+    for attempt in 0..2 {
+        if write_atomic(p, &text) { mirror(p); return true; }
+        if attempt == 0 { std::thread::sleep(std::time::Duration::from_millis(50)); }
+    }
+    let keys: Vec<&str> = pairs.iter().map(|(k, _)| *k).collect();
+    log(&format!("settings write failed twice (keys: {}), the file is held or not writable", keys.join(",")));
+    false
+}
+
+fn read_at(p: &std::path::Path) -> Value {
+    for attempt in 0..2 {
+        if let Some(v) = file_text(p).and_then(|t| parse(&t)).filter(|v| v.is_object()) { return v; }
+        if attempt == 0 && p.exists() { std::thread::sleep(std::time::Duration::from_millis(15)); }
+    }
+    if p.exists() { if let Some(v) = backup_json(p).filter(|v| v.is_object()) { return v; } }
+    json!({})
+}
+
+const BASE_FILE: &str = "claims_base.txt";
+
+/// The Claims reset line (and the few resets before it, for Undo) is kept TWICE, in settings.json and in claims_base.txt (both in the app's
+/// own data folder): if one write fails (antivirus, a held file) the other still has it. The text file: line 1 = the line, line 2 = the older
+/// ones, comma separated, newest last. Returns (settings written, text file written).
+pub fn save_claims_base(base: &str, stack: &[String]) -> (bool, bool) {
+    let Some(p) = PATH.get() else { return (false, false) };
+    save_claims_base_at(p, base, stack)
+}
+
+fn save_claims_base_at(p: &std::path::Path, base: &str, stack: &[String]) -> (bool, bool) {
+    let a = set_at(p, &[("claims_base", Value::String(base.to_string())), ("claims_base_stack", json!(stack))]);
+    let f = p.with_file_name(BASE_FILE);
+    let text = format!("{base}\n{}", stack.join(","));
+    let mut b = write_atomic(&f, &text);
+    if !b { std::thread::sleep(std::time::Duration::from_millis(50)); b = write_atomic(&f, &text); }
+    if !b { log("claims_base.txt write failed"); }
+    if !a || !b { log(&format!("claims_base write failed (settings.json ok={a}, claims_base.txt ok={b})")); }
+    // verify by reading both back
+    let (rs, rf) = (read_at(p).get("claims_base").and_then(Value::as_str).map(str::to_string), file_text(&f).and_then(|t| t.lines().next().map(|l| l.trim().to_string())));
+    log(&format!("claims base saved: '{base}' older={} (settings read back {:?}, file read back {:?})", stack.len(), rs, rf));
+    (a, b)
+}
+
+/// The Claims reset line at start: the LATER of the two copies (Journal timestamps compare as text), with the older resets of that copy.
+/// Returns (line, older resets, where it came from).
+pub fn load_claims_base() -> (String, Vec<String>, &'static str) {
+    let Some(p) = PATH.get() else { return (String::new(), Vec::new(), "none") };
+    load_claims_base_at(p)
+}
+
+fn load_claims_base_at(p: &std::path::Path) -> (String, Vec<String>, &'static str) {
+    let v = read_at(p);
+    let a = v.get("claims_base").and_then(Value::as_str).unwrap_or("").to_string();
+    let sa: Vec<String> = v.get("claims_base_stack").and_then(Value::as_array).map(|x| x.iter().filter_map(|s| s.as_str().map(str::to_string)).collect()).unwrap_or_default();
+    let t = file_text(&p.with_file_name(BASE_FILE)).unwrap_or_default();
+    let mut lines = t.lines();
+    let b = lines.next().unwrap_or("").trim().to_string();
+    let sb: Vec<String> = lines.next().unwrap_or("").split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+    if b > a { (b, sb, "file") } else if !a.is_empty() { (a, sa, "settings") } else { (String::new(), Vec::new(), "none") }
 }
 
 #[cfg(test)]
@@ -197,6 +254,35 @@ mod tests {
         assert!(write_atomic(&f, "{\"a\":1}"));
         assert_eq!(std::fs::read_to_string(&f).unwrap(), "{\"a\":1}");
         assert!(!f.with_file_name("settings.json.tmp").exists());
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn the_claims_base_survives_a_failed_settings_write() {
+        let base = std::env::temp_dir().join(format!("gravitas_store_base_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        std::fs::create_dir_all(&base).unwrap();
+        let f = base.join("settings.json");
+        let (a, b) = save_claims_base_at(&f, "2026-11-25T15:50:00Z", &[]);
+        assert!(a && b);
+        assert_eq!(load_claims_base_at(&f), ("2026-11-25T15:50:00Z".to_string(), vec![], "settings"));
+        // the second reset: settings.json cannot be replaced (a directory sits where the temp file goes), the text file still takes it
+        std::fs::create_dir_all(base.join("settings.json.tmp")).unwrap();
+        let (a, b) = save_claims_base_at(&f, "2026-11-25T16:49:00Z", &["2026-11-25T15:50:00Z".to_string()]);
+        assert!(!a && b, "settings write fails, the text file works");
+        // a restart: the stale settings (15:50) and the file (16:49): the later one wins
+        assert_eq!(load_claims_base_at(&f), ("2026-11-25T16:49:00Z".to_string(), vec!["2026-11-25T15:50:00Z".to_string()], "file"));
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn a_failing_set_says_so() {
+        let base = std::env::temp_dir().join(format!("gravitas_store_fail_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        std::fs::create_dir_all(base.join("settings.json.tmp")).unwrap();
+        assert!(!set_at(&base.join("settings.json"), &[("a", json!(1))]));
+        std::fs::remove_dir_all(base.join("settings.json.tmp")).unwrap();
+        assert!(set_at(&base.join("settings.json"), &[("a", json!(1))]));
         let _ = std::fs::remove_dir_all(&base);
     }
 }

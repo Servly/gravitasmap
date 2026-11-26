@@ -43,8 +43,11 @@ pub struct Settings {
     pub claim_bonds: bool,
     /// the Combat report says when Claims hold more than the fight (money from before it)
     pub claims_note: bool,
+    pub standby_chip: bool,
     /// the game sometimes writes one Bounty line twice (identical, same second): the second copy is ignored everywhere (the plugin counted both)
     pub claims_dedupe: bool,
+    /// Claims fixes the old plugin did not have (wing state kept over a death, a cash-in a little below the balance clears it)
+    pub claims_fix: bool,
     /// how many kills the Kill feed shows
     pub feed_rows: i64,
     pub wing_bonus_op: bool,
@@ -78,13 +81,13 @@ impl Default for Settings {
             .iter()
             .map(|(key, x, y)| {
                 let when = combat::DEFAULT_WHEN.iter().find(|(k, _)| k == key).map(|(_, w)| *w).unwrap_or("always");
-                (*key, WinCfg { on: !combat::WINDOWS_OFF.contains(key), x: *x, y: *y, dx: 0.0, dy: 0.0, colour: "#ff7100".into(), shape: (0.0, 0, 100, 100), when: when.into(), persp: true, ground: -1, size: -1, opacity: -1 })
+                (*key, WinCfg { on: !combat::WINDOWS_OFF.contains(key), x: *x, y: *y, dx: 0.0, dy: 0.0, colour: "#ff7100".into(), shape: (0.0, 0, 100, 100), when: when.into(), persp: true, ground: -1, size: -1, opacity: -1, z: 0 })
             })
             .collect();
         Settings {
             combat_on: true, calm_s: 60, sc_ends: true, report_s: 10.0, drop_lost: true, hide_maps: true, look_hide: true, keep_hidden_in_panel: true, bonds: false, rows: 6,
             sort: "v".into(), order: combat::DEFAULT_ORDER.iter().map(|s| s.to_string()).collect(), wing_bonus_on: true, brief: false, feed_rows: 6,
-            wing_bonus_op: false, claim_bonds: true, claims_note: true, claims_dedupe: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, live_key_hints: true, win,
+            wing_bonus_op: false, claim_bonds: true, claims_note: true, standby_chip: false, claims_dedupe: true, claims_fix: true, always: true, show_gone: false, auto: true, bg: false, opacity: 92, size_auto: true, size_pct: 100, front: true, boot: true, removed: Vec::new(), keys: true, look_btn: "m3".into(), look_hold: true, live_key_hints: true, win,
         }
     }
 }
@@ -145,6 +148,8 @@ pub struct Host {
     pub need_boot: bool,
     /// a window being placed from the menu or the window (its name, or "*" for all): shown with made-up data while it is edited, whatever else is on
     pub edit: Option<String>,
+    /// the live path only: while every window shows made-up data for placing (edit "+"), a small EDIT HUD chip says so, and windows that share a home are staggered
+    pub edit_chip: bool,
     /// fights that just ended with a report, to be kept in Past combats (the caller takes them), and the ones kept already (by start time)
     pub finished: Vec<Value>,
     saved: std::collections::HashSet<String>,
@@ -213,6 +218,7 @@ impl Host {
             cleared: None,
             need_boot: true,
             edit: None,
+            edit_chip: false,
             finished: Vec::new(),
             saved: Default::default(),
             th: Default::default(),
@@ -258,6 +264,7 @@ impl Host {
             return;
         }
         self.claims.set_dedupe(self.set.claims_dedupe);
+        self.claims.set_fix(self.set.claims_fix);
         crate::drift::check_fields(entry);
         if HERE_FROM.contains(&ev) && !Self::s(entry, "StarSystem").is_empty() {
             self.system = Some(Self::s(entry, "StarSystem").to_string());
@@ -303,6 +310,7 @@ impl Host {
                 continue;
             }
             self.claims.set_dedupe(self.set.claims_dedupe);
+        self.claims.set_fix(self.set.claims_fix);
             if HERE_FROM.contains(&ev) && !Self::s(e, "StarSystem").is_empty() {
                 self.system = Some(Self::s(e, "StarSystem").to_string());
             }
@@ -465,6 +473,8 @@ impl Host {
         bounty["claim"] = self.claims.view();
         bounty["claim_reset"] = json!(self.claims.base_local());
         if self.set.claim_bonds {
+            let base = self.claims.base().to_string();
+            self.bonds.set_base(&base); // (the reset line covers the bonds too)
             bounty["bond_owed"] = self.bonds.view();
         }
         bounty["wing_bonus_on"] = json!(self.set.wing_bonus_on);
@@ -474,7 +484,7 @@ impl Host {
         let opts = Opts {
             sort: s.sort.clone(), order: s.order.clone(), report_s: s.report_s, banner: pbanner || now < self.banner_until,
             scan: scan.and_then(|x| x.get("pri")).cloned(), tg: scan.and_then(|x| x.get("tg")).cloned(), always: s.always && !preview && !shown, gone: gone_of, show_gone: s.show_gone,
-            bounty: Some(if preview { combat::sample_bounty() } else { bounty }), wing_bonus_on: s.wing_bonus_on, wing_bonus_op: s.wing_bonus_op, claims_note: s.claims_note, fight_bonus: s.claims_dedupe, rows: s.rows, feed_rows: s.feed_rows,
+            bounty: Some(if preview { combat::sample_bounty() } else { bounty }), wing_bonus_on: s.wing_bonus_on, wing_bonus_op: s.wing_bonus_op, claims_note: s.claims_note, standby: s.standby_chip, fight_bonus: s.claims_dedupe, rows: s.rows, feed_rows: s.feed_rows,
             keys_on: preview || now < self.keys_until, keys_left: if preview { combat::KEYS_S as i64 } else { ((self.keys_until - now).ceil() as i64).max(0) },
             report_on: preview || shown || now < self.report_until,
             hints: if s.live_key_hints { Some(self.key_texts.clone()) } else { None },
@@ -483,6 +493,9 @@ impl Host {
         let asked = shown || (now < self.report_until && !self.report_auto);
         let mut items: Vec<Value> = Vec::new();
         let mut tied_n: HashMap<String, usize> = HashMap::new();
+        // Edit HUD (live only): windows that share the same home at the top are shown one step lower each, so none hides another (the saved places are not touched)
+        let stagger_on = self.edit_chip && edit.as_deref() == Some("+");
+        let mut stag_n: HashMap<String, usize> = HashMap::new();
         for (key, w) in &s.win {
             if s.removed.contains(key) {
                 continue;
@@ -574,16 +587,31 @@ impl Host {
             if let Some(m) = m {
                 let i = *tied_n.get(&w.when).unwrap_or(&0);
                 tied_n.insert(w.when.clone(), i + 1);
+                let mut extra = 0.0;
+                if stagger_on {
+                    let h = combat::home(key, w, i);
+                    let sig = if s.auto { if h.first().and_then(Value::as_str) == Some("top") { Some(format!("{:?}", h)) } else { None } } else { Some(format!("{}/{}", w.x, w.y)) };
+                    if let Some(sig) = sig {
+                        let n = stag_n.entry(sig).or_insert(0);
+                        extra = *n as f64 * EDIT_STEP;
+                        *n += 1;
+                    }
+                }
                 let place: Option<Vec<Value>> = if s.auto {
                     let mut p = combat::home(key, w, i);
                     p.push(json!(w.dx));
-                    p.push(json!(w.dy));
+                    p.push(json!(w.dy + extra));
                     Some(p)
                 } else {
                     None
                 };
-                items.push(json!([key, m, w.x, w.y, w.colour, [w.shape.0, w.shape.1, w.shape.2, w.shape.3], place, group, combat::anchor_of(w, place.as_ref())]));
+                let w_y = if s.auto { w.y } else { w.y + extra };
+                items.push(json!([key, m, w.x, w_y, w.colour, [w.shape.0, w.shape.1, w.shape.2, w.shape.3], place, group, combat::anchor_of(w, place.as_ref())]));
             }
+        }
+        if stagger_on && !items.is_empty() {
+            // the chip that says the windows show made-up data (never in the parity tests: edit_chip is off there)
+            items.push(json!(["editchip", {"kind": "chip", "tone": "red", "text": "EDIT HUD", "sub": "made-up data, not your game"}, 40.0, 1.0, "#ff7100", [0.0, 0, 100, 100], ["top", 0.012, 0.0, 0.0], "all", "center"]));
         }
         if items.is_empty() {
             self.need_boot = true;
@@ -593,6 +621,9 @@ impl Host {
         }
     }
 }
+
+/// Edit HUD: the step (percent of the game's height) between windows that share a home at the top
+const EDIT_STEP: f64 = 5.5;
 
 fn truthy(v: &Value) -> bool {
     crate::pyval::truthy(Some(v))
@@ -675,3 +706,5 @@ pub mod parity;
 mod logic;
 #[cfg(test)]
 mod fuzz;
+#[cfg(test)]
+mod claimsim;

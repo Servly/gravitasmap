@@ -6,7 +6,7 @@ use crate::host::Settings;
 use indexmap::IndexMap;
 use serde_json::{json, Value};
 
-const FIELDS: [&str; 7] = ["on", "when", "x", "y", "dx", "dy", "colour"];
+const FIELDS: [&str; 8] = ["on", "when", "x", "y", "dx", "dy", "colour", "z"];
 
 #[derive(Default, Clone)]
 pub struct Profiles {
@@ -15,7 +15,9 @@ pub struct Profiles {
 }
 
 fn win_json(w: &WinCfg) -> Value {
-    json!({"on": w.on, "when": w.when, "x": w.x, "y": w.y, "dx": w.dx, "dy": w.dy, "colour": w.colour})
+    let mut j = json!({"on": w.on, "when": w.when, "x": w.x, "y": w.y, "dx": w.dx, "dy": w.dy, "colour": w.colour});
+    if w.z != 0 { j["z"] = json!(w.z); } // (only when set: a profile without a stacking order stays as the plugin's was)
+    j
 }
 
 impl Profiles {
@@ -72,6 +74,7 @@ impl Profiles {
                         "y" => w.y = v.as_f64().unwrap_or(w.y),
                         "dx" => w.dx = v.as_f64().map(|x| x.clamp(-150.0, 150.0)).unwrap_or(w.dx),
                         "dy" => w.dy = v.as_f64().map(|x| x.clamp(-100.0, 100.0)).unwrap_or(w.dy),
+                        "z" => w.z = v.as_i64().map(|x| x.clamp(-100, 100)).unwrap_or(w.z),
                         _ => { if let Some(c) = v.as_str().filter(|c| c.len() == 7 && c.starts_with('#') && c[1..].chars().all(|h| h.is_ascii_hexdigit())) { w.colour = c.to_string(); } }   // (#rrggbb only: anything else would break the painter)
                     }
                 }

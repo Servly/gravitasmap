@@ -282,7 +282,7 @@
   "win.where": "Aparece com",
   "win.colour": "Cor",
   "menu.w.defpos": "Posição padrão",
-  "menu.w.defpos.d": "Devolver esta janela ao lugar onde o GRAVITAS a coloca ao iniciar",
+  "menu.w.defpos.d": "Devolver esta janela ao estado inicial do GRAVITAS: posição, cor, quando aparece, perspectiva, tamanho, opacidade e ordem",
   "menu.w.g.main": "Vista principal",
   "menu.w.g.left": "Painel esquerdo (1)",
   "menu.w.g.comms": "Painel de comunicações (2)",
@@ -394,7 +394,7 @@
   "tip.kb.on": "Liga ou desliga todas as teclas do GRAVITAS.",
   "tip.kb.job": "A tecla desta ação. Escolha Nenhuma, a padrão ou a sua.",
   "tip.kb.mod": "Uma tecla segurada junto com a tecla principal.",
-  "tip.kb.key": "A tecla principal: letra, número, tecla F ou do teclado numérico (Num0 a Num9, NumAdd, NumSub).",
+  "tip.kb.key": "Clique aqui e pressione a combinação que quiser (por exemplo Ctrl+Alt+K). Ela é aplicada na hora. Teclas do teclado numérico e teclas F também funcionam.",
   "tip.kb.apply": "Salva esta tecla.",
   "tip.wn.open": "Veja o que mudou nesta versão.",
   "tip.github": "O código-fonte no GitHub.",
@@ -907,5 +907,10 @@
   "vis.search.busy": "Pesquisando em todo o seu histórico…",
   "vis.sum.months": "Somado a partir dos resumos mensais. As listas de destaques são aproximadas.",
   "vis.ill": "Espiral: ilustração, não um mapa estelar",
-  "tip.vis.ill": "A espiral tênue atrás do mapa é só decoração. Suas paradas, a rota e os três pontos de referência (Sol, Colonia, Sagittarius A*) usam coordenadas reais."
+  "tip.vis.ill": "A espiral tênue atrás do mapa é só decoração. Suas paradas, a rota e os três pontos de referência (Sol, Colonia, Sagittarius A*) usam coordenadas reais.",
+  "menu.w.front": "Para frente",
+  "menu.w.back": "Para trás",
+  "tip.w.front": "Coloca esta janela na frente das outras onde elas se sobrepõem.",
+  "tip.w.back": "Coloca esta janela atrás das outras onde elas se sobrepõem.",
+  "menu.claims.undo.sure": "Clique de novo para desfazer"
 }

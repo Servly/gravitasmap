@@ -16,12 +16,12 @@ impl Settings {
     pub fn to_json(&self) -> Value {
         let win: serde_json::Map<String, Value> = self.win.iter().map(|(k, w)| (k.to_string(), json!({
             "on": w.on, "x": w.x, "y": w.y, "dx": w.dx, "dy": w.dy, "colour": w.colour, "when": w.when,
-            "shape": [w.shape.0, w.shape.1, w.shape.2, w.shape.3], "persp": w.persp, "ground": w.ground, "size": w.size, "opacity": w.opacity,
+            "shape": [w.shape.0, w.shape.1, w.shape.2, w.shape.3], "persp": w.persp, "ground": w.ground, "size": w.size, "opacity": w.opacity, "z": w.z,
         }))).collect();
         json!({
             "combat_on": self.combat_on, "calm_s": self.calm_s, "sc_ends": self.sc_ends, "report_s": self.report_s, "drop_lost": self.drop_lost,
             "hide_maps": self.hide_maps, "look_hide": self.look_hide, "keep_hidden_in_panel": self.keep_hidden_in_panel, "bonds": self.bonds, "rows": self.rows, "sort": self.sort, "order": self.order,
-            "brief": self.brief, "feed_rows": self.feed_rows, "wing_bonus_on": self.wing_bonus_on, "wing_bonus_op": self.wing_bonus_op, "claim_bonds": self.claim_bonds, "claims_note": self.claims_note, "claims_dedupe": self.claims_dedupe, "always": self.always, "show_gone": self.show_gone, "auto": self.auto,
+            "brief": self.brief, "feed_rows": self.feed_rows, "wing_bonus_on": self.wing_bonus_on, "wing_bonus_op": self.wing_bonus_op, "claim_bonds": self.claim_bonds, "claims_note": self.claims_note, "claims_dedupe": self.claims_dedupe, "claims_fix": self.claims_fix, "always": self.always, "show_gone": self.show_gone, "auto": self.auto,
             "bg": self.bg, "opacity": self.opacity, "size_auto": self.size_auto, "size_pct": self.size_pct, "front": self.front, "boot": self.boot, "keys": self.keys, "look_btn": self.look_btn, "look_hold": self.look_hold, "win": Value::Object(win),
         })
     }
@@ -47,6 +47,7 @@ impl Settings {
         self.claim_bonds = flag(v.get("claim_bonds"), d.claim_bonds);
         self.claims_note = flag(v.get("claims_note"), d.claims_note);
         self.claims_dedupe = flag(v.get("claims_dedupe"), d.claims_dedupe);
+        self.claims_fix = flag(v.get("claims_fix"), d.claims_fix);
         self.keep_hidden_in_panel = flag(v.get("keep_hidden_in_panel"), d.keep_hidden_in_panel);
         self.feed_rows = clamp(v.get("feed_rows"), 1, 10, d.feed_rows);
         self.brief = flag(v.get("brief"), d.brief);
@@ -76,6 +77,7 @@ impl Settings {
                 w.ground = saved.get("ground").and_then(Value::as_i64).map(|g| g.clamp(-1, 100)).unwrap_or(w.ground);
                 w.size = saved.get("size").and_then(Value::as_i64).map(|g| if g < 0 { -1 } else { g.clamp(30, 200) }).unwrap_or(w.size);
                 w.opacity = saved.get("opacity").and_then(Value::as_i64).map(|g| if g < 0 { -1 } else { g.clamp(10, 100) }).unwrap_or(w.opacity);
+                w.z = saved.get("z").and_then(Value::as_i64).map(|g| g.clamp(-100, 100)).unwrap_or(w.z);
                 if let Some(wh) = saved.get("when").and_then(Value::as_str).filter(|wh| combat::WHEN.iter().any(|(k, _)| k == wh)) { w.when = wh.to_string(); }
                 if let Some(s) = saved.get("shape").and_then(Value::as_array).filter(|s| s.len() == 4) {
                     w.shape = (s[0].as_f64().unwrap_or(0.0), s[1].as_i64().unwrap_or(0), s[2].as_i64().unwrap_or(100), s[3].as_i64().unwrap_or(100));

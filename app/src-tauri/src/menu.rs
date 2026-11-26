@@ -109,6 +109,12 @@ pub fn is_open() -> bool {
     OPEN.load(Ordering::SeqCst)
 }
 
+/// The menu window is really on screen (the flag alone can be stale: the tray, a minimise, a close some other way).
+pub fn window_visible() -> bool {
+    let Some(app) = APP.get() else { return false };
+    app.get_webview_window("menu").and_then(|m| m.hwnd().ok()).map(|h| unsafe { IsWindowVisible(HWND(h.0 as *mut _)).as_bool() }).unwrap_or(false)
+}
+
 /// Opens the menu if it is closed, closes it if it is open. Called from any thread.
 pub fn request_toggle() {
     if let Some(app) = APP.get() {
@@ -209,6 +215,16 @@ pub fn guard() {
         }
     }
     if !open { AWAY.store(0, Ordering::Relaxed); return; }
+    // "open" but the menu window itself is not on screen (hidden by the tray, minimised, closed some other way): the flag must not stay
+    // true, it keeps every window showing made-up Edit HUD data (found from a Windows 10 tester's report, 25 Nov)
+    static GONE: AtomicU64 = AtomicU64::new(0);
+    let shown = app.get_webview_window("menu").and_then(|m| m.hwnd().ok()).map(|h| unsafe { IsWindowVisible(HWND(h.0 as *mut _)).as_bool() }).unwrap_or(false);
+    if shown { GONE.store(0, Ordering::Relaxed); } else if GONE.fetch_add(1, Ordering::Relaxed) + 1 >= 3 {
+        GONE.store(0, Ordering::Relaxed);
+        crate::store::log("menu flag cleared: the menu window is not visible");
+        close_quiet();
+        return;
+    }
     // who has the focus: this program or the game are fine
     let pid_of = |h: HWND| { let mut pid = 0u32; unsafe { GetWindowThreadProcessId(h, Some(&mut pid)); } pid };
     let fg = unsafe { GetForegroundWindow() };
@@ -231,6 +247,21 @@ pub fn raise_menu(app: &AppHandle) {
             unsafe { let _ = SetWindowPos(HWND(h.0 as *mut _), Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE); }
         }
     }
+}
+
+/// After the overlay windows were put in a new stacking order (all topmost): the editor layer and the menu go back above them. Any thread, no focus.
+pub fn raise_over_overlays() {
+    let Some(app) = APP.get() else { return };
+    if !OPEN.load(Ordering::SeqCst) { return; }
+    let up = |label: &str| {
+        if let Some(w) = app.get_webview_window(label) {
+            if let Ok(h) = w.hwnd() {
+                unsafe { let _ = SetWindowPos(HWND(h.0 as *mut _), Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE); }
+            }
+        }
+    };
+    if EDIT_HUD.load(Ordering::SeqCst) { up("editor"); }
+    up("menu");
 }
 
 /// The menu folded to its title bar (or open again): the game shows through.

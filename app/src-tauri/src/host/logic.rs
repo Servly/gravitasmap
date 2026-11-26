@@ -85,7 +85,7 @@ fn card_models_match_the_plugin_on_random_input() {
         let opt = |k: &str| if o[k].is_null() { None } else { Some(o[k].clone()) };
         let opts = Opts {
             sort: s("sort"), order: o["order"].as_array().unwrap().iter().map(|x| x.as_str().unwrap().to_string()).collect(),
-            report_s: n("report_s"), banner: b("banner"), scan: opt("scan"), tg: opt("tg"), always: b("always"),
+            report_s: n("report_s"), banner: b("banner"), scan: opt("scan"), tg: opt("tg"), always: b("always"), standby: true,
             gone: if o["gone"].is_null() { json!({}) } else { o["gone"].clone() }, show_gone: b("show_gone"), bounty: opt("bounty"),
             wing_bonus_on: b("wing_bonus_on"), wing_bonus_op: b("wing_bonus_op"), rows: n("rows") as i64, feed_rows: 6, keys_on: b("keys_on"),
             keys_left: n("keys_left") as i64, report_on: b("report_on"), report_left: n("report_left") as i64, ..Default::default()
@@ -270,7 +270,9 @@ fn preview_and_shown_match_the_plugin() {
         for (k, w) in h.set.win.iter_mut() { w.on = se["on"][*k].as_bool().unwrap_or(false); }
         h.set.always = se["always"].as_bool().unwrap();
         h.set.claims_note = false; // (the plugin has no Claims note)
+        h.set.standby_chip = true; // (the plugin has the STANDBY chip)
         h.set.claims_dedupe = false; // (the plugin counted a repeated Bounty line twice)
+        h.set.claims_fix = false;
         h.set.keep_hidden_in_panel = false; // (the plugin showed the windows again at the end of a free look over a panel)
         h.set.live_key_hints = false; // (the plugin's footers name its fixed Ctrl+Shift+F7..F12)
         h.set.show_gone = se["show_gone"].as_bool().unwrap();

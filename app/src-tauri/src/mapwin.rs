@@ -150,6 +150,7 @@ pub fn open_site(app: &AppHandle, mode: Option<&str>, system: Option<&str>) {
         let r = url.parse().map(|u| {
             WebviewWindowBuilder::new(&app, "mapsite", WebviewUrl::External(u))
                 .title("GRAVITAS Map")
+                .background_color(tauri::window::Color(11, 7, 22, 255)) // (the page's own dark ground: no white flash while it loads)
                 .inner_size(1400.0, 860.0)
                 .min_inner_size(640.0, 420.0)
                 .maximized(true)

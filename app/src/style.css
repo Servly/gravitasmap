@@ -200,3 +200,7 @@ h3.sub2{margin:14px 0 4px;font-size:13px;font-weight:600;opacity:.85}
 .card.sync .linkbox{margin:12px 0 0;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px}
 .card.sync .linkcode{display:block;font-size:26px;letter-spacing:.14em;font-variant-numeric:tabular-nums;user-select:all}
 .card.sync .linkbox .note{margin:6px 0 0}
+
+/* 0.9.37: the Profiles pop-up never leaves a narrow window (a Windows 10 tester's small window cut it) */
+.profpop{max-width:calc(100vw - 24px);max-height:calc(100vh - 96px);overflow-y:auto}
+@media (max-width:620px){.profpop{position:fixed;left:12px;right:12px;top:64px;width:auto}}

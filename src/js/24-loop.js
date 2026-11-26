@@ -52,6 +52,9 @@ addEventListener("keydown", e => { PACE.held.add(e.code); _paceAct(); });
 addEventListener("keyup", e => { PACE.held.delete(e.code); _paceAct(); });
 addEventListener("blur", () => PACE.held.clear());
 var TOUCH_SCREEN = matchMedia("(pointer: coarse)").matches;
+// v0.99.24: "is this page the one in front?" In the GRAVITAS app the window tells the page itself (window.__gvFocus, set from the app's own focus events):
+// the browser's hasFocus() was measured staying true on some PCs while the game was in front, so the map kept drawing 15 pictures a second next to the game
+const appFocus = () => (typeof APP_WINDOW !== "undefined" && APP_WINDOW && window.__gvFocus === false) ? false : document.hasFocus();
 function paceGap(now) {
   if (typeof APP_SMAP !== "undefined" && APP_SMAP && S) return now < PACE.act ? 1000 / 20 : 5000;   // the app's see-through System map (48-app-hook.js): a still picture, asked to move now and then
   if (typeof LENS !== "undefined" && LENS.open) return 250;      // v0.97: the Lenses window covers the map: 4 frames a second behind it
@@ -60,12 +63,15 @@ function paceGap(now) {
   PACE.cam.copy(camera.matrixWorld);
   // v0.75.7: the Milky Way is drawn in strips only in the 3D view, so it keeps the pace up only there (on the map it kept
   // the page at 60 frames a second for as long as the visitor stayed on the map)
+  // v0.99.24: not the page in front: quiet whatever else is going on (a system that failed to load, a fast clock, the first 30 s of quality tuning
+  // kept an unfocused page at 60 pictures a second, measured 20 to 60 % of a core). A mouse moving over it or a held key still wakes it.
+  if (!appFocus() && !TOUCH_SCREEN && !fly && !PACE.held.size) return now < PACE.act ? 1000 / 15 : (speed === 0 || speed === 1 || LIVE ? 1000 / 3 : 1000 / 10);
   const busy = now < PACE.act || moving || fly || PACE.held.size || BAKE.queue.length || (!MAPMODE && SKY.rt && SKY.y >= 0 && SKY.y < SKY.W / 2)
-    || (QAUTO.on && !QAUTO.tried && now - QAUTO.t < 30000) || !(speed === 0 || speed === 1 || LIVE) || !S;
+    || (QAUTO.on && !MAPMODE && !QAUTO.tried && now - QAUTO.t < 30000) || !(speed === 0 || speed === 1 || LIVE) || !S;
   if (busy) return 1000 / 60;
   // v0.71: quieter still. Bodies crawl at 1×, so 15 frames a second look the same. With the game in front
   // (this window not focused) 3 a second is plenty, and a paused, still screen needs only 4
-  if (!document.hasFocus() && !TOUCH_SCREEN) return 1000 / 3;    // v0.76.3: a phone or tablet is itself the screen (iPad Safari often reports no focus)
+  if (!appFocus() && !TOUCH_SCREEN) return 1000 / 3;    // v0.76.3: a phone or tablet is itself the screen (iPad Safari often reports no focus)
   if (STAR_ANIM.on && QUALITY !== PRESETS.low && (speed !== 0 || LIVE)) return 1000 / 30;   // v0.75.7: flames on screen move smoothly
   return speed === 0 && !LIVE ? 250 : 1000 / 15;
 }

@@ -284,7 +284,15 @@
     GVC.init({ t: t, lang: function () { return lang; }, toast: toast });
     GVC.reset();
     fillPane("profPop", ["shipprof"]);
-    (function () { var b = $("#profBtn"), p = $("#profPop"); b.onclick = function (e) { e.stopPropagation(); p.hidden = !p.hidden; };
+    (function () { var b = $("#profBtn"), p = $("#profPop"); b.onclick = function (e) {
+      e.stopPropagation(); p.hidden = !p.hidden;
+      if (!p.hidden) { // the pop-up is placed on the window itself, under the button, so no parent can cut it
+        var r = b.getBoundingClientRect(), w = Math.min(340, innerWidth - 24);
+        p.style.position = "fixed"; p.style.width = w + "px"; p.style.top = (r.bottom + 8) + "px";
+        p.style.left = Math.max(12, Math.min(r.right - w, innerWidth - w - 12)) + "px"; p.style.right = "auto";
+        p.style.maxHeight = Math.max(160, innerHeight - r.bottom - 24) + "px";
+      }
+    };
       document.addEventListener("click", function (e) { if (!p.hidden && !p.contains(e.target) && e.target !== b) p.hidden = true; }); })();
     fillPane("combat-overview", ["modes", "actions"]);
     fillPane("combat-windows", ["windows", "profiles"]);

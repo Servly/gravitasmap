@@ -47,18 +47,37 @@ pub fn saved_games() -> Option<PathBuf> {
     dir.is_dir().then_some(dir)
 }
 
+/// A sortable key from a Journal's file name: Journal.<date>.<part>.log sorts by time. The old form (Journal.YYMMDDHHMMSS.01.log) and the
+/// ISO form (Journal.2026-11-25T123456.01.log) both become 20YYMMDDHHMMSS + the part, so the two forms sort together.
+/// The file's modified time is NOT used for order: an antivirus or a copy touches old files.
+pub(crate) fn name_key(name: &str) -> String {
+    let rest = name.strip_prefix("Journal.").unwrap_or(name);
+    let rest = rest.strip_suffix(".log").unwrap_or(rest);
+    let (stamp, part) = rest.split_once('.').unwrap_or((rest, ""));
+    let digits: String = stamp.chars().filter(|c| c.is_ascii_digit()).collect();
+    let digits = if digits.len() == 12 { format!("20{digits}") } else { digits };
+    format!("{digits}.{part}")
+}
+
+fn is_journal_name(n: &str) -> bool {
+    n.starts_with("Journal.") && n.ends_with(".log")
+}
+
+/// The Journal files of a folder, oldest first (by file name, see name_key).
+pub(crate) fn journal_files(folder: &Path) -> Vec<PathBuf> {
+    let mut v: Vec<(String, PathBuf)> = fs::read_dir(folder)
+        .map(|rd| rd.filter_map(|e| e.ok()).filter_map(|e| {
+            let n = e.file_name().to_string_lossy().into_owned();
+            is_journal_name(&n).then(|| (name_key(&n), e.path()))
+        }).collect())
+        .unwrap_or_default();
+    v.sort();
+    v.into_iter().map(|(_, p)| p).collect()
+}
+
+/// The newest Journal: the greatest file name (the game names them by start time).
 pub(crate) fn newest(folder: &Path) -> Option<PathBuf> {
-    fs::read_dir(folder)
-        .ok()?
-        .filter_map(|e| e.ok())
-        .filter(|e| {
-            let n = e.file_name();
-            let n = n.to_string_lossy();
-            n.starts_with("Journal.") && n.ends_with(".log")
-        })
-        .filter_map(|e| Some((e.metadata().ok()?.modified().ok()?, e.path())))
-        .max_by_key(|(t, _)| *t)
-        .map(|(_, p)| p)
+    journal_files(folder).pop()
 }
 
 /// at most this much of the file is read at once
@@ -471,5 +490,12 @@ mod tests {
         assert_eq!(t.state.system, "Survivor");
         println!("byte noise: {n} rounds, reader fine");
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn journal_names_sort_by_time_in_both_forms() {
+        let mut v = vec!["Journal.2026-11-25T120000.02.log", "Journal.210525120000.01.log", "Journal.2026-11-25T120000.01.log", "Journal.2021-06-01T100000.01.log", "Journal.200101000000.01.log"];
+        v.sort_by_key(|n| name_key(n));
+        assert_eq!(v, ["Journal.200101000000.01.log", "Journal.210525120000.01.log", "Journal.2021-06-01T100000.01.log", "Journal.2026-11-25T120000.01.log", "Journal.2026-11-25T120000.02.log"]);
     }
 }

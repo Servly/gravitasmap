@@ -282,7 +282,7 @@
   "win.where": "Zeigt bei",
   "win.colour": "Farbe",
   "menu.w.defpos": "Standardposition",
-  "menu.w.defpos.d": "Dieses Fenster an die Startposition zurücksetzen",
+  "menu.w.defpos.d": "Dieses Fenster wie beim Start von GRAVITAS zurücksetzen: Position, Farbe, Anzeige, Perspektive, Größe, Deckkraft und Reihenfolge",
   "menu.w.g.main": "Hauptansicht",
   "menu.w.g.left": "Linkes Panel (1)",
   "menu.w.g.comms": "Comms-Panel (2)",
@@ -394,7 +394,7 @@
   "tip.kb.on": "Alle GRAVITAS-Tasten ein- oder ausschalten.",
   "tip.kb.job": "Die Taste für diese Aufgabe. Keine, Standard oder eigene wählen.",
   "tip.kb.mod": "Eine Taste, die zusammen mit der Haupttaste gehalten wird.",
-  "tip.kb.key": "Die Haupttaste: Buchstabe, Zahl, F-Taste oder Ziffernblock (Num0 bis Num9, NumAdd, NumSub).",
+  "tip.kb.key": "Hier klicken und die gewünschte Tastenkombination drücken (zum Beispiel Ctrl+Alt+K). Sie wird sofort übernommen. Auch Ziffernblock- und F-Tasten gehen.",
   "tip.kb.apply": "Diese Taste speichern.",
   "tip.wn.open": "Sehen, was sich in dieser Version geändert hat.",
   "tip.github": "Der Quellcode auf GitHub.",
@@ -907,5 +907,10 @@
   "vis.search.busy": "Dein gesamter Verlauf wird durchsucht…",
   "vis.sum.months": "Aus den Monatszusammenfassungen addiert. Die Toplisten sind Näherungswerte.",
   "vis.ill": "Spirale: Illustration, keine Sternkarte",
-  "tip.vis.ill": "Die schwache Spirale hinter der Karte ist nur Dekoration. Deine Stopps, die Route und die drei Orientierungspunkte (Sol, Colonia, Sagittarius A*) nutzen echte Koordinaten."
+  "tip.vis.ill": "Die schwache Spirale hinter der Karte ist nur Dekoration. Deine Stopps, die Route und die drei Orientierungspunkte (Sol, Colonia, Sagittarius A*) nutzen echte Koordinaten.",
+  "menu.w.front": "Nach vorn",
+  "menu.w.back": "Nach hinten",
+  "tip.w.front": "Dieses Fenster vor die anderen legen, wo sie sich überlappen.",
+  "tip.w.back": "Dieses Fenster hinter die anderen legen, wo sie sich überlappen.",
+  "menu.claims.undo.sure": "Zum Rückgängigmachen nochmals klicken"
 }
