@@ -2,6 +2,12 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.42
+- BGS WATCH wording now follows the community guide to the Background Simulation. Your band is called your target range and is never presented as a game rule (the game has no safe range: a faction under 2.5 % starts a retreat and above 75 % may start an expansion). A low value means control is easier to lose, a high value is above your range, and a system at 75 or more now says that an expansion may start. The report says BOOST FIRST and ABOVE YOUR RANGE, the Defend tab is called Attention, and the tick notes say that each system ticks at its own time and the game's panels can show it up to 12 hours late.
+
+## 0.9.41
+- BGS WATCH, a calmer page. One slim bar stays at the top with the tabs and three filters, and the data starts on the first screen. Six tabs: Setup, Defend (the systems to act on first, with the reason for each, and a system that is falling counts as much as one that is already low), Changes (what moved by a point or more, before and after), Overview (all systems over time), Trends and Report. Every chart title now states what it shows. Import CSV takes several files at once and reads plurals right.
+
 ## 0.9.40
 - Fix on the BGS page: the Setup panel stayed visible under every tab, so you had to scroll far down to reach the charts. Each tab now shows only its own content.
 

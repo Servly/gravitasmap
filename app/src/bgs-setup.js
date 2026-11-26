@@ -131,7 +131,7 @@
       invoke("bgs_forget").then(function (r) { if (r && r.ok) { msg(c5, tr("bgs.forget.done", { n: r.files_removed || 0 }), "ok"); BG.dirty = true; refresh(); } else msg(c5, BG.errText(r && r.error), "err"); });
     };
     // Import CSV: the file Export CSV wrote (for example from a friend). First it is only read and reported, nothing is saved until the player confirms.
-    var impFile = document.createElement("input"); impFile.type = "file"; impFile.accept = ".csv,text/csv"; impFile.hidden = true;
+    var impFile = document.createElement("input"); impFile.type = "file"; impFile.accept = ".csv,text/csv"; impFile.multiple = true; impFile.hidden = true;
     var impBtn = h.tip(mk("button", "btn", tr("bgs.imp.btn")), "tip.bgs.imp"); impBtn.type = "button";
     var impBox = mk("div", "bg-imp");
     impBtn.onclick = function () { impFile.value = ""; impFile.click(); };
@@ -146,12 +146,12 @@
       });
       impBox.appendChild(list);
       if (!r.to_add) { impBox.appendChild(mk("p", "note", tr("bgs.imp.none"))); return; }
-      var go = h.tip(mk("button", "btn go", tr("bgs.imp.go", { a: r.to_add })), "tip.bgs.imp_go"); go.type = "button";
+      var go = h.tip(mk("button", "btn go", tr(r.to_add === 1 ? "bgs.imp.go1" : "bgs.imp.go", { a: r.to_add })), "tip.bgs.imp_go"); go.type = "button";
       var no = h.tip(mk("button", "btn", tr("bgs.imp.cancel")), "tip.bgs.imp_cancel"); no.type = "button";
       go.onclick = function () {
         go.disabled = true;
         invoke("bgs_import_csv", { text: text, apply: true }).then(function (r2) {
-          if (r2 && r2.ok && r2.applied) { impBox.textContent = ""; msg(c5, tr("bgs.imp.done", { a: (r2.ids || []).length }), "ok"); BG.dirty = true; refresh(); }
+          if (r2 && r2.ok && r2.applied) { impBox.textContent = ""; msg(c5, tr((r2.ids || []).length === 1 ? "bgs.imp.done1" : "bgs.imp.done", { a: (r2.ids || []).length }), "ok"); BG.dirty = true; refresh(); }
           else { impBox.appendChild(mk("p", "bg-msg err", BG.errText(r2 && r2.error) || tr("bgs.imp.fail"))); go.disabled = false; }
         }).catch(function () { impBox.appendChild(mk("p", "bg-msg err", tr("bgs.imp.fail"))); go.disabled = false; });
       };
@@ -159,17 +159,20 @@
       var bb = mk("div", "bg-btns"); bb.appendChild(go); bb.appendChild(no); impBox.appendChild(bb);
     }
     impFile.onchange = function () {
-      var f = impFile.files && impFile.files[0]; if (!f) return;
-      if (f.size > 20e6) { msg(c5, tr("bgs.csv.big"), "err"); return; }
-      var rd = new FileReader();
-      rd.onload = function () {
-        var text = String(rd.result || "");
-        invoke("bgs_import_csv", { text: text, apply: false }).then(function (r) {
+      var files = Array.prototype.slice.call(impFile.files || []); if (!files.length) return;
+      if (files.length > 40) { msg(c5, tr("bgs.csv.big"), "err"); return; }
+      // several files are joined into one text (each has the same header, only the first one is kept) so one summary covers them all
+      Promise.all(files.map(function (f) {
+        return new Promise(function (ok, bad) {
+          if (f.size > 20e6) { bad(); return; }
+          var rd = new FileReader(); rd.onload = function () { ok(String(rd.result || "")); }; rd.onerror = function () { bad(); }; rd.readAsText(f);
+        });
+      })).then(function (texts) {
+        var text = texts.map(function (t, i) { t = t.replace(/^\ufeff/, ""); if (i === 0) return t; var k = t.indexOf("\n"); return k < 0 ? "" : t.slice(k + 1); }).map(function (t) { return t.replace(/\s+$/, ""); }).join("\n") + "\n";
+        return invoke("bgs_import_csv", { text: text, apply: false }).then(function (r) {
           if (r && r.ok) impShow(text, r); else { impBox.textContent = ""; impBox.appendChild(mk("p", "bg-msg err", BG.errText(r && r.error) || tr("bgs.imp.fail"))); }
-        }).catch(function () { impBox.textContent = ""; impBox.appendChild(mk("p", "bg-msg err", tr("bgs.imp.fail"))); });
-      };
-      rd.onerror = function () { msg(c5, tr("bgs.imp.fail"), "err"); };
-      rd.readAsText(f);
+        });
+      }).catch(function () { impBox.textContent = ""; impBox.appendChild(mk("p", "bg-msg err", tr("bgs.imp.fail"))); });
     };
     bx.appendChild(ex); bx.appendChild(impBtn); bx.appendChild(impFile); bx.appendChild(fg); c5.appendChild(bx); c5.appendChild(impBox); c5.appendChild(mk("p", "note", tr("bgs.imp.note"))); c5.appendChild(mk("p", "note", tr("bgs.data.note")));
     function show() {

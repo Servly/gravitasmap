@@ -47,8 +47,8 @@
     var list = M.sys.filter(function (s) { return s.score > 0; }).sort(function (a, b) { return b.score - a.score; });
     var dl = list.filter(function (s) { return s.side !== "high"; }).slice(0, 8), th = list.filter(function (s) { return s.side === "high"; }).slice(0, 5);
     function plain(s) { return s.whyK[0] ? BG.trEn(s.whyK[0][0], s.whyK[0][1]).replace(/[<>]/g, "") : ""; }
-    if (o.att && dl.length) { L.push(""); L.push("DEFEND FIRST (value, change, system)"); dl.forEach(function (s) { L.push(row(s, plain(s))); }); }
-    if (o.att && th.length) { L.push(""); L.push("TOO HIGH (value, change, system)"); th.forEach(function (s) { L.push(row(s, plain(s))); }); }
+    if (o.att && dl.length) { L.push(""); L.push("BOOST FIRST (value, change, system)"); dl.forEach(function (s) { L.push(row(s, plain(s))); }); }
+    if (o.att && th.length) { L.push(""); L.push("ABOVE YOUR RANGE (value, change, system)"); th.forEach(function (s) { L.push(row(s, plain(s))); }); }
     if (k && o.drops) { L.push(""); L.push("BIGGEST DROPS"); ds.filter(function (s) { return s.d < 0 && s.tier === "big"; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 5).forEach(function (s) { L.push(row(s)); }); }
     if (k && o.gains) { L.push(""); L.push("BIGGEST GAINS"); ds.filter(function (s) { return s.d > 0 && s.tier === "big"; }).sort(function (a, b) { return b.d - a.d; }).slice(0, 5).forEach(function (s) { L.push(row(s)); }); }
     if (k && o.cross) {

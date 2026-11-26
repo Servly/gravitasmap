@@ -55,7 +55,8 @@ pub fn plan(text: &str, st: &Store, known: &[String], window_s: i64) -> Result<P
         let (spelled, listed) = match by_name.get(&snap::norm(&name)) { Some(k) => ((*k).clone(), true), None => (name.clone(), known.is_empty()) };
         let g = match groups.iter().position(|g| g.t == t) { Some(i) => i, None => { groups.push(Group { t, rows: Vec::new(), not_in_list: Vec::new(), skip: "" }); groups.len() - 1 } };
         let g = &mut groups[g];
-        if g.rows.iter().any(|x| snap::norm(&x.system) == snap::norm(&spelled)) { bad += 1; continue; }
+        // a repeat of the same system at the same time: the very same value (the same snapshot in two files) is ignored quietly, a different value is a bad row
+        if let Some(x) = g.rows.iter().find(|x| snap::norm(&x.system) == snap::norm(&spelled)) { if x.inf_x10 != x10 { bad += 1; } continue; }
         if !listed { g.not_in_list.push(spelled.clone()); }
         g.rows.push(StoredRow { system: spelled, inf_x10: x10, star: false, conf: if confirmed { 1.0 } else { 0.5 }, confirmed, accepted_unchecked: !confirmed, ..Default::default() });
     }

@@ -82,6 +82,20 @@
     return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dtl(sn.t)) + '">' + C.dt(sn.t) + " UTC</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span><span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
       (fw ? "<span class='w'>" + t("bgs.dq.warn", { n: fw }) + "</span>" : "") + (M.nS > 1 ? "<span>" + t("bgs.dq.inc", { n: M.snaps.filter(function (x) { return !x.complete; }).length }) + "</span>" : "") + "<span class='bg-fl'>" + t("bgs.dq.utc") + "</span>";
   }
+  // the slim bar: one quality chip, the three filters that matter, everything else under "more"
+  function pin(M) {
+    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + C.dt(sn.t) + " UTC";
+    var s = (store.g && store.g.settings) || {};
+    function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
+    function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
+    var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
+      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["7d", t("bgs.base.7d")]])) +
+      lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
+    var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
+      lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');
+    return '<div class="bg-pin"><span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + main +
+      '<details class="bg-more"><summary data-tip="' + esc(t("tip.bgs.more")) + '">' + t("bgs.more") + '</summary><div class="bg-moreb"><div class="bg-dq">' + head(M) + '</div><div class="bg-bar">' + more + "</div></div></details></div>";
+  }
   function empty() {
     var g = store.g, off = g && g.settings && !g.settings.on;
     return '<div class="bg-empty">' + (g ? (off ? t("bgs.e.off") : t("bgs.e.none")) : t("bgs.e.load")) + '<div style="margin-top:12px"><button class="btn go" data-gosetup="1" data-tip="' + esc(t("tip.bgs.gosetup")) + '">' + t("bgs.e.go") + "</button></div></div>";
@@ -90,7 +104,7 @@
     var M = store.M; p.rev = store.rev;
     var keep = p.el.querySelector(".bg-scroll"), sx = keep ? keep.scrollLeft : 0, sy = p.sc ? p.sc.scrollTop : 0;
     if (!M) { p.el.innerHTML = empty(); return; }
-    p.el.innerHTML = '<div class="bg-dq">' + head(M) + '</div><div class="bg-bar">' + bar(M) + '</div><div class="bg-view">' + (V[p.tab] || V.today)(M, ui) + "</div>";
+    p.el.innerHTML = pin(M) + '<div class="bg-view">' + (V[p.tab] || V.defend)(M, ui) + "</div>";
     var k2 = p.el.querySelector(".bg-scroll"); if (k2) k2.scrollLeft = sx;
     if (ui.sel && drawer && drawer.classList.contains("on")) drawer.innerHTML = V.detail(M, ui.sel);
   }

@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="debrief.css">
 <link rel="stylesheet" href="visits.css">
 <link rel="stylesheet" href="bgs.css">
+<link rel="stylesheet" href="bgs-style.css">
 <link rel="stylesheet" href="themes.css">
 <script src="themes.js"></script>
 <link rel="stylesheet" href="kbcapture.css">
@@ -98,8 +99,8 @@
 
     <section class="view" id="v-bgs" aria-label="bgs">
       <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.bgs"></h2><h1 data-i18n="page.bgs.h1"></h1><p class="sub" data-i18n="page.bgs.sub"></p></div></div>
-      <nav class="tabs" data-scope="bgs"><button class="tab on" data-i18n-title="tip.bgs.tab.setup" data-tab="setup" data-i18n="bgs.tab.setup"></button><button class="tab" data-i18n-title="tip.bgs.tab.today" data-tab="today" data-i18n="bgs.tab.today"></button><button class="tab" data-i18n-title="tip.bgs.tab.movers" data-tab="movers" data-i18n="bgs.tab.movers"></button><button class="tab" data-i18n-title="tip.bgs.tab.risk" data-tab="risk" data-i18n="bgs.tab.risk"></button><button class="tab" data-i18n-title="tip.bgs.tab.heat" data-tab="heat" data-i18n="bgs.tab.heat"></button><button class="tab" data-i18n-title="tip.bgs.tab.trends" data-tab="trends" data-i18n="bgs.tab.trends"></button><button class="tab" data-i18n-title="tip.bgs.tab.fleet" data-tab="fleet" data-i18n="bgs.tab.fleet"></button><button class="tab" data-i18n-title="tip.bgs.tab.tick" data-tab="tick" data-i18n="bgs.tab.tick"></button><button class="tab" data-i18n-title="tip.bgs.tab.report" data-tab="report" data-i18n="bgs.tab.report"></button></nav>
-      <div class="pane on" id="bgs-setup"></div><div class="pane" id="bgs-today"></div><div class="pane" id="bgs-movers"></div><div class="pane" id="bgs-risk"></div><div class="pane" id="bgs-heat"></div><div class="pane" id="bgs-trends"></div><div class="pane" id="bgs-fleet"></div><div class="pane" id="bgs-tick"></div><div class="pane" id="bgs-report"></div>
+      <nav class="tabs" data-scope="bgs"><button class="tab on" data-i18n-title="tip.bgs.tab.setup" data-tab="setup" data-i18n="bgs.tab.setup"></button><button class="tab" data-i18n-title="tip.bgs.tab.defend" data-tab="defend" data-i18n="bgs.tab.defend"></button><button class="tab" data-i18n-title="tip.bgs.tab.changes" data-tab="changes" data-i18n="bgs.tab.changes"></button><button class="tab" data-i18n-title="tip.bgs.tab.overview" data-tab="overview" data-i18n="bgs.tab.overview"></button><button class="tab" data-i18n-title="tip.bgs.tab.trends" data-tab="trends" data-i18n="bgs.tab.trends"></button><button class="tab" data-i18n-title="tip.bgs.tab.report" data-tab="report" data-i18n="bgs.tab.report"></button></nav>
+      <div class="pane on" id="bgs-setup"></div><div class="pane" id="bgs-defend"></div><div class="pane" id="bgs-changes"></div><div class="pane" id="bgs-overview"></div><div class="pane" id="bgs-trends"></div><div class="pane" id="bgs-report"></div>
     </section>
 
     <section class="view" id="v-prefs" aria-label="Settings">
@@ -163,6 +164,7 @@
 <script src="bgs-heat.js"></script>
 <script src="bgs-tick.js"></script>
 <script src="bgs-detail.js"></script>
+<script src="bgs-defend.js"></script>
 <script src="bgs-setup.js"></script>
 <script src="bgs-confirm.js"></script>
 <script src="bgs-ui.js"></script>

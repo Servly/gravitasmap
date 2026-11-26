@@ -1,6 +1,48 @@
 {
   "versions": [
     {
+      "v": "0.9.42",
+      "en": [
+        "BGS WATCH wording now follows the community guide to the Background Simulation. Your band is called your target range and is never presented as a game rule (the game has no safe range: a faction under 2.5 % starts a retreat and above 75 % may start an expansion). A low value means control is easier to lose, a high value is above your range, and a system at 75 or more now says that an expansion may start. The report says BOOST FIRST and ABOVE YOUR RANGE, the Defend tab is called Attention, and the tick notes say that each system ticks at its own time and the game's panels can show it up to 12 hours late."
+      ],
+      "de": [
+        "BGS WATCH folgt in der Wortwahl jetzt dem Community-Leitfaden zur Hintergrundsimulation. Dein Bereich heißt Zielbereich und wird nie als Spielregel dargestellt (das Spiel kennt keinen sicheren Bereich: eine Fraktion unter 2,5 % beginnt einen Rückzug und über 75 % kann sie eine Expansion starten). Ein niedriger Wert bedeutet, dass die Kontrolle leichter verloren geht, ein hoher liegt über deinem Bereich, und ein System ab 75 sagt jetzt, dass eine Expansion beginnen kann. Der Bericht sagt ZUERST STÄRKEN und ÜBER DEINEM BEREICH, der Tab Verteidigen heißt Aufmerksamkeit, und die Tick-Hinweise nennen, dass jedes System zu seiner eigenen Zeit tickt und die Spielpanels es bis zu 12 Stunden zu spät zeigen können."
+      ],
+      "es": [
+        "BGS WATCH ahora usa las palabras de la guía de la comunidad sobre la Simulación de Fondo. Tu banda se llama rango objetivo y nunca se presenta como una regla del juego (el juego no tiene un rango seguro: una facción por debajo del 2,5 % inicia una retirada y por encima del 75 % puede iniciar una expansión). Un valor bajo significa que es más fácil perder el control, un valor alto está sobre tu rango, y un sistema en 75 o más ahora indica que puede empezar una expansión. El informe dice REFORZAR PRIMERO y SOBRE TU RANGO, la pestaña Defender se llama Atención, y las notas del tick dicen que cada sistema hace tick a su hora y que los paneles del juego pueden mostrarlo hasta 12 horas tarde."
+      ],
+      "fr": [
+        "BGS WATCH suit maintenant le vocabulaire du guide communautaire de la simulation d'arrière-plan. Votre bande s'appelle votre plage cible et n'est jamais présentée comme une règle du jeu (le jeu n'a pas de plage sûre : une faction sous 2,5 % commence un retrait et au-dessus de 75 % peut lancer une expansion). Une valeur basse signifie que le contrôle se perd plus facilement, une valeur haute est au-dessus de votre plage, et un système à 75 ou plus indique maintenant qu'une expansion peut commencer. Le rapport dit À RENFORCER D'ABORD et AU-DESSUS DE VOTRE PLAGE, l'onglet Défendre s'appelle Attention, et les notes du tick précisent que chaque système fait son tick à sa propre heure et que les panneaux du jeu peuvent l'afficher jusqu'à 12 heures en retard."
+      ],
+      "pt-br": [
+        "BGS WATCH agora segue o vocabulário do guia da comunidade sobre a Simulação de Fundo. Sua faixa se chama intervalo alvo e nunca é apresentada como regra do jogo (o jogo não tem um intervalo seguro: uma facção abaixo de 2,5 % inicia uma retirada e acima de 75 % pode iniciar uma expansão). Um valor baixo significa que é mais fácil perder o controle, um valor alto está acima do seu intervalo, e um sistema em 75 ou mais agora diz que uma expansão pode começar. O relatório diz REFORÇAR PRIMEIRO e ACIMA DO SEU INTERVALO, a aba Defender se chama Atenção, e as notas do tick dizem que cada sistema faz tick na sua própria hora e que os painéis do jogo podem mostrá-lo até 12 horas atrasado."
+      ],
+      "ru": [
+        "BGS WATCH теперь использует слова из общественного руководства по фоновой симуляции. Ваш диапазон называется целевым и никогда не выдаётся за правило игры (у игры нет безопасного диапазона: фракция ниже 2,5 % начинает отступление, а выше 75 % может начать экспансию). Низкое значение значит, что контроль легче потерять, высокое выше вашего диапазона, а система с 75 и выше теперь сообщает, что может начаться экспансия. Отчёт говорит СНАЧАЛА УСИЛИТЬ и ВЫШЕ ВАШЕГО ДИАПАЗОНА, вкладка Защита называется Внимание, а заметки о тике поясняют, что каждая система тикает в своё время и панели игры могут показать его с опозданием до 12 часов."
+      ]
+    },
+    {
+      "v": "0.9.41",
+      "en": [
+        "BGS WATCH, a calmer page. One slim bar stays at the top with the tabs and three filters, and the data starts on the first screen. Six tabs: Setup, Defend (the systems to act on first, with the reason for each, and a system that is falling counts as much as one that is already low), Changes (what moved by a point or more, before and after), Overview (all systems over time), Trends and Report. Every chart title now states what it shows. Import CSV takes several files at once and reads plurals right."
+      ],
+      "de": [
+        "BGS WATCH, eine ruhigere Seite. Oben bleibt eine schmale Leiste mit den Tabs und drei Filtern, und die Daten beginnen auf dem ersten Bildschirm. Sechs Tabs: Setup, Verteidigen (die Systeme, um die du dich zuerst kümmern solltest, mit Grund, und ein fallendes System zählt so viel wie ein schon niedriges), Änderungen (was sich um einen Punkt oder mehr bewegt hat, vorher und nachher), Übersicht (alle Systeme über die Zeit), Trends und Bericht. Jeder Diagrammtitel sagt jetzt, was er zeigt. CSV importieren nimmt mehrere Dateien auf einmal und schreibt Mehrzahl richtig."
+      ],
+      "es": [
+        "BGS WATCH, una página más tranquila. Arriba queda una barra delgada con las pestañas y tres filtros, y los datos empiezan en la primera pantalla. Seis pestañas: Setup, Defender (los sistemas en los que actuar primero, con el motivo, y un sistema que baja cuenta tanto como uno ya bajo), Cambios (lo que se movió un punto o más, antes y después), Resumen (todos los sistemas en el tiempo), Tendencias e Informe. Cada título de gráfico dice ahora lo que muestra. Importar CSV acepta varios archivos a la vez y los plurales son correctos."
+      ],
+      "fr": [
+        "BGS WATCH, une page plus calme. Une barre fine reste en haut avec les onglets et trois filtres, et les données commencent dès le premier écran. Six onglets : Setup, Défendre (les systèmes à traiter en premier, avec la raison, et un système qui baisse compte autant qu'un système déjà bas), Changements (ce qui a bougé d'un point ou plus, avant et après), Aperçu (tous les systèmes dans le temps), Tendances et Rapport. Chaque titre de graphique dit maintenant ce qu'il montre. Importer un CSV accepte plusieurs fichiers à la fois et les pluriels sont corrects."
+      ],
+      "pt-br": [
+        "BGS WATCH, uma página mais calma. Uma barra fina fica no topo com as abas e três filtros, e os dados começam na primeira tela. Seis abas: Setup, Defender (os sistemas em que agir primeiro, com o motivo, e um sistema em queda conta tanto quanto um já baixo), Mudanças (o que se moveu um ponto ou mais, antes e depois), Visão geral (todos os sistemas ao longo do tempo), Tendências e Relatório. Cada título de gráfico agora diz o que mostra. Importar CSV aceita vários arquivos de uma vez e os plurais estão corretos."
+      ],
+      "ru": [
+        "BGS WATCH, более спокойная страница. Вверху остаётся тонкая панель с вкладками и тремя фильтрами, а данные начинаются на первом экране. Шесть вкладок: Setup, Защита (системы, которыми заняться в первую очередь, с причиной, и падающая система важна так же, как уже низкая), Изменения (что изменилось на пункт и более, до и после), Обзор (все системы во времени), Тренды и Отчёт. Заголовок каждого графика теперь говорит, что он показывает. Импорт CSV принимает сразу несколько файлов, а числительные записываются правильно."
+      ]
+    },
+    {
       "v": "0.9.40",
       "en": [
         "Fix on the BGS page: the Setup panel stayed visible under every tab, so you had to scroll far down to reach the charts. Each tab now shows only its own content."

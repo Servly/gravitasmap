@@ -77,6 +77,18 @@
       if (s.tier === "big" && s.dir < 0 && s.last - st.lo < 6 && s.zone !== "low") { sc = Math.max(sc, 50 + Math.abs(s.d)); side = side || "low"; W("bgs.why.lost", { d: Math.abs(s.d), r: r1(s.last - st.lo), lo: st.lo }); }
       if (s.tier === "big" && s.dir > 0 && st.hi - s.last < 6 && s.zone !== "high") { sc = Math.max(sc, 50 + Math.abs(s.d)); side = side || "high"; W("bgs.why.gained", { d: Math.abs(s.d), r: r1(st.hi - s.last), hi: st.hi }); }
       s.score = sc; s.why = why; s.whyK = whyK; s.side = side;
+      // Defend list (0.9.41): how far outside the band, room to the nearest edge, movement toward it, one simple score. Falls count too.
+      var E = s.zone === "low" ? st.lo - s.last : s.zone === "high" ? s.last - st.hi : 0;
+      var edge = E ? s.zone : (s.last - st.lo <= st.hi - s.last ? "low" : "high");
+      var R = E ? 0 : Math.min(s.last - st.lo, st.hi - s.last);
+      var tw = s.slope ? (edge === "low" ? -s.slope.perDay : s.slope.perDay) : 0;
+      var dm = s.d == null ? 0 : (edge === "low" ? -s.d : s.d);
+      var s2 = E ? 100 + 3 * E : Math.max(0, 60 - 4 * R);
+      if (dm > 0) s2 += Math.min(40, 8 * dm);
+      if (tw > 0) s2 += Math.min(30, 10 * tw);
+      if (s.run && s.run.n >= 3 && s.run.sign === (edge === "low" ? -1 : 1)) s2 += 8;
+      if (s.d != null && s.d <= -2 && s.zone !== "high") s2 = Math.max(s2, 55);
+      s.E = r1(E); s.R = r1(R); s.edge = edge; s.toward = tw; s.score2 = s2;
       return s;
     }).filter(Boolean);
     var M = { st: st, snaps: snaps, K: K, first: first, sys: sys, nS: nS, squad: data.squad };

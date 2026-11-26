@@ -98,3 +98,22 @@ fn no_influence_value_beyond_the_columns_is_kept() {
     assert_eq!(ids.len(), 1);
 }
 
+#[test]
+fn the_same_snapshot_in_two_files_counts_once_and_without_complaint() {
+    let b = Store::at(tmp("g")).unwrap();
+    let one = "snapshot_utc,system,influence_percent,change_vs_previous,confirmed
+2026-11-26T03:59:24Z,Serra,68.0,,yes
+2026-11-26T03:59:24Z,Gunwin,66.9,,yes
+";
+    let two = "2026-11-26T03:59:24Z,Serra,68.0,,yes
+2026-11-26T03:59:24Z,Gunwin,66.9,,yes
+2026-11-25T05:23:37Z,Serra,66.6,,yes
+";
+    let p = plan(&format!("{one}{two}"), &b, &known(), 300).unwrap();
+    assert_eq!(p.bad_rows, 0);
+    assert_eq!(p.groups.len(), 2);
+    assert_eq!(p.groups[1].rows.len(), 2, "no duplicate rows");
+    let clash = format!("{one}2026-11-26T03:59:24Z,Serra,67.0,,yes
+");
+    assert_eq!(plan(&clash, &b, &known(), 300).unwrap().bad_rows, 1, "a different value for the same system and time is a bad row");
+}
