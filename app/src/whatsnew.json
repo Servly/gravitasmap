@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.44",
+      "en": [
+        "BGS WATCH layout fixes. Charts keep their natural size, so the text no longer grows on a wide window. The dates on the Overview are written upright, the three groups in Attention line up their columns, the report no longer prints a long number for the minor change, Save looks off when nothing changed, the inputs in Setup have the same height, and the Trends title no longer says 1 days."
+      ],
+      "de": [
+        "BGS WATCH, Layout-Korrekturen. Diagramme behalten ihre natürliche Größe, der Text wächst auf einem breiten Fenster nicht mehr mit. Die Daten in der Übersicht stehen aufrecht, die drei Gruppen in Aufmerksamkeit richten ihre Spalten aus, der Bericht zeigt keine lange Zahl mehr für die kleine Änderung, Speichern wirkt ausgeschaltet, wenn nichts geändert wurde, die Eingabefelder im Setup sind gleich hoch, und der Trends-Titel sagt nicht mehr 1 Tage."
+      ],
+      "es": [
+        "BGS WATCH, correcciones de diseño. Los gráficos mantienen su tamaño natural, así el texto ya no crece en una ventana ancha. Las fechas del Resumen se escriben en vertical, los tres grupos de Atención alinean sus columnas, el informe ya no muestra un número largo para el cambio menor, Guardar se ve apagado cuando no hay cambios, los campos de Setup tienen la misma altura y el título de Tendencias ya no dice 1 días."
+      ],
+      "fr": [
+        "BGS WATCH, corrections de mise en page. Les graphiques gardent leur taille naturelle, le texte ne grossit donc plus sur une fenêtre large. Les dates de l'Aperçu sont écrites à la verticale, les trois groupes d'Attention alignent leurs colonnes, le rapport n'affiche plus un long nombre pour le petit changement, Enregistrer paraît éteint quand rien n'a changé, les champs de Setup ont la même hauteur et le titre de Tendances ne dit plus 1 jours."
+      ],
+      "pt-br": [
+        "BGS WATCH, correções de layout. Os gráficos mantêm seu tamanho natural, então o texto não cresce mais numa janela larga. As datas da Visão geral são escritas na vertical, os três grupos de Atenção alinham as colunas, o relatório não mostra mais um número longo para a mudança pequena, Salvar parece desligado quando nada mudou, os campos do Setup têm a mesma altura e o título de Tendências não diz mais 1 dias."
+      ],
+      "ru": [
+        "BGS WATCH, исправления вёрстки. Графики сохраняют естественный размер, поэтому текст больше не растёт в широком окне. Даты в Обзоре написаны вертикально, три группы в Внимании выровнены по столбцам, отчёт больше не печатает длинное число для малого изменения, кнопка Сохранить выглядит выключенной, когда нечего сохранять, поля в Setup одной высоты, а заголовок Трендов больше не говорит 1 дней."
+      ]
+    },
+    {
       "v": "0.9.43",
       "en": [
         "BGS WATCH, your chosen charts. Attention shows three groups (below your range, close to an edge, above your range) with the reason for each system. Changes shows diverging bars: red fell, green rose. Overview is a heat map of the change per snapshot, so a tick shows as a whole column lighting up. Trends are small multiples, Squad counts the systems below, inside and above your range over time. Every mark has a tip with the time to the minute, and each system's last change is shown as the two readings it happened between. A search box at the top opens any system. The comparison now defaults to about 24 hours. New Edit tab: a spreadsheet of every snapshot (columns A, B, C, rows 0, 1, 2) where you correct a value, a time, or delete a snapshot, and all charts update at once. Setup is the last tab and is arranged in the order you need it."

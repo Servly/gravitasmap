@@ -1500,7 +1500,7 @@
   "bgs.t.all": "Tous les systèmes",
   "tip.bgs.t.top": "Les 12 systèmes qui demandent le plus d'attention.",
   "tip.bgs.t.all": "Tous les systèmes, la valeur la plus basse d'abord.",
-  "bgs.t.find": "{n} systèmes sur {d} jours, une échelle commune, votre plage cible ombrée",
+  "bgs.t.find": "{n} systèmes, durée {d} j, une échelle commune, votre plage cible ombrée",
   "bgs.t.how": "Chaque case est un système. Le gros point est la dernière lecture (rouge ou vert selon le dernier changement). La ligne pointillée est 75. Survolez un point pour l'heure et la valeur.",
   "bgs.s.h": "Escouade",
   "bgs.s.find": "Maintenant : {a} sous, {b} dans, {c} au-dessus de votre plage cible (au début : {fa}, {fb}, {fc})",

@@ -1500,7 +1500,7 @@
   "bgs.t.all": "All systems",
   "tip.bgs.t.top": "The 12 systems that need attention most.",
   "tip.bgs.t.all": "Every system, lowest value first.",
-  "bgs.t.find": "{n} systems over {d} days, one shared scale, your target range shaded",
+  "bgs.t.find": "{n} systems, time span {d} d, one shared scale, your target range shaded",
   "bgs.t.how": "Each box is one system. The big dot is the latest reading (red or green by the last change). The dotted line is 75. Hover a dot for its time and value.",
   "bgs.s.h": "Squad",
   "bgs.s.find": "Now: {a} below, {b} inside, {c} above your target range (at the start: {fa}, {fb}, {fc})",

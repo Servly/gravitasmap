@@ -25,7 +25,7 @@
   }
   function build() {
     var g = store.g, s = (g && g.settings) || {};
-    if (!ui.setSeen && s.minor != null) { ui.minor = s.minor; ui.tickPct = s.tick_pct == null ? 20 : s.tick_pct; ui.setSeen = true; } // (kept from the last session)
+    if (!ui.setSeen && s.minor != null) { ui.minor = Math.round(s.minor * 10) / 10; ui.tickPct = s.tick_pct == null ? 20 : Math.round(s.tick_pct); ui.setSeen = true; } // (kept from the last session)
     if (!store.data || !store.data.snaps.length) { store.M = null; return; }
     store.M = C.model(store.data, { lo: s.low == null ? 50 : s.low, hi: s.high == null ? 65 : s.high, minor: ui.minor, base: ui.base, days: ui.days, tickPct: ui.tickPct });
     V.setModel(store.M); BG.M = store.M;

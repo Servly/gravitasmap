@@ -1500,7 +1500,7 @@
   "bgs.t.all": "Alle Systeme",
   "tip.bgs.t.top": "Die 12 Systeme, die am meisten Aufmerksamkeit brauchen.",
   "tip.bgs.t.all": "Jedes System, niedrigster Wert zuerst.",
-  "bgs.t.find": "{n} Systeme über {d} Tage, eine gemeinsame Skala, dein Zielbereich schattiert",
+  "bgs.t.find": "{n} Systeme, Zeitspanne {d} T, eine gemeinsame Skala, dein Zielbereich schattiert",
   "bgs.t.how": "Jedes Feld ist ein System. Der große Punkt ist die letzte Messung (rot oder grün nach der letzten Änderung). Die gepunktete Linie ist 75. Punkt berühren für Zeit und Wert.",
   "bgs.s.h": "Squad",
   "bgs.s.find": "Jetzt: {a} darunter, {b} innerhalb, {c} darüber (am Anfang: {fa}, {fb}, {fc})",

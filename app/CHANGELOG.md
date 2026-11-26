@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.44
+- BGS WATCH layout fixes. Charts keep their natural size, so the text no longer grows on a wide window. The dates on the Overview are written upright, the three groups in Attention line up their columns, the report no longer prints a long number for the minor change, Save looks off when nothing changed, the inputs in Setup have the same height, and the Trends title no longer says 1 days.
+
 ## 0.9.43
 - BGS WATCH, your chosen charts. Attention shows three groups (below your range, close to an edge, above your range) with the reason for each system. Changes shows diverging bars: red fell, green rose. Overview is a heat map of the change per snapshot, so a tick shows as a whole column lighting up. Trends are small multiples, Squad counts the systems below, inside and above your range over time. Every mark has a tip with the time to the minute, and each system's last change is shown as the two readings it happened between. A search box at the top opens any system. The comparison now defaults to about 24 hours. New Edit tab: a spreadsheet of every snapshot (columns A, B, C, rows 0, 1, 2) where you correct a value, a time, or delete a snapshot, and all charts update at once. Setup is the last tab and is arranged in the order you need it.
 

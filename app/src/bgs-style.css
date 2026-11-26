@@ -44,7 +44,7 @@
 .bg-hit:hover text{fill:var(--accent)}
 .bg-hit{cursor:pointer}
 svg [data-sys]{cursor:pointer}
-svg rect[data-tip]:hover,svg circle[data-tip]:hover{stroke:var(--text);stroke-width:1}
+svg circle[data-tip]:hover,svg rect[data-tip]:not([fill="transparent"]):hover{stroke:var(--text);stroke-width:1}
 .bg-search{min-width:210px;background:rgba(255,255,255,.06);border:1px solid var(--line-2);color:var(--text);border-radius:999px;padding:5px 14px;font:inherit}
 .bg-grp{margin:0 0 18px}.bg-grp>b{display:block;margin:0 0 6px}
 .bg-tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line)}
@@ -80,3 +80,13 @@ svg rect[data-tip]:hover,svg circle[data-tip]:hover{stroke:var(--text);stroke-wi
 .bg-edin{width:100%;box-sizing:border-box;background:var(--opt,#140c26);color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:2px 4px;font:inherit;text-align:right}
 .bg-edin.wide{text-align:center;min-width:130px}.bg-edin.bad{border-color:var(--bad)}
 .bg-edfind{max-width:220px;margin-left:auto}
+/* 0.9.44: a chart keeps its natural size (bgs.css had max-width:100% on every svg, so charts filled the window and the text grew with it) */
+.bg-wrap svg.bg-chart{max-width:900px;width:100%}
+.bg-wrap svg.bg-chart.fixed{max-width:none}
+/* 0.9.44: aligned columns in the three groups, a calm disabled Save, equal inputs in Setup, a readable width on very wide windows */
+.bg-tbl{table-layout:fixed}
+.bg-tbl th:nth-child(1){width:30%}.bg-tbl th:nth-child(2){width:9%}.bg-tbl th:nth-child(3){width:15%}
+.bg-tbl td:nth-child(1){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bg-wrap .bg-card{max-width:1400px}
+.bg-btns .btn:disabled{opacity:.4;cursor:default;box-shadow:none;filter:saturate(.4)}
+.bg-form input,.bg-form select{box-sizing:border-box;height:36px}

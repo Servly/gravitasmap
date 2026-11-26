@@ -75,11 +75,12 @@
   V.overview = function (M) {
     if (need2(M)) return needMsg();
     var st = M.st, minor = Math.max(0.3, st.minor || 0.3), ord = M.sys.slice().sort(function (a, b) { return a.last - b.last; });
-    var n = M.K - M.first + 1, L = 200, RH = 13, CH = 40, W = 900, cw = Math.max(6, Math.min(24, Math.floor((W - L - 10) / n))), H = CH + ord.length * RH + 6, o = "", k;
-    var lastDay = "";
+    var n = M.K - M.first + 1, L = 200, RH = 13, CH = 86, W = 900, cw = Math.max(6, Math.min(24, Math.floor((W - L - 10) / n))), H = CH + ord.length * RH + 6, o = "", k;
+    var every = Math.max(1, Math.ceil(13 / cw));   // a vertical label needs about 13 px of width
     for (k = M.first; k <= M.K; k++) {
-      var d = C.dmy(M.snaps[k].t);
-      if (d !== lastDay) { o += '<text class="bg-ax" x="' + (L + (k - M.first) * cw) + '" y="12">' + esc(d) + "</text>"; lastDay = d; }
+      if ((k - M.first) % every && k !== M.K) continue;
+      var lx = L + (k - M.first) * cw + cw / 2 + 4;
+      o += '<text class="bg-ax" transform="rotate(-90 ' + lx + " " + (CH - 6) + ')" x="' + lx + '" y="' + (CH - 6) + '"' + tip(when(M.snaps[k].t)) + ">" + esc(C.dt(M.snaps[k].t)) + "</text>";
     }
     ord.forEach(function (s, ri) {
       var y = CH + ri * RH;
@@ -95,7 +96,7 @@
     var outN = M.sys.filter(function (s) { return s.zone !== "in"; }).length;
     return '<section class="bg-card"><h3>' + t("bgs.o.h") + '<button class="bg-mini" data-save="1"' + tip(t("tip.bgs.save")) + ">" + t("bgs.save") + "</button></h3>" +
       '<p class="bg-find">' + t("bgs.o.title", { n: outN, t: M.sys.length }) + '</p><p class="bg-how">' + t("bgs.o.how", { m: f1(minor) }) + "</p>" +
-      '<div class="bg-scroll"><svg class="bg-chart" style="min-width:' + W + 'px" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="">' + o + "</svg></div>" +
+      '<div class="bg-scroll"><svg class="bg-chart fixed" style="width:' + W + 'px;max-width:none" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="">' + o + "</svg></div>" +
       '<div class="bg-legend"><span><i class="bg-sw" style="background:rgba(var(--good-rgb),.8)"></i>' + t("bgs.o.rose") + '</span><span><i class="bg-sw" style="background:rgba(var(--bad-rgb),.8)"></i>' + t("bgs.o.fell") + '</span><span><i class="bg-sw" style="background:rgba(255,255,255,.12)"></i>' + t("bgs.o.same") + "</span></div></section>";
   };
 

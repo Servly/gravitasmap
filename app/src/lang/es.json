@@ -1500,7 +1500,7 @@
   "bgs.t.all": "Todos los sistemas",
   "tip.bgs.t.top": "Los 12 sistemas que más atención requieren.",
   "tip.bgs.t.all": "Todos los sistemas, el valor más bajo primero.",
-  "bgs.t.find": "{n} sistemas en {d} días, una escala común, tu rango objetivo sombreado",
+  "bgs.t.find": "{n} sistemas, intervalo de {d} d, una escala común, tu rango objetivo sombreado",
   "bgs.t.how": "Cada caja es un sistema. El punto grande es la última lectura (rojo o verde según el último cambio). La línea de puntos es 75. Pasa el ratón por un punto para ver hora y valor.",
   "bgs.s.h": "Escuadrón",
   "bgs.s.find": "Ahora: {a} por debajo, {b} dentro, {c} por encima de tu rango objetivo (al inicio: {fa}, {fb}, {fc})",

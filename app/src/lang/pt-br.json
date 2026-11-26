@@ -1500,7 +1500,7 @@
   "bgs.t.all": "Todos os sistemas",
   "tip.bgs.t.top": "Os 12 sistemas que mais precisam de atenção.",
   "tip.bgs.t.all": "Todos os sistemas, o menor valor primeiro.",
-  "bgs.t.find": "{n} sistemas em {d} dias, uma escala comum, seu intervalo alvo sombreado",
+  "bgs.t.find": "{n} sistemas, período de {d} d, uma escala comum, seu intervalo alvo sombreado",
   "bgs.t.how": "Cada caixa é um sistema. O ponto grande é a última leitura (vermelho ou verde conforme a última mudança). A linha pontilhada é 75. Passe o mouse num ponto para ver hora e valor.",
   "bgs.s.h": "Esquadrão",
   "bgs.s.find": "Agora: {a} abaixo, {b} dentro, {c} acima do seu intervalo alvo (no início: {fa}, {fb}, {fc})",
