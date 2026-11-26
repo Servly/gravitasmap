@@ -1535,7 +1535,8 @@
   "bgs.res": "View",
   "bgs.res.daily": "Daily",
   "bgs.res.snap": "Every snapshot",
-  "tip.bgs.res": "Daily: one column per UTC day, showing the last snapshot of that day (every snapshot stays saved, and the changes inside a day are in the tips). Every snapshot: one column each.",
+  "tip.bgs.res": "Automatic: every snapshot is its own column while your data is under 10 days old, then one column per UTC day. Daily: always one column per day (the last snapshot of that day). Every snapshot: always one column each. Nothing is ever deleted.",
   "bgs.tp.step": "Changed between {a} and {b}: {d}",
-  "bgs.tp.snaps": "Snapshots that day: {n} (the last one is shown)"
+  "bgs.tp.snaps": "Snapshots that day: {n} (the last one is shown)",
+  "bgs.res.auto": "Automatic"
 }

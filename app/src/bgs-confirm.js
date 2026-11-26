@@ -75,6 +75,15 @@
       }).catch(function (e) { sc.busy = false; sc.err = String(e); draw(); });
     }
     function draw() {
+      // the table is rebuilt on every click: keep where the page and the table were scrolled
+      var saved = [], e = body;
+      while (e && e !== document.documentElement) { if (e.scrollTop > 0) saved.push([e, e.scrollTop]); e = e.parentNode; }
+      var cs = body.querySelector(".bg-confscroll"), cst = cs ? cs.scrollTop : 0;
+      draw0();
+      saved.forEach(function (p) { p[0].scrollTop = p[1]; });
+      var cs2 = body.querySelector(".bg-confscroll"); if (cs2) cs2.scrollTop = cst;
+    }
+    function draw0() {
       body.textContent = ""; go.disabled = sc.busy || !state();
       if (!state()) body.appendChild(mk("p", "bg-msg", tr("bgs.scan.off")));
       if (sc.busy) { var pg = mk("div", "bg-prog"); pg.appendChild(mk("i")); body.appendChild(pg); body.appendChild(mk("p", "bg-msg", sc.rows ? tr("bgs.cf.saving") : tr("bgs.scan.run", { n: g && g.settings ? g.settings.n : 8 }))); }

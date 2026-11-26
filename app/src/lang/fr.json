@@ -1535,7 +1535,8 @@
   "bgs.res": "Vue",
   "bgs.res.daily": "Quotidien",
   "bgs.res.snap": "Chaque instantané",
-  "tip.bgs.res": "Quotidien : une colonne par jour UTC avec le dernier instantané du jour (chaque instantané reste enregistré et les changements dans la journée sont dans les infobulles). Chaque instantané : une colonne chacun.",
+  "tip.bgs.res": "Automatique : chaque instantané est sa propre colonne tant que vos données ont moins de 10 jours, puis une colonne par jour UTC. Quotidien : toujours une colonne par jour (le dernier instantané du jour). Chaque instantané : toujours une colonne chacun. Rien n'est jamais supprimé.",
   "bgs.tp.step": "Changé entre {a} et {b} : {d}",
-  "bgs.tp.snaps": "Instantanés ce jour-là : {n} (le dernier est affiché)"
+  "bgs.tp.snaps": "Instantanés ce jour-là : {n} (le dernier est affiché)",
+  "bgs.res.auto": "Automatique"
 }

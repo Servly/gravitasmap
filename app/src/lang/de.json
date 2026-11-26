@@ -1535,7 +1535,8 @@
   "bgs.res": "Ansicht",
   "bgs.res.daily": "Täglich",
   "bgs.res.snap": "Jede Momentaufnahme",
-  "tip.bgs.res": "Täglich: eine Spalte pro UTC-Tag mit der letzten Momentaufnahme des Tages (jede Momentaufnahme bleibt gespeichert, die Änderungen innerhalb eines Tages stehen in den Tipps). Jede Momentaufnahme: je eine Spalte.",
+  "tip.bgs.res": "Automatisch: Jede Momentaufnahme ist eine eigene Spalte, solange deine Daten jünger als 10 Tage sind, danach eine Spalte pro UTC-Tag. Täglich: immer eine Spalte pro Tag (die letzte Momentaufnahme des Tages). Jede Momentaufnahme: immer je eine Spalte. Nichts wird je gelöscht.",
   "bgs.tp.step": "Geändert zwischen {a} und {b}: {d}",
-  "bgs.tp.snaps": "Momentaufnahmen an diesem Tag: {n} (die letzte wird gezeigt)"
+  "bgs.tp.snaps": "Momentaufnahmen an diesem Tag: {n} (die letzte wird gezeigt)",
+  "bgs.res.auto": "Automatisch"
 }

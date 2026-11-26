@@ -4,7 +4,7 @@
 (function () {
   var T = window.__TAURI__ || {}, invoke = T.core && T.core.invoke, BG = window.BG = window.BG || {}, S = BG.svg, V = BG.views, C = BG.calc, esc = S.esc;
   var t = function (k, v) { return BG.tr(k, v); };
-  var ui = BG.ui = { tmode: "top", base: "24h", minor: 0.3, tickPct: 20, days: 0, msort: "drop", rfilter: "all", tsort: "low", hsort: "low", hmode: "chg", q: "", sel: null, faction: "", rep: { att: 1, drops: 1, gains: 1, cross: 1, tick: 1 } };
+  var ui = BG.ui = { res: "auto", tmode: "top", base: "24h", minor: 0.3, tickPct: 20, days: 0, msort: "drop", rfilter: "all", tsort: "low", hsort: "low", hmode: "chg", q: "", sel: null, faction: "", rep: { att: 1, drops: 1, gains: 1, cross: 1, tick: 1 } };
   var store = BG.store = { sig: "", data: null, M: null, rev: 0, last: 0, busy: false, g: null };
   var panes = [];
 
@@ -48,7 +48,10 @@
     if (!ui.setSeen && s.minor != null) { ui.minor = Math.round(s.minor * 10) / 10; ui.tickPct = s.tick_pct == null ? 20 : Math.round(s.tick_pct); ui.setSeen = true; } // (kept from the last session)
     if (!store.data || !store.data.snaps.length) { store.M = null; return; }
     var nDays = {}; store.data.snaps.forEach(function (x) { nDays[new Date(x.t).toISOString().slice(0, 10)] = 1; });
-    var dataIn = ui.res !== "snap" && Object.keys(nDays).length >= 2 ? daily(store.data) : store.data;
+    var span = store.data.snaps.length > 1 ? store.data.snaps[store.data.snaps.length - 1].t - store.data.snaps[0].t : 0;
+    // Automatic: every snapshot is its own column while the data is younger than 10 days, one column per day from then on
+    var useDaily = ui.res === "daily" || (ui.res === "auto" && span >= 10 * 864e5);
+    var dataIn = useDaily && Object.keys(nDays).length >= 2 ? daily(store.data) : store.data;
     store.M = C.model(dataIn, { lo: s.low == null ? 50 : s.low, hi: s.high == null ? 65 : s.high, minor: ui.minor, base: ui.base, days: ui.days, tickPct: ui.tickPct });
     V.setModel(store.M); BG.M = store.M;
   }
@@ -112,7 +115,7 @@
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
     var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
       lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["7d", t("bgs.base.7d")]])) +
-      lab("tip.bgs.res", t("bgs.res"), sel("bres", ui.res === "snap" ? "snap" : "daily", [["daily", t("bgs.res.daily")], ["snap", t("bgs.res.snap")]])) +
+      lab("tip.bgs.res", t("bgs.res"), sel("bres", ui.res, [["auto", t("bgs.res.auto")], ["daily", t("bgs.res.daily")], ["snap", t("bgs.res.snap")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
     var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');

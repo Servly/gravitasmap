@@ -1535,7 +1535,8 @@
   "bgs.res": "Vista",
   "bgs.res.daily": "Diario",
   "bgs.res.snap": "Cada instantánea",
-  "tip.bgs.res": "Diario: una columna por día UTC con la última instantánea del día (cada instantánea sigue guardada y los cambios dentro de un día están en los tips). Cada instantánea: una columna cada una.",
+  "tip.bgs.res": "Automático: cada instantánea es su propia columna mientras tus datos tengan menos de 10 días, luego una columna por día UTC. Diario: siempre una columna por día (la última instantánea del día). Cada instantánea: siempre una columna cada una. Nunca se borra nada.",
   "bgs.tp.step": "Cambió entre {a} y {b}: {d}",
-  "bgs.tp.snaps": "Instantáneas ese día: {n} (se muestra la última)"
+  "bgs.tp.snaps": "Instantáneas ese día: {n} (se muestra la última)",
+  "bgs.res.auto": "Automático"
 }

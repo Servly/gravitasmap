@@ -562,3 +562,18 @@ fn unseen_sizes_read_how_well() {
     }
     for l in out { println!("{l}"); }
 }
+
+#[test]
+fn a_misread_page_number_is_repaired_by_the_values() {
+    // the friend's case: page 6 read as page 8, so 8 appears twice and 6 is missing; the pages are put in order by their first value
+    let rows = list(50, 700);
+    let mut pages: Vec<PageIn> = (0..5).map(|k| page(k as u32 + 1, 5, 50, rows[k * 10..k * 10 + 10].to_vec(), 1000 + k as i64 * 10)).collect();
+    pages[2].read.page = Some(5);
+    pages[4].read.page = Some(5);
+    let p = build(pages, &ctx(&[], None));
+    assert!(p.issues.iter().any(|i| i.code == "page_numbers_fixed"), "{:?}", p.issues.iter().map(|i| i.code).collect::<Vec<_>>());
+    assert!(!p.issues.iter().any(|i| i.code == "missing_page" || i.code == "duplicate_page"));
+    assert_eq!(p.pages_found, vec![1, 2, 3, 4, 5]);
+    assert_eq!(p.rows.len(), 50);
+    assert!(p.rows.windows(2).all(|w| w[0].inf_x10 >= w[1].inf_x10), "the rows are in list order");
+}

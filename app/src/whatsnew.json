@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.46",
+      "en": [
+        "BGS WATCH fixes. Clicking Looks right no longer throws you back to the top of the list: the page and the table keep their place. A page number the reader confused (a 6 read as 8, so one page looked taken twice and another missing) is now repaired by putting the pages in order by their values, so no page is dropped. The View switch has an Automatic setting, now the default: every snapshot is its own column while your data is under 10 days old, then one column per day."
+      ],
+      "de": [
+        "BGS WATCH, Korrekturen. Ein Klick auf Looks right wirft dich nicht mehr an den Anfang der Liste: Seite und Tabelle behalten ihre Position. Eine verwechselte Seitennummer (eine 6 als 8 gelesen, sodass eine Seite doppelt und eine fehlend wirkte) wird jetzt repariert, indem die Seiten nach ihren Werten geordnet werden, damit keine Seite verloren geht. Der Ansicht-Schalter hat eine Einstellung Automatisch, jetzt Standard: Jede Momentaufnahme ist eine eigene Spalte, solange deine Daten unter 10 Tage alt sind, danach eine Spalte pro Tag."
+      ],
+      "es": [
+        "BGS WATCH, correcciones. Pulsar Looks right ya no te devuelve al principio de la lista: la página y la tabla mantienen su posición. Un número de página confundido (un 6 leído como 8, de modo que una página parecía repetida y otra faltaba) ahora se repara ordenando las páginas por sus valores, así no se pierde ninguna. El selector Vista tiene un ajuste Automático, ahora por defecto: cada instantánea es su propia columna mientras tus datos tengan menos de 10 días, luego una columna por día."
+      ],
+      "fr": [
+        "BGS WATCH, corrections. Cliquer sur Looks right ne vous renvoie plus en haut de la liste : la page et le tableau gardent leur position. Un numéro de page confondu (un 6 lu comme 8, si bien qu'une page semblait prise deux fois et une autre manquante) est maintenant réparé en classant les pages selon leurs valeurs, aucune page n'est donc perdue. Le sélecteur Vue a un réglage Automatique, désormais par défaut : chaque instantané est sa propre colonne tant que vos données ont moins de 10 jours, puis une colonne par jour."
+      ],
+      "pt-br": [
+        "BGS WATCH, correções. Clicar em Looks right não joga mais você de volta ao topo da lista: a página e a tabela mantêm a posição. Um número de página confundido (um 6 lido como 8, de modo que uma página parecia repetida e outra faltando) agora é reparado ordenando as páginas pelos seus valores, então nenhuma página se perde. O seletor Visão tem um ajuste Automático, agora o padrão: cada instantâneo é sua própria coluna enquanto seus dados tiverem menos de 10 dias, depois uma coluna por dia."
+      ],
+      "ru": [
+        "BGS WATCH, исправления. Нажатие Looks right больше не возвращает вас в начало списка: страница и таблица сохраняют позицию. Перепутанный номер страницы (6 прочитано как 8, из-за чего одна страница казалась снятой дважды, а другая пропавшей) теперь исправляется упорядочиванием страниц по значениям, так что ни одна страница не теряется. У переключателя Вид есть режим Авто, теперь по умолчанию: каждый снимок это отдельный столбец, пока данным меньше 10 дней, затем один столбец на день."
+      ]
+    },
+    {
       "v": "0.9.45",
       "en": [
         "BGS WATCH: a daily view. A new View switch next to the filters: Daily shows one column per UTC day with the last snapshot of that day, Every snapshot shows each one. Every snapshot stays saved. In the daily view each cell's tip lists the changes inside that day with the two readings between which each one happened, so the tick can still be followed."

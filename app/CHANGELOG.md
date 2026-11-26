@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.46
+- BGS WATCH fixes. Clicking Looks right no longer throws you back to the top of the list: the page and the table keep their place. A page number the reader confused (a 6 read as 8, so one page looked taken twice and another missing) is now repaired by putting the pages in order by their values, so no page is dropped. The View switch has an Automatic setting, now the default: every snapshot is its own column while your data is under 10 days old, then one column per day.
+
 ## 0.9.45
 - BGS WATCH: a daily view. A new View switch next to the filters: Daily shows one column per UTC day with the last snapshot of that day, Every snapshot shows each one. Every snapshot stays saved. In the daily view each cell's tip lists the changes inside that day with the two readings between which each one happened, so the tick can still be followed.
 

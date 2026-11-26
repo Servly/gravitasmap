@@ -43,6 +43,21 @@ pub fn build(mut pages: Vec<PageIn>, ctx: &Ctx) -> Proposal {
     p.systems_read = mode(&pages.iter().filter_map(|x| x.read.systems).collect::<Vec<_>>());
     p.resolution = format!("{}x{}", pages[0].read.width, pages[0].read.height);
 
+    // The page number digits are sometimes confused (a 6 read as 8: one page seems taken twice and another missing). When there are exactly as many pages
+    // as the list has and the numbers are not 1..m once each, the pages are put in order by their first influence value (the list is sorted from high to low).
+    if let Some(m) = total {
+        let nums: Vec<Option<u32>> = pages.iter().map(|x| x.read.page).collect();
+        let mut seen: Vec<u32> = nums.iter().flatten().copied().collect();
+        seen.sort_unstable(); seen.dedup();
+        let clean = nums.iter().all(|n| n.is_some()) && seen.len() == pages.len() && seen.iter().all(|n| (1..=m).contains(n));
+        let firsts: Vec<Option<i32>> = pages.iter().map(|x| x.read.rows.first().and_then(|r| r.inf_x10)).collect();
+        if !clean && nums.iter().all(|n| n.is_some()) && pages.len() as u32 == m && firsts.iter().all(|f| f.is_some()) {   // (an unreadable number keeps its own rule below)
+            let mut order: Vec<usize> = (0..pages.len()).collect();
+            order.sort_by(|&a, &b| firsts[b].cmp(&firsts[a]).then(pages[a].taken.cmp(&pages[b].taken)));
+            for (rank, &i) in order.iter().enumerate() { pages[i].read.page = Some(rank as u32 + 1); }
+            issues.push(issue("page_numbers_fixed", "a page number was misread: the pages were put in order by their values", None, false));
+        }
+    }
     // page numbers: the read ones, a page without a readable number takes the lowest free number in the order the pages were taken
     let m = total.unwrap_or(pages.len() as u32);
     let mut slot: Vec<Option<usize>> = vec![None; m as usize + 1];
