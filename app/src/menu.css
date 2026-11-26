@@ -2,17 +2,17 @@
 :root{--ma:1}
 html,body{background:transparent}
 .win.menu{grid-template-columns:minmax(0,1fr);grid-template-rows:44px minmax(0,1fr);border-radius:18px;overflow:hidden;
-  background:linear-gradient(160deg,rgba(21,13,40,var(--ma)),rgba(7,5,17,var(--ma)))}
+  background:linear-gradient(160deg,rgba(var(--win1-rgb),var(--ma)),rgba(var(--win2-rgb),var(--ma)))}
 .win.menu .titlebar{background:rgba(255,255,255,calc(.02*var(--ma)))}
-.win.menu .card{background:rgba(22,14,40,calc(.72*var(--ma)))}
-.win.menu .tabs{background:linear-gradient(rgba(14,9,32,var(--ma)),rgba(14,9,32,calc(.92*var(--ma))))}
+.win.menu .card{background:rgba(var(--glass-rgb),calc(.72*var(--ma)))}
+.win.menu .tabs{background:linear-gradient(rgba(var(--tab-rgb),var(--ma)),rgba(var(--tab-rgb),calc(.92*var(--ma))))}
 .medit{margin-left:auto;margin-right:10px}.medit.on{background:var(--accent);color:#1a0a24}.malpha{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:11px}.malpha input{width:90px;accent-color:var(--accent)}
 .win.menu .ribbon{margin-left:12px}
 .mbody{position:relative;min-height:0;overflow:auto;padding:14px 22px 36px;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
-.tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:4px;margin-bottom:14px;position:sticky;top:-14px;padding:14px 0 8px;background:linear-gradient(#0e0920,rgba(14,9,32,.92));z-index:2}
+.tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:4px;margin-bottom:14px;position:sticky;top:-14px;padding:14px 0 8px;background:linear-gradient(var(--tab),rgba(var(--tab-rgb),.92));z-index:2}
 .tab{flex:0 0 auto;white-space:nowrap;padding:7px 11px;border-radius:99px;color:var(--dim);font-weight:600;font-size:12.5px;border:1px solid transparent;transition:color .25s,background .25s,border-color .25s}
 .tab:hover{color:var(--text)}
-.tab.on{color:#fff;background:linear-gradient(160deg,rgba(255,106,213,.22),rgba(106,232,255,.12));border-color:var(--line-2)}
+.tab.on{color:#fff;background:linear-gradient(160deg,rgba(var(--acc-rgb),.22),rgba(var(--cy-rgb),.12));border-color:var(--line-2)}
 .pane{display:none}.pane.on{display:block}
 .pane .card{margin-bottom:14px}
 .opt.dis{opacity:.55}.soon{font-size:11px;color:var(--warn);border:1px solid var(--line);border-radius:99px;padding:2px 10px;white-space:nowrap}
@@ -22,7 +22,7 @@ html,body{background:transparent}
 .rng{display:flex;align-items:center;gap:10px}.rng input{width:160px;accent-color:var(--accent)}.rng b{min-width:3.2em;text-align:right;font-weight:600}
 select.sel{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line-2);border-radius:12px;padding:6px 10px;font:inherit}
 select.sel,.txt{box-sizing:border-box;height:35px}
-select.sel option{background:#1a1030}
+select.sel option{background:var(--opt)}
 select.sel[size]{height:auto;padding:6px;line-height:1.6}
 select.sel[size] option{padding:4px 8px;border-radius:8px}
 .mbody{scrollbar-gutter:stable}
@@ -40,3 +40,4 @@ select.sel[size] option{padding:4px 8px;border-radius:8px}
 .win.menu .opt>.btn:first-child:nth-last-child(3),.win.menu .opt>.btn:first-child:nth-last-child(3)~.btn{flex:1 1 0;min-width:0;justify-content:center;text-align:center}
 .win.menu .opt{gap:10px}
 .win.menu .opt:has(>.btn:first-child:nth-last-child(3)){align-items:stretch}
+.kbgorow{display:flex;justify-content:flex-end;margin:0 0 10px}

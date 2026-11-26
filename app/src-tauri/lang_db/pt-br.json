@@ -43,5 +43,10 @@
   "pvp.obs.first": "O primeiro ataque contra você veio em {ta}. O primeiro ataque contra {opp} veio em {tb}.",
   "pvp.obs.shield_me": "Seus escudos caíram em {t}, {s} s depois do primeiro ataque contra você.",
   "pvp.obs.shield_opp": "Os escudos de {opp} caíram em {t}, {s} s depois do primeiro ataque contra {opp}.",
-  "pvp.obs.fa": "Flight Assist ficou desligado em {pa} % da sua luta e em {pb} % da luta de {opp}."
+  "pvp.obs.fa": "Flight Assist ficou desligado em {pa} % da sua luta e em {pb} % da luta de {opp}.",
+  "claims.chip": "CLAIMS {n} cr",
+  "claims.chip.restored": "CLAIMS RESTAURADOS {n} cr",
+  "claims.chip.wait": "CLAIMS: LENDO OS JOURNALS",
+  "claims.src.all": "Contado de todos os seus Journals desde a sua última morte",
+  "claims.src.reset": "Contado desde a sua redefinição às {t}"
 }

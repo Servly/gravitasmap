@@ -1,6 +1,6 @@
 [package]
 name = "gravitas"
-version = "0.9.37"
+version = "0.9.38"
 description = "GRAVITAS, a free fan-made companion for Elite Dangerous"
 authors = ["CMDR Hongark"]
 edition = "2021"

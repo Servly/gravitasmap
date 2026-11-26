@@ -1,13 +1,13 @@
 //! The GRAVITAS menu over the game (Ctrl+Shift+G): a small window with tabs, opened and closed without leaving the game. While it is open it takes
 //! the keyboard and the mouse (Burak's choice: the game stays in view, is not sent to the background, and gets no keys meanwhile); closed, the focus
 //! goes back to the game. It shows the same settings as the app's window: one settings file, one state.
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicIsize, AtomicU64, Ordering};
 use std::sync::OnceLock;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use windows::core::w;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
-use windows::Win32::UI::WindowsAndMessaging::{FindWindowW, ClipCursor, GetForegroundWindow, IsWindowVisible, GetWindowLongPtrW, SetCursorPos, GetWindowThreadProcessId, SetForegroundWindow, SetWindowLongPtrW, SetWindowPos, ShowWindow, GWL_EXSTYLE, HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SW_HIDE, SW_SHOWNOACTIVATE, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW};
+use windows::Win32::UI::WindowsAndMessaging::{GetAncestor, GetWindow, IsWindow, ShowWindowAsync, GA_ROOTOWNER, GW_HWNDPREV, SWP_ASYNCWINDOWPOS, FindWindowW, ClipCursor, GetForegroundWindow, IsWindowVisible, GetWindowLongPtrW, SetCursorPos, GetWindowThreadProcessId, SetForegroundWindow, SetWindowLongPtrW, SetWindowPos, ShowWindow, GWL_EXSTYLE, HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SW_HIDE, SW_SHOWNOACTIVATE, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW};
 
 pub static APP: OnceLock<AppHandle> = OnceLock::new();
 /// A toggle asked for from the Combat overlay's thread (the hotkey): done on the main thread.
@@ -16,6 +16,27 @@ static OPEN: AtomicBool = AtomicBool::new(false);
 static EDIT_HUD: AtomicBool = AtomicBool::new(false);
 pub fn edit_hud() -> bool { EDIT_HUD.load(Ordering::SeqCst) }
 pub fn store_edit_hud(on: bool) { EDIT_HUD.store(on, Ordering::SeqCst); }
+
+/// The window handles of the menu and the editor layer, kept when they are made (on the main thread / the editor's own thread). The Combat thread
+/// looks at them about every 15 ms: asking Tauri for a handle from another thread is a round trip to the main thread's event loop that WAITS for
+/// the answer, so a busy main thread stopped the Combat thread (drawing, keys) with it. A raw handle needs no round trip.
+static MENU_H: AtomicIsize = AtomicIsize::new(0);
+static EDITOR_H: AtomicIsize = AtomicIsize::new(0);
+/// The editor page's last sign of life and the time the layer was shown (milliseconds since 1970): the watchdog in guard().
+static EDITOR_PING: AtomicU64 = AtomicU64::new(0);
+static EDITOR_SHOWN: AtomicU64 = AtomicU64::new(0);
+
+fn now_ms() -> u64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0) }
+
+fn cached(h: &AtomicIsize) -> Option<HWND> {
+    let v = h.load(Ordering::Relaxed);
+    if v == 0 { return None; }
+    let hw = HWND(v as *mut _);
+    if unsafe { IsWindow(Some(hw)).as_bool() } { Some(hw) } else { None }
+}
+
+/// The editor page is alive (its poll, or its own once-a-second ping).
+pub fn editor_ping() { EDITOR_PING.store(now_ms(), Ordering::Relaxed); }
 
 const W: f64 = 860.0;
 const H: f64 = 580.0;
@@ -111,8 +132,7 @@ pub fn is_open() -> bool {
 
 /// The menu window is really on screen (the flag alone can be stale: the tray, a minimise, a close some other way).
 pub fn window_visible() -> bool {
-    let Some(app) = APP.get() else { return false };
-    app.get_webview_window("menu").and_then(|m| m.hwnd().ok()).map(|h| unsafe { IsWindowVisible(HWND(h.0 as *mut _)).as_bool() }).unwrap_or(false)
+    cached(&MENU_H).map(|h| unsafe { IsWindowVisible(h).as_bool() }).unwrap_or(false)
 }
 
 /// Opens the menu if it is closed, closes it if it is open. Called from any thread.
@@ -185,6 +205,8 @@ fn editor_show_now(app: &AppHandle) {
     // never takes the focus: a click on it must not bring it over the menu or take the keyboard from it
     if let Ok(h) = win.hwnd() {
         let hw = HWND(h.0 as *mut _);
+        EDITOR_H.store(h.0 as isize, Ordering::Relaxed);
+        EDITOR_SHOWN.store(now_ms(), Ordering::Relaxed); // (the watchdog waits for the page's first sign of life from now)
         unsafe {
             let ex = GetWindowLongPtrW(hw, GWL_EXSTYLE);
             SetWindowLongPtrW(hw, GWL_EXSTYLE, ex | (WS_EX_NOACTIVATE.0 | WS_EX_TOOLWINDOW.0) as isize);
@@ -193,7 +215,7 @@ fn editor_show_now(app: &AppHandle) {
         }
     }
     set_visible(&win, true);
-    raise_menu(app);
+    raise_over_overlays();
 }
 
 /// Looked at about 4 times a second (from the Combat thread): the menu belongs to the game. When another program has the focus (alt-tab, a click
@@ -205,12 +227,40 @@ pub fn guard() {
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
     if now.saturating_sub(LAST.load(Ordering::Relaxed)) < 250 { return; }
     LAST.store(now, Ordering::Relaxed);
-    let Some(app) = APP.get() else { return };
+    if APP.get().is_none() { return; }
     let open = OPEN.load(Ordering::SeqCst);
-    if !open || !EDIT_HUD.load(Ordering::SeqCst) {
-        if let Some(e) = app.get_webview_window("editor") {
-            if let Ok(h) = e.hwnd() {
-                unsafe { if IsWindowVisible(HWND(h.0 as *mut _)).as_bool() { let _ = ShowWindow(HWND(h.0 as *mut _), SW_HIDE); } }
+    let editing = EDIT_HUD.load(Ordering::SeqCst);
+    // (ShowWindowAsync and the cached handles: nothing here may wait for the main thread, which is what might be stuck)
+    if !open || !editing {
+        if let Some(e) = cached(&EDITOR_H) {
+            unsafe { if IsWindowVisible(e).as_bool() { let _ = ShowWindowAsync(e, SW_HIDE); } }
+        }
+    }
+    if open && editing {
+        if let Some(e) = cached(&EDITOR_H) {
+            if unsafe { IsWindowVisible(e).as_bool() } {
+                // WATCHDOG: the editor page answers at least once a second. When it stops for 6 s (the page or the main thread is stuck) Edit HUD is
+                // switched off and the layer hidden, so a full-screen layer can never stay over the game and the menu
+                let (p, s) = (EDITOR_PING.load(Ordering::Relaxed), EDITOR_SHOWN.load(Ordering::Relaxed));
+                let (last, limit) = if p >= s { (p, 6000) } else { (s, 20000) }; // (the page's first load can be slow: 20 s before its first sign)
+                if now.saturating_sub(last) > limit {
+                    crate::store::log("Edit HUD closed: the editor layer stopped answering");
+                    EDIT_HUD.store(false, Ordering::SeqCst);
+                    unsafe { let _ = ShowWindowAsync(e, SW_HIDE); }
+                    return;
+                }
+                // the menu must always be above the editor layer, or its buttons (Edit HUD off) cannot be reached: when the layer got above it, the menu goes back on top
+                if let Some(m) = cached(&MENU_H) {
+                    let mut w = m;
+                    let mut above = false;
+                    for _ in 0..300 {
+                        match unsafe { GetWindow(w, GW_HWNDPREV) } { Ok(p) if !p.0.is_null() => { if p == e { above = true; break; } w = p; } _ => break }
+                    }
+                    if above {
+                        crate::store::log("menu put back above the editor layer");
+                        unsafe { let _ = SetWindowPos(m, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS); }
+                    }
+                }
             }
         }
     }
@@ -218,7 +268,7 @@ pub fn guard() {
     // "open" but the menu window itself is not on screen (hidden by the tray, minimised, closed some other way): the flag must not stay
     // true, it keeps every window showing made-up Edit HUD data (found from a Windows 10 tester's report, 25 Nov)
     static GONE: AtomicU64 = AtomicU64::new(0);
-    let shown = app.get_webview_window("menu").and_then(|m| m.hwnd().ok()).map(|h| unsafe { IsWindowVisible(HWND(h.0 as *mut _)).as_bool() }).unwrap_or(false);
+    let shown = cached(&MENU_H).map(|h| unsafe { IsWindowVisible(h).as_bool() }).unwrap_or(false);
     if shown { GONE.store(0, Ordering::Relaxed); } else if GONE.fetch_add(1, Ordering::Relaxed) + 1 >= 3 {
         GONE.store(0, Ordering::Relaxed);
         crate::store::log("menu flag cleared: the menu window is not visible");
@@ -231,7 +281,10 @@ pub fn guard() {
     if fg.0.is_null() { return; }
     let (fp, me) = (pid_of(fg), std::process::id());
     let gp = game_hwnd().map(pid_of).unwrap_or(0);
-    if fp == me || (gp != 0 && fp == gp) {
+    // (a dialog of our own page's browser process, such as the colour chooser behind a colour square, has another process id but belongs to one of our windows)
+    let owner = unsafe { GetAncestor(fg, GA_ROOTOWNER) };
+    let owned = !owner.0.is_null() && pid_of(owner) == me;
+    if fp == me || owned || (gp != 0 && fp == gp) {
         AWAY.store(0, Ordering::Relaxed);
     } else {
         let n = AWAY.fetch_add(1, Ordering::Relaxed) + 1;
@@ -251,17 +304,15 @@ pub fn raise_menu(app: &AppHandle) {
 
 /// After the overlay windows were put in a new stacking order (all topmost): the editor layer and the menu go back above them. Any thread, no focus.
 pub fn raise_over_overlays() {
-    let Some(app) = APP.get() else { return };
     if !OPEN.load(Ordering::SeqCst) { return; }
-    let up = |label: &str| {
-        if let Some(w) = app.get_webview_window(label) {
-            if let Ok(h) = w.hwnd() {
-                unsafe { let _ = SetWindowPos(HWND(h.0 as *mut _), Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE); }
-            }
+    // (asynchronous and by cached handle: a window of the main thread is moved by a message to that thread, and this thread must never wait for it)
+    let up = |h: Option<HWND>| {
+        if let Some(h) = h {
+            unsafe { let _ = SetWindowPos(h, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS); }
         }
     };
-    if EDIT_HUD.load(Ordering::SeqCst) { up("editor"); }
-    up("menu");
+    if EDIT_HUD.load(Ordering::SeqCst) { up(cached(&EDITOR_H)); }
+    up(cached(&MENU_H));
 }
 
 /// The menu folded to its title bar (or open again): the game shows through.
@@ -310,6 +361,7 @@ fn toggle(app: &AppHandle) {
             Err(_) => return,
         },
     };
+    if let Ok(h) = win.hwnd() { MENU_H.store(h.0 as isize, Ordering::Relaxed); }
     // the page's own browser keys off (Ctrl+G and Ctrl+F opened WebView2's find bar over the menu, F5 reloads, Ctrl+P prints)
     let _ = win.with_webview(|wv| unsafe {
         use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Settings3;

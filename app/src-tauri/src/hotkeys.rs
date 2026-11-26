@@ -13,7 +13,7 @@ const VK_RWIN: u32 = 0x5C;
 /// The jobs, in the plugin's order. Only the menu has a key to begin with (Ctrl+Shift+K: the game uses no K, and G, the first default, got in the way of
 /// the game's own G binds): the others are in the menu as buttons, and a key for any of them can be set under Key Bindings (and taken away again). The plugin's own
 /// keys were Ctrl+Shift+F7 to F12 (offered there as each job's default choice).
-pub const JOBS: [&str; 18] = ["flip", "report", "reset", "clear", "hide", "claims", "report_clear", "menu", "app", "map_up", "map_left", "map_down", "map_right", "map_zin", "map_zout", "map_fit", "map_show", "map_site"];
+pub const JOBS: [&str; 20] = ["flip", "report", "reset", "clear", "hide", "claims", "report_clear", "claims_restore", "claims_show", "menu", "app", "map_up", "map_left", "map_down", "map_right", "map_zin", "map_zout", "map_fit", "map_show", "map_site"];
 
 /// The jobs the windows' footers and the Keys card talk about (the key a footer shows is always the one set for its job).
 pub const HINT_JOBS: [&str; 7] = ["flip", "report", "reset", "clear", "hide", "claims", "report_clear"];
@@ -97,6 +97,12 @@ pub struct Keys {
     held: HashMap<String, bool>,
 }
 
+/// The "press a key" window of the Key Bindings is open: until this moment (ms since 1970) no key runs a job. Ends by itself after 35 s.
+static CAPTURE_UNTIL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+fn now_ms() -> u64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0) }
+pub fn capturing() -> bool { now_ms() < CAPTURE_UNTIL.load(std::sync::atomic::Ordering::Relaxed) }
+pub fn set_capture(on: bool) { CAPTURE_UNTIL.store(if on { now_ms() + 35_000 } else { 0 }, std::sync::atomic::Ordering::Relaxed); }
+
 impl Keys {
     /// `custom`: (job, text) pairs that replace the defaults ("" takes a key away); one that cannot be read keeps its default.
     pub fn new(custom: &[(String, String)]) -> Keys {
@@ -114,10 +120,13 @@ impl Keys {
     /// The keys pressed since the last look, by name. `state` tells whether a key is down.
     pub fn pressed(&mut self, state: &dyn Fn(u32) -> bool) -> Vec<String> {
         let mut out = Vec::new();
+        let paused = capturing();
         for (name, (ctrl, shift, alt, win, vk)) in &self.binds {
             let mods = (!ctrl || state(VK_CTRL)) && shift_ok(state, *shift, *vk) && (!alt || state(VK_ALT)) && (!win || state(VK_LWIN) || state(VK_RWIN));
             let down = mods && key_is_down(state, *vk);
             if is_map_hold(name) { continue; } // (held keys: see `held_now`)
+            // while the "press a key" window is open the keys do nothing (pressing a key that is already set must not run its job)
+            if paused { self.held.insert(name.clone(), down); continue; }
             if down && !self.held.get(name).copied().unwrap_or(false) {
                 out.push(name.clone());
             }
@@ -128,6 +137,7 @@ impl Keys {
 
     /// The map keys that are down right now (they repeat while held).
     pub fn held_now(&self, state: &dyn Fn(u32) -> bool) -> Vec<String> {
+        if capturing() { return Vec::new(); }
         self.binds.iter().filter(|(n, _)| is_map_hold(n)).filter(|(_, (ctrl, shift, alt, win, vk))| {
             (!ctrl || state(VK_CTRL)) && shift_ok(state, *shift, *vk) && (!alt || state(VK_ALT)) && (!win || state(VK_LWIN) || state(VK_RWIN)) && key_is_down(state, *vk)
         }).map(|(n, _)| n.clone()).collect()

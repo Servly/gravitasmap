@@ -48,6 +48,7 @@
     });
   }).catch(function () {});
 
+  var TH = window.GVTH ? GVTH.tint : function (c) { return c; };   // colour themes (themes.js)
   /* ---------- starfield: drawn once, never animated (the app runs next to a game) ---------- */
   function stars() {
     // painted once into ONE opaque background image of the window: a second full-window layer that has to be blended again on every
@@ -57,11 +58,13 @@
     var n = Math.round(W * H / 9000);
     for (var i = 0; i < n; i++) {
       var c = Math.random(); cx.globalAlpha = Math.random() * .55 + .12;
-      cx.fillStyle = c < .16 ? "#ff9ae6" : c < .3 ? "#9eeeff" : "#fff";
+      cx.fillStyle = c < .16 ? TH("#ff9ae6") : c < .3 ? TH("#9eeeff") : "#fff";
       cx.beginPath(); cx.arc(Math.random() * W, Math.random() * H, Math.random() * 1.1 + .2, 0, 6.283); cx.fill();
     }
-    $("#win").style.backgroundImage = "url(" + cv.toDataURL("image/png") + "), linear-gradient(160deg,#150d28,#070511)";
+    var cs = getComputedStyle(document.documentElement);   // the theme's tones (themes.js); the default gives the same colours as before
+    $("#win").style.backgroundImage = "url(" + cv.toDataURL("image/png") + "), linear-gradient(160deg," + (cs.getPropertyValue("--win1").trim() || "#150d28") + "," + (cs.getPropertyValue("--win2").trim() || "#070511") + ")";
   }
+  addEventListener("gv-theme", function () { stars(); });
   stars(); var rz; addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(function () { stars(); moveInd(); }, 150); });
 
   /* ---------- nothing moves while the window is hidden or minimized ---------- */
@@ -89,7 +92,7 @@
   }
 
   /* ---------- navigation ---------- */
-  var VIEWS = ["hub", "map", "combat", "thargoid", "debrief", "pvp", "foot", "keys", "updates", "prefs", "about"];
+  var VIEWS = ["hub", "map", "combat", "thargoid", "debrief", "pvp", "foot", "bgs", "keys", "updates", "prefs", "about"];
   function moveInd() {
     var b = $(".nav.on"), r = $("#rail"), p = $("#pill"); if (!b) return;
     var br = b.getBoundingClientRect(), rr = r.getBoundingClientRect();
@@ -97,6 +100,7 @@
     p.style.transform = "translate(" + (br.left - rr.left) + "px," + (br.top - rr.top) + "px)";
   }
   function go(v) {
+    if (v === "keys") { v = "prefs"; var kt = document.querySelector('.tabs[data-scope="prefs"] .tab[data-tab="keys"]'); if (kt) kt.click(); } // (Key Bindings live in Settings now)
     if (VIEWS.indexOf(v) < 0) v = "hub"; cur = v;
     $$(".nav").forEach(function (b) { var on = b.dataset.view === v; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     $$(".view").forEach(function (s) { s.classList.toggle("on", s.id === "v-" + v); });
@@ -104,6 +108,8 @@
     if (v === "hub") devPoll(true);
   }
   $$(".nav").forEach(function (b) { b.addEventListener("click", function () { go(b.dataset.view); }); });
+  // any button with data-go jumps to that page (the Key Bindings button on the mode pages)
+  document.addEventListener("click", function (e) { var g = e.target.closest && e.target.closest("[data-go]"); if (g) go(g.dataset.go); });
 
   /* ---------- modes ---------- */
   var ICON = {
@@ -115,12 +121,13 @@
     thargoid: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><circle cx="12" cy="12" r="3"/>',
     debrief: '<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 15l3-4 3 3 3-5 3 4"/>',
     pvp: '<path d="M4 20L14 10M14 4h6v6M20 20L10 10M10 4H4v6"/>',
-    foot: '<ellipse cx="8" cy="8" rx="2.6" ry="4.2"/><ellipse cx="16" cy="16" rx="2.6" ry="4.2"/>'
+    foot: '<ellipse cx="8" cy="8" rx="2.6" ry="4.2"/><ellipse cx="16" cy="16" rx="2.6" ry="4.2"/>',
+    bgs: '<path d="M3 20V9M9 20V4M15 20v-8M21 20V7"/><path d="M2 20h20"/>'
   };
   // what each one is today: "next" (the very next mode to come to the app), "ready" (works in the app now: the map and its tools open in the GRAVITAS MAP window), "planned"
-  var MODES = [["map", "ready"], ["combat", "plain"], ["thargoid", "plain"], ["debrief", "plain"], ["pvp", "preview"], ["foot", "planned"], ["collisions", "ready"], ["sono", "ready"], ["lenses", "ready"]];
+  var MODES = [["map", "ready"], ["combat", "plain"], ["thargoid", "plain"], ["debrief", "plain"], ["pvp", "preview"], ["foot", "planned"], ["bgs", "preview"], ["collisions", "ready"], ["sono", "ready"], ["lenses", "ready"]];
   var TOOL = { collisions: "coll", sono: "sono", lenses: "lenses" };   // the tools of the GRAVITAS MAP window
-  var PAGE = { combat: "combat", map: "map", thargoid: "thargoid", debrief: "debrief", pvp: "pvp", foot: "foot" };
+  var PAGE = { combat: "combat", map: "map", thargoid: "thargoid", debrief: "debrief", pvp: "pvp", foot: "foot", bgs: "bgs" };
   function renderModes() {
     var g = $("#modes"); g.innerHTML = "";
     MODES.forEach(function (m, i) {
@@ -301,11 +308,13 @@
     fillPane("keys-main", ["kbmain"]);   fillPane("keys-map", ["kbmap"]);
     fillPane("keys-combat", ["kbcombat"]); fillPane("keys-thargoid", ["kbsoon"]); fillPane("keys-foot", ["kbsoon"]);
     fillPane("combat-past", ["past"]);
-    fillPane("prefs-x", ["prefsx"]);
+    fillPane("prefs-x", ["themes", "prefsx"]);
     fillPane("map-overview", ["mapopen", "mapov", "mapsite"]);          fillPane("map-past", ["visits"]);
     fillPane("thargoid-overview", ["thwin", "threc"]); fillPane("thargoid-past", ["thpast"]);
     fillPane("debrief-overview", ["dbmode", "dbwin", "dbbinds"]);   // (the Past debriefs list is not reachable from the UI for now: SEC.dbpast and the db_* commands stay)
     fillPane("pvp-overview", ["pvpmode", "pvpwin"]); fillPane("pvp-past", ["pvpfights"]); fillPane("pvp-cmp", ["pvpcompare"]);
+    fillPane("bgs-setup", ["bgssetup", "bgsscan"]);
+    ["today", "movers", "risk", "heat", "trends", "fleet", "tick", "report"].forEach(function (k) { fillPane("bgs-" + k, [["bgsview", k]]); });
     fillPane("foot-overview", [["soon", "nav.foot"]]);         fillPane("foot-past", [["soon", "tab.past.foot"]]);
   }
   /* ---------- updates: only "a newer version exists" ever comes from the server (updater.rs) ---------- */
@@ -404,7 +413,7 @@
     $$(".tab", nav).forEach(function (b) {
       b.addEventListener("click", function () {
         $$(".tab", nav).forEach(function (x) { x.classList.toggle("on", x === b); });
-        $$(".pane", nav.parentNode).forEach(function (p) { p.classList.toggle("on", p.id === scope + "-" + b.dataset.tab); });
+        $$(".pane", nav.parentNode).forEach(function (p) { if (p.parentNode !== nav.parentNode) return; p.classList.toggle("on", p.id === scope + "-" + b.dataset.tab); });
       });
     });
   });

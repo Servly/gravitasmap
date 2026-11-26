@@ -43,5 +43,10 @@
   "pvp.obs.first": "Der erste Angriff auf dich kam bei {ta}. Der erste Angriff auf {opp} kam bei {tb}.",
   "pvp.obs.shield_me": "Deine Schilde fielen bei {t}, {s} s nach dem ersten Angriff auf dich.",
   "pvp.obs.shield_opp": "Die Schilde von {opp} fielen bei {t}, {s} s nach dem ersten Angriff auf {opp}.",
-  "pvp.obs.fa": "Flight Assist war in {pa} % deines Kampfes aus und in {pb} % des Kampfes von {opp}."
+  "pvp.obs.fa": "Flight Assist war in {pa} % deines Kampfes aus und in {pb} % des Kampfes von {opp}.",
+  "claims.chip": "CLAIMS {n} cr",
+  "claims.chip.restored": "CLAIMS WIEDERHERGESTELLT {n} cr",
+  "claims.chip.wait": "CLAIMS: JOURNALE WERDEN GELESEN",
+  "claims.src.all": "Gezählt aus allen Journalen seit deinem letzten Tod",
+  "claims.src.reset": "Gezählt seit deinem Reset um {t}"
 }

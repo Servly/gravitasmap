@@ -43,5 +43,10 @@
   "pvp.obs.first": "Первая атака на вас пришлась на {ta}. Первая атака на {opp} — на {tb}.",
   "pvp.obs.shield_me": "Ваши щиты упали в {t}, через {s} с после первой атаки на вас.",
   "pvp.obs.shield_opp": "Щиты {opp} упали в {t}, через {s} с после первой атаки на {opp}.",
-  "pvp.obs.fa": "Flight Assist был выключен {pa} % вашего боя и {pb} % боя {opp}."
+  "pvp.obs.fa": "Flight Assist был выключен {pa} % вашего боя и {pb} % боя {opp}.",
+  "claims.chip": "CLAIMS {n} cr",
+  "claims.chip.restored": "CLAIMS ВОССТАНОВЛЕНЫ {n} cr",
+  "claims.chip.wait": "CLAIMS: ЧТЕНИЕ ЖУРНАЛОВ",
+  "claims.src.all": "Подсчёт по всем журналам с момента вашей последней смерти",
+  "claims.src.reset": "Подсчёт с момента вашего сброса в {t}"
 }

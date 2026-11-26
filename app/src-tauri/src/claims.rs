@@ -524,6 +524,14 @@ impl Claims {
         b
     }
 
+    /// Restore: the reset line and the stack of older ones are gone, Claims are worked out again from the Journals (every unredeemed bounty and bond since the
+    /// last death, as the game's own Claims panel counts them). Returns "" (no line).
+    pub fn restore(&mut self) -> String {
+        self.older.clear();
+        self.set_base("");
+        String::new()
+    }
+
     pub fn older(&self) -> &[String] {
         &self.older
     }
@@ -818,6 +826,27 @@ mod real_cases {
             c.feed(&json!({"timestamp":"2026-11-25T10:05:00Z","event":"RedeemVoucher","Type":"bounty","Factions":[{"Faction":"A","Amount":996000}]}));
             assert_eq!(c.view()[0].as_i64().unwrap(), if fix { 0 } else { 4000 }, "fix {fix}");
         }
+    }
+
+    #[test]
+    fn restore_brings_back_everything_the_resets_took_away() {
+        let mut c = Claims::new();
+        c.start(None, None);
+        c.feed(&bounty("2020-01-01T10:00:00Z", &[1000, 2500], "A"));
+        c.feed(&bounty("2020-01-01T11:00:00Z", &[4000], "B"));
+        let before = c.view()[0].as_i64().unwrap();
+        assert_eq!(before, 7500);
+        c.reset_at(1_900_000_000);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+        c.reset_at(1_900_001_000);
+        assert_eq!(c.view()[0].as_i64().unwrap(), 0, "after two resets nothing counts");
+        assert_eq!(c.restore(), "", "no line any more");
+        assert!(c.older().is_empty(), "the stack is gone too");
+        assert_eq!(c.view()[0].as_i64().unwrap(), before, "Claims are worked out again, the same total as before the resets");
+        assert_eq!(c.base_local(), "", "no reset note");
+        // money earned after a restore counts as always
+        c.feed(&bounty("2026-11-26T12:00:00Z", &[500], "A"));
+        assert_eq!(c.view()[0].as_i64().unwrap(), before + 500);
     }
 
     #[test]

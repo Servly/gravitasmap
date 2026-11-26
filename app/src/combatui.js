@@ -51,7 +51,7 @@
   // the PVP page's own window
   var PWINS = [["pvp", "PVP mode chip"]];
   // the keys' jobs that are worth a button (flip free look is not: the game's own button does that)
-  var ACTS = [["reset", "menu.act.reset"], ["clear", "menu.act.clear"], ["report", "menu.act.report"], ["hide", "menu.act.hide"], ["claims", "menu.act.claims"], ["report_clear", "menu.act.report_clear"]];
+  var ACTS = [["reset", "menu.act.reset"], ["clear", "menu.act.clear"], ["report", "menu.act.report"], ["hide", "menu.act.hide"], ["claims", "menu.act.claims"], ["claims_show", "menu.act.claims_show"], ["claims_restore", "menu.act.claims_restore"], ["report_clear", "menu.act.report_clear"]];
   // behaviour switches (the wing ones, the dark ground and the Bounty counter's brief mode have their own places)
   var FLAGS = [["always", "menu.k.always"], ["hide_maps", "menu.k.maps"], ["look_hide", "menu.k.look"], ["bonds", "menu.k.bonds"], ["front", "menu.k.front"],
                ["drop_lost", "menu.k.droplost"], ["sc_ends", "menu.k.scends"]];
@@ -233,7 +233,12 @@
       };
       c.appendChild(row(tr("menu.claims.bonds"), sw(function () { return S.claim_bonds !== false; }, function (n) { set("claim_bonds", n); }), tr("menu.claims.bonds.d"), "tip.claims.bonds"));
       c.appendChild(row(tr("menu.claims.note"), sw(function () { return S.claims_note !== false; }, function (n) { set("claims_note", n); }), tr("menu.claims.note.d"), "tip.claims.note"));
-      c.appendChild(st); c.appendChild(b);
+      // Show claims and Restore claims: the same two jobs as the keys (Settings > Key Bindings)
+      var bs = tip(mk("button", "btn", tr("menu.act.claims_show")), "tip.act.claims_show"), br = tip(mk("button", "btn", tr("menu.act.claims_restore")), "tip.act.claims_restore");
+      bs.onclick = function () { if (invoke) invoke("combat_action", { name: "claims_show" }); };
+      br.onclick = function () { if (invoke) invoke("combat_action", { name: "claims_restore" }); };
+      var ar = mk("div", "acts"); ar.appendChild(bs); ar.appendChild(br);
+      c.appendChild(st); c.appendChild(ar); c.appendChild(b);
       renders.push(function () { var at = extra.claims_reset; st.textContent = at ? tr("menu.claims.at", { at: at }) : tr("menu.claims.none"); b.disabled = !at; });
     },
     /** how the windows look */

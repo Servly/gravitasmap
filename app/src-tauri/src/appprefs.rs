@@ -107,6 +107,23 @@ pub fn export_file() -> Result<String, String> {
     Ok(path.display().to_string())
 }
 
+/// Writes a text file the player asked for (kind "bgs" = the BGS CSV) into the Documents folder as GRAVITAS-<kind>-<date>.csv and shows it in Explorer.
+/// The name is made here, never taken from the page. Returns the full path.
+pub fn save_text_file(kind: &str, text: &str) -> Result<String, String> {
+    if kind != "bgs" { return Err("unknown file kind".into()); }
+    if text.len() > 20_000_000 { return Err("the file is too big".into()); }
+    let dir = documents().ok_or("no Documents folder")?;
+    let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0) as i64;
+    let (y, m, d) = civil(secs.div_euclid(86400));
+    let stamp = format!("{y:04}-{m:02}-{d:02}");
+    let mut path = dir.join(format!("GRAVITAS-{kind}-{stamp}.csv"));
+    let mut n = 2;
+    while path.exists() { path = dir.join(format!("GRAVITAS-{kind}-{stamp}-{n}.csv")); n += 1; }
+    if !crate::store::write_atomic(&path, text) { return Err("could not write the file".into()); }
+    let _ = std::process::Command::new(explorer()).arg(format!("/select,{}", path.display())).spawn();
+    Ok(path.display().to_string())
+}
+
 /// Days since 1970-01-01 to (year, month, day), proleptic Gregorian (Howard Hinnant's algorithm)
 fn civil(z: i64) -> (i64, u32, u32) {
     let z = z + 719468;
@@ -153,6 +170,32 @@ pub fn open_folder(which: &str) -> bool {
     std::process::Command::new(explorer()).arg(&p).spawn().is_ok()
 }
 
+// ---------------------------------------------------------------- colour theme of the app window and the menu (settings key "theme")
+
+const THEMES: &[&str] = &["gravitas", "game", "cold", "green", "red", "graphite", "custom"];
+
+/// A theme from the pages or from an imported file, or None when it is not one: {"id": name} and, for "custom", {"c": "#rrggbb"}.
+pub fn theme_clean(v: &Value) -> Option<Value> {
+    let id = v.get("id")?.as_str()?;
+    if !THEMES.contains(&id) { return None; }
+    if id == "custom" {
+        let c = v.get("c")?.as_str()?;
+        let ok = c.len() == 7 && c.starts_with('#') && c[1..].chars().all(|ch| ch.is_ascii_hexdigit());
+        return if ok { Some(json!({ "id": "custom", "c": c.to_ascii_lowercase() })) } else { None };
+    }
+    Some(json!({ "id": id }))
+}
+
+/// The saved theme (Null = the default one).
+pub fn theme_get() -> Value {
+    crate::store::read().get("theme").and_then(theme_clean).unwrap_or(Value::Null)
+}
+
+/// Keeps the theme. Returns whether it was valid and written.
+pub fn theme_set(v: &Value) -> bool {
+    match theme_clean(v) { Some(t) => crate::store::set(&[("theme", t)]), None => false }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -189,5 +232,15 @@ mod tests {
         assert_eq!(civil(0), (1970, 1, 1));
         assert_eq!(civil(20_453), (2025, 12, 31));
         assert_eq!(civil(20_454), (2026, 1, 1));
+    }
+
+    #[test]
+    fn the_theme_is_checked() {
+        assert_eq!(theme_clean(&json!({"id":"game"})), Some(json!({"id":"game"})));
+        assert_eq!(theme_clean(&json!({"id":"custom","c":"#FFAA00"})), Some(json!({"id":"custom","c":"#ffaa00"})));
+        assert_eq!(theme_clean(&json!({"id":"custom","c":"red"})), None);
+        assert_eq!(theme_clean(&json!({"id":"custom"})), None);
+        assert_eq!(theme_clean(&json!({"id":"<script>"})), None);
+        assert_eq!(theme_clean(&json!("game")), None);
     }
 }

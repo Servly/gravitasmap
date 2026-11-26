@@ -53,6 +53,7 @@ mod drift;
 mod mapfeed;
 mod pairing;
 mod visits;
+mod bgs;
 mod mapwin;
 mod controls;
 mod panelkeys;
@@ -225,6 +226,12 @@ fn prefs_get() -> serde_json::Value {
     })
 }
 
+/// The colour theme of the app window and the menu (themes.js): the saved one, or null for the default.
+#[tauri::command]
+fn theme_get() -> serde_json::Value { appprefs::theme_get() }
+#[tauri::command]
+fn theme_set(value: serde_json::Value) -> bool { appprefs::theme_set(&value) }
+
 /// Start with Windows on or off (current user only). Returns whether it is now as asked.
 #[tauri::command(async)]
 fn autostart_set(on: bool) -> bool { !cfg!(feature = "store") && appprefs::autostart_set(on) }
@@ -385,7 +392,7 @@ fn combat_setting(key: String, value: serde_json::Value) {
 /// One of the keys' jobs done from a button: flip, report, reset, clear, hide, claims, report_clear.
 #[tauri::command]
 fn combat_action(name: String) {
-    if ["flip", "report", "reset", "clear", "hide", "claims", "report_clear"].contains(&name.as_str()) {
+    if ["flip", "report", "reset", "clear", "hide", "claims", "report_clear", "claims_restore", "claims_show"].contains(&name.as_str()) {
         if let Ok(mut a) = live::ACTIONS.lock() { a.push(name); }
     }
 }
@@ -427,6 +434,37 @@ fn visits_forget() -> bool { visits::forget() }
 #[tauri::command]
 fn visits_keep_set(on: bool) { visits::keep_set(on) }
 
+// BGS Watch (see bgs.rs): every command returns JSON with "ok". Reading and the one network request run only on the player's click.
+#[tauri::command]
+fn bgs_get() -> serde_json::Value { bgs::get() }
+#[tauri::command(async)]
+fn bgs_scan() -> serde_json::Value { bgs::scan() }
+#[tauri::command(async)]
+fn bgs_commit(snapshot: serde_json::Value, accept_flagged: Option<bool>) -> serde_json::Value { bgs::commit(&snapshot, accept_flagged.unwrap_or(false)) }
+#[tauri::command(async)]
+fn bgs_snapshots(n: Option<u32>) -> serde_json::Value { bgs::snapshots(n.unwrap_or(100) as usize) }
+#[tauri::command(async)]
+fn bgs_snapshot(id: String) -> serde_json::Value { bgs::snapshot(&id) }
+#[tauri::command]
+fn bgs_names_import_csv(text: String) -> serde_json::Value { bgs::names_import_csv(&text) }
+#[tauri::command]
+fn bgs_names_set(list: Vec<String>) -> serde_json::Value { bgs::names_set(&list) }
+#[tauri::command]
+fn bgs_names_get() -> serde_json::Value { bgs::names_get() }
+#[tauri::command]
+fn bgs_settings_set(key: String, value: serde_json::Value) -> serde_json::Value { bgs::settings_set(&key, &value) }
+#[tauri::command(async)]
+fn bgs_export_csv() -> serde_json::Value { bgs::export_csv() }
+#[tauri::command(async)]
+fn bgs_forget() -> serde_json::Value { bgs::forget() }
+/// Saves the BGS CSV into the Documents folder (name made here). Returns the path.
+#[tauri::command(async)]
+fn save_text_file(kind: String, text: String) -> Result<String, String> { appprefs::save_text_file(&kind, &text) }
+
+/// The "press a key" window opens (true) or closes (false): while it is open no key runs a job.
+#[tauri::command]
+fn hotkeys_capture(on: bool) { hotkeys::set_capture(on); }
+
 #[tauri::command]
 fn hotkeys_get() -> Vec<(String, String)> {
     let saved = store::read();
@@ -452,8 +490,13 @@ fn combat_op(name: String, value: serde_json::Value) {
 
 #[tauri::command]
 fn editor_rects() -> serde_json::Value {
+    menu::editor_ping();
     live::EDITRECTS.lock().map(|r| r.clone()).unwrap_or(serde_json::Value::Null)
 }
+
+/// The editor page says it is alive (about once a second, also while a box is being dragged): the guard closes Edit HUD when this stops.
+#[tauri::command]
+fn editor_ping() { menu::editor_ping(); }
 
 #[tauri::command]
 fn combat_extra() -> serde_json::Value {
@@ -531,7 +574,7 @@ fn whatsnew_seen() {
     store::set(&[("seen_version", serde_json::json!(updater::CURRENT))]);
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn menu_toggle() { menu::request_toggle(); }
 
 #[tauri::command]
@@ -782,7 +825,7 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, combat_op, combat_extra, editor_rects, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, diagnostic_report, send_feedback, prefs_get, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
+        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, hotkeys_capture, save_text_file, combat_op, combat_extra, editor_rects, editor_ping, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, bgs_get, bgs_scan, bgs_commit, bgs_snapshots, bgs_snapshot, bgs_names_import_csv, bgs_names_set, bgs_names_get, bgs_settings_set, bgs_export_csv, bgs_forget, diagnostic_report, send_feedback, prefs_get, theme_get, theme_set, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
         .run(tauri::generate_context!())
         .expect("error while running GRAVITAS");
 }

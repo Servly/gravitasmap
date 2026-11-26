@@ -448,7 +448,12 @@ fn run() {
                 profiles.save(&a, &h.set);
             }
             set_dirty = true;
-            crate::store::set(&[("combat_settings", h.set.to_json()), ("profiles", profiles.to_json()["profiles"].clone()), ("profile_active", Value::String(profiles.active.clone()))]);
+            if name == "drag_to" || name == "drag_begin" {
+                // a drag sends about 20 of these a second: the file (and its backup copy) is written when they stop, like the sliders' changes
+                save_at = Some(Instant::now());
+            } else {
+                crate::store::set(&[("combat_settings", h.set.to_json()), ("profiles", profiles.to_json()["profiles"].clone()), ("profile_active", Value::String(profiles.active.clone()))]);
+            }
             last_draw = Instant::now() - DRAW_EVERY;
         }
         if let Ok(mut e) = EXTRA.lock() {
@@ -503,7 +508,21 @@ fn run() {
             if pressed.iter().any(|k| k == "menu") { crate::menu::request_toggle(); }
             if pressed.iter().any(|k| k == "app") { crate::menu::request_show_main(); }
             pressed.retain(|k| k != "menu" && k != "app" && !k.starts_with("map_"));
-            if let Ok(mut a) = ACTIONS.lock() { pressed.extend(a.drain(..)); }
+            // Restore claims / Show claims: from the keys (only while the keys are on) and from the buttons (always)
+            let mut claim_jobs: Vec<String> = if h.set.keys { pressed.iter().filter(|k| k.starts_with("claims_")).cloned().collect() } else { Vec::new() };
+            pressed.retain(|k| !k.starts_with("claims_"));
+            if let Ok(mut a) = ACTIONS.lock() { for k in a.drain(..) { if k.starts_with("claims_") { claim_jobs.push(k); } else { pressed.push(k); } } }
+            for j in claim_jobs {
+                if j == "claims_restore" {
+                    let b = h.claims.restore();
+                    crate::store::log("claims base: restored (the reset line and its stack removed, Claims worked out again from the Journals)");
+                    crate::store::save_claims_base(&b, h.claims.older());
+                    h.show_claims(now_secs(), true);
+                } else {
+                    h.show_claims(now_secs(), false);
+                }
+                last_draw = Instant::now() - DRAW_EVERY;
+            }
             if h.set.keys && pressed.iter().any(|k| k == "report_clear") { h.shown = None; } // (a past report shown from Past combats goes with it; its list is not touched)
             let mouse = crate::rawmouse::take();
             let front = matches!(overlay::game_rect(), Game::Window { front: true, .. });

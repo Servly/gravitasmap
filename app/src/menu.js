@@ -24,7 +24,28 @@
     fill("p-debrief", ["dbmode", "dbwin"]);
     fill("p-pvp", ["pvpmode", "pvpwin"]);
     fill("p-thargoid", ["thwin", "threc"]); fill("p-foot", [["soon", "nav.foot"]]);
+    fill("p-bgs", ["bgsmenu"]);
     fill("p-keys", ["kbmain", "kbmap", "kbcombat"]);
+    keysLinks();
+  }
+  // Key Bindings are not a tab here: every page with keys has a Key Bindings button, the keys page has Back (the player stays over the game)
+  var lastPane = "main";
+  function showPane(id) {
+    $$(".pane").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + id); });
+    $$(".tab").forEach(function (x) { x.classList.toggle("on", x.dataset.tab === id); });
+  }
+  function keysLinks() {
+    ["main", "map", "combat", "thargoid", "debrief", "pvp", "foot"].forEach(function (id) {
+      var pane = document.getElementById("p-" + id); if (!pane) return;
+      var row = document.createElement("div"); row.className = "kbgorow";
+      var b = document.createElement("button"); b.className = "btn sm kbgo"; b.textContent = t("nav.keys"); b.title = t("tip.kb.go");
+      b.onclick = function () { lastPane = id; showPane("keys"); };
+      row.appendChild(b); pane.insertBefore(row, pane.firstChild);
+    });
+    var kp = document.getElementById("p-keys"), r2 = document.createElement("div"); r2.className = "kbgorow";
+    var back = document.createElement("button"); back.className = "btn sm kbgo"; back.textContent = t("kb.back"); back.title = t("tip.kb.back");
+    back.onclick = function () { showPane(lastPane); };
+    r2.appendChild(back); kp.insertBefore(r2, kp.firstChild);
   }
   var menuKey = "";
   function applyLang() {
@@ -44,7 +65,7 @@
   $("#mMin").onclick = function () { var on = !$("#win").classList.contains("mini"); $("#win").classList.toggle("mini", on); invoke && invoke("menu_collapse", { on: on }); };
   $("#mClose").onclick = function () { invoke && invoke("menu_close"); };
   $$(".tab").forEach(function (b) {
-    b.onclick = function () { $$(".tab").forEach(function (x) { x.classList.toggle("on", x === b); }); $$(".pane").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + b.dataset.tab); }); };
+    b.onclick = function () { showPane(b.dataset.tab); };
   });
   addEventListener("keydown", function (e) {
     var k = (e.key || "").toLowerCase();

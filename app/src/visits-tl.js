@@ -3,6 +3,7 @@
 // month totals, the held stops (active window and archive) as fine bars; the page is the lit window. Nothing here needs a stop that is not in memory.
 (function () {
   var G = window.GVV, clamp = G.clamp, st = G.store;
+  var TH = window.GVTH ? GVTH.tint : function (c) { return c; };   // colour theme: the default theme returns the colour unchanged (themes.js)
   /** [from, to] of the whole history: the index when there is one, else the held stops */
   G.bounds = function (s) { var ix = s.idx, D = s.D; if (ix && ix.months.length) return [ix.lo, ix.hi]; return D && D.n ? [D.tmin, D.tmax] : [0, 1]; };
   function tlRange(s) { var b = G.bounds(s), sp = Math.max(b[1] - b[0], 36e5); return [b[0] - sp * .02 - 3.6e6, b[1] + sp * .02 + 3.6e6]; }
@@ -22,7 +23,7 @@
     var c = s.tl, hist = s.hist, tlW = s.tlW, f = s.f, ix = s.idx; c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0); var h = 54; c.clearRect(0, 0, tlW, h);
     var bw = tlW / hist.nb, base = h - 14, bh = base - 4, x0 = G.tlX(s, R.ta), x1 = G.tlX(s, R.tb), k;
     if (ix && st.hasOlder(s)) {                    // the active window (the last 12 months) sits on a faint band
-      var act = ix.months.filter(function (mo) { return st.isActive(ix, mo); }); if (act.length) { var ax = Math.max(0, G.tlX(s, act[0].t0)); c.fillStyle = "rgba(106,232,255,.06)"; c.fillRect(ax, 1, tlW - ax, base - 1); }
+      var act = ix.months.filter(function (mo) { return st.isActive(ix, mo); }); if (act.length) { var ax = Math.max(0, G.tlX(s, act[0].t0)); c.fillStyle = TH("rgba(106,232,255,.06)"); c.fillRect(ax, 1, tlW - ax, base - 1); }
     }
     for (k = 0; k < hist.nb; k++) {
       var v = hist.c[k], qv = hist.q[k], x = k * bw, inR = x + bw > x0 && x < x1, col = G.ramp(k / hist.nb);
@@ -31,8 +32,8 @@
       c.fillStyle = "rgba(" + col[0] + "," + col[1] + "," + col[2] + "," + (inR ? .9 : .32) + ")"; c.fillRect(x, base - hh, Math.max(1, bw - .6), hh);
       var mv = hist.m[k]; if (mv) { var mh = Math.max(1.5, Math.sqrt(mv / hist.mx) * bh); c.fillStyle = inR ? "rgba(125,255,155,.95)" : "rgba(125,255,155,.45)"; c.fillRect(x, base - mh, Math.max(1, bw - .6), Math.min(mh, hh)); }
     }
-    c.strokeStyle = "rgba(190,120,255,.3)"; c.lineWidth = 1; c.beginPath(); c.moveTo(0, base + .5); c.lineTo(tlW, base + .5); c.stroke();
-    c.fillStyle = "rgba(157,140,192,.9)"; c.font = '10px "Segoe UI",system-ui,sans-serif'; c.textBaseline = "top";
+    c.strokeStyle = TH("rgba(190,120,255,.3)"); c.lineWidth = 1; c.beginPath(); c.moveTo(0, base + .5); c.lineTo(tlW, base + .5); c.stroke();
+    c.fillStyle = TH("rgba(157,140,192,.9)"); c.font = '10px "Segoe UI",system-ui,sans-serif'; c.textBaseline = "top";
     var span = G.tlT(s, tlW) - G.tlT(s, 0), pxPerDay = tlW / (span / 864e5), unit = pxPerDay > 60 ? 1 : pxPerDay > 12 ? 7 : pxPerDay > 4 ? 30 : pxPerDay > 1.2 ? 91 : 365;
     var t = new Date(G.tlT(s, 0)); t = unit === 1 ? new Date(t.getFullYear(), t.getMonth(), t.getDate()) : new Date(t.getFullYear(), unit >= 365 ? 0 : t.getMonth(), 1);
     var lastLabel = -99;
@@ -41,14 +42,14 @@
       if (tx >= 0 && tx - lastLabel > 54) { c.fillRect(tx, base, 1, 3); c.fillText(unit === 365 || (t.getMonth() === 0 && unit >= 30) ? String(t.getFullYear()) : unit >= 30 ? f.mon(+t) : f.d(+t), tx + 3, base + 2); lastLabel = tx; }
       t = unit === 1 ? new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1) : unit === 7 ? new Date(t.getFullYear(), t.getMonth(), t.getDate() + 7) : unit === 30 ? new Date(t.getFullYear(), t.getMonth() + 1, 1) : unit === 91 ? new Date(t.getFullYear(), t.getMonth() + 3, 1) : new Date(t.getFullYear() + 1, 0, 1);
     }
-    if (D.ses.length <= 500 && pxPerDay > 1.2) { c.fillStyle = "rgba(106,232,255,.55)"; for (k = 0; k < D.ses.length; k++) c.fillRect(G.tlX(s, D.T[D.ses[k]]), base - 3, 1, 3); }
-    c.fillStyle = "rgba(167,123,255,.16)"; c.strokeStyle = "rgba(106,232,255,.85)"; c.lineWidth = 1.3; var bx = Math.max(0, x0), bx2 = Math.min(tlW, Math.max(x1, x0 + 3));
+    if (D.ses.length <= 500 && pxPerDay > 1.2) { c.fillStyle = TH("rgba(106,232,255,.55)"); for (k = 0; k < D.ses.length; k++) c.fillRect(G.tlX(s, D.T[D.ses[k]]), base - 3, 1, 3); }
+    c.fillStyle = TH("rgba(167,123,255,.16)"); c.strokeStyle = TH("rgba(106,232,255,.85)"); c.lineWidth = 1.3; var bx = Math.max(0, x0), bx2 = Math.min(tlW, Math.max(x1, x0 + 3));
     c.beginPath(); c.roundRect(bx + .5, 1.5, bx2 - bx - 1, base - 1, 5); c.fill(); c.stroke();
-    c.fillStyle = "#6ae8ff"; c.beginPath(); c.roundRect(bx - 1, base / 2 - 9, 4, 18, 2); c.fill(); c.beginPath(); c.roundRect(bx2 - 3, base / 2 - 9, 4, 18, 2); c.fill();
+    c.fillStyle = TH("#6ae8ff"); c.beginPath(); c.roundRect(bx - 1, base / 2 - 9, 4, 18, 2); c.fill(); c.beginPath(); c.roundRect(bx2 - 3, base / 2 - 9, 4, 18, 2); c.fill();
     if (s.replay && R.i1 > R.i0) { var rx = G.tlX(s, D.T[R.i0 + Math.min(R.i1 - R.i0 - 1, Math.floor(s.replay.p * (R.i1 - R.i0)))]); c.fillStyle = "#fff"; c.fillRect(rx - .5, 0, 1.5, base); }
     if (s.tlHover >= 0) {
       c.fillStyle = "rgba(255,255,255,.35)"; c.fillRect(s.tlHover, 0, 1, base); var tt = f.dy(G.tlT(s, s.tlHover)); c.font = '600 10.5px "Segoe UI",system-ui,sans-serif';
-      var w = c.measureText(tt).width + 10, lx = clamp(s.tlHover - w / 2, 0, tlW - w); c.fillStyle = "rgba(10,6,22,.92)"; c.fillRect(lx, 1, w, 15); c.fillStyle = "#e9ddff"; c.fillText(tt, lx + 5, 3);
+      var w = c.measureText(tt).width + 10, lx = clamp(s.tlHover - w / 2, 0, tlW - w); c.fillStyle = TH("rgba(10,6,22,.92)"); c.fillRect(lx, 1, w, 15); c.fillStyle = TH("#e9ddff"); c.fillText(tt, lx + 5, 3);
     }
   };
   G.invalidateDock = function (s) { if (s.dockQ || !s.on) return; s.dockQ = requestAnimationFrame(function () { s.dockQ = 0; G.raf++; G.dockDraw(s); }); };

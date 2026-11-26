@@ -12,7 +12,9 @@
   // CSS pixels per game pixel: this layer is the size of the game's window, so the ratio is read from the two sizes, not guessed from the screen's scale
   function K() { return rects && rects.gw ? innerWidth / rects.gw : 1 / (window.devicePixelRatio || 1); }
   function raise() { if (invoke) invoke("menu_raise").catch(function () {}); }
-  var lastSend = 0;
+  var lastSend = 0, down = false, downT = 0, lastRaise = 0;
+  // the bars (and the cog panels) live in their own layer ABOVE every box: a window that lies over another must never hide the other one's buttons
+  var bars = document.createElement("div"); bars.id = "bars"; document.body.insertBefore(bars, document.getElementById("hint"));
 
   function load(code) { return fetch("lang/" + code + ".json").then(function (r) { return r.json(); }).catch(function () { return {}; }); }
   function t(k) { var s = dict[k]; if (s == null) s = en[k]; return s == null ? k : s; }
@@ -86,18 +88,19 @@
     if (!rects) return;
     var key = JSON.stringify(rects.wins.map(function (w) { var q = placeOf(w); return [w.key, q[0], q[1], w.w, w.h, w.colour, !!free[w.key]]; })) + (popFor || "") + K();
     if (key === built) return;
-    built = key; stage.innerHTML = ""; guideLayer(null);
+    built = key; stage.innerHTML = ""; bars.innerHTML = ""; guideLayer(null);
     // overlapping windows: the boxes are stacked in the same order as the windows on the game (the app sends them bottom to top: the player's To front /
     // To back first, then the smaller one on top), so what you see is what you grab; a box being dragged is raised
     var zOf = {};
     rects.wins.forEach(function (w, i) { zOf[w.key] = 10 + i; });
-    rects.wins.forEach(function (w) {
+    rects.wins.forEach(function (w, wi) {
       var q = placeOf(w);
       var box = mk("div", "box" + (free[w.key] ? " free" : "")), x = q[0], y = q[1], bw = w.w * K(), bh = w.h * K();
       var above = y > 42;
       box.style.cssText = "left:" + x + "px;top:" + y + "px;width:" + bw + "px;height:" + bh + "px;z-index:" + (zOf[w.key] || 10);
       var bar = mk("div", "bar");
-      if (above) bar.style.bottom = (bh + 6) + "px"; else bar.style.top = (bh + 6) + "px";
+      bar.style.left = x + "px"; bar.style.zIndex = 1000 + wi;
+      if (above) bar.style.bottom = (innerHeight - y + 6) + "px"; else bar.style.top = (y + bh + 6) + "px";
       bar.appendChild(mk("b", null, NAMES[w.key] || w.key));
       var lk = mk("button", free[w.key] ? "on" : "", free[w.key] ? t("ed.unlocked") : t("ed.locked")); // (the button says the state the window is in now)
       lk.onclick = function (e) { e.stopPropagation(); free[w.key] = !free[w.key]; if (!free[w.key]) op("editor.lock", { key: w.key }); built = ""; build(); raise(); };
@@ -111,8 +114,9 @@
       var cog = mk("button", popFor === w.key ? "on" : "", "⚙");
       cog.title = t("ed.more"); cog.onclick = function (e) { e.stopPropagation(); popFor = popFor === w.key ? null : w.key; built = ""; build(); raise(); };
       bar.appendChild(cog);
-      box.appendChild(bar);
-      if (popFor === w.key) { var p = popup(); if (above) p.style.bottom = (bh + 48) + "px"; else p.style.top = (bh + 48) + "px"; box.appendChild(p); }
+      bars.appendChild(bar);
+      var p = null;
+      if (popFor === w.key) { p = popup(); p.style.left = x + "px"; p.style.zIndex = 3000; if (above) p.style.bottom = (innerHeight - y + 48) + "px"; else p.style.top = (y + bh + 48) + "px"; bars.appendChild(p); }
       function send(d, last) {
         // only the dashed box follows the mouse; the window itself takes its new place when the mouse is let go (one repaint, no cost while dragging)
         var now = Date.now(); if (!last && now - lastSend < 50) return; lastSend = now;
@@ -140,11 +144,13 @@
       box.onpointerdown = function (e) {
         if (!free[w.key] || e.target.closest(".bar,.pop")) return;
         drag = { key: w.key, box: box, sx: e.clientX, sy: e.clientY, x: x, y: y, w: bw, h: bh, dx: 0, dy: 0 }; box.classList.add("drag"); box.style.zIndex = 500; box.setPointerCapture(e.pointerId);
+        drag.along = [bar, p].filter(Boolean);
         op("drag_begin", { key: w.key });
       };
       box.onpointermove = function (e) {
         if (!drag || drag.box !== box) return;
         var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy; box.style.transform = "translate(" + dx + "px," + dy + "px)";
+        drag.along.forEach(function (a) { a.style.transform = "translate(" + dx + "px," + dy + "px)"; });
         var W = rects.gw * K(), cx = drag.x + dx + drag.w / 2, mid = Math.abs(cx - W / 2) < W * BAND; drag.dx = dx; drag.dy = dy;
         guideLayer(mid ? "mid" : cx < W / 2 ? "left" : "right");
         hint.textContent = t(mid ? "ed.flat" : cx < W / 2 ? "ed.left" : "ed.right");
@@ -155,9 +161,18 @@
   }
 
   function poll() {
-    if (!invoke || drag || document.visibilityState === "hidden" || Date.now() < pause) return;
+    // (nothing is rebuilt while a mouse button is down: a box rebuilt between the press and the release ate the click)
+    if (!invoke || drag || document.visibilityState === "hidden" || Date.now() < pause || (down && Date.now() - downT < 15000)) return;
     Promise.all([invoke("editor_rects"), invoke("combat_settings")]).then(function (r) { if (r[0] && r[0].wins) { rects = r[0]; } S = r[1] || S; build(); }).catch(function () {});
   }
+  // any click on the layer puts the menu back on top of it (before, only some buttons did), and no rebuild happens under the mouse
+  addEventListener("pointerdown", function () { down = true; downT = Date.now(); if (Date.now() - lastRaise > 150) { lastRaise = Date.now(); raise(); } }, true);
+  addEventListener("pointerup", function () { down = false; }, true);
+  addEventListener("pointercancel", function () { down = false; }, true);
+  bars.addEventListener("input", function () { pause = Math.max(pause, Date.now() + 1500); }); // (a slider or the colour square is in use)
+  // a sign of life for the watchdog in the app (it closes Edit HUD when this stops), also while a box is being dragged
+  function ping() { if (invoke) invoke("editor_ping").catch(function () {}); }
+  setInterval(ping, 1000); ping();
   addEventListener("keydown", function (e) { if (e.key === "Escape") { e.preventDefault(); invoke && invoke("menu_close"); } });
   addEventListener("contextmenu", function (e) { e.preventDefault(); });
   load("en").then(function (d) { en = d; return lang === "en" ? {} : load(lang); }).then(function (d) { dict = d; hint.textContent = t("ed.hint"); setInterval(poll, 200); poll(); });

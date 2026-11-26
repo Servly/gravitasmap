@@ -43,5 +43,10 @@
   "pvp.obs.first": "La première attaque contre vous est venue à {ta}. La première attaque contre {opp} est venue à {tb}.",
   "pvp.obs.shield_me": "Vos boucliers sont tombés à {t}, {s} s après la première attaque contre vous.",
   "pvp.obs.shield_opp": "Les boucliers de {opp} sont tombés à {t}, {s} s après la première attaque contre {opp}.",
-  "pvp.obs.fa": "Flight Assist était coupé {pa} % de votre combat et {pb} % du combat de {opp}."
+  "pvp.obs.fa": "Flight Assist était coupé {pa} % de votre combat et {pb} % du combat de {opp}.",
+  "claims.chip": "CLAIMS {n} cr",
+  "claims.chip.restored": "CLAIMS RESTAURÉS {n} cr",
+  "claims.chip.wait": "CLAIMS : LECTURE DES JOURNALS",
+  "claims.src.all": "Compté depuis tous vos Journals depuis votre dernière mort",
+  "claims.src.reset": "Compté depuis votre remise à zéro à {t}"
 }

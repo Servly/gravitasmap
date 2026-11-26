@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="feedback.css">
 <link rel="stylesheet" href="debrief.css">
 <link rel="stylesheet" href="visits.css">
+<link rel="stylesheet" href="bgs.css">
+<link rel="stylesheet" href="themes.css">
+<script src="themes.js"></script>
+<link rel="stylesheet" href="kbcapture.css">
 </head>
 <body>
 <div class="win" id="win">
@@ -32,7 +36,7 @@
     <button class="nav" data-i18n-title="tip.nav.debrief" data-view="debrief"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 15l3-4 3 3 3-5 3 4"/></svg><span data-i18n="nav.debrief"></span></button>
     <button class="nav" data-i18n-title="tip.nav.pvp" data-view="pvp"><svg viewBox="0 0 24 24"><path d="M4 20L14 10M14 4h6v6M20 20L10 10M10 4H4v6"/></svg><span data-i18n="nav.pvp"></span></button>
     <button class="nav" data-i18n-title="tip.nav.foot" data-view="foot"><svg viewBox="0 0 24 24"><ellipse cx="8" cy="8" rx="2.6" ry="4.2"/><ellipse cx="16" cy="16" rx="2.6" ry="4.2"/></svg><span data-i18n="nav.foot"></span></button>
-    <button class="nav" data-i18n-title="tip.nav.keys" data-view="keys"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button>
+    <button class="nav" data-i18n-title="tip.nav.bgs" data-view="bgs"><svg viewBox="0 0 24 24"><path d="M3 20V9M9 20V4M15 20v-8M21 20V7"/><path d="M2 20h20"/></svg><span data-i18n="nav.bgs"></span></button>
     <span class="sp"></span>
     <button class="nav" data-i18n-title="tip.nav.updates" data-view="updates"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v7M8.8 11.2L12 14.4l3.2-3.2"/></svg><span data-i18n="nav.updates"></span></button>
     <button class="nav" data-i18n-title="tip.nav.settings" data-view="prefs"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg><span data-i18n="nav.settings"></span></button>
@@ -57,53 +61,60 @@
     </section>
 
     <section class="view" id="v-map" aria-label="map">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.map"></h2><h1 data-i18n="page.map.h1"></h1><p class="sub" data-i18n="page.map.sub"></p></div></div>
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.map"></h2><h1 data-i18n="page.map.h1"></h1><p class="sub" data-i18n="page.map.sub"></p></div><button class="btn sm kbgo" data-go="keys" data-i18n-title="tip.kb.go"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button></div>
       <nav class="tabs" data-scope="map"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.visits" data-tab="past" data-i18n="tab.past.map"></button></nav>
       <div class="pane on" id="map-overview"></div><div class="pane" id="map-past"></div>
     </section>
 
     <section class="view" id="v-combat" aria-label="combat">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.combat"></h2><h1 data-i18n="page.combat.h1"></h1><p class="sub" data-i18n="page.combat.sub"></p></div></div>
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.combat"></h2><h1 data-i18n="page.combat.h1"></h1><p class="sub" data-i18n="page.combat.sub"></p></div><button class="btn sm kbgo" data-go="keys" data-i18n-title="tip.kb.go"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button></div>
       <nav class="tabs" data-scope="combat"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.windows" data-tab="windows" data-i18n="tab.windows"></button><button class="tab" data-i18n-title="tip.tab.look" data-tab="look" data-i18n="tab.look"></button><button class="tab" data-i18n-title="tip.tab.behaviour" data-tab="behaviour" data-i18n="tab.behaviour"></button><button class="tab" data-i18n-title="tip.tab.past" data-tab="past" data-i18n="tab.past.combat"></button></nav>
       <div class="pane on" id="combat-overview"></div><div class="pane" id="combat-windows"></div><div class="pane" id="combat-look"></div><div class="pane" id="combat-behaviour"></div><div class="pane" id="combat-past"></div>
     </section>
 
     <section class="view" id="v-debrief" aria-label="debrief">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.debrief"></h2><h1 data-i18n="page.debrief.h1"></h1><p class="sub" data-i18n="page.debrief.sub"></p></div></div>
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.debrief"></h2><h1 data-i18n="page.debrief.h1"></h1><p class="sub" data-i18n="page.debrief.sub"></p></div><button class="btn sm kbgo" data-go="keys" data-i18n-title="tip.kb.go"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button></div>
       <div class="pane on" id="debrief-overview"></div>
     </section>
 
     <section class="view" id="v-pvp" aria-label="pvp">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.pvp"></h2><h1 data-i18n="page.pvp.h1"></h1><p class="sub" data-i18n="page.pvp.sub"></p></div></div>
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.pvp"></h2><h1 data-i18n="page.pvp.h1"></h1><p class="sub" data-i18n="page.pvp.sub"></p></div><button class="btn sm kbgo" data-go="keys" data-i18n-title="tip.kb.go"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button></div>
       <nav class="tabs" data-scope="pvp"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.past" data-tab="past" data-i18n="tab.past.pvp"></button><button class="tab" data-i18n-title="tip.pvp.tab.cmp" data-tab="cmp" data-i18n="tab.pvp.cmp"></button></nav>
       <div class="pane on" id="pvp-overview"></div><div class="pane" id="pvp-past"></div><div class="pane" id="pvp-cmp"></div>
     </section>
 
     <section class="view" id="v-thargoid" aria-label="thargoid">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.thargoid"></h2><h1 data-i18n="page.thargoid.h1"></h1><p class="sub" data-i18n="page.thargoid.sub"></p></div></div>
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.thargoid"></h2><h1 data-i18n="page.thargoid.h1"></h1><p class="sub" data-i18n="page.thargoid.sub"></p></div><button class="btn sm kbgo" data-go="keys" data-i18n-title="tip.kb.go"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button></div>
       <nav class="tabs" data-scope="thargoid"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.past" data-tab="past" data-i18n="tab.past.thargoid"></button></nav>
       <div class="pane on" id="thargoid-overview"></div><div class="pane" id="thargoid-past"></div>
     </section>
 
     <section class="view" id="v-foot" aria-label="foot">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.foot"></h2><h1 data-i18n="page.foot.h1"></h1><p class="sub" data-i18n="page.soon.sub"></p></div></div>
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.foot"></h2><h1 data-i18n="page.foot.h1"></h1><p class="sub" data-i18n="page.soon.sub"></p></div><button class="btn sm kbgo" data-go="keys" data-i18n-title="tip.kb.go"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span data-i18n="nav.keys"></span></button></div>
       <nav class="tabs" data-scope="foot"><button class="tab on" data-i18n-title="tip.tab.overview" data-tab="overview" data-i18n="tab.overview"></button><button class="tab" data-i18n-title="tip.tab.planned" data-tab="past" data-i18n="tab.past.foot"></button></nav>
       <div class="pane on" id="foot-overview"></div><div class="pane" id="foot-past"></div>
     </section>
 
-    <section class="view" id="v-keys" aria-label="Key Bindings">
-      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.keys"></h2><h1 data-i18n="page.keys.h1"></h1><p class="sub" data-i18n="page.keys.sub"></p></div></div>
-      <nav class="tabs" data-scope="keys"><button class="tab on" data-i18n-title="tip.tab.main" data-tab="main" data-i18n="menu.tab.main"></button><button class="tab" data-i18n-title="tip.tab.map" data-tab="map" data-i18n="menu.tab.map"></button><button class="tab" data-i18n-title="tip.tab.combat" data-tab="combat" data-i18n="menu.tab.combat"></button><button class="tab" data-i18n-title="tip.tab.thargoid" data-tab="thargoid" data-i18n="menu.tab.thargoid"></button><button class="tab" data-i18n-title="tip.tab.foot" data-tab="foot" data-i18n="menu.tab.foot"></button></nav>
-      <div class="pane on" id="keys-main"></div><div class="pane" id="keys-map"></div><div class="pane" id="keys-combat"></div><div class="pane" id="keys-thargoid"></div><div class="pane" id="keys-foot"></div>
+
+    <section class="view" id="v-bgs" aria-label="bgs">
+      <div class="head rise" style="--i:0"><div><h2 data-i18n="nav.bgs"></h2><h1 data-i18n="page.bgs.h1"></h1><p class="sub" data-i18n="page.bgs.sub"></p></div></div>
+      <nav class="tabs" data-scope="bgs"><button class="tab on" data-i18n-title="tip.bgs.tab.setup" data-tab="setup" data-i18n="bgs.tab.setup"></button><button class="tab" data-i18n-title="tip.bgs.tab.today" data-tab="today" data-i18n="bgs.tab.today"></button><button class="tab" data-i18n-title="tip.bgs.tab.movers" data-tab="movers" data-i18n="bgs.tab.movers"></button><button class="tab" data-i18n-title="tip.bgs.tab.risk" data-tab="risk" data-i18n="bgs.tab.risk"></button><button class="tab" data-i18n-title="tip.bgs.tab.heat" data-tab="heat" data-i18n="bgs.tab.heat"></button><button class="tab" data-i18n-title="tip.bgs.tab.trends" data-tab="trends" data-i18n="bgs.tab.trends"></button><button class="tab" data-i18n-title="tip.bgs.tab.fleet" data-tab="fleet" data-i18n="bgs.tab.fleet"></button><button class="tab" data-i18n-title="tip.bgs.tab.tick" data-tab="tick" data-i18n="bgs.tab.tick"></button><button class="tab" data-i18n-title="tip.bgs.tab.report" data-tab="report" data-i18n="bgs.tab.report"></button></nav>
+      <div class="pane on" id="bgs-setup"></div><div class="pane" id="bgs-today"></div><div class="pane" id="bgs-movers"></div><div class="pane" id="bgs-risk"></div><div class="pane" id="bgs-heat"></div><div class="pane" id="bgs-trends"></div><div class="pane" id="bgs-fleet"></div><div class="pane" id="bgs-tick"></div><div class="pane" id="bgs-report"></div>
     </section>
 
     <section class="view" id="v-prefs" aria-label="Settings">
       <div class="head rise" style="--i:0"><div><h2 data-i18n="prefs.h2"></h2><h1 data-i18n="prefs.h1"></h1></div></div>
+      <nav class="tabs" data-scope="prefs"><button class="tab on" data-i18n-title="tip.tab.prefs.general" data-tab="general" data-i18n="prefs.tab.general"></button><button class="tab" data-i18n-title="tip.nav.keys" data-tab="keys" data-i18n="nav.keys"></button></nav>
       <div class="pane on" id="prefs-general"><div class="narrow">
         <h2 class="rise" style="--i:1" data-i18n="prefs.lang"></h2>
         <div class="list rise" style="--i:2" id="langs" role="radiogroup"></div>
         <p class="note rise" style="--i:3" data-i18n="prefs.lang.note"></p>
       </div><div class="narrow" id="prefs-x"></div></div>
+      <div class="pane" id="prefs-keys">
+        <p class="sub" data-i18n="page.keys.sub"></p>
+        <nav class="tabs" data-scope="keys"><button class="tab on" data-i18n-title="tip.tab.main" data-tab="main" data-i18n="menu.tab.main"></button><button class="tab" data-i18n-title="tip.tab.map" data-tab="map" data-i18n="menu.tab.map"></button><button class="tab" data-i18n-title="tip.tab.combat" data-tab="combat" data-i18n="menu.tab.combat"></button><button class="tab" data-i18n-title="tip.tab.thargoid" data-tab="thargoid" data-i18n="menu.tab.thargoid"></button><button class="tab" data-i18n-title="tip.tab.foot" data-tab="foot" data-i18n="menu.tab.foot"></button></nav>
+        <div class="pane on" id="keys-main"></div><div class="pane" id="keys-map"></div><div class="pane" id="keys-combat"></div><div class="pane" id="keys-thargoid"></div><div class="pane" id="keys-foot"></div>
+      </div>
     </section>
 
     <section class="view" id="v-updates" aria-label="Updates">
@@ -146,9 +157,20 @@
 <script src="visits-panel.js"></script>
 <script src="visits-ui.js"></script>
 <script src="combatui.js"></script>
+<script src="bgs-calc.js"></script>
+<script src="bgs-svg.js"></script>
+<script src="bgs-views.js"></script>
+<script src="bgs-heat.js"></script>
+<script src="bgs-tick.js"></script>
+<script src="bgs-detail.js"></script>
+<script src="bgs-setup.js"></script>
+<script src="bgs-confirm.js"></script>
+<script src="bgs-ui.js"></script>
+<script src="kbcapture.js"></script>
 <script src="keybind.js"></script>
 <script src="feedback.js"></script>
 <script src="prefsx.js"></script>
+<script src="themes-ui.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

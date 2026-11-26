@@ -4,6 +4,7 @@
 // and the faint "dust" of the older history, built ONCE from the month grids (500 ly cells), never from single stops.
 (function () {
   var G = window.GVV, st = G.store;
+  var TH = window.GVTH ? GVTH.tint : function (c) { return c; };   // colour theme: the default theme returns the colour unchanged (themes.js)
   G.last = null;                                       // { resp, mon }: a language change builds the page again and starts from it (the archive is not kept)
 
   G.onIndex = function (s, resp) {
@@ -59,7 +60,7 @@
   };
   G.drawIdxDust = function (s, c, sc, cp) {
     var du = s.idxDust; if (!du || sc > .12) return; var cam = s.cam, W = s.W, H = s.H, fade = sc > .06 ? (.12 - sc) / .06 : 1;
-    c.fillStyle = "rgba(143,123,216,1)";
+    c.fillStyle = TH("rgba(143,123,216,1)");
     for (var q = 0; q < du.x.length; q++) {
       var X = cam.ox + (du.x[q] - cam.cx) * sc, Y = cam.oy + (du.z[q] - cam.cz) * cp * sc; if (X < -4 || X > W + 4 || Y < -4 || Y > H + 4) continue;
       var lg = Math.log10(du.n[q] + 1), r = .8 + Math.min(1.5, lg * .6); c.globalAlpha = (.12 + .2 * Math.min(1, lg / 3)) * fade; c.fillRect(X - r, Y - r, r * 2, r * 2);

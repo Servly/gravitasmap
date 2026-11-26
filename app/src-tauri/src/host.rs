@@ -137,6 +137,10 @@ pub struct Host {
     pub guess_gui: Option<i64>,
     /// a past report shown on the HUD from the Past combats window, and until when (unix seconds)
     pub shown: Option<(Value, f64)>,
+    /// the Claims chip (Show claims / Restore claims): its title, its second line and until when (unix seconds)
+    pub claims_chip: Option<(String, String, f64)>,
+    /// while the chip shows over a hidden HUD (free look, maps, hidden by key, not in the cockpit) it is the only window drawn
+    only_chip: bool,
     /// Preview: made-up fights on the windows (from the settings), and when it was turned on (the COMBAT banner shows first)
     pub preview: bool,
     pub preview_t0: f64,
@@ -212,6 +216,8 @@ impl Host {
             gui: 0,
             guess_gui: None,
             shown: None,
+            claims_chip: None,
+            only_chip: false,
             preview: false,
             preview_t0: 0.0,
             key_texts: HashMap::new(),
@@ -422,10 +428,13 @@ impl Host {
         let editing = self.edit.is_some();
         // (on foot there is no cockpit: only the card that says "On Foot Mode On" is drawn)
         let foot_card = self.mode_card.is_some_and(|c| c.0 == Mode::Foot && now < c.1);
+        let chip_on = self.claims_chip.as_ref().is_some_and(|c| now < c.2);
+        self.only_chip = false;
         if !self.in_cockpit() && !foot_card && shown.is_none() && !self.preview && !editing {
             self.need_boot = true;
             self.keys_shown = false; // (the HUD hides: nothing more is asked of the engine; the Keys card comes again with the HUD)
-            return t;
+            if !chip_on { return t; }
+            self.only_chip = true; // (the player asked for Claims: that chip alone shows)
         }
         if !self.keys_shown {
             // the Keys card, 10 s each time the HUD comes on in the cockpit
@@ -438,12 +447,14 @@ impl Host {
         }
         self.hot = live_hot;
         if self.key_hidden {
-            return t; // Ctrl+Shift+hide: the fight is still followed, the report still kept
+            if !chip_on { return t; } // Ctrl+Shift+hide: the fight is still followed, the report still kept
+            self.only_chip = true;
         }
         // the maps and station services, by panel, music or key (the HUD goes at once), and free look
         let in_map = self.game_menu || (5..12).contains(&self.gui) || self.map_music || self.guess_gui.is_some_and(|g| (5..12).contains(&g));
         if ((self.looking && self.set.look_hide) || (self.set.hide_maps && in_map)) && shown.is_none() && !editing {  // (Preview behaves as the game will: hidden in free look and in the maps)
-            return t;
+            if !chip_on { return t; }
+            self.only_chip = true;
         }
         let scan = if self.set.combat_on && !self.preview { Some(self.eng.scan()) } else { None };
         let gone = if self.preview { json!({}) } else { self.eng.gone() };
@@ -453,6 +464,29 @@ impl Host {
         let v_shown = if self.preview { Some(combat::sample(now * 1000.0)) } else if shown.is_some() && !on_now { shown.clone() } else { v.clone().filter(|x| !self.is_cleared(x)) }; // Preview, or a past report asked for from Past combats
         t.items = self.windows(v_shown.as_ref(), scan.as_ref(), &gone, now, shown.is_some());
         t
+    }
+
+    /// Show claims: the Claims total as the Bounty counter's CLAIMS tile works it out (bounties not cashed in, the wing estimate when it counts, combat bonds),
+    /// for 8 seconds, with where it comes from. `restored`: the line said "Claims restored".
+    pub fn show_claims(&mut self, now: f64, restored: bool) {
+        let mut bounty = self.counter.view(self.set.bonds);
+        bounty["claim"] = self.claims.view();
+        if self.set.claim_bonds {
+            let base = self.claims.base().to_string();
+            self.bonds.set_base(&base);
+            bounty["bond_owed"] = self.bonds.view();
+        }
+        let total = combat::claims_total(Some(&bounty), self.set.wing_bonus_on);
+        let (text, sub) = match total {
+            Some(t) => {
+                let when = self.claims.base_local();
+                let src = if when.is_empty() { crate::dbcard::tx(&self.tr, "claims.src.all", &[]) } else { crate::dbcard::tx(&self.tr, "claims.src.reset", &[("t", when)]) };
+                let head = crate::dbcard::tx(&self.tr, if restored { "claims.chip.restored" } else { "claims.chip" }, &[("n", crate::pyval::num(Some(&json!(t.round()))))]);
+                (head, src)
+            }
+            None => (crate::dbcard::tx(&self.tr, "claims.chip.wait", &[]), String::new()),
+        };
+        self.claims_chip = Some((text, sub, now + 8.0));
     }
 
     /// A fight that is over and whose report was cleared (Controls.cleared): nothing of it is shown between fights any more.
@@ -505,7 +539,7 @@ impl Host {
             let is_db = crate::dbcard::is_key(key);
             let is_pvp = *key == "pvp";
             let touched = edit.as_deref().is_some() || preview;
-            if foot_only && *key != "modecard" { continue; }
+            if (foot_only || self.only_chip) && *key != "modecard" { continue; }
             if !self.combat_enabled && !is_th && !is_db && !is_pvp && *key != "modecard" && !touched { continue; }
             if is_pvp && !self.pvp.on && !touched { continue; }
             if is_db && !self.db.on && !touched { continue; }
@@ -525,7 +559,11 @@ impl Host {
                 }
             } else if *key == "modecard" {
                 // the card that says which mode just came on (a few seconds, by itself)
-                if w.on || editing {
+                let claims = self.claims_chip.clone().filter(|c| now < c.2 && !editing && !preview);
+                if let Some((txt, sub, _)) = claims {
+                    // Show claims / Restore claims: the Claims total, drawn even when the Combat Mode card is off
+                    m = Some(json!({"kind": "chip", "tone": "green", "text": txt, "sub": sub}));
+                } else if w.on || editing {
                     let want = if editing || preview { Some(Mode::Combat) } else { self.mode_card.filter(|c| now < c.1).map(|c| c.0) };
                     if let Some(md) = want {
                         m = Some(json!({"kind": "chip", "tone": if md == Mode::Foot { "green" } else { "red" }, "text": crate::thargoid::tx(&self.tr, md.key(), &[]), "sub": ""}));
