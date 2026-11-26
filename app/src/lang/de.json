@@ -1531,5 +1531,11 @@
   "bgs.ed.fail": "Die Änderung konnte nicht gespeichert werden.",
   "bgs.ed.none": "Noch keine gespeicherten Momentaufnahmen. Zuerst aus Screenshots einlesen oder eine CSV importieren.",
   "bgs.ed.pasted": "Eingefügte Zellen: {n}. Speichern, um sie zu behalten.",
-  "bgs.ed.pasted_bad": "Eingefügte Zellen: {n}. Übersprungen, weil keine Werte: {b}."
+  "bgs.ed.pasted_bad": "Eingefügte Zellen: {n}. Übersprungen, weil keine Werte: {b}.",
+  "bgs.res": "Ansicht",
+  "bgs.res.daily": "Täglich",
+  "bgs.res.snap": "Jede Momentaufnahme",
+  "tip.bgs.res": "Täglich: eine Spalte pro UTC-Tag mit der letzten Momentaufnahme des Tages (jede Momentaufnahme bleibt gespeichert, die Änderungen innerhalb eines Tages stehen in den Tipps). Jede Momentaufnahme: je eine Spalte.",
+  "bgs.tp.step": "Geändert zwischen {a} und {b}: {d}",
+  "bgs.tp.snaps": "Momentaufnahmen an diesem Tag: {n} (die letzte wird gezeigt)"
 }

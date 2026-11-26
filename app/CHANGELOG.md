@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.45
+- BGS WATCH: a daily view. A new View switch next to the filters: Daily shows one column per UTC day with the last snapshot of that day, Every snapshot shows each one. Every snapshot stays saved. In the daily view each cell's tip lists the changes inside that day with the two readings between which each one happened, so the tick can still be followed.
+
 ## 0.9.44
 - BGS WATCH layout fixes. Charts keep their natural size, so the text no longer grows on a wide window. The dates on the Overview are written upright, the three groups in Attention line up their columns, the report no longer prints a long number for the minor change, Save looks off when nothing changed, the inputs in Setup have the same height, and the Trends title no longer says 1 days.
 

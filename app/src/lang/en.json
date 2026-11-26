@@ -1531,5 +1531,11 @@
   "bgs.ed.fail": "The change could not be saved.",
   "bgs.ed.none": "No saved snapshots yet. Import from screenshots or import a CSV first.",
   "bgs.ed.pasted": "Cells pasted: {n}. Save to keep them.",
-  "bgs.ed.pasted_bad": "Cells pasted: {n}. Skipped because they were not values: {b}."
+  "bgs.ed.pasted_bad": "Cells pasted: {n}. Skipped because they were not values: {b}.",
+  "bgs.res": "View",
+  "bgs.res.daily": "Daily",
+  "bgs.res.snap": "Every snapshot",
+  "tip.bgs.res": "Daily: one column per UTC day, showing the last snapshot of that day (every snapshot stays saved, and the changes inside a day are in the tips). Every snapshot: one column each.",
+  "bgs.tp.step": "Changed between {a} and {b}: {d}",
+  "bgs.tp.snaps": "Snapshots that day: {n} (the last one is shown)"
 }

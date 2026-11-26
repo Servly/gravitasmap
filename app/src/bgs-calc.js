@@ -41,7 +41,7 @@
       var v = o.v.slice(0, nS), f = o.f.slice(0, nS), li = -1, j;
       for (j = K; j >= 0; j--) if (v[j] != null) { li = j; break; }
       if (li < 0) return null;
-      var s = { n: o.n, v: v, f: f, li: li, stale: li < K, last: v[li], fi: v.findIndex(function (x) { return x != null; }) };
+      var s = { n: o.n, steps: o.steps, v: v, f: f, li: li, stale: li < K, last: v[li], fi: v.findIndex(function (x) { return x != null; }) };
       s.zone = s.last < st.lo ? "low" : s.last > st.hi ? "high" : "in";
       s.bi = baseIdx(snaps, s, li, st.base); s.base = s.bi >= 0 ? v[s.bi] : null;
       s.d = s.base == null ? null : r1(s.last - s.base);

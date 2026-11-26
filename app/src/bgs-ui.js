@@ -23,11 +23,33 @@
     });
     return { squad: "", snaps: snaps, sys: order };
   }
+  // Daily view: one column per UTC day, its value is the day's LAST snapshot. Every raw snapshot stays stored; the steps inside a day (with the two readings
+  // between which each change happened) are kept for the tips, so the tick can still be followed.
+  function daily(d) {
+    var days = [], idx = {};
+    d.snaps.forEach(function (sn, i) { var k = new Date(sn.t).toISOString().slice(0, 10); if (!(k in idx)) { idx[k] = days.length; days.push({ k: k, last: i, n: 0 }); } var g = days[idx[k]]; g.last = i; g.n++; });
+    var dayOf = d.snaps.map(function (sn) { return idx[new Date(sn.t).toISOString().slice(0, 10)]; });
+    var snaps = days.map(function (g) { var sn = d.snaps[g.last]; return { t: sn.t, complete: sn.complete, missing: sn.missing, minOld: sn.minOld, id: sn.id, n: g.n, day: g.k }; });
+    var sys = d.sys.map(function (o) {
+      var v = [], f = [], steps = [], pv = null, pt = null, i;
+      days.forEach(function (g, di) { v[di] = null; f[di] = ""; steps[di] = []; });
+      for (i = 0; i < d.snaps.length; i++) {
+        if (o.v[i] == null) continue;
+        var di = dayOf[i];
+        if (pv != null && o.v[i] !== pv) steps[di].push({ a: pt, b: d.snaps[i].t, d: Math.round((o.v[i] - pv) * 10) / 10 });
+        pv = o.v[i]; pt = d.snaps[i].t; v[di] = o.v[i]; f[di] = o.f[i];
+      }
+      return { n: o.n, v: v, f: f, steps: steps };
+    });
+    return { squad: d.squad, snaps: snaps, sys: sys };
+  }
   function build() {
     var g = store.g, s = (g && g.settings) || {};
     if (!ui.setSeen && s.minor != null) { ui.minor = Math.round(s.minor * 10) / 10; ui.tickPct = s.tick_pct == null ? 20 : Math.round(s.tick_pct); ui.setSeen = true; } // (kept from the last session)
     if (!store.data || !store.data.snaps.length) { store.M = null; return; }
-    store.M = C.model(store.data, { lo: s.low == null ? 50 : s.low, hi: s.high == null ? 65 : s.high, minor: ui.minor, base: ui.base, days: ui.days, tickPct: ui.tickPct });
+    var nDays = {}; store.data.snaps.forEach(function (x) { nDays[new Date(x.t).toISOString().slice(0, 10)] = 1; });
+    var dataIn = ui.res !== "snap" && Object.keys(nDays).length >= 2 ? daily(store.data) : store.data;
+    store.M = C.model(dataIn, { lo: s.low == null ? 50 : s.low, hi: s.high == null ? 65 : s.high, minor: ui.minor, base: ui.base, days: ui.days, tickPct: ui.tickPct });
     V.setModel(store.M); BG.M = store.M;
   }
   function load(force) {
@@ -90,6 +112,7 @@
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
     var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
       lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["7d", t("bgs.base.7d")]])) +
+      lab("tip.bgs.res", t("bgs.res"), sel("bres", ui.res === "snap" ? "snap" : "daily", [["daily", t("bgs.res.daily")], ["snap", t("bgs.res.snap")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
     var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');
@@ -138,7 +161,7 @@
         (id === "blo" ? invoke("bgs_settings_set", { key: "low", value: lo }) : invoke("bgs_settings_set", { key: "high", value: hi })).then(function (r) { if (r && r.ok) load(true); else { BG.toast && BG.toast(BG.errText(r && r.error)); load(true); } });
         return;
       }
-      if (id === "bmin") { ui.minor = Math.max(0.1, +x.value || 0.3); invoke("bgs_settings_set", { key: "minor", value: ui.minor }); } else if (id === "btick") { ui.tickPct = Math.max(2, Math.min(90, +x.value || 20)); invoke("bgs_settings_set", { key: "tick_pct", value: ui.tickPct }); } else if (id === "bbase") ui.base = x.value; else if (id === "bdays") ui.days = +x.value;
+      if (id === "bmin") { ui.minor = Math.max(0.1, +x.value || 0.3); invoke("bgs_settings_set", { key: "minor", value: ui.minor }); } else if (id === "btick") { ui.tickPct = Math.max(2, Math.min(90, +x.value || 20)); invoke("bgs_settings_set", { key: "tick_pct", value: ui.tickPct }); } else if (id === "bbase") ui.base = x.value; else if (id === "bdays") ui.days = +x.value; else if (id === "bres") ui.res = x.value;
       else if (x.dataset.rep) ui.rep[x.dataset.rep] = x.checked ? 1 : 0; else return;
       build(); store.rev++; renderAll();
     });

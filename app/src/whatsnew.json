@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.45",
+      "en": [
+        "BGS WATCH: a daily view. A new View switch next to the filters: Daily shows one column per UTC day with the last snapshot of that day, Every snapshot shows each one. Every snapshot stays saved. In the daily view each cell's tip lists the changes inside that day with the two readings between which each one happened, so the tick can still be followed."
+      ],
+      "de": [
+        "BGS WATCH: eine Tagesansicht. Ein neuer Ansicht-Schalter neben den Filtern: Täglich zeigt eine Spalte pro UTC-Tag mit der letzten Momentaufnahme des Tages, Jede Momentaufnahme zeigt jede einzeln. Jede Momentaufnahme bleibt gespeichert. In der Tagesansicht listet der Tipp jeder Zelle die Änderungen innerhalb des Tages mit den zwei Messungen, zwischen denen sie geschahen, sodass der Tick weiter verfolgt werden kann."
+      ],
+      "es": [
+        "BGS WATCH: una vista diaria. Un nuevo selector Vista junto a los filtros: Diario muestra una columna por día UTC con la última instantánea del día, Cada instantánea muestra cada una. Todas las instantáneas siguen guardadas. En la vista diaria, el tip de cada celda lista los cambios dentro del día con las dos lecturas entre las que ocurrió cada uno, así se puede seguir el tick."
+      ],
+      "fr": [
+        "BGS WATCH : une vue quotidienne. Un nouveau sélecteur Vue à côté des filtres : Quotidien montre une colonne par jour UTC avec le dernier instantané du jour, Chaque instantané les montre tous. Chaque instantané reste enregistré. Dans la vue quotidienne, l'infobulle de chaque cellule liste les changements dans la journée avec les deux lectures entre lesquelles chacun s'est produit, on peut donc suivre le tick."
+      ],
+      "pt-br": [
+        "BGS WATCH: uma visão diária. Um novo seletor Visão ao lado dos filtros: Diário mostra uma coluna por dia UTC com o último instantâneo do dia, Cada instantâneo mostra cada um. Todos os instantâneos continuam salvos. Na visão diária, a dica de cada célula lista as mudanças dentro do dia com as duas leituras entre as quais cada uma ocorreu, assim o tick pode ser acompanhado."
+      ],
+      "ru": [
+        "BGS WATCH: просмотр по дням. Новый переключатель Вид рядом с фильтрами: По дням показывает один столбец на день UTC с последним снимком дня, Каждый снимок показывает каждый. Все снимки остаются сохранёнными. В режиме по дням подсказка каждой ячейки перечисляет изменения внутри дня с двумя показаниями, между которыми каждое произошло, так что тик можно отслеживать."
+      ]
+    },
+    {
       "v": "0.9.44",
       "en": [
         "BGS WATCH layout fixes. Charts keep their natural size, so the text no longer grows on a wide window. The dates on the Overview are written upright, the three groups in Attention line up their columns, the report no longer prints a long number for the minor change, Save looks off when nothing changed, the inputs in Setup have the same height, and the Trends title no longer says 1 days."

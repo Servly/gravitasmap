@@ -1531,5 +1531,11 @@
   "bgs.ed.fail": "Não foi possível salvar a alteração.",
   "bgs.ed.none": "Nenhum instantâneo salvo ainda. Primeiro importe das capturas ou importe um CSV.",
   "bgs.ed.pasted": "Células coladas: {n}. Salve para mantê-las.",
-  "bgs.ed.pasted_bad": "Células coladas: {n}. Ignoradas por não serem valores: {b}."
+  "bgs.ed.pasted_bad": "Células coladas: {n}. Ignoradas por não serem valores: {b}.",
+  "bgs.res": "Visão",
+  "bgs.res.daily": "Diário",
+  "bgs.res.snap": "Cada instantâneo",
+  "tip.bgs.res": "Diário: uma coluna por dia UTC com o último instantâneo do dia (cada instantâneo continua salvo e as mudanças dentro de um dia estão nas dicas). Cada instantâneo: uma coluna cada.",
+  "bgs.tp.step": "Mudou entre {a} e {b}: {d}",
+  "bgs.tp.snaps": "Instantâneos nesse dia: {n} (o último é mostrado)"
 }

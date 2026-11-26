@@ -26,6 +26,11 @@
     if (s.edge === "low") return t(dm >= 1 ? "bgs.r2.fall" : s.toward >= 0.15 ? "bgs.r2.trend_low" : "bgs.r2.near_low", v);
     return t(dm >= 1 ? "bgs.r2.rise" : s.toward >= 0.15 ? "bgs.r2.trend_high" : "bgs.r2.near_high", v);
   }
+  // the steps inside one column (daily view): when each change happened, as the two readings it fell between
+  function stepsText(s, k) {
+    var st = s.steps && s.steps[k]; if (!st || !st.length) return "";
+    return "\n" + st.map(function (x) { return t("bgs.tp.step", { a: when(x.a), b: when(x.b), d: sg(x.d) }); }).join("\n");
+  }
   function lastChg(M, s) { return s.lastChg ? t("bgs.tp.lastchg", { a: when(s.lastChg.a), b: when(s.lastChg.b) }) : t("bgs.tp.nochg"); }
   V.reason = reason;
 
@@ -80,7 +85,7 @@
     for (k = M.first; k <= M.K; k++) {
       if ((k - M.first) % every && k !== M.K) continue;
       var lx = L + (k - M.first) * cw + cw / 2 + 4;
-      o += '<text class="bg-ax" transform="rotate(-90 ' + lx + " " + (CH - 6) + ')" x="' + lx + '" y="' + (CH - 6) + '"' + tip(when(M.snaps[k].t)) + ">" + esc(C.dt(M.snaps[k].t)) + "</text>";
+      o += '<text class="bg-ax" transform="rotate(-90 ' + lx + " " + (CH - 6) + ')" x="' + lx + '" y="' + (CH - 6) + '"' + tip(when(M.snaps[k].t)) + ">" + esc(C.dt(M.snaps[k].t)) + (M.snaps[k].n > 1 ? " ×" + M.snaps[k].n : "") + "</text>";
     }
     ord.forEach(function (s, ri) {
       var y = CH + ri * RH;
@@ -89,7 +94,7 @@
         var v = s.v[k], pv = null, j; for (j = k - 1; j >= M.first; j--) if (s.v[j] != null) { pv = s.v[j]; break; }
         var dd = v != null && pv != null ? Math.round((v - pv) * 10) / 10 : null, c, x = L + (k - M.first) * cw;
         if (v == null) c = "transparent"; else if (dd == null || Math.abs(dd) < minor) c = "rgba(255,255,255,.07)"; else c = (dd > 0 ? "rgba(var(--good-rgb)," : "rgba(var(--bad-rgb),") + Math.min(1, 0.3 + Math.abs(dd) / 3).toFixed(2) + ")";
-        var tp = s.n + "\n" + when(M.snaps[k].t) + "\n" + (v == null ? t("bgs.tp.noread") : f1(v) + (dd == null ? "" : " (" + sg(dd) + ")"));
+        var tp = s.n + "\n" + when(M.snaps[k].t) + (M.snaps[k].n > 1 ? "\n" + t("bgs.tp.snaps", { n: M.snaps[k].n }) : "") + "\n" + (v == null ? t("bgs.tp.noread") : f1(v) + (dd == null ? "" : " (" + sg(dd) + ")")) + stepsText(s, k);
         o += '<rect x="' + x + '" y="' + y + '" width="' + (cw - 1) + '" height="' + (RH - 1) + '" style="fill:' + c + '" data-sys="' + esc(s.n) + '"' + tip(tp) + "/>";
       }
     });

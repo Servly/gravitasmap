@@ -1531,5 +1531,11 @@
   "bgs.ed.fail": "No se pudo guardar el cambio.",
   "bgs.ed.none": "Aún no hay instantáneas guardadas. Primero importa desde capturas o importa un CSV.",
   "bgs.ed.pasted": "Celdas pegadas: {n}. Guarda para conservarlas.",
-  "bgs.ed.pasted_bad": "Celdas pegadas: {n}. Omitidas por no ser valores: {b}."
+  "bgs.ed.pasted_bad": "Celdas pegadas: {n}. Omitidas por no ser valores: {b}.",
+  "bgs.res": "Vista",
+  "bgs.res.daily": "Diario",
+  "bgs.res.snap": "Cada instantánea",
+  "tip.bgs.res": "Diario: una columna por día UTC con la última instantánea del día (cada instantánea sigue guardada y los cambios dentro de un día están en los tips). Cada instantánea: una columna cada una.",
+  "bgs.tp.step": "Cambió entre {a} y {b}: {d}",
+  "bgs.tp.snaps": "Instantáneas ese día: {n} (se muestra la última)"
 }
