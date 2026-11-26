@@ -9,8 +9,10 @@
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   function colName(i) { var s = ""; i++; while (i > 0) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
   function pad(n) { return (n < 10 ? "0" : "") + n; }
-  function fmtT(iso) { var d = new Date(iso); return isNaN(d) ? iso : d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) + " " + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()); }
-  function parseT(s) { var m = /^\s*(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?\s*$/.exec(s); if (!m) return null; var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0))); return isNaN(d) ? null : d.toISOString().replace(/\.\d+Z$/, "Z"); }
+  // times are shown and typed in THIS PC's time (0.9.51); stored as UTC
+  function fmtT(iso) { var d = new Date(iso); return isNaN(d) ? iso : d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function parseT(s) { var m = /^\s*(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?\s*$/.exec(s); if (!m) return null; var d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)); return isNaN(d) ? null : d.toISOString().replace(/\.\d+Z$/, "Z"); }
+  function tmx(iso) { var ms = new Date(iso).getTime(); return BG.calc && !isNaN(ms) ? BG.calc.tm(ms) : fmtT(iso); }
   function parseV(s) { s = String(s).trim().replace(",", "."); if (!s) return null; var m = /^(\d{1,3})(?:\.(\d))?$/.exec(s.replace("%", "")); if (!m) return undefined; var v = +m[1] * 10 + (m[2] ? +m[2] : 0); return v >= 0 && v <= 1000 ? v : undefined; }
   var fv = function (x) { return x == null ? "" : (x / 10).toFixed(1); };
 
@@ -18,6 +20,7 @@
     var mk = h.mk, tr = h.tr;
     var c = h.card("bgs.ed.h", parent), msg = mk("p", "bg-msg"), top = mk("div", "bg-btns"), wrap = mk("div", "bg-grid"), body = mk("div");
     c.appendChild(mk("p", "note", tr("bgs.ed.how")));
+    c.appendChild(mk("p", "note bg-edlegend", tr("bgs.ed.legend")));
     var save = h.tip(mk("button", "btn go", tr("bgs.ed.save")), "tip.bgs.ed.save"), undo = h.tip(mk("button", "btn", tr("bgs.ed.discard")), "tip.bgs.ed.discard"), find = h.tip(mk("input", "txt bg-edfind"), "tip.bgs.ed.find");
     save.type = "button"; undo.type = "button"; find.type = "search"; find.placeholder = tr("bgs.ed.findph");
     top.appendChild(save); top.appendChild(undo); top.appendChild(find); c.appendChild(top); c.appendChild(msg); c.appendChild(wrap); c.appendChild(body);
@@ -59,10 +62,10 @@
       });
       o += "</tr></thead><tbody>";
       rows.forEach(function (rw) {
-        o += '<tr><th class="bg-rowh">' + rw.i + '</th><th class="bg-sysn" data-sys="' + esc(rw.n) + '">' + esc(rw.n) + "</th>";
+        o += '<tr><th class="bg-rowh">' + rw.i + '</th><th class="bg-sysn" data-sys="' + esc(rw.n) + '">' + esc(rw.n) + (BG.popHtml ? BG.popHtml(rw.n) : "") + "</th>";
         st.cols.forEach(function (col, ci) {
           var k = key(ci, rw.n), ch = k in st.pend, v = valueAt(ci, rw.n), fl = st.flags[k] || "";
-          var tp = rw.n + "\n" + fmtT(col.t) + " UTC" + (ch ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : fl === "w" ? "\n" + tr("bgs.ed.unsure") : fl === "c" ? "\n" + tr("bgs.ed.corrected") : "");
+          var tp = rw.n + "\n" + tmx(col.t) + (ch ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : fl === "w" ? "\n" + tr("bgs.ed.unsure") : fl === "c" ? "\n" + tr("bgs.ed.corrected") : "");
           o += '<td class="bg-c' + (ch ? " chg" : "") + (fl && !ch ? " f" + fl : "") + (st.sel.r === rw.i && st.sel.c === ci ? " sel" : "") + '" data-r="' + rw.i + '" data-c="' + ci + '" data-tip="' + esc(tp) + '">' + esc(fv(v)) + "</td>";
         });
         o += "</tr>";
@@ -82,7 +85,7 @@
         if (commit && val === undefined) { i.classList.add("bad"); say(tr("bgs.ed.badval"), "err"); return; }
         st.editing = null; if (commit) { setVal(r, ci, val); say("", ""); }
         td.textContent = fv(valueAt(ci, name)); var k = key(ci, name); td.classList.toggle("chg", k in st.pend); td.classList.remove("ff"); updBtns(); select(r + dr, ci + dc);
-        if (commit) { td.setAttribute("data-tip", name + "\n" + fmtT(st.cols[ci].t) + " UTC" + (k in st.pend ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : "")); }
+        if (commit) { td.setAttribute("data-tip", name + "\n" + tmx(st.cols[ci].t) + (k in st.pend ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : "")); }
       }
       i.onkeydown = function (e) {
         if (e.key === "Enter") { e.preventDefault(); fin(true, e.shiftKey ? -1 : 1, 0); }

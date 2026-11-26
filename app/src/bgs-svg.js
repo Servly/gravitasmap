@@ -7,6 +7,14 @@
     goodA: function (a) { return "rgba(var(--good-rgb)," + a + ")"; }, badA: function (a) { return "rgba(var(--bad-rgb)," + a + ")"; }, warnA: function (a) { return "rgba(var(--warn-rgb)," + a + ")"; }, viA: function (a) { return "rgba(var(--vi-rgb)," + a + ")"; }, accA: function (a) { return "rgba(var(--acc-rgb)," + a + ")"; }, cyA: function (a) { return "rgba(var(--cy-rgb)," + a + ")"; } };
   var FONT = "Segoe UI,system-ui,sans-serif";
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  // 0.9.52: "(Pop: 316,782)" next to a system's name, from Spansh (BG.popMap is filled by bgs-ui.js from the app's saved answer; empty = nothing is shown)
+  BG.popMap = BG.popMap || {};
+  BG.popHtml = function (n) {
+    var v = BG.popMap[String(n).toLowerCase()];
+    if (v == null) return "";
+    var txt; try { txt = Number(v).toLocaleString(BG.lang || "en"); } catch (e) { txt = String(v); }
+    return ' <span class="bg-pop">(' + BG.tr("bgs.pop", { n: txt }) + ")</span>";
+  };
   function f1(x) { return x == null ? "" : (Math.round(x * 10) / 10).toFixed(1); }
   function sg(x) { return x == null ? "" : (x > 0 ? "+" : x < 0 ? "-" : "") + Math.abs(Math.round(x * 10) / 10).toFixed(1); }
   function arrow(d, tier) { return tier === "flat" || d == null ? "=" : d > 0 ? "▲" : "▼"; }

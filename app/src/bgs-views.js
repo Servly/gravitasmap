@@ -19,7 +19,7 @@
     return '<span class="' + cls + '" data-tip="' + esc(s.tier === "minor" ? t("tip.bgs.minor", { m: cur.st.minor }) : t("tip.bgs.chg")) + '">' + S.arrow(s.d, s.tier) + " " + (s.tier === "flat" ? "0.0" : S.sg(s.d)) + "</span>";
   }
   V.dtxt = dtxt;
-  function nm(s) { return '<a class="bg-sn" data-sys="' + esc(s.n) + '">' + esc(s.n) + "</a>" + (s.warn ? ' <i class="bg-wf" data-tip="' + esc(t("tip.bgs.warncell")) + '">◌</i>' : "") + (s.stale ? ' <i class="bg-wf" data-tip="' + esc(t("tip.bgs.stale")) + '">' + t("bgs.old") + "</i>" : ""); }
+  function nm(s) { return '<a class="bg-sn" data-sys="' + esc(s.n) + '">' + esc(s.n) + "</a>" + BG.popHtml(s.n) + (s.warn ? ' <i class="bg-wf" data-tip="' + esc(t("tip.bgs.warncell")) + '">◌</i>' : "") + (s.stale ? ' <i class="bg-wf" data-tip="' + esc(t("tip.bgs.stale")) + '">' + t("bgs.old") + "</i>" : ""); }
   V.nm = nm;
   V.baseLabel = function (M) { return t("bgs.base." + M.st.base); };
   function tile(l, v, s, c, tipKey) { return '<div class="bg-tile ' + c + '"' + (tipKey ? ' data-tip="' + esc(t(tipKey)) + '"' : "") + '><div class="bg-tl">' + l + '</div><div class="bg-tv">' + v + '</div><div class="bg-ts">' + s + "</div></div>"; }

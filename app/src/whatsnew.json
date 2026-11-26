@@ -1,6 +1,54 @@
 {
   "versions": [
     {
+      "v": "0.9.52",
+      "en": [
+        "BGS WATCH now remembers what you left. The Band edges, Compare with, View, Show and the sorting and filters of every tab come back as you set them, and a new band such as 70 to 80 is no longer pulled back to 50 (both edges are saved together). Next to every system you now see (Pop: number), its population from Spansh. The app asks Spansh only for the system names of your newest snapshot, at most every 6 hours, and the switch in the BGS Setup turns it off completely."
+      ],
+      "de": [
+        "BGS WATCH merkt sich jetzt, was du eingestellt hast. Die Band-Grenzen, Vergleichen mit, Ansicht, Anzeigen sowie Sortierung und Filter jedes Tabs kommen so zurück, wie du sie gelassen hast, und ein neues Band wie 70 bis 80 wird nicht mehr auf 50 zurückgesetzt (beide Grenzen werden zusammen gespeichert). Neben jedem System steht jetzt (Pop: Zahl), seine Einwohnerzahl von Spansh. Die App fragt Spansh nur nach den Systemnamen deiner neuesten Momentaufnahme, höchstens alle 6 Stunden, und der Schalter im BGS-Setup schaltet das ganz ab."
+      ],
+      "es": [
+        "BGS WATCH ahora recuerda lo que dejaste. Los bordes de la Banda, Comparar con, Vista, Mostrar y el orden y los filtros de cada pestaña vuelven como los dejaste, y una banda nueva como 70 a 80 ya no se devuelve a 50 (los dos bordes se guardan juntos). Junto a cada sistema ves ahora (Pop: número), su población según Spansh. La app solo pide a Spansh los nombres de los sistemas de tu última instantánea, como máximo cada 6 horas, y el interruptor de la configuración de BGS lo apaga por completo."
+      ],
+      "fr": [
+        "BGS WATCH se souvient maintenant de ce que vous avez réglé. Les bords de la Bande, Comparer avec, Vue, Afficher ainsi que le tri et les filtres de chaque onglet reviennent comme vous les avez laissés, et une nouvelle bande comme 70 à 80 n'est plus ramenée à 50 (les deux bords sont enregistrés ensemble). À côté de chaque système vous voyez maintenant (Pop : nombre), sa population selon Spansh. L'app ne demande à Spansh que les noms des systèmes de votre dernier instantané, au plus toutes les 6 heures, et l'interrupteur de la configuration BGS le coupe complètement."
+      ],
+      "pt-br": [
+        "O BGS WATCH agora lembra o que você deixou. Os limites da Faixa, Comparar com, Visão, Mostrar e a ordenação e os filtros de cada aba voltam como você deixou, e uma faixa nova como 70 a 80 não volta mais para 50 (os dois limites são salvos juntos). Ao lado de cada sistema você vê agora (Pop: número), a população segundo o Spansh. O app só pergunta ao Spansh os nomes dos sistemas do seu snapshot mais recente, no máximo a cada 6 horas, e o botão na configuração do BGS desliga isso por completo."
+      ],
+      "ru": [
+        "BGS WATCH теперь запоминает, что вы оставили. Границы диапазона, Сравнить с, Вид, Показать, а также сортировка и фильтры каждой вкладки возвращаются как вы их поставили, а новый диапазон вроде 70–80 больше не возвращается к 50 (обе границы сохраняются вместе). Рядом с каждой системой теперь видно (Pop: число), её население по данным Spansh. Приложение запрашивает у Spansh только названия систем из вашего последнего снимка, не чаще раза в 6 часов, а переключатель в настройках BGS отключает это полностью."
+      ]
+    },
+    {
+      "v": "0.9.51",
+      "en": [
+        "BGS WATCH reads your screenshots whatever the colour, gamma or brightness of your screen. The reader no longer depends on the default HUD colour: it works from the brightness of the picture, so a recoloured HUD, a very dark or very bright screen all read the same. The home system row (its name, SYSTEM OF ORIGIN and the little house) no longer breaks the name, and a name that cannot be read at all gets the one system that is still missing from the list, marked for you to look at.",
+        "A value the reader doubts whose runner-up reading equals the same system's value in your last snapshot now becomes that value (still marked), because values rarely change between two snapshots. All times are on your PC's clock first with UTC in brackets, the Tick tab has vertical date labels, a legend, a how-to-read note and a Show all button, compare can use 6, 12, 18 or 24 hours, Save picture writes the PNG into your Documents folder and tells you where, and the search box opens a system with Enter or Tab."
+      ],
+      "de": [
+        "BGS WATCH liest deine Screenshots bei jeder Farbe, jedem Gamma und jeder Helligkeit. Der Leser hängt nicht mehr von der Standard-HUD-Farbe ab: Er arbeitet mit der Helligkeit des Bildes, daher werden ein umgefärbtes HUD, ein sehr dunkler oder sehr heller Bildschirm gleich gelesen. Die Zeile des Heimatsystems (Name, SYSTEM OF ORIGIN und das kleine Haus) stört den Namen nicht mehr, und ein gar nicht lesbarer Name bekommt das eine System, das in der Liste noch fehlt, zur Kontrolle markiert.",
+        "Ein Wert, an dem der Leser zweifelt und dessen zweitbeste Lesung dem Wert desselben Systems in deinem letzten Snapshot entspricht, wird nun zu diesem Wert (weiter markiert), da sich Werte zwischen zwei Snapshots selten ändern. Alle Zeiten stehen zuerst nach der Uhr deines PCs, UTC in Klammern. Der Tick-Tab hat senkrechte Datumsbeschriftungen, eine Legende, eine Leseanleitung und die Schaltfläche Alle zeigen, der Vergleich kann 6, 12, 18 oder 24 Stunden nutzen, Bild speichern legt das PNG im Ordner Dokumente ab und sagt dir wo, und das Suchfeld öffnet ein System mit Enter oder Tab."
+      ],
+      "es": [
+        "BGS WATCH lee tus capturas sea cual sea el color, el gamma o el brillo de tu pantalla. El lector ya no depende del color de HUD por defecto: trabaja con el brillo de la imagen, así que un HUD recoloreado, una pantalla muy oscura o muy brillante se leen igual. La fila del sistema de origen (su nombre, SYSTEM OF ORIGIN y la casita) ya no rompe el nombre, y un nombre que no se puede leer recibe el único sistema que aún falta en la lista, marcado para que lo revises.",
+        "Un valor del que el lector duda y cuya segunda lectura coincide con el valor de ese sistema en tu última captura pasa a ser ese valor (sigue marcado), porque los valores rara vez cambian entre dos capturas. Todas las horas van primero según el reloj de tu PC, con UTC entre paréntesis. La pestaña Tick tiene fechas verticales, leyenda, una nota de cómo leerla y el botón Mostrar todo, la comparación puede usar 6, 12, 18 o 24 horas, Guardar imagen escribe el PNG en tu carpeta Documentos y te dice dónde, y el buscador abre un sistema con Enter o Tab."
+      ],
+      "fr": [
+        "BGS WATCH lit vos captures quels que soient la couleur, le gamma ou la luminosité de votre écran. Le lecteur ne dépend plus de la couleur de HUD par défaut : il travaille sur la luminosité de l'image, donc un HUD recoloré, un écran très sombre ou très lumineux se lisent pareil. La ligne du système d'origine (son nom, SYSTEM OF ORIGIN et la petite maison) ne casse plus le nom, et un nom illisible reçoit le seul système encore absent de la liste, marqué pour que vous le vérifiiez.",
+        "Une valeur dont le lecteur doute et dont la deuxième lecture égale la valeur de ce système dans votre dernier instantané devient cette valeur (toujours marquée), car les valeurs changent rarement entre deux instantanés. Toutes les heures sont d'abord celles de l'horloge de votre PC, avec UTC entre parenthèses. L'onglet Tick a des dates verticales, une légende, une note de lecture et un bouton Tout afficher, la comparaison peut utiliser 6, 12, 18 ou 24 heures, Enregistrer l'image écrit le PNG dans votre dossier Documents et vous dit où, et la recherche ouvre un système avec Entrée ou Tab."
+      ],
+      "pt-br": [
+        "O BGS WATCH lê suas capturas qualquer que seja a cor, o gama ou o brilho da sua tela. O leitor não depende mais da cor padrão do HUD: ele trabalha com o brilho da imagem, então um HUD recolorido, uma tela muito escura ou muito clara são lidos igual. A linha do sistema de origem (o nome, SYSTEM OF ORIGIN e a casinha) não quebra mais o nome, e um nome ilegível recebe o único sistema que ainda falta na lista, marcado para você conferir.",
+        "Um valor de que o leitor duvida e cuja segunda leitura é igual ao valor desse sistema no seu último snapshot passa a ser esse valor (continua marcado), porque os valores raramente mudam entre dois snapshots. Todos os horários aparecem primeiro no relógio do seu PC, com UTC entre parênteses. A aba Tick tem datas na vertical, legenda, uma nota de como ler e o botão Mostrar tudo, a comparação pode usar 6, 12, 18 ou 24 horas, Salvar imagem grava o PNG na sua pasta Documentos e diz onde, e a busca abre um sistema com Enter ou Tab."
+      ],
+      "ru": [
+        "BGS WATCH читает ваши скриншоты при любом цвете, гамме и яркости экрана. Считыватель больше не зависит от стандартного цвета HUD: он работает по яркости картинки, поэтому перекрашенный HUD, очень тёмный или очень яркий экран читаются одинаково. Строка родной системы (название, SYSTEM OF ORIGIN и домик) больше не ломает название, а совсем нечитаемое название получает единственную ещё не занятую систему списка с пометкой для проверки.",
+        "Значение, в котором считыватель сомневается и у которого второй вариант равен значению этой системы в прошлом снимке, теперь становится этим значением (с пометкой), потому что значения редко меняются между двумя снимками. Все времена сначала по часам вашего ПК, UTC в скобках. На вкладке Tick вертикальные даты, легенда, подсказка как читать и кнопка Показать все, сравнение может брать 6, 12, 18 или 24 часа, Сохранить картинку пишет PNG в папку «Документы» и сообщает путь, а поиск открывает систему по Enter или Tab."
+      ]
+    },
+    {
       "v": "0.9.50",
       "en": [
         "BGS WATCH has a Tick tab. For every system it shows the range of the day in which that system ticks, worked out from your own snapshots: each time a system's value changed between two readings, its tick fell inside that window, and the windows of several days are laid over each other so the range narrows as you take more snapshots. Systems are listed surest first, in UTC with your local time next to it. It is a range, not an exact time: the game's panels can be up to 12 hours late, and a tick that changes nothing cannot be seen."

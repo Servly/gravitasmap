@@ -13,7 +13,7 @@
   var cls = function (x) { return x > 0.04 ? "bg-rise" : x < -0.04 ? "bg-fall" : ""; };
   var col = function (x) { return x > 0.04 ? GREEN : x < -0.04 ? RED : FAINT; };
   var tip = function (s) { return ' data-tip="' + esc(s) + '"'; };
-  var when = function (ms) { return C.dt(ms) + " UTC"; };
+  var when = function (ms) { return C.tm(ms); };
   function need2(M) { return M.nS < 2; }
   function needMsg() { return '<section class="bg-card"><p class="bg-find">' + t("bgs.need2") + "</p></section>"; }
 
@@ -45,7 +45,7 @@
       var h = '<div class="bg-grp"><b><span class="bg-tag ' + tone + '"' + tip(t(tipKey, { lo: st.lo, hi: st.hi })) + ">" + title + " · " + list.length + '</span></b><table class="bg-tbl"><tr><th>' + t("bgs.c.system") + "</th><th>" + t("bgs.dt.now") + "</th><th>" + t("bgs.g.change", { b: base }) + "</th><th>" + t("bgs.g.why") + "</th></tr>";
       list.slice(0, 15).forEach(function (s) {
         var tp = s.n + " · " + f1(s.last) + (s.d == null ? "" : " (" + sg(s.d) + " " + t("bgs.g.since", { b: base }) + ")") + "\n" + lastChg(M, s) + (s.slope ? "\n" + t("bgs.g.perday", { x: sg(s.slope.perDay) }) : "");
-        h += "<tr" + tip(tp) + '><td><a class="bg-sn" data-sys="' + esc(s.n) + '">' + esc(s.n) + '</a></td><td class="n"><b>' + f1(s.last) + '</b></td><td class="n ' + cls(s.d || 0) + '">' + (s.d == null ? "–" : arrow(s.d) + " " + sg(s.d)) + '</td><td class="bg-why">' + esc(reason(s, st)) + "</td></tr>";
+        h += "<tr" + tip(tp) + '><td><a class="bg-sn" data-sys="' + esc(s.n) + '">' + esc(s.n) + '</a>' + BG.popHtml(s.n) + '</td><td class="n"><b>' + f1(s.last) + '</b></td><td class="n ' + cls(s.d || 0) + '">' + (s.d == null ? "–" : arrow(s.d) + " " + sg(s.d)) + '</td><td class="bg-why">' + esc(reason(s, st)) + "</td></tr>";
       });
       return h + "</table></div>";
     }
@@ -85,7 +85,7 @@
     for (k = M.first; k <= M.K; k++) {
       if ((k - M.first) % every && k !== M.K) continue;
       var lx = L + (k - M.first) * cw + cw / 2 + 4;
-      o += '<text class="bg-ax" transform="rotate(-90 ' + lx + " " + (CH - 6) + ')" x="' + lx + '" y="' + (CH - 6) + '"' + tip(when(M.snaps[k].t)) + ">" + esc(C.dt(M.snaps[k].t)) + (M.snaps[k].n > 1 ? " ×" + M.snaps[k].n : "") + "</text>";
+      o += '<text class="bg-ax" transform="rotate(-90 ' + lx + " " + (CH - 6) + ')" x="' + lx + '" y="' + (CH - 6) + '"' + tip(when(M.snaps[k].t)) + ">" + esc(C.dl(M.snaps[k].t)) + (M.snaps[k].n > 1 ? " ×" + M.snaps[k].n : "") + "</text>";
     }
     ord.forEach(function (s, ri) {
       var y = CH + ri * RH;
@@ -118,7 +118,7 @@
         var pv = null, j; for (j = k - 1; j >= M.first; j--) if (s.v[j] != null) { pv = s.v[j]; break; }
         dots += '<circle cx="' + X(M.snaps[k].t).toFixed(1) + '" cy="' + Y(s.v[k]).toFixed(1) + '" r="' + (k === s.li ? 4 : 3) + '" style="fill:' + (k === s.li ? c : "var(--blue,#8aa4ff)") + ";opacity:" + (k === s.li ? 1 : 0.55) + '"' + tip(s.n + "\n" + when(M.snaps[k].t) + "\n" + f1(s.v[k]) + (pv == null ? "" : " (" + sg(s.v[k] - pv) + ")")) + "/>";
       }
-      o += '<div class="bg-mt"><div class="bg-mt-h"><a class="bg-sn" data-sys="' + esc(s.n) + '">' + esc(s.n) + '</a> <b class="' + cls(s.d || 0) + '">' + f1(s.last) + (s.d == null ? "" : " " + arrow(s.d) + " " + sg(s.d)) + '</b></div><svg viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="">' +
+      o += '<div class="bg-mt"><div class="bg-mt-h"><a class="bg-sn" data-sys="' + esc(s.n) + '">' + esc(s.n) + '</a>' + BG.popHtml(s.n) + ' <b class="' + cls(s.d || 0) + '">' + f1(s.last) + (s.d == null ? "" : " " + arrow(s.d) + " " + sg(s.d)) + '</b></div><svg viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="">' +
         '<rect x="0" y="' + Y(st.hi) + '" width="' + w + '" height="' + (Y(st.lo) - Y(st.hi)) + '" style="fill:rgba(var(--acc-rgb),.10)"/><line x1="0" x2="' + w + '" y1="' + Y(75) + '" y2="' + Y(75) + '" style="stroke:' + AMBER + ';stroke-dasharray:2 4;opacity:.7"/>' +
         '<polyline points="' + pts.join(" ") + '" fill="none" style="stroke:var(--blue,#8aa4ff);stroke-width:1.8"/>' + dots + '<text class="bg-ax" x="2" y="' + (h - 3) + '">' + C.dmy(t0) + '</text><text class="bg-ax" x="' + (w - 2) + '" y="' + (h - 3) + '" text-anchor="end">' + C.dmy(t1) + "</text></svg></div>";
     });

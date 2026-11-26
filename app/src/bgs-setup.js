@@ -99,7 +99,8 @@
       if (small) l.appendChild(mk("small", "bg-fl", small));
       i.onchange = function () {
         var v = parseFloat(i.value); if (isNaN(v)) { show(); return; }
-        invoke("bgs_settings_set", { key: key, value: v }).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c3, tr("bgs.saved"), "ok"); BG.bandChanged && BG.bandChanged(); } else { msg(c3, BG.errText(r && r.error), "err"); } show(); });
+        var call = key === "low" || key === "high" ? { key: "band", value: [parseFloat(inputs.low.value), parseFloat(inputs.high.value)] } : { key: key, value: v };
+        invoke("bgs_settings_set", call).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c3, tr("bgs.saved"), "ok"); BG.bandChanged && BG.bandChanged(); } else { msg(c3, BG.errText(r && r.error), "err"); } show(); });
       };
       form.appendChild(l);
     }
@@ -113,6 +114,11 @@
     dl.style.cssText = "display:grid;gap:4px;font-size:12.5px;color:var(--dim);margin-top:8px"; dl.appendChild(mk("span", null, tr("bgs.dir"))); dl.appendChild(dir);
     dir.onchange = function () { invoke("bgs_settings_set", { key: "shots_dir", value: dir.value }).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c3, tr("bgs.saved"), "ok"); } else msg(c3, BG.errText(r && r.error), "err"); }); };
     c3.appendChild(dl);
+    // population from Spansh: on by default, one switch
+    var pl = mk("label", "bg-ck"), pc = document.createElement("input"); pc.type = "checkbox"; h.tip(pl, "tip.bgs.pop");
+    pl.style.cssText = "display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:10px"; pl.appendChild(pc); pl.appendChild(mk("span", null, tr("bgs.pop.sw")));
+    pc.onchange = function () { invoke("bgs_settings_set", { key: "population", value: pc.checked }).then(function (r) { if (r && r.ok) { (g || (g = {})).settings = r.settings; msg(c3, tr("bgs.saved"), "ok"); BG.dirty = true; } else msg(c3, BG.errText(r && r.error), "err"); show(); }); };
+    c3.appendChild(pl); c3.appendChild(mk("p", "note", tr("bgs.pop.d")));
     // ----- card: data (export, forget) -----
     var c5 = h.card("bgs.data.h", parent); c5.classList.add("bg-data"); var bx = mk("div", "bg-btns");
     var ex = h.tip(mk("button", "btn", tr("bgs.export")), "tip.bgs.csv"); ex.type = "button";
@@ -141,7 +147,7 @@
       impBox.appendChild(mk("p", "bg-msg", tr("bgs.imp.sum", { n: r.snapshots, a: r.to_add, s: skipped, b: r.bad_rows || 0 })));
       var list = mk("ul", "bg-issues");
       gs.forEach(function (x) {
-        var when = BG.calc ? BG.calc.dt(Date.parse(x.data_utc)) + " UTC" : x.data_utc;
+        var when = BG.calc ? BG.calc.tm(Date.parse(x.data_utc)) : x.data_utc;
         list.appendChild(mk("li", x.action === "add" ? "" : "blk", when + ": " + x.rows + " " + tr("bgs.imp.rows") + (x.action === "add" ? "" : " (" + tr("bgs.imp.have") + ")") + (x.unchecked_rows ? ", " + tr("bgs.imp.unchecked", { n: x.unchecked_rows }) : "") + (x.not_in_list_count ? ", " + tr("bgs.imp.names", { n: x.not_in_list_count, list: (x.not_in_list || []).slice(0, 6).join(", ") }) : "")));
       });
       impBox.appendChild(list);
@@ -180,6 +186,7 @@
       Object.keys(inputs).forEach(function (k) { if (document.activeElement !== inputs[k] && s[k] != null) inputs[k].value = s[k]; });
       if (document.activeElement !== idIn && s.inara_id != null) idIn.value = s.inara_id;
       if (document.activeElement !== dir) dir.value = s.shots_dir || "";
+      if (document.activeElement !== pc) pc.checked = s.population !== false;
       cnt.textContent = names(); cnt.className = "bg-msg " + (g.names && g.names.count ? "ok" : "");
     }
     function refresh() { BG.get().then(function (r) { g = r; BG.g = r; show(); if (window.GVC) GVC.poll(); }).catch(function () {}); }

@@ -8,6 +8,7 @@ pub mod crops;
 pub mod csvimport;
 pub mod decode;
 pub mod gates;
+pub mod pop;
 pub mod glyphs;
 pub mod grammar;
 pub mod imgops;
@@ -38,6 +39,8 @@ mod tests5;
 mod tests6;
 #[cfg(test)]
 mod tests7;
+#[cfg(test)]
+mod tests8;
 
 use model::{Proposal, Skipped, Snapshot};
 use serde_json::{json, Value};
@@ -76,11 +79,28 @@ pub fn get() -> Value {
         "names": {"count": nf.names.len(), "source": nf.source, "updated_utc": nf.updated_utc},
         "snapshots": st.as_ref().map(|x| x.summaries()).unwrap_or_default(),
         "storage_ok": st.is_some(),
+        "pop": if s.population { names_dir().map(|d| { let p = pop::load(&d); json!({"map": p.map, "updated_utc": if p.updated > 0 { timeutil::fmt_iso(p.updated) } else { String::new() }}) }).unwrap_or(Value::Null) } else { Value::Null },
         "pictures_dir": pics.map(|p| p.to_string_lossy().into_owned()),
         "templates_ok": tpl::bundled().is_ok(),
         "scanning": SCANNING.load(Ordering::SeqCst),
         "last_scan": LAST.lock().unwrap_or_else(|e| e.into_inner()).clone(),
     })
+}
+
+/// Asks Spansh for the population of the systems of the newest snapshot (at most every 6 hours, `force` skips that rule). Off when the player switched it off.
+/// Only the system names go out. A failed call keeps the numbers already saved.
+pub fn pop_refresh(force: bool) -> Value {
+    let s = settings::get();
+    if !s.population { return json!({"ok": true, "off": true}); }
+    let Some(dir) = names_dir() else { return err("no data folder") };
+    let Some(st) = store() else { return err("the snapshots could not be opened") };
+    let all = st.all();
+    let Some(newest) = all.iter().max_by(|a, b| a.data_utc.cmp(&b.data_utc)) else { return json!({"ok": true, "empty": true}) };
+    let names: Vec<String> = newest.rows.iter().map(|r| r.system.clone()).collect();
+    match pop::refresh(&dir, &names, force, timeutil::now()) {
+        Ok(p) => json!({"ok": true, "count": p.map.len(), "updated_utc": timeutil::fmt_iso(p.updated)}),
+        Err(e) => err(e),
+    }
 }
 
 pub fn settings_set(key: &str, v: &Value) -> Value {
@@ -103,7 +123,7 @@ fn read_one(path: &std::path::Path, t: &tpl::Templates) -> Outcome {
                 let img = imgops::Img::new(rgb);
                 match reader::read_screen(&img, t) {
                     Some(p) if !p.rows.is_empty() => Outcome::Page(p, img),
-                    _ => Outcome::Skip("this is not the Squadron > Faction list".into()),
+                    _ => Outcome::Skip("this screenshot does not show a page of the Squadron > Faction list".into()),
                 }
             }
         }

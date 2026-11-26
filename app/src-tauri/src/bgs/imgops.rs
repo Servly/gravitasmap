@@ -1,7 +1,9 @@
 //! BGS Watch, small image tools written by hand (no OpenCV): colour masks, percentile, area and bilinear resize, connected components.
 use super::decode::Rgb;
 
-/// The picture with its green plane (the text brightness is read from green).
+/// The picture with ONE grey plane. Everything the reader sees comes from this plane after auto-levels (dark and bright ends stretched to 0..255),
+/// so the colour of the player's HUD, the gamma and the brightness of the screen do not matter. The plane is the brightest of R, G, B (text stays bright in
+/// ANY HUD colour). `rgb` is kept only for the star icon (informative).
 pub struct Img {
     pub w: usize,
     pub h: usize,
@@ -9,21 +11,45 @@ pub struct Img {
     pub g: Vec<u8>,
 }
 
+/// stretches the 2nd percentile to 0 and the 99.95th to 255 (a flat picture is left as it is)
+fn auto_levels(raw: &[u8]) -> Vec<u8> {
+    let mut h = [0u32; 256];
+    for &v in raw { h[v as usize] += 1; }
+    let n = raw.len() as u32;
+    let (lo, hi) = (percentile_hist(&h, n, 2.0), percentile_hist(&h, n, 99.95));
+    if hi - lo < 8.0 { return raw.to_vec(); }
+    let k = 255.0 / (hi - lo);
+    raw.iter().map(|&v| ((v as f64 - lo) * k).clamp(0.0, 255.0).round() as u8).collect()
+}
+
 impl Img {
     pub fn new(src: Rgb) -> Img {
-        let g = src.px.chunks_exact(3).map(|p| p[1]).collect();
+        let raw: Vec<u8> = src.px.chunks_exact(3).map(|p| p[0].max(p[1]).max(p[2])).collect();
+        let g = auto_levels(&raw);
         Img { w: src.w, h: src.h, rgb: src.px, g }
     }
-    fn mask(&self, f: impl Fn(i32, i32, i32) -> bool) -> Vec<u8> {
-        self.rgb.chunks_exact(3).map(|p| f(p[0] as i32, p[1] as i32, p[2] as i32) as u8).collect()
+
+    /// Thin bright strips (frame lines, the divider): the pixel is brighter than both sides at distance `o` by more than `t`.
+    /// `vertical` looks left and right (finds vertical lines), else up and down. Colour free.
+    pub fn ridge(&self, vertical: bool, o: usize, t: i32) -> Vec<u8> {
+        let (w, h) = (self.w, self.h);
+        let mut out = vec![0u8; w * h];
+        if w <= 2 * o || h <= 2 * o { return out; }
+        for y in 0..h {
+            for x in 0..w {
+                let (a, b) = if vertical {
+                    if x < o || x + o >= w { continue; }
+                    (self.g[y * w + x - o] as i32, self.g[y * w + x + o] as i32)
+                } else {
+                    if y < o || y + o >= h { continue; }
+                    (self.g[(y - o) * w + x] as i32, self.g[(y + o) * w + x] as i32)
+                };
+                if self.g[y * w + x] as i32 - (a + b) / 2 > t { out[y * w + x] = 1; }
+            }
+        }
+        out
     }
-    /// frame lines and the divider: grey-aqua, medium bright
-    pub fn line_mask(&self) -> Vec<u8> { self.mask(|r, g, b| g > 90 && b > 90 && (r as f32) < g as f32 * 0.8 && (g - b).abs() < 14) }
-    pub fn yellow_mask(&self) -> Vec<u8> { self.mask(|r, g, b| r > 170 && g > 140 && b < 110 && r - b > 90) }
-    /// NAME text: aqua (R clearly below G and B), grey sub lines are left out
-    pub fn aqua_mask(&self) -> Vec<u8> { self.mask(|r, g, b| g > 105 && b > 105 && (r as f32) < g as f32 * 0.86) }
-    pub fn neutral_mask(&self) -> Vec<u8> { self.mask(|r, g, b| r > 50 && (r - g).abs() < 14 && (g - b).abs() < 14) }
-    pub fn white_mask(&self) -> Vec<u8> { self.mask(|r, g, b| r > 120 && g > 120 && b > 120 && (r - g).abs() < 24 && (g - b).abs() < 24) }
+    pub fn yellow_mask(&self) -> Vec<u8> { self.rgb.chunks_exact(3).map(|p| { let (r, g, b) = (p[0] as i32, p[1] as i32, p[2] as i32); (r > 170 && g > 140 && b < 110 && r - b > 90) as u8 }).collect() }
 }
 
 /// numpy's percentile (linear) of 8-bit values given as a histogram

@@ -41,33 +41,110 @@ fn line_bg_peak(img: &Img, x0: usize, x1: usize, y0: usize, y1: usize) -> (f64, 
     (percentile_hist(&h, n, 20.0), percentile_hist(&h, n, 99.7))
 }
 
-/// Cuts one text line (window x0..x1, y0..y1, clamped to the picture) into glyphs. `mask` is the colour mask of the whole picture.
-pub fn segment_line(img: &Img, mask: &[u8], win: [i64; 4], hf: f64, g_frac: f64, peel: bool) -> Option<Seg> {
+/// the tallest thing that may be a letter (x screen height). The biggest letter measured on 69 real pages is 0.0111, the house icon of the home system is 0.028.
+pub const MAX_LETTER_H: f64 = 0.015;
+/// the capital height always lies in this band (x screen height): a measuring that leaves it is clamped
+pub const CAP_BAND: (f64, f64) = (0.009, 0.0135);
+
+fn ink_mask(img: &Img, mask: Option<&[u8]>, win: (usize, usize, usize, usize), frac: f64, bg: f64, peak: f64) -> Vec<u8> {
+    let (x0, x1, y0, y1) = win;
+    let (ww, wh) = (x1 - x0, y1 - y0);
+    let mut sub = vec![0u8; ww * wh];
+    for y in 0..wh {
+        for x in 0..ww {
+            let i = (y0 + y) * img.w + x0 + x;
+            let mut on = mask.map_or(true, |m| m[i] != 0);
+            if on && frac > 0.0 { on = img.g[i] as f64 > bg + frac * (peak - bg); }
+            sub[y * ww + x] = on as u8;
+        }
+    }
+    sub
+}
+
+fn boxes_of(sub: &[u8], win: (usize, usize, usize, usize), hf: f64) -> Vec<[i64; 4]> {
+    let (x0, x1, y0, y1) = win;
+    let min_area = (((0.0025 * hf).powi(2)) as usize).max(2);
+    components(sub, x1 - x0, y1 - y0, min_area).into_iter()
+        .map(|b| [b[0] as i64 + x0 as i64, b[1] as i64 + y0 as i64, b[2] as i64 + x0 as i64, b[3] as i64 + y0 as i64]).collect()
+}
+
+/// The NAME line of a row. Everything the window sees is sorted first: a box taller than a letter (an icon, the house of the home system) is not text,
+/// and when a row holds two text lines (the home system has "SYSTEM OF ORIGIN" under its name) the TOP line is the name. Colour is never asked.
+fn name_line(boxes: Vec<[i64; 4]>, hf: f64) -> Vec<[i64; 4]> {
+    let mut letters: Vec<[i64; 4]> = boxes.into_iter().filter(|b| (b[3] - b[1]) as f64 <= MAX_LETTER_H * hf).collect();
+    if letters.is_empty() { return letters; }
+    letters.sort_by(|a, b| (a[1] + a[3]).cmp(&(b[1] + b[3])));
+    let mut hs: Vec<f64> = letters.iter().map(|b| (b[3] - b[1]) as f64).collect();
+    let capref = median(&mut hs);
+    let mut lines: Vec<Vec<[i64; 4]>> = vec![vec![letters[0]]];
+    for b in letters.into_iter().skip(1) {
+        let c = (b[1] + b[3]) as f64 / 2.0;
+        let l = lines.last().unwrap();
+        let lc = l.iter().map(|z| (z[1] + z[3]) as f64 / 2.0).sum::<f64>() / l.len() as f64;
+        if c - lc > 0.6 * capref { lines.push(vec![b]); } else { lines.last_mut().unwrap().push(b); }
+    }
+    let mut top = lines.swap_remove(0);
+    top.sort();
+    top
+}
+
+/// two letters that touch make one box clearly wider than a capital is tall
+fn merged_sign(boxes: &[[i64; 4]]) -> bool {
+    if boxes.is_empty() { return false; }
+    let mut hs: Vec<f64> = boxes.iter().map(|b| (b[3] - b[1]) as f64).collect();
+    let cap = median(&mut hs);
+    boxes.iter().any(|b| (b[2] - b[0]) as f64 > 1.5 * cap)
+}
+
+/// Cuts one text line (window x0..x1, y0..y1, clamped to the picture) into glyphs. `mask` (optional) narrows what counts as ink, `g_frac` is the brightness
+/// threshold between the window's background and its peak. `name` = a NAME cell: icons and a second text line are sorted out, touching letters are
+/// separated by a stricter threshold, hyphens are peeled. `cap_hint` = the capital height the other rows of the page agree on.
+pub fn segment_line(img: &Img, mask: Option<&[u8]>, win: [i64; 4], hf: f64, g_frac: f64, name: bool) -> Option<Seg> { segment_line_h(img, mask, win, hf, g_frac, name, None) }
+
+pub fn segment_line_h(img: &Img, mask: Option<&[u8]>, win: [i64; 4], hf: f64, g_frac: f64, peel: bool, cap_hint: Option<f64>) -> Option<Seg> {
     let x0 = win[0].clamp(0, img.w as i64) as usize;
     let x1 = win[1].clamp(0, img.w as i64) as usize;
     let y0 = win[2].clamp(0, img.h as i64) as usize;
     let y1 = win[3].clamp(0, img.h as i64) as usize;
     if x1 <= x0 + 2 || y1 <= y0 + 2 { return None; }
-    let (ww, wh) = (x1 - x0, y1 - y0);
+    let w = (x0, x1, y0, y1);
+    let (ww, _wh) = (x1 - x0, y1 - y0);
     let (bg, peak) = line_bg_peak(img, x0, x1, y0, y1);
-    let mut sub = vec![0u8; ww * wh];
-    for y in 0..wh {
-        for x in 0..ww {
-            let i = (y0 + y) * img.w + x0 + x;
-            let mut on = mask[i] != 0;
-            if on && g_frac > 0.0 { on = img.g[i] as f64 > bg + g_frac * (peak - bg); }
-            sub[y * ww + x] = on as u8;
+    let mut sub = ink_mask(img, mask, w, g_frac, bg, peak);
+    let mut boxes = boxes_of(&sub, w, hf);
+    if peel {
+        boxes = name_line(boxes, hf);
+        if g_frac > 0.0 {
+            // letters that touch (bright or blooming screens): try stricter thresholds, keep the first that has no merged-looking box and loses at most one blob
+            for f in [0.50, 0.55, 0.62, 0.70] {
+                if !merged_sign(&boxes) { break; }
+                let s2 = ink_mask(img, mask, w, f, bg, peak);
+                let b2 = name_line(boxes_of(&s2, w, hf), hf);
+                if b2.len() + 1 >= boxes.len() { boxes = b2; sub = s2; } else { break; }
+            }
         }
     }
-    let min_area = (((0.0025 * hf).powi(2)) as usize).max(2);
-    let boxes: Vec<[i64; 4]> = components(&sub, ww, wh, min_area).into_iter()
-        .map(|b| [b[0] as i64 + x0 as i64, b[1] as i64 + y0 as i64, b[2] as i64 + x0 as i64, b[3] as i64 + y0 as i64]).collect();
     if boxes.is_empty() { return None; }
     let hs: Vec<i64> = boxes.iter().map(|b| b[3] - b[1]).collect();
     let maxh = *hs.iter().max()? as f64;
-    let tall: Vec<&[i64; 4]> = boxes.iter().zip(&hs).filter(|(_, &h)| h as f64 >= 0.7 * maxh).map(|(b, _)| b).collect();
-    let cap_h = median(&mut tall.iter().map(|b| (b[3] - b[1]) as f64).collect());
+    // names: the tallest group (capitals). Other cells (numbers, labels) may hold a separator bar taller than the letters ("77 SYSTEMS | 77 CONTROLLED"),
+    // so there the typical height (75th percentile) decides and the group is the boxes close to it.
+    let tall: Vec<&[i64; 4]> = if peel {
+        boxes.iter().zip(&hs).filter(|(_, &h)| h as f64 >= 0.7 * maxh).map(|(b, _)| b).collect()
+    } else {
+        let mut sh: Vec<i64> = hs.clone();
+        sh.sort_unstable();
+        let r = sh[(0.75 * (sh.len() - 1) as f64).round() as usize] as f64;
+        boxes.iter().zip(&hs).filter(|(_, &h)| (h as f64) >= 0.8 * r && (h as f64) <= 1.3 * r).map(|(b, _)| b).collect()
+    };
+    let mut cap_h = median(&mut tall.iter().map(|b| (b[3] - b[1]) as f64).collect());
     let cap_top = median(&mut tall.iter().map(|b| b[1] as f64).collect());
+    if peel {
+        cap_h = cap_h.clamp(CAP_BAND.0 * hf, CAP_BAND.1 * hf);
+        if let Some(c) = cap_hint { if (cap_h - c).abs() > 0.25 * c { cap_h = c; } }
+    }
+    let mut boxes = boxes;
+    if peel { restore_faint_hyphens(img, mask, w, hf, &mut boxes, cap_top, cap_h, bg, peak); }
     let boxes = if peel { peel_hyphens(&sub, ww, &boxes, x0 as i64, y0 as i64, cap_top, cap_h) } else { boxes };
     let mut glyphs = Vec::with_capacity(boxes.len());
     for (i, bx) in boxes.iter().enumerate() {
@@ -77,6 +154,27 @@ pub fn segment_line(img: &Img, mask: &[u8], win: [i64; 4], hf: f64, g_frac: f64,
         glyphs.push(Glyph { canvas, wrel: ((bx[2] - bx[0]) as f64 / cap_h) as f32, bx: *bx });
     }
     Some(Seg { glyphs, cap_h, cap_top })
+}
+
+/// A dark or very bright screen can lose a hyphen (thin and dim): "B22-5" would be read "B22 5" and shown as sure. A second, much lower threshold finds
+/// such strokes again. Only a mark of hyphen size (short, thin, at mid height of the capitals, clear of every letter box) is taken back.
+#[allow(clippy::too_many_arguments)]
+fn restore_faint_hyphens(img: &Img, mask: Option<&[u8]>, win: (usize, usize, usize, usize), hf: f64, boxes: &mut Vec<[i64; 4]>, cap_top: f64, cap_h: f64, bg: f64, peak: f64) {
+    if boxes.len() < 2 { return; }
+    let low = ink_mask(img, mask, win, 0.25, bg, peak);
+    let (mid_a, mid_b) = (cap_top + 0.25 * cap_h, cap_top + 0.75 * cap_h);
+    let mut add: Vec<[i64; 4]> = Vec::new();
+    for b in boxes_of(&low, win, hf) {
+        let (w, h) = ((b[2] - b[0]) as f64, (b[3] - b[1]) as f64);
+        let cy = (b[1] + b[3]) as f64 / 2.0;
+        if h < 0.08 * cap_h || h > 0.30 * cap_h || w < 0.25 * cap_h || w > 0.70 * cap_h || cy < mid_a || cy > mid_b { continue; }
+        // clear of every letter (a gap between two letters, not part of a thickened stroke)
+        if boxes.iter().any(|l| b[0] < l[2] + 1 && l[0] < b[2] + 1 && b[1] < l[3] && l[1] < b[3]) { continue; }
+        let left = boxes.iter().any(|l| l[2] <= b[0] && b[0] - l[2] <= (0.6 * cap_h) as i64 + 1);
+        let right = boxes.iter().any(|l| l[0] >= b[2] && l[0] - b[2] <= (0.6 * cap_h) as i64 + 1);
+        if left && right { add.push(b); }
+    }
+    if !add.is_empty() { boxes.extend(add); boxes.sort(); }
 }
 
 /// A hyphen can touch the next glyph. A hyphen is ink only in the middle band of the line, so columns at the END of a blob that carry ink only

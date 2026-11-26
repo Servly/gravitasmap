@@ -319,8 +319,11 @@ fn known_names_make_exact_rows_sure_and_snap_the_rest() {
     assert_eq!(p.rows[2].state, "snapped");
     assert!(!p.rows[2].uncertain, "snapped to the one known name: 16 of 16 were right out of sample, so it is shown as sure but marked as snapped");
     assert!(p.rows[2].name_alts.contains(&"SYS 0O2".to_string()), "what was read stays visible");
-    // 'UNKNOWN PLACE' is far from SYS 003, but SYS 003 is the only known name left: still not taken at distance 2
-    assert_eq!(p.rows[3].name_state, "not_in_list");
+    // 'UNKNOWN PLACE' is far from SYS 003, but the list is complete (10 rows, 10 known names) and SYS 003 is the only known name left (0.9.51): by elimination the row is
+    // that system. It is shown as matched, but the player is asked to look.
+    assert_eq!(p.rows[3].name_state, "snapped");
+    assert_eq!(p.rows[3].system, "Sys 003");
+    assert!(p.rows[3].reasons.contains(&"only_name_left"));
     assert!(p.rows[3].uncertain);
 }
 

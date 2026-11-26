@@ -103,12 +103,12 @@
       if (!ps.length) return;
       if (ps.length > 1) {
         var sel = mk("select", "sel"); h.tip(sel, "tip.bgs.cf.pick");
-        ps.forEach(function (p, i) { var o = mk("option", null, tr("bgs.cf.opt", { t: BG.calc ? BG.calc.dt(Date.parse(p.taken_utc)) : p.taken_utc, p: (p.pages_found || []).length, q: p.pages_total, s: p.systems_read })); o.value = i; sel.appendChild(o); });
+        ps.forEach(function (p, i) { var o = mk("option", null, tr("bgs.cf.opt", { t: BG.calc ? BG.calc.dl(Date.parse(p.taken_utc)) : p.taken_utc, p: (p.pages_found || []).length, q: p.pages_total, s: p.systems_read })); o.value = i; sel.appendChild(o); });
         sel.value = sc.sel; sel.onchange = function () { sc.sel = +sel.value; setRows(); draw(); }; body.appendChild(sel);
       }
       var p = ps[sc.sel], rows = sc.rows || [], unsure = rows.filter(function (x) { return x.unc; }).length, pend = pending();
       var sm = mk("div", "bg-sum");
-      [[tr("bgs.cf.taken"), BG.calc ? BG.calc.dt(Date.parse(p.taken_utc)) + " UTC" : p.taken_utc], [tr("bgs.cf.pages"), (p.pages_found || []).length + " / " + p.pages_total], [tr("bgs.cf.sys"), p.systems_read],
+      [[tr("bgs.cf.taken"), BG.calc ? BG.calc.tm(Date.parse(p.taken_utc)) : p.taken_utc], [tr("bgs.cf.pages"), (p.pages_found || []).length + " / " + p.pages_total], [tr("bgs.cf.sys"), p.systems_read],
         [tr("bgs.cf.sure"), rows.length - unsure], [tr("bgs.cf.unsure"), unsure], [tr("bgs.cf.age"), p.minutes_old == null ? "?" : p.minutes_old + " " + tr("bgs.u.min")], [tr("bgs.cf.res"), p.resolution]].forEach(function (x) {
         var s = mk("span"); s.appendChild(document.createTextNode(x[0] + " ")); s.appendChild(mk("b", null, String(x[1]))); sm.appendChild(s);
       });

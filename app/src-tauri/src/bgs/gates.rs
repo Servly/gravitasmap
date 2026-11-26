@@ -202,9 +202,24 @@ fn snap_names(cells: &mut [Cell], known: &[String], issues: &mut Vec<Issue>) {
             }
         }
     }
+    // By elimination: a complete list (as many rows as known systems) where exactly one row has no name and exactly one known system has no row.
+    // The row can only be that system, however badly its name was read.
+    let unmatched: Vec<usize> = hits.iter().enumerate().filter(|(_, h)| **h == Hit::None).map(|(i, _)| i).collect();
+    let unclaimed: Vec<usize> = (0..known.len()).filter(|&k| !taken_k[k]).collect();
+    let no_dups = super::snap::duplicates(&hits).is_empty();
+    if cells.len() == known.len() && unmatched.len() == 1 && unclaimed.len() == 1 && no_dups {
+        let (i, k) = (unmatched[0], unclaimed[0]);
+        let c = &mut cells[i];
+        c.name_alts.insert(0, c.read_name.clone());
+        c.system = known[k].clone();
+        c.name_state = "snapped";
+        c.reasons.retain(|r| *r != "not_in_list" && *r != "name_weak");
+        c.reasons.push("snapped");
+        c.reasons.push("only_name_left");
+    }
     let dups = super::snap::duplicates(&hits);
     for k in dups { issues.push(issue("duplicate_name", format!("two rows are \"{}\"", known[k]), None, false)); }
-    let exact_or_near = hits.iter().filter(|h| **h != Hit::None).count();
+    let exact_or_near = hits.iter().filter(|h| **h != Hit::None).count() + cells.iter().filter(|c| c.reasons.contains(&"only_name_left")).count();
     if cells.len() != known.len() || exact_or_near != cells.len() {
         let missing = known.len().saturating_sub(exact_or_near);
         if missing > 0 && cells.len() >= known.len() / 2 { issues.push(issue("names_unmatched", format!("{missing} known systems did not appear in this list"), None, false)); }
@@ -282,6 +297,17 @@ fn continuity(cells: &mut [Cell], ctx: &Ctx, issues: &mut Vec<Issue>, complete: 
             Some(Some(pv)) => {
                 c.prev_x10 = Some(*pv);
                 if let Some(v) = c.inf_x10 {
+                    // The value hardly ever changes between two snapshots (96 % of the steps in real histories are zero). A reading the reader doubted whose
+                    // runner-up is exactly the last value is much more likely that value: it is taken, and stays marked.
+                    if v != *pv && c.inf_unsure && (v - pv).abs() <= ctx.jump_x10 && !c.reasons.contains(&"value_shape") {
+                        let alt = c.inf_alts.iter().find(|a| super::reader::parse_inf(a) == Some(*pv)).cloned();
+                        if let Some(a) = alt {
+                            c.inf_alts.insert(0, c.inf.clone());
+                            c.inf = a; c.inf_x10 = Some(*pv);
+                            c.reasons.push("value_prior_prev");
+                            continue;
+                        }
+                    }
                     if (v - pv).abs() > ctx.jump_x10 { c.reasons.push("jump"); }
                     else if v == *pv && c.inf_unsure && !c.reasons.contains(&"value_disagree") && !c.reasons.contains(&"value_shape") && matches!(c.name_state, "exact" | "ok" | "snapped") {
                         // two independent proofs agree: the reading and the same system's value in the last snapshot. A look-alike doubt or a low margin alone is cleared.
@@ -305,7 +331,7 @@ fn finish(c: &mut Cell) {
     let name_unsure = matches!(c.name_state, "unsure" | "not_in_list");
     c.state = if c.reasons.contains(&"jump") { "jump" } else if c.reasons.contains(&"order") { "order" }
         else if name_unsure || c.inf_unsure { "unsure" } else if c.name_state == "snapped" { "snapped" } else { "sure" };
-    c.uncertain = matches!(c.state, "jump" | "order" | "unsure") || (c.state == "snapped" && c.reasons.contains(&"name_twin"));
+    c.uncertain = matches!(c.state, "jump" | "order" | "unsure") || (c.state == "snapped" && (c.reasons.contains(&"name_twin") || c.reasons.contains(&"only_name_left")));
 }
 
 pub fn snapshot_of(p: &Proposal) -> Snapshot {
@@ -314,5 +340,63 @@ pub fn snapshot_of(p: &Proposal) -> Snapshot {
         sources: p.files.clone(), pages: p.pages_total, complete: p.complete,
         rows: p.rows.iter().map(|c| super::model::StoredRow { system: c.system.clone(), inf_x10: c.inf_x10, star: c.star, conf: c.name_conf.min(c.inf_conf), confirmed: false, accepted_unchecked: false, edited: false, flagged: false, pos: 0 }).collect(),
         reader: "bgs1".into(), imported: false, proposal_id: p.id.clone(),
+    }
+}
+
+#[cfg(test)]
+mod rules_0951 {
+    use super::*;
+    use super::super::model::StoredRow;
+
+    fn cell(name: &str) -> Cell { Cell { read_name: name.into(), system: name.into(), name_state: "ok", ..Default::default() } }
+
+    /// 0.9.51: a complete list where exactly one row has no name and exactly one known system has no row: the row is that system.
+    #[test]
+    fn the_only_name_left_goes_to_the_only_row_left() {
+        let known: Vec<String> = ["ALPHA", "BRAVO", "CHARLIE"].iter().map(|s| s.to_string()).collect();
+        let mut cells = vec![cell("ALPHA"), cell("-11-1T111 A"), cell("CHARLIE")];
+        let mut issues = Vec::new();
+        snap_names(&mut cells, &known, &mut issues);
+        assert_eq!(cells[1].system, "BRAVO");
+        assert_eq!(cells[1].name_state, "snapped");
+        assert!(cells[1].reasons.contains(&"only_name_left"));
+        assert!(!issues.iter().any(|i| i.code == "names_unmatched"), "the list is complete now");
+    }
+
+    /// two rows without a name and two known names left: no guess (it could be swapped)
+    #[test]
+    fn two_unknown_rows_are_not_guessed() {
+        let known: Vec<String> = ["ALPHA", "BRAVO", "CHARLIE", "DELTA"].iter().map(|s| s.to_string()).collect();
+        let mut cells = vec![cell("ALPHA"), cell("-11-1T111 A"), cell("%%%%%%"), cell("DELTA")];
+        let mut issues = Vec::new();
+        snap_names(&mut cells, &known, &mut issues);
+        assert_eq!(cells[1].name_state, "not_in_list");
+        assert_eq!(cells[2].name_state, "not_in_list");
+    }
+
+    /// a doubted reading whose runner-up equals the value of the last snapshot: the last value is taken, and the row stays marked
+    #[test]
+    fn a_doubted_value_whose_runner_up_is_the_last_value_becomes_that_value() {
+        let prev = Snapshot { rows: vec![StoredRow { system: "Sys".into(), inf_x10: Some(645), ..Default::default() }], ..Default::default() };
+        let ctx = Ctx { known: &[], prev: Some(&prev), jump_x10: 30 };
+        let mut c = Cell { system: "Sys".into(), name_state: "ok", inf: "65.0%".into(), inf_x10: Some(650), inf_unsure: true, inf_alts: vec!["64.5%".into()], ..Default::default() };
+        let mut issues = Vec::new();
+        continuity(std::slice::from_mut(&mut c), &ctx, &mut issues, false);
+        assert_eq!(c.inf_x10, Some(645));
+        assert_eq!(c.inf, "64.5%");
+        assert!(c.inf_unsure, "it is still a guess: the player is asked");
+        assert!(c.reasons.contains(&"value_prior_prev"));
+        assert_eq!(c.inf_alts[0], "65.0%", "the reading that was changed stays among the alternatives");
+    }
+
+    /// a SURE reading is never changed by the last value, however different
+    #[test]
+    fn a_sure_value_is_never_replaced_by_the_last_value() {
+        let prev = Snapshot { rows: vec![StoredRow { system: "Sys".into(), inf_x10: Some(645), ..Default::default() }], ..Default::default() };
+        let ctx = Ctx { known: &[], prev: Some(&prev), jump_x10: 30 };
+        let mut c = Cell { system: "Sys".into(), name_state: "ok", inf: "65.0%".into(), inf_x10: Some(650), inf_unsure: false, inf_alts: vec!["64.5%".into()], ..Default::default() };
+        let mut issues = Vec::new();
+        continuity(std::slice::from_mut(&mut c), &ctx, &mut issues, false);
+        assert_eq!(c.inf_x10, Some(650));
     }
 }

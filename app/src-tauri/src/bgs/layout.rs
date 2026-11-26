@@ -1,6 +1,6 @@
 //! BGS Watch, layout of the Squadron > Faction screen found from its structure. Every size is a fraction of the screen height H
 //! (the UI is a centred 16:9 area that scales with H), nothing is a pixel constant.
-use super::imgops::{runs, Img};
+use super::imgops::{percentile_hist, runs, Img};
 
 pub struct Layout {
     pub h: usize,
@@ -77,26 +77,78 @@ fn find_hlines(img: &Img, line: &[u8], div_x: f64) -> Vec<(usize, usize, usize)>
     }).collect()
 }
 
-pub fn find_layout(img: &Img, line: &[u8], white: &[u8]) -> Option<Layout> {
+/// How the frame lines are looked for: the ridge distance (x screen height) and the contrast the line must have against both sides (on the auto-levelled plane).
+/// A real list page is always found: the first try is the sharp one, then the search relaxes (softer lines, a wider or narrower line) until a plausible list appears.
+const LADDER: &[(f64, i32)] = &[(0.005, 14), (0.005, 9), (0.0035, 9), (0.007, 9), (0.005, 6), (0.0035, 6), (0.007, 6), (0.004, 4), (0.006, 4)];
+
+pub fn find_layout(img: &Img) -> Option<Layout> {
     let (w, h) = (img.w, img.h);
     if h < 300 || w < 400 { return None; }
-    let div = find_divider(img, line)?;
-    let hl_all = find_hlines(img, line, div.0);
-    if hl_all.is_empty() { return None; }
-    let title: Vec<_> = hl_all.iter().filter(|l| (l.0 as i64) < div.1 as i64 - 2).cloned().collect();
-    let title_line = title.last().cloned();
-    let hl: Vec<_> = hl_all.into_iter().filter(|l| l.0 as i64 >= div.1 as i64 - 2).collect();
-    if hl.len() < 3 { return None; }
-    let list_left = hl.iter().map(|l| l.1).min()?;
-    let list_right = hl.iter().map(|l| l.2).max()?;
-    let head_bottom = hl[1].0;
+    for &(of, t) in LADDER {
+        if let Some(l) = layout_try(img, of, t) { if l.rows.len() >= 3 { return Some(l); } }
+    }
+    None
+}
+
+fn layout_try(img: &Img, of: f64, ridge_t: i32) -> Option<Layout> {
+    let (w, h) = (img.w, img.h);
+    let o = ((of * h as f64).round() as usize).max(2);
+    let line_v = img.ridge(true, o, ridge_t);
+    let div = find_divider(img, &line_v)?;
+    drop(line_v);
+    let line_h = img.ridge(false, o, ridge_t);
+    let hl_all = find_hlines(img, &line_h, div.0);
+    drop(line_h);
+    // The ridge divider starts under the NAME | INF header: the first frame line at or below its top is the line under that header,
+    // the one before it is the top of the list and the one before that (if any) is the title underline.
+    let i0 = hl_all.iter().position(|l| l.0 as i64 >= div.1 as i64 - 2)?;
+    // Which line is the one under the NAME | INF header depends on where the divider was seen to start (a soft picture runs it through the header).
+    // Both candidates are tried and the one whose rows are evenly spaced wins (a header text read as a row breaks the pitch).
+    let mut first: Option<Layout> = None;
+    for shift in [1usize, 0] {
+        if i0 < shift || (shift == 1 && i0 < 1) { continue; }
+        let hl: Vec<_> = hl_all[i0 - shift..].to_vec();
+        if hl.len() < 3 { continue; }
+        // the title underline is the widest line above the list (the text over it can break a thin line into pieces)
+        let above = hl_all.len() - hl.len();
+        let title_line = hl_all[..above.saturating_sub(1)].iter().max_by_key(|l| l.2 - l.1).copied();
+        let list_left = hl.iter().map(|l| l.1).min()?;
+        let list_right = hl.iter().map(|l| l.2).max()?;
+        let head_bottom = hl[1].0;
+        let rows = list_rows(img, div, head_bottom);
+        let lay = Layout { h, div_x: div.0, div_top: div.1, div_bottom: div.2, list_left, list_right, hlines: hl, rows, title_line };
+        if lay.rows.len() >= 3 && even_pitch(&lay.rows) { return Some(lay); }
+        if first.is_none() && lay.rows.len() >= 3 { first = Some(lay); }
+    }
+    first
+}
+
+/// the rows are as far apart as the median pitch, give or take 8 %
+fn even_pitch(rows: &[(usize, usize)]) -> bool {
+    let mut p: Vec<f64> = rows.windows(2).map(|w| w[1].0 as f64 - w[0].0 as f64).collect();
+    if p.is_empty() { return true; }
+    p.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let m = p[p.len() / 2];
+    p.iter().all(|&x| (x - m).abs() <= 0.08 * m)
+}
+
+/// the list rows: ink in the number column under the header line
+fn list_rows(img: &Img, div: (f64, usize, usize), head_bottom: usize) -> Vec<(usize, usize)> {
+    let (w, h) = (img.w, img.h);
     let hf = h as f64;
     let xa = ((div.0 + 0.008 * hf) as usize).min(w);
     let xb = ((div.0 + 0.125 * hf) as usize).min(w);
     let (ya, yb) = ((head_bottom + 2).min(h), div.2.min(h));
-    let mut proj = vec![false; yb.saturating_sub(ya)];
+    if yb <= ya || xb <= xa { return Vec::new(); }
+    // the number column: any pixel clearly brighter than the column's own background counts as ink (no colour rule)
+    let mut hist = [0u32; 256];
+    for y in ya..yb { for &v in &img.g[y * w + xa..y * w + xb] { hist[v as usize] += 1; } }
+    let n = ((yb - ya) * (xb - xa)) as u32;
+    let (bg, pk) = (percentile_hist(&hist, n, 20.0), percentile_hist(&hist, n, 99.7));
+    let thr = bg + 0.35 * (pk - bg);
+    let mut proj = vec![false; yb - ya];
     for (i, y) in (ya..yb).enumerate() {
-        proj[i] = white[y * w + xa..y * w + xb].iter().any(|&v| v != 0);
+        proj[i] = img.g[y * w + xa..y * w + xb].iter().filter(|&&v| v as f64 > thr).take(3).count() >= 3;   // a few bright pixels, not one noise speck
     }
     let mut rows = Vec::new();
     for (a, b) in runs(&proj, (0.006 * hf) as usize) {
@@ -104,7 +156,7 @@ pub fn find_layout(img: &Img, line: &[u8], white: &[u8]) -> Option<Layout> {
         let len = (b - a + 1) as f64;
         if 0.008 * hf <= len && len <= 0.04 * hf { rows.push((a, b)); }
     }
-    Some(Layout { h, div_x: div.0, div_top: div.1, div_bottom: div.2, list_left, list_right, hlines: hl, rows, title_line })
+    rows
 }
 
 /// True per row when a yellow star icon sits in the row (informative only)

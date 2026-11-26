@@ -2,6 +2,13 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.52
+- BGS WATCH now remembers what you left. The Band edges, Compare with, View, Show and the sorting and filters of every tab come back as you set them, and a new band such as 70 to 80 is no longer pulled back to 50 (both edges are saved together). Next to every system you now see (Pop: number), its population from Spansh. The app asks Spansh only for the system names of your newest snapshot, at most every 6 hours, and the switch in the BGS Setup turns it off completely.
+
+## 0.9.51
+- BGS WATCH reads your screenshots whatever the colour, gamma or brightness of your screen. The reader no longer depends on the default HUD colour: it works from the brightness of the picture, so a recoloured HUD, a very dark or very bright screen all read the same. The home system row (its name, SYSTEM OF ORIGIN and the little house) no longer breaks the name, and a name that cannot be read at all gets the one system that is still missing from the list, marked for you to look at.
+- A value the reader doubts whose runner-up reading equals the same system's value in your last snapshot now becomes that value (still marked), because values rarely change between two snapshots. All times are on your PC's clock first with UTC in brackets, the Tick tab has vertical date labels, a legend, a how-to-read note and a Show all button, compare can use 6, 12, 18 or 24 hours, Save picture writes the PNG into your Documents folder and tells you where, and the search box opens a system with Enter or Tab.
+
 ## 0.9.50
 - BGS WATCH has a Tick tab. For every system it shows the range of the day in which that system ticks, worked out from your own snapshots: each time a system's value changed between two readings, its tick fell inside that window, and the windows of several days are laid over each other so the range narrows as you take more snapshots. Systems are listed surest first, in UTC with your local time next to it. It is a range, not an exact time: the game's panels can be up to 12 hours late, and a tick that changes nothing cannot be seen.
 

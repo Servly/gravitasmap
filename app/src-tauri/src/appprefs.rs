@@ -124,6 +124,60 @@ pub fn save_text_file(kind: &str, text: &str) -> Result<String, String> {
     Ok(path.display().to_string())
 }
 
+/// Plain base64 (standard alphabet, padding optional), whitespace ignored. None on any other character.
+fn b64_decode(s: &str) -> Option<Vec<u8>> {
+    let mut out = Vec::with_capacity(s.len() / 4 * 3);
+    let (mut acc, mut bits) = (0u32, 0u32);
+    for c in s.bytes() {
+        let v = match c {
+            b'A'..=b'Z' => c - b'A', b'a'..=b'z' => c - b'a' + 26, b'0'..=b'9' => c - b'0' + 52, b'+' => 62, b'/' => 63,
+            b'=' | b'\n' | b'\r' | b' ' => continue,
+            _ => return None,
+        } as u32;
+        acc = (acc << 6) | v; bits += 6;
+        if bits >= 8 { bits -= 8; out.push((acc >> bits) as u8); acc &= (1 << bits) - 1; }
+    }
+    Some(out)
+}
+
+/// Saves a chart picture (PNG) the player asked for into the Documents folder as GRAVITAS-<kind>-<date>.png and shows it in Explorer. The name is made here,
+/// never taken from the page, the bytes must be a PNG, 8 MB at most. Returns the full path.
+pub fn save_png_file(kind: &str, b64: &str) -> Result<String, String> {
+    if kind != "bgs-chart" { return Err("unknown file kind".into()); }
+    if b64.len() > 12_000_000 { return Err("the picture is too big".into()); }
+    let bytes = b64_decode(b64).ok_or("the picture data is not valid")?;
+    if bytes.len() < 8 || bytes[..8] != [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A] { return Err("the data is not a PNG picture".into()); }
+    let dir = documents().ok_or("no Documents folder")?;
+    let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0) as i64;
+    let (y, m, d) = civil(secs.div_euclid(86400));
+    let stamp = format!("{y:04}-{m:02}-{d:02}");
+    let mut path = dir.join(format!("GRAVITAS-{kind}-{stamp}.png"));
+    let mut n = 2;
+    while path.exists() { path = dir.join(format!("GRAVITAS-{kind}-{stamp}-{n}.png")); n += 1; }
+    let tmp = path.with_extension("png.tmp");
+    std::fs::write(&tmp, &bytes).map_err(|_| "could not write the file".to_string())?;
+    std::fs::rename(&tmp, &path).map_err(|_| "could not write the file".to_string())?;
+    let _ = std::process::Command::new(explorer()).arg(format!("/select,{}", path.display())).spawn();
+    Ok(path.display().to_string())
+}
+
+#[cfg(test)]
+mod png_save_tests {
+    use super::*;
+    #[test]
+    fn base64_decodes_and_refuses_junk() {
+        assert_eq!(b64_decode("aGVsbG8=").unwrap(), b"hello");
+        assert_eq!(b64_decode("aGVsbG8").unwrap(), b"hello");
+        assert!(b64_decode("a$b").is_none());
+    }
+    #[test]
+    fn only_a_png_is_saved() {
+        assert!(save_png_file("other", "aGVsbG8=").is_err());
+        assert!(save_png_file("bgs-chart", "aGVsbG8=").unwrap_err().contains("PNG"));
+        assert!(save_png_file("bgs-chart", "***").is_err());
+    }
+}
+
 /// Days since 1970-01-01 to (year, month, day), proleptic Gregorian (Howard Hinnant's algorithm)
 fn civil(z: i64) -> (i64, u32, u32) {
     let z = z + 719468;

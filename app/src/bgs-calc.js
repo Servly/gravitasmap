@@ -14,9 +14,17 @@
   function dmy(t) { try { return new Date(t).toLocaleDateString(BG.lang || "en", { day: "numeric", month: "short", timeZone: "UTC" }); } catch (e) { return new Date(t).toISOString().slice(5, 10); } }
   function dt(t) { return dmy(t) + " " + hhmm(tod(t)); }                       // UTC (the game's clock)
   function dtl(t) { try { return new Date(t).toLocaleString(BG.lang || "en", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch (e) { return new Date(t).toString(); } }   // this PC's time, for tips
+  // 0.9.51: the player's own clock comes first, UTC (the game's clock) in brackets. dl = local date and time, tm = local with UTC in brackets, hml = local hh:mm
+  function dl(t) { try { return new Date(t).toLocaleString(BG.lang || "en", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }); } catch (e) { return new Date(t).toString(); } }
+  function dml(t) { try { return new Date(t).toLocaleDateString(BG.lang || "en", { day: "numeric", month: "short" }); } catch (e) { return ""; } }
+  function hml(t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  function tm(t) { var u = hhmm(tod(t)) + " UTC"; if (dmy(t) !== dml(t)) u = dmy(t) + " " + u; return dl(t) + " (" + u + ")"; }
+  function lhm(m) { return hhmm(m + offMin()); }                                         // minute of the UTC day shown on this PC's clock
+  function both(m) { return lhm(m) + " (" + hhmm(m) + " UTC)"; }
+  function offMin() { return -new Date().getTimezoneOffset(); }                       // minutes this PC is ahead of UTC (+180 in Turkey)
   function ago(ms) { var h = ms / H; return h < 36 ? Math.round(h) + " " + tr("bgs.u.h") : (h / 24).toFixed(1).replace(".0", "") + " " + tr("bgs.u.d"); }
 
-  // which earlier reading a system is compared with: the one before, about 24 h ago, or about 7 days ago
+  // which earlier reading a system is compared with: the one before, about 6, 12, 18 or 24 h ago, the end of yesterday, or about 7 days ago
   function baseIdx(snaps, s, li, mode) {
     var j;
     if (mode === "prev") { for (j = li - 1; j >= 0; j--) if (s.v[j] != null) return j; return -1; }
@@ -25,7 +33,8 @@
       for (j = li - 1; j >= 0; j--) if (snaps[j].t < d0 && s.v[j] != null) return snaps[j].t >= d0 - 36 * H ? j : -1;
       return -1;
     }
-    var want = snaps[li].t - (mode === "24h" ? DAY : 7 * DAY), tol = mode === "24h" ? 18 * H : 48 * H, best = -1, bd = 1e18;
+    var hm = /^(\d+)h$/.exec(mode), hrs = hm ? +hm[1] : null;        // "6h", "12h", "18h", "24h": that long before the newest reading
+    var want = snaps[li].t - (hrs != null ? hrs * H : 7 * DAY), tol = hrs === 24 ? 18 * H : hrs != null ? Math.max(3 * H, hrs * 0.6 * H) : 48 * H, best = -1, bd = 1e18;
     for (j = 0; j < li; j++) if (s.v[j] != null && Math.abs(snaps[j].t - want) < bd) { bd = Math.abs(snaps[j].t - want); best = j; }
     return bd <= tol ? best : -1;
   }
@@ -137,11 +146,11 @@
         var r = rng(x); if (r[0] <= lo && lo < r[1]) lo = Math.min(r[1], hi); if (r[0] < hi && hi <= r[1]) hi = Math.max(r[0], lo);
       });
       out.win = [lo, hi]; out.level = tight.length >= 3 ? 3 : 2;
-      out.text = tr("bgs.tick.win", { a: hhmm(lo), b: hhmm(hi), n: tight.length });
+      out.text = tr("bgs.tick.win", { a: both(lo), b: both(hi), n: tight.length });
     } else {
       var mids = tight.map(function (x) { var r = rng(x); return (r[0] + r[1]) / 2; });
       out.win = [Math.min.apply(0, mids), Math.max.apply(0, mids)]; out.level = 1;
-      out.text = tr("bgs.tick.rough", { a: hhmm(out.win[0]), b: hhmm(out.win[1]) });
+      out.text = tr("bgs.tick.rough", { a: both(out.win[0]), b: both(out.win[1]) });
     }
     out.tight = tight; out.drift = tr("bgs.tick.drift");
     return out;
@@ -176,5 +185,5 @@
       return out;
     });
   }
-  BG.calc = { tickSys: tickSys, DEF: DEF, model: model, hhmm: hhmm, dmy: dmy, dt: dt, dtl: dtl, tod: tod, ago: ago, r1: r1, median: median, quant: quant };
+  BG.calc = { tickSys: tickSys, DEF: DEF, model: model, hhmm: hhmm, dmy: dmy, dt: dt, dtl: dtl, dl: dl, lhm: lhm, both: both, dml: dml, hml: hml, tm: tm, offMin: offMin, tod: tod, ago: ago, r1: r1, median: median, quant: quant };
 })();

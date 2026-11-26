@@ -6,7 +6,7 @@ use super::reader::{read_screen, T_COST, T_MARGIN};
 
 fn stats(dir: &str) {
     let Ok(rd) = std::fs::read_dir(dir) else { println!("{dir}: folder not found, skipped"); return };
-    let t = super::tpl::bundled().expect("templates");
+    let t = super::tpl::bundled().unwrap();
     let mut files: Vec<_> = rd.filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.extension().map_or(false, |x| x == "bmp" || x == "png")).collect();
     files.sort();
     let (mut n, mut nc, mut nm, mut ic, mut im, mut dis, mut conf, mut any_v, mut any_n, mut any) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -203,4 +203,47 @@ fn real_4k_pages() {
     for c in p.rows.iter().filter(|c| c.uncertain) { *rc.entry(format!("{} {:?}", c.state, c.reasons)).or_insert(0) += 1; }
     println!("4K: rows {} wrong names {wn} wrong values {wv} flagged {flagged} wrong AND sure {wrong_sure} issues {:?}
    {rc:?}", p.rows.len(), p.issues.iter().map(|i| i.code).collect::<Vec<_>>());
+}
+
+/// Diagnostic (0.9.51): where the "77 SYSTEMS" cell is cut. GV_DIR = folder of one real set.
+#[test]
+#[ignore]
+fn dbg_systems_cell() {
+    let f = super::train::root().join(std::env::var("GV_FILE").unwrap_or("inbox/p3/Screenshot_0005.bmp".into()));
+    let im = super::decode::decode_file(&f).unwrap();
+    let img = Img::new(super::decode::Rgb { w: im.w, h: im.h, px: im.px.clone() });
+    let sc = super::reader::segment_screen(&img).unwrap();
+    println!("hlines {:?} title {:?} div {} rows {}", sc.lay.hlines, sc.lay.title_line, sc.lay.div_x, sc.lay.rows.len());
+    for (n, s) in [("systems", &sc.systems), ("page", &sc.page), ("updated", &sc.updated)] {
+        match s { Some(s) => println!("{n}: {} glyphs cap_h {:.1} boxes {:?}", s.glyphs.len(), s.cap_h, s.glyphs.iter().take(14).map(|g| g.bx).collect::<Vec<_>>()), None => println!("{n}: none") }
+    }
+}
+
+/// One folder of pages: GV_DIR relative to the project root. cargo test --release bgs::tests7::stats_one_folder -- --ignored --nocapture
+#[test]
+#[ignore]
+fn stats_one_folder() {
+    stats(&super::train::root().join(std::env::var("GV_DIR").unwrap_or("inbox/cyanidex_new-bmp".into())).to_string_lossy());
+}
+
+/// Dumps every cell the reader gives for a folder to GV_DUMP (page, row, name, value, reasons) so two builds can be compared line by line.
+#[test]
+#[ignore]
+fn dump_folder_reading() {
+    let dir = super::train::root().join(std::env::var("GV_DIR").unwrap_or("inbox/cyanidex_new-bmp".into()));
+    let out = std::env::var("GV_DUMP").expect("GV_DUMP");
+    let t = super::tpl::bundled().unwrap();
+    let mut files: Vec<_> = std::fs::read_dir(dir).unwrap().filter_map(|e| e.ok()).map(|e| e.path()).collect();
+    files.sort();
+    let mut s = String::new();
+    for f in files {
+        let im = super::decode::decode_file(&f).unwrap();
+        match read_screen(&Img::new(super::decode::Rgb { w: im.w, h: im.h, px: im.px.clone() }), t) {
+            None => s.push_str(&format!("{}: no list\n", f.file_name().unwrap().to_string_lossy())),
+            Some(p) => for (i, r) in p.rows.iter().enumerate() {
+                s.push_str(&format!("{} p{:?} r{} | {} | {} | cost {:.2}/{:.2} margin {:.2}/{:.2} | {:?}\n", f.file_name().unwrap().to_string_lossy(), p.page, i, r.name, r.inf, r.name_cost, r.inf_cost, r.name_margin, r.inf_margin, r.reasons));
+            },
+        }
+    }
+    std::fs::write(out, s).unwrap();
 }

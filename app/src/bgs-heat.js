@@ -13,7 +13,7 @@
     var Hh = top + a.length * rh + 30, o = '<defs><pattern id="bghat" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="' + COL.ink + '"/><line x1="0" y1="0" x2="0" y2="5" stroke="' + COL.faint + '" stroke-width="2"/></pattern></defs>';
     for (i = M.first; i <= M.K; i++) {
       var sn = M.snaps[i];
-      o += S.T(xs[i] + cw / 2, 14, C.dmy(sn.t), { anchor: "middle", size: 10, fill: COL.dim }) + S.T(xs[i] + cw / 2, 27, C.hhmm(C.tod(sn.t)), { anchor: "middle", size: 10, fill: COL.faint });
+      o += S.T(xs[i] + cw / 2, 14, C.dml(sn.t), { anchor: "middle", size: 10, fill: COL.dim }) + S.T(xs[i] + cw / 2, 27, C.hml(sn.t), { anchor: "middle", size: 10, fill: COL.faint });
       if (!sn.complete) o += '<text x="' + (xs[i] + cw / 2) + '" y="37" fill="' + COL.warn + '" font-size="11" text-anchor="middle" font-weight="700" data-tip="' + esc(t("tip.bgs.incomplete", { n: sn.missing })) + '">!</text>';
       if (i > M.first && M.snaps[i].t - M.snaps[i - 1].t > 36 * H) o += S.T(xs[i] - 8, 37, "≈" + C.ago(M.snaps[i].t - M.snaps[i - 1].t), { anchor: "middle", size: 9, fill: COL.faint });
     }
@@ -36,7 +36,7 @@
           fill = z === "low" ? COL.badA(Math.min(.9, .35 + (lo - v) / 14).toFixed(2)) : z === "high" ? COL.warnA(Math.min(.8, .25 + (v - hi) / 14).toFixed(2)) : COL.viA((.12 + (v - lo) / (hi - lo) * .3).toFixed(2));
           txt = S.f1(v); tc = z === "low" ? COL.ink : "rgba(255,255,255,.85)";
         }
-        tip = s.n + " | " + C.dt(M.snaps[i].t) + " UTC (" + C.dtl(M.snaps[i].t) + ") | " + S.f1(v) + (dd == null ? "" : " (" + S.sg(dd) + (last.i < i - 1 ? ", " + t("bgs.heat.since") : "") + ")") + (s.f[i] ? " | " + t("bgs.accepted") : "");
+        tip = s.n + " | " + C.tm(M.snaps[i].t) + " | " + S.f1(v) + (dd == null ? "" : " (" + S.sg(dd) + (last.i < i - 1 ? ", " + t("bgs.heat.since") : "") + ")") + (s.f[i] ? " | " + t("bgs.accepted") : "");
         o += S.R(xs[i], y, cw - 1, rh - 1, fill, { rx: 2, stroke: s.f[i] ? COL.warn : null, dash: s.f[i] ? "2 2" : null, extra: ' data-sys="' + esc(s.n) + '" data-tip="' + esc(tip) + '"' });
         if (cw >= 34) o += '<text x="' + (xs[i] + (cw - 1) / 2) + '" y="' + (y + 10.5) + '" fill="' + tc + '" font-size="9.5" text-anchor="middle" font-family="Segoe UI,sans-serif" pointer-events="none">' + esc(txt) + "</text>";
         last = { v: v, i: i };
@@ -73,8 +73,8 @@
     var X = function (k) { return 36 + (k - M.first) * ((w - 50) / (M.K - M.first + 1)); }, Yp = function (v) { return 8 + (1 - v / max) * (h - 36); };
     for (i = M.first; i <= M.K; i++) {
       var z = M.fleet[i].z, x = X(i), acc = 0;
-      [["low", COL.bad], ["in", COL.viA(.55)], ["high", COL.warn]].forEach(function (sgm) { var c = z[sgm[0]], yy = Yp(acc + c); o += S.R(x, yy, bw, Yp(acc) - yy, sgm[1], { extra: ' data-tip="' + esc(C.dt(M.snaps[i].t) + " UTC | " + t("bgs.fl.tip", { lo: z.low, i: z.in, hi: z.high }) + (M.snaps[i].complete ? "" : " | " + t("bgs.fl.inc"))) + '"' }); acc += c; });
-      o += S.T(x + bw / 2, h - 16, String(new Date(M.snaps[i].t).getUTCDate()), { anchor: "middle", size: 10, fill: COL.faint }) + (M.snaps[i].complete ? "" : S.T(x + bw / 2, h - 3, "!", { anchor: "middle", size: 11, fill: COL.warn, w: 700 }));
+      [["low", COL.bad], ["in", COL.viA(.55)], ["high", COL.warn]].forEach(function (sgm) { var c = z[sgm[0]], yy = Yp(acc + c); o += S.R(x, yy, bw, Yp(acc) - yy, sgm[1], { extra: ' data-tip="' + esc(C.tm(M.snaps[i].t) + " | " + t("bgs.fl.tip", { lo: z.low, i: z.in, hi: z.high }) + (M.snaps[i].complete ? "" : " | " + t("bgs.fl.inc"))) + '"' }); acc += c; });
+      o += S.T(x + bw / 2, h - 16, String(new Date(M.snaps[i].t).getDate()), { anchor: "middle", size: 10, fill: COL.faint }) + (M.snaps[i].complete ? "" : S.T(x + bw / 2, h - 3, "!", { anchor: "middle", size: 11, fill: COL.warn, w: 700 }));
       if (z.low) o += S.T(x + bw / 2, Yp(z.low) + 11, String(z.low), { anchor: "middle", size: 9, fill: COL.ink, w: 700 });
     }
     [0, Math.round(max / 4), Math.round(max / 2), Math.round(max * .75), max].forEach(function (g) { o += S.T(30, Yp(g) + 3, String(g), { anchor: "end", size: 9.5, fill: COL.faint }); o += S.L(34, Yp(g), w - 12, Yp(g), COL.grid); });
@@ -86,7 +86,7 @@
     o2 += '<polygon points="' + up.concat(dn).join(" ") + '" fill="' + COL.cyA(.15) + '"/>';
     var mp = []; for (i = M.first; i <= M.K; i++) mp.push(Xp(i).toFixed(1) + "," + Yq(M.fleet[i].med).toFixed(1));
     o2 += '<polyline points="' + mp.join(" ") + '" fill="none" stroke="' + COL.cyan + '" stroke-width="2"/>';
-    for (i = M.first; i <= M.K; i++) o2 += '<circle cx="' + Xp(i).toFixed(1) + '" cy="' + Yq(M.fleet[i].med).toFixed(1) + '" r="3" fill="' + COL.cyan + '" data-tip="' + esc(C.dt(M.snaps[i].t) + " UTC | " + t("bgs.fl.med", { m: S.f1(M.fleet[i].med), a: S.f1(M.fleet[i].q1), b: S.f1(M.fleet[i].q3) })) + '"/>' + S.T(Xp(i), h2 - 6, String(new Date(M.snaps[i].t).getUTCDate()), { anchor: "middle", size: 10, fill: COL.faint });
+    for (i = M.first; i <= M.K; i++) o2 += '<circle cx="' + Xp(i).toFixed(1) + '" cy="' + Yq(M.fleet[i].med).toFixed(1) + '" r="3" fill="' + COL.cyan + '" data-tip="' + esc(C.tm(M.snaps[i].t) + " | " + t("bgs.fl.med", { m: S.f1(M.fleet[i].med), a: S.f1(M.fleet[i].q1), b: S.f1(M.fleet[i].q3) })) + '"/>' + S.T(Xp(i), h2 - 6, String(new Date(M.snaps[i].t).getDate()), { anchor: "middle", size: 10, fill: COL.faint });
     [Y[0], lo, hi, Y[1]].forEach(function (g) { o2 += S.T(30, Yq(g) + 3, String(g), { anchor: "end", size: 9.5, fill: COL.faint }); });
     var mc = card(t("bgs.med.h"), S.svg(w2, h2, o2, 'id="msvg"'), { save: 1, q: t("bgs.med.q"), note: t("bgs.med.note") });
     return '<div class="bg-two">' + zc + mc + "</div>" + V.hist(M);

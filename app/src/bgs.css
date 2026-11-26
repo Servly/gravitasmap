@@ -99,3 +99,5 @@ html.calm .bg-prog i{animation:none;margin-left:0;width:100%}
 #bgs-setup.on > .bg-read{order:-2}
 #bgs-setup.on > .bg-data{order:-1}
 .bg-imp{margin-top:8px}
+.bg-one{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}.bg-edlegend{color:var(--dim)}
+.bg-pop{color:var(--dim);font-size:.82em;font-weight:400;white-space:nowrap}

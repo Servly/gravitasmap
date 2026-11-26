@@ -43,8 +43,23 @@
     });
     return { squad: d.squad, snaps: snaps, sys: sys };
   }
+  // 0.9.52: what the player left in the bar (compare with, view, show, sorting...) is saved and comes back as it was
+  var UI_KEYS = ["res", "tmode", "base", "days", "msort", "rfilter", "tsort", "hsort", "hmode", "tmore"], uiSaved = {};
+  function restoreUi(saved) {
+    saved = saved || {};
+    UI_KEYS.forEach(function (k) { if (saved[k] != null) ui[k] = k === "days" ? +saved[k] : String(saved[k]); uiSaved[k] = ui[k]; });
+  }
+  function persistUi() {
+    if (!invoke || !ui.uiSeen) return;
+    UI_KEYS.forEach(function (k) {
+      if (ui[k] == null || uiSaved[k] === ui[k]) return;
+      uiSaved[k] = ui[k];
+      invoke("bgs_settings_set", { key: "ui." + k, value: ui[k] });
+    });
+  }
   function build() {
     var g = store.g, s = (g && g.settings) || {};
+    if (!ui.uiSeen && g && g.settings) { restoreUi(s.ui); ui.uiSeen = true; }
     if (!ui.setSeen && s.minor != null) { ui.minor = Math.round(s.minor * 10) / 10; ui.tickPct = s.tick_pct == null ? 20 : Math.round(s.tick_pct); ui.setSeen = true; } // (kept from the last session)
     if (!store.data || !store.data.snaps.length) { store.M = null; return; }
     var nDays = {}; store.data.snaps.forEach(function (x) { nDays[new Date(x.t).toISOString().slice(0, 10)] = 1; });
@@ -60,9 +75,14 @@
     if (store.busy || !invoke) return Promise.resolve();
     store.busy = true;
     return invoke("bgs_get").then(function (g) {
-      var sig = JSON.stringify([g.snapshots.map(function (x) { return x.id; }), g.settings && [g.settings.low, g.settings.high, g.settings.on]]);
+      var sig = JSON.stringify([g.snapshots.map(function (x) { return x.id; }), g.settings && [g.settings.low, g.settings.high, g.settings.on, g.settings.population], g.pop && g.pop.updated_utc]);
       var changedSnaps = JSON.stringify(g.snapshots.map(function (x) { return x.id; })) !== store.snapIds;
       store.g = g;
+      BG.popMap = (g.pop && g.pop.map) || {};
+      if (g.settings && g.settings.population !== false && g.snapshots.length && Date.now() - (store.popAt || 0) > 20 * 60e3) {
+        store.popAt = Date.now();
+        invoke("bgs_pop_refresh", { force: false }).then(function (r) { if (r && r.ok && !r.off && !r.empty) { BG.dirty = true; store.popAt = Date.now(); load(true); } }, function () {});
+      }
       if (!changedSnaps && !force && !BG.dirty) { if (sig !== store.sig) { store.sig = sig; build(); store.rev++; } return; }
       BG.dirty = false; store.snapIds = JSON.stringify(g.snapshots.map(function (x) { return x.id; })); store.sig = sig;
       if (!g.snapshots.length) { store.data = null; build(); store.rev++; return; }
@@ -82,7 +102,7 @@
   function savePng(svgEl) {
     var cs = getComputedStyle(document.documentElement), x = new XMLSerializer().serializeToString(svgEl).replace(/var\(--([\w-]+)\)/g, function (m, k) { return cs.getPropertyValue("--" + k).trim() || "#888"; });
     var w = svgEl.viewBox.baseVal.width, h = svgEl.viewBox.baseVal.height, im = new Image();
-    im.onload = function () { var c = document.createElement("canvas"); c.width = w * 2; c.height = h * 2; var g = c.getContext("2d"); g.fillStyle = cs.getPropertyValue("--tab").trim() || "#0e0920"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height); c.toBlob(function (b) { b && dl("bgs-chart.png", b); }); };
+    im.onload = function () { var c = document.createElement("canvas"); c.width = w * 2; c.height = h * 2; var g = c.getContext("2d"); g.fillStyle = cs.getPropertyValue("--tab").trim() || "#0e0920"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height); c.toBlob(function (b) { if (!b) return; if (!invoke) { dl("bgs-chart.png", b); return; } var fr = new FileReader(); fr.onload = function () { invoke("save_png_file", { kind: "bgs-chart", b64: String(fr.result).split(",")[1] || "" }).then(function (p) { BG.toast && BG.toast(t("bgs.save.done", { p: p })); }, function () { dl("bgs-chart.png", b); }); }; fr.readAsDataURL(b); }); };
     im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(x);
   }
   // the drawer (one for all panes)
@@ -100,22 +120,22 @@
     return lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
       lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">') +
-      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
+      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["6h", t("bgs.base.6h")], ["12h", t("bgs.base.12h")], ["18h", t("bgs.base.18h")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
   }
   function head(M) {
     var sn = M.snaps[M.K], fw = M.sys.reduce(function (a, s) { return a + (s.f[M.K] ? 1 : 0); }, 0), tot = M.sys.length;
-    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dtl(sn.t)) + '">' + C.dt(sn.t) + " UTC</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span><span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
+    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t) + "</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span><span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
       (fw ? "<span class='w'>" + t("bgs.dq.warn", { n: fw }) + "</span>" : "") + (M.nS > 1 ? "<span>" + t("bgs.dq.inc", { n: M.snaps.filter(function (x) { return !x.complete; }).length }) + "</span>" : "") + "<span class='bg-fl'>" + t("bgs.dq.utc") + "</span>";
   }
   // the slim bar: one quality chip, the three filters that matter, everything else under "more"
   function pin(M) {
-    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + C.dt(sn.t) + " UTC";
+    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + C.tm(sn.t);
     var s = (store.g && store.g.settings) || {};
     function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
     var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
-      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
+      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["6h", t("bgs.base.6h")], ["12h", t("bgs.base.12h")], ["18h", t("bgs.base.18h")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
       lab("tip.bgs.res", t("bgs.res"), sel("bres", ui.res, [["auto", t("bgs.res.auto")], ["daily", t("bgs.res.daily")], ["snap", t("bgs.res.snap")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
     var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
@@ -140,11 +160,28 @@
   function renderAll() { panes.forEach(function (p) { if (!p.el.isConnected) return; if (p.el.offsetParent) renderPane(p); else p.rev = -1; }); }
   BG.render = renderAll;
 
+  // the search box: a name (or the start of one) opens that system. Enter does it, and so does Tab (the focus then stays in the box: it must not jump into the Band fields)
+  function findSys(q) {
+    q = String(q || "").trim().toLowerCase();
+    var ns = store.M ? store.M.sys.map(function (s) { return s.n; }) : [];
+    return q ? (ns.filter(function (n) { return n.toLowerCase() === q; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) === 0; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) >= 0; })[0]) : undefined;
+  }
+  function searchSys(x) {
+    var q = x.value.trim(), hit = findSys(q);
+    ui.sq = x.value;
+    if (q && hit) { openSys(hit); ui.sq = hit; x.value = hit; } else if (q && BG.toast) BG.toast(t("bgs.search.none", { q: x.value }));
+  }
+
   function wire(el) {
+    el.addEventListener("keydown", function (e) {
+      var x = e.target; if (!x || x.id !== "bgq") return;
+      if (e.key === "Enter") { e.preventDefault(); searchSys(x); }
+      else if (e.key === "Tab" && !e.shiftKey) { var hit = findSys(x.value); if (hit && hit !== ui.sel) { e.preventDefault(); searchSys(x); } }
+    });
     el.addEventListener("click", function (e) {
       var x = e.target, b;
       if ((b = x.closest("[data-gosetup]"))) { var tb = document.querySelector('.tabs[data-scope="bgs"] .tab[data-tab="setup"]'); if (tb) tb.click(); return; }
-      if ((b = x.closest("[data-seg] button"))) { ui[b.parentNode.dataset.seg] = b.dataset.v; renderAll(); return; }
+      if ((b = x.closest("[data-seg] button"))) { ui[b.parentNode.dataset.seg] = b.dataset.v; persistUi(); renderAll(); return; }
       if (x.closest("[data-close]")) { closeSys(); return; }
       if ((b = x.closest("[data-save]"))) { var sv = b.closest(".bg-card").querySelector("svg"); if (sv) savePng(sv); return; }
       if ((b = x.closest("[data-csv]"))) { if (store.M) dl("bgs-" + b.dataset.csv + ".csv", new Blob([V.csv(store.M, b.dataset.csv)], { type: "text/csv;charset=utf-8" })); return; }
@@ -153,20 +190,15 @@
     });
     el.addEventListener("change", function (e) {
       var x = e.target, id = x.id;
-      if (id === "bgq") {
-        var q = x.value.trim().toLowerCase(), ns = store.M ? store.M.sys.map(function (s) { return s.n; }) : [];
-        var hit = ns.filter(function (n) { return n.toLowerCase() === q; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) === 0; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) >= 0; })[0];
-        ui.sq = x.value;
-        if (q && hit) { openSys(hit); ui.sq = hit; x.value = hit; } else if (q && BG.toast) BG.toast(t("bgs.search.none", { q: x.value }));
-        return;
-      }
+      if (id === "bgq") { searchSys(x); return; }
       if (id === "blo" || id === "bhi") {
         var lo = parseFloat(document.getElementById("blo").value), hi = parseFloat(document.getElementById("bhi").value);
-        (id === "blo" ? invoke("bgs_settings_set", { key: "low", value: lo }) : invoke("bgs_settings_set", { key: "high", value: hi })).then(function (r) { if (r && r.ok) load(true); else { BG.toast && BG.toast(BG.errText(r && r.error)); load(true); } });
+        invoke("bgs_settings_set", { key: "band", value: [lo, hi] }).then(function (r) { if (r && r.ok) load(true); else { BG.toast && BG.toast(BG.errText(r && r.error)); load(true); } });
         return;
       }
       if (id === "bmin") { ui.minor = Math.max(0.1, +x.value || 0.3); invoke("bgs_settings_set", { key: "minor", value: ui.minor }); } else if (id === "btick") { ui.tickPct = Math.max(2, Math.min(90, +x.value || 20)); invoke("bgs_settings_set", { key: "tick_pct", value: ui.tickPct }); } else if (id === "bbase") ui.base = x.value; else if (id === "bdays") ui.days = +x.value; else if (id === "bres") ui.res = x.value;
       else if (x.dataset.rep) ui.rep[x.dataset.rep] = x.checked ? 1 : 0; else return;
+      persistUi();
       build(); store.rev++; renderAll();
     });
     el.addEventListener("input", function (e) {

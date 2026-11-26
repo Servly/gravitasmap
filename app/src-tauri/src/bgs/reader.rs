@@ -1,5 +1,5 @@
 //! BGS Watch, one screenshot of the Squadron > Faction list to numbers: layout, glyphs, matching, grammar. Memory only.
-use super::glyphs::{segment_line, Seg, G_FRAC};
+use super::glyphs::{segment_line, segment_line_h, Seg, G_FRAC};
 use super::grammar::{recognise, recognise_glyphs, recognise_mode, split_words, Recog};
 use super::imgops::Img;
 use super::layout::{find_layout, star_rows, Layout};
@@ -69,21 +69,30 @@ pub struct PageRead {
     pub height: usize,
 }
 
+/// brightness threshold (between the cell's background and its peak) for number and label text
+const NUM_FRAC: f64 = 0.45;
+/// the NAME cell ends this far (x screen height) before the divider: the home system's house icon sits right before it and is no part of any name
+const NAME_END: f64 = 0.065;
+
 pub fn segment_screen(img: &Img) -> Option<Screen> {
-    let line = img.line_mask();
-    let white = img.white_mask();
-    let lay = find_layout(img, &line, &white)?;
-    drop(line);
+    let lay = find_layout(img)?;
+    let (name_frac, num_frac) = (G_FRAC, NUM_FRAC);
     let hf = lay.h as f64;
-    let aqua = img.aqua_mask();
     let stars = star_rows(img, &lay, &img.yellow_mask());
+    let half = (0.0305 * hf) as i64;
+    let name_win = |a: usize, b: usize| { let yc = ((a + b) / 2) as i64; [lay.list_left as i64 + 2, (lay.div_x - NAME_END * hf) as i64, yc - half, yc + half] };
+    // pass 1: every name cut by itself. The capital height of a page is one number: rows that disagree with the page's median are cut again with it.
+    let first: Vec<Option<Seg>> = lay.rows.iter().map(|&(a, b)| segment_line(img, None, name_win(a, b), hf, name_frac, true)).collect();
+    let mut caps: Vec<f64> = first.iter().flatten().map(|s| s.cap_h).collect();
+    let page_cap = if caps.len() >= 3 { caps.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)); Some(caps[caps.len() / 2]) } else { None };
     let mut rows = Vec::new();
-    for (&(a, b), &star) in lay.rows.iter().zip(&stars) {
-        let yc = ((a + b) / 2) as i64;
-        let half = (0.0305 * hf) as i64;
-        let name = segment_line(img, &aqua, [lay.list_left as i64 + 2, (lay.div_x - 0.004 * hf) as i64, yc - half, yc + half], hf, G_FRAC, true);
+    for ((&(a, b), &star), name1) in lay.rows.iter().zip(&stars).zip(first) {
+        let name = match (page_cap, &name1) {
+            (Some(c), Some(s)) if (s.cap_h - c).abs() > 0.25 * c => segment_line_h(img, None, name_win(a, b), hf, name_frac, true, Some(c)).or(name1),
+            _ => name1,
+        };
         let pad = (0.004 * hf) as i64;
-        let inf = segment_line(img, &white, [(lay.div_x + 0.008 * hf) as i64, (lay.div_x + 0.125 * hf) as i64, a as i64 - pad, b as i64 + pad], hf, 0.0, false);
+        let inf = segment_line(img, None, [(lay.div_x + 0.008 * hf) as i64, (lay.div_x + 0.125 * hf) as i64, a as i64 - pad, b as i64 + pad], hf, num_frac, false);
         rows.push(RowSeg { star, name, inf });
     }
     // "PAGE n/m": centred on the list, just under the pager line (the first frame line after the divider)
@@ -91,15 +100,14 @@ pub fn segment_screen(img: &Img) -> Option<Screen> {
     let page = below.first().and_then(|&y| {
         let cx = (lay.list_left + lay.list_right) as f64 / 2.0;
         let y0 = y as i64 + (0.014 * hf) as i64;
-        segment_line(img, &white, [(cx - 0.12 * hf) as i64, (cx + 0.12 * hf) as i64, y0, y0 + (0.026 * hf) as i64], hf, 0.0, false)
+        segment_line(img, None, [(cx - 0.12 * hf) as i64, (cx + 0.12 * hf) as i64, y0, y0 + (0.026 * hf) as i64], hf, num_frac, false)
     });
-    // "77 SYSTEMS": white line above the first frame line of the list
+    // "77 SYSTEMS": the line above the first frame line of the list
     let top = lay.hlines[0].0 as i64;
-    let systems = segment_line(img, &white, [lay.list_left as i64, lay.list_left as i64 + (0.30 * hf) as i64, top - (0.040 * hf) as i64, top - (0.006 * hf) as i64], hf, 0.0, false);
-    // "LAST UPDATED: 52 MINUTES AGO": grey, right aligned above the underline of the title row
+    let systems = segment_line(img, None, [lay.list_left as i64, lay.list_left as i64 + (0.30 * hf) as i64, top - (0.040 * hf) as i64, top - (0.006 * hf) as i64], hf, num_frac, false);
+    // "LAST UPDATED: 52 MINUTES AGO": right aligned above the underline of the title row
     let updated = lay.title_line.and_then(|(ty, _, tx1)| {
-        let neutral = img.neutral_mask();
-        segment_line(img, &neutral, [tx1 as i64 - (0.60 * hf) as i64, tx1 as i64, ty as i64 - (0.040 * hf) as i64, ty as i64 - (0.006 * hf) as i64], hf, 0.4, false)
+        segment_line(img, None, [tx1 as i64 - (0.60 * hf) as i64, tx1 as i64, ty as i64 - (0.040 * hf) as i64, ty as i64 - (0.006 * hf) as i64], hf, 0.4, false)
     });
     Some(Screen { lay, rows, page, systems, updated })
 }
