@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.40",
+      "en": [
+        "Fix on the BGS page: the Setup panel stayed visible under every tab, so you had to scroll far down to reach the charts. Each tab now shows only its own content."
+      ],
+      "de": [
+        "Korrektur auf der BGS-Seite: Das Setup-Panel blieb unter jedem Tab sichtbar, sodass man weit nach unten scrollen musste, um die Diagramme zu sehen. Jeder Tab zeigt jetzt nur noch seinen eigenen Inhalt."
+      ],
+      "es": [
+        "Corrección en la página BGS: el panel Setup seguía visible bajo cada pestaña y había que bajar mucho para llegar a los gráficos. Ahora cada pestaña muestra solo su contenido."
+      ],
+      "fr": [
+        "Correction de la page BGS : le panneau Setup restait visible sous chaque onglet, il fallait descendre loin pour atteindre les graphiques. Chaque onglet n'affiche plus que son propre contenu."
+      ],
+      "pt-br": [
+        "Correção na página BGS: o painel Setup continuava visível sob cada aba e era preciso rolar muito para chegar aos gráficos. Agora cada aba mostra só o seu conteúdo."
+      ],
+      "ru": [
+        "Исправление на странице BGS: панель Setup оставалась видимой под каждой вкладкой, и до графиков приходилось долго прокручивать. Теперь каждая вкладка показывает только своё содержимое."
+      ]
+    },
+    {
       "v": "0.9.39",
       "en": [
         "BGS WATCH: Import CSV reads a CSV that Export CSV wrote (for example from a friend who read the screenshots on his PC). Each snapshot is placed at the time it was read, after a summary you confirm, and rows the sender did not check stay marked. The button that reads the screenshots is now at the top of Setup and is called Import from screenshots. The Inara box takes the whole page address or just the number and shows no example number."

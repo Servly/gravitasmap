@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.40
+- Fix on the BGS page: the Setup panel stayed visible under every tab, so you had to scroll far down to reach the charts. Each tab now shows only its own content.
+
 ## 0.9.39
 - BGS WATCH: Import CSV reads a CSV that Export CSV wrote (for example from a friend who read the screenshots on his PC). Each snapshot is placed at the time it was read, after a summary you confirm, and rows the sender did not check stay marked. The button that reads the screenshots is now at the top of Setup and is called Import from screenshots. The Inara box takes the whole page address or just the number and shows no example number.
 
