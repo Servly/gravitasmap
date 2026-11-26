@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.48
+- BGS WATCH, three small things. A name the reader matched to your faction's list no longer says "please look" when it is trusted: it reads "Matched to a known name". When every value equals the last saved snapshot, Save asks "Nothing changed since the last saved snapshot. Save it anyway?" so you do not store the same reading twice. The compare setting has a new choice, "the end of yesterday" (the last reading before 00:00 UTC), next to the previous snapshot, 24 hours and 7 days.
+
 ## 0.9.47
 - BGS WATCH reads other screens with far fewer doubts. It was too cautious: on pages it had never seen, including real 4K (3840x2160), it read every value and name right, yet marked most rows to check. Now a row is marked only when there is a real reason. A look-alike digit (6, 8, 9, 0, 3, 5) is cleared when the list order or the same system's last value agrees. Names with a 0 read as the letter O or a lost hyphen now snap to the one known name. A name that has a twin differing by one look-alike digit is still marked when the reading was not clear.
 

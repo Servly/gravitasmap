@@ -1118,7 +1118,7 @@
   "bgs.bar.show": "Mostrar",
   "tip.bgs.bar.minor": "Un cambio menor se dibuja pálido, no en negrita. El juego muestra pasos de 0,1. Solo mientras esta página está abierta.",
   "tip.bgs.bar.tick": "Se cuenta un tick cuando al menos esta parte de los sistemas cambió entre dos capturas. Solo mientras esta página está abierta.",
-  "tip.bgs.bar.base": "Con qué lectura anterior se mide el cambio.",
+  "tip.bgs.bar.base": "Con qué lectura anterior se compara el cambio: la anterior, hace unas 24 h, la última de ayer (UTC) o hace unos 7 días.",
   "tip.bgs.bar.show": "Limita las vistas de historial (mapa de calor, tendencias, conjunto).",
   "bgs.base.prev": "la captura anterior",
   "bgs.base.24h": "hace unas 24 h",
@@ -1538,5 +1538,10 @@
   "tip.bgs.res": "Automático: cada instantánea es su propia columna mientras tus datos tengan menos de 10 días, luego una columna por día UTC. Diario: siempre una columna por día (la última instantánea del día). Cada instantánea: siempre una columna cada una. Nunca se borra nada.",
   "bgs.tp.step": "Cambió entre {a} y {b}: {d}",
   "bgs.tp.snaps": "Instantáneas ese día: {n} (se muestra la última)",
-  "bgs.res.auto": "Automático"
+  "bgs.res.auto": "Automático",
+  "bgs.base.eod": "el final de ayer",
+  "bgs.state.snapped_ok": "Asignado a un nombre conocido",
+  "bgs.cf.same": "Nada ha cambiado desde la última captura guardada. ¿Guardarla de todos modos?",
+  "bgs.cf.same_go": "Guardar de todos modos",
+  "tip.bgs.cf.same_go": "Guarda esta lectura aunque cada valor sea igual a la última captura guardada."
 }

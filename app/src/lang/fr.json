@@ -1118,7 +1118,7 @@
   "bgs.bar.show": "Afficher",
   "tip.bgs.bar.minor": "Une variation plus petite est dessinée pâle, pas en gras. Le jeu affiche des pas de 0,1. Seulement tant que cette page est ouverte.",
   "tip.bgs.bar.tick": "Un tick est compté quand au moins cette part des systèmes a changé entre deux instantanés. Seulement tant que cette page est ouverte.",
-  "tip.bgs.bar.base": "Avec quelle lecture antérieure la variation est mesurée.",
+  "tip.bgs.bar.base": "Avec quelle lecture antérieure le changement est comparé : la précédente, il y a environ 24 h, la dernière d'hier (UTC) ou il y a environ 7 jours.",
   "tip.bgs.bar.show": "Limite les vues d'historique (bande thermique, tendances, ensemble).",
   "bgs.base.prev": "l'instantané précédent",
   "bgs.base.24h": "il y a environ 24 h",
@@ -1538,5 +1538,10 @@
   "tip.bgs.res": "Automatique : chaque instantané est sa propre colonne tant que vos données ont moins de 10 jours, puis une colonne par jour UTC. Quotidien : toujours une colonne par jour (le dernier instantané du jour). Chaque instantané : toujours une colonne chacun. Rien n'est jamais supprimé.",
   "bgs.tp.step": "Changé entre {a} et {b} : {d}",
   "bgs.tp.snaps": "Instantanés ce jour-là : {n} (le dernier est affiché)",
-  "bgs.res.auto": "Automatique"
+  "bgs.res.auto": "Automatique",
+  "bgs.base.eod": "la fin d'hier",
+  "bgs.state.snapped_ok": "Associé à un nom connu",
+  "bgs.cf.same": "Rien n'a changé depuis le dernier instantané enregistré. L'enregistrer quand même ?",
+  "bgs.cf.same_go": "Enregistrer quand même",
+  "tip.bgs.cf.same_go": "Enregistre cette lecture même si chaque valeur est égale au dernier instantané enregistré."
 }

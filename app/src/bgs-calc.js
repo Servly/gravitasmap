@@ -20,6 +20,11 @@
   function baseIdx(snaps, s, li, mode) {
     var j;
     if (mode === "prev") { for (j = li - 1; j >= 0; j--) if (s.v[j] != null) return j; return -1; }
+    if (mode === "eod") {
+      var d0 = Math.floor(snaps[li].t / DAY) * DAY;
+      for (j = li - 1; j >= 0; j--) if (snaps[j].t < d0 && s.v[j] != null) return snaps[j].t >= d0 - 36 * H ? j : -1;
+      return -1;
+    }
     var want = snaps[li].t - (mode === "24h" ? DAY : 7 * DAY), tol = mode === "24h" ? 18 * H : 48 * H, best = -1, bd = 1e18;
     for (j = 0; j < li; j++) if (s.v[j] != null && Math.abs(snaps[j].t - want) < bd) { bd = Math.abs(snaps[j].t - want); best = j; }
     return bd <= tol ? best : -1;

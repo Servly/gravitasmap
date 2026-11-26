@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.48",
+      "en": [
+        "BGS WATCH, three small things. A name the reader matched to your faction's list no longer says \"please look\" when it is trusted: it reads \"Matched to a known name\". When every value equals the last saved snapshot, Save asks \"Nothing changed since the last saved snapshot. Save it anyway?\" so you do not store the same reading twice. The compare setting has a new choice, \"the end of yesterday\" (the last reading before 00:00 UTC), next to the previous snapshot, 24 hours and 7 days."
+      ],
+      "de": [
+        "BGS WATCH, drei Kleinigkeiten. Ein Name, den der Leser der Liste deiner Fraktion zugeordnet hat, sagt nicht mehr \"bitte prüfen\", wenn er vertrauenswürdig ist: Er lautet \"Einem bekannten Namen zugeordnet\". Wenn jeder Wert dem letzten gespeicherten Snapshot entspricht, fragt Speichern: \"Seit der letzten gespeicherten Momentaufnahme hat sich nichts geändert. Trotzdem speichern?\", damit du dieselbe Messung nicht doppelt ablegst. Die Vergleichseinstellung hat eine neue Wahl, \"dem Ende von gestern\" (die letzte Messung vor 00:00 UTC), neben dem vorigen Snapshot, 24 Stunden und 7 Tagen."
+      ],
+      "es": [
+        "BGS WATCH, tres detalles. Un nombre que el lector asignó a la lista de tu facción ya no dice \"revísalo\" cuando es de confianza: ahora dice \"Asignado a un nombre conocido\". Si cada valor es igual al de la última captura guardada, Guardar pregunta \"Nada ha cambiado desde la última captura guardada. ¿Guardarla de todos modos?\" para no almacenar la misma lectura dos veces. El ajuste de comparación tiene una opción nueva, \"el final de ayer\" (la última lectura antes de las 00:00 UTC), junto a la captura anterior, 24 horas y 7 días."
+      ],
+      "fr": [
+        "BGS WATCH, trois petites choses. Un nom que le lecteur a associé à la liste de votre faction ne dit plus « à vérifier » quand il est fiable : il indique « Associé à un nom connu ». Quand chaque valeur égale celle du dernier instantané enregistré, Enregistrer demande « Rien n'a changé depuis le dernier instantané enregistré. L'enregistrer quand même ? » pour ne pas stocker deux fois la même lecture. Le réglage de comparaison a un nouveau choix, « la fin d'hier » (la dernière lecture avant 00:00 UTC), à côté de l'instantané précédent, de 24 heures et de 7 jours."
+      ],
+      "pt-br": [
+        "BGS WATCH, três pequenas coisas. Um nome que o leitor ligou à lista da sua facção não diz mais \"confira\" quando é confiável: agora diz \"Ligado a um nome conhecido\". Quando todo valor é igual ao do último snapshot salvo, Salvar pergunta \"Nada mudou desde o último snapshot salvo. Salvar mesmo assim?\" para não guardar a mesma leitura duas vezes. O ajuste de comparação tem uma nova opção, \"o fim de ontem\" (a última leitura antes das 00:00 UTC), ao lado do snapshot anterior, 24 horas e 7 dias."
+      ],
+      "ru": [
+        "BGS WATCH, три мелочи. Название, которое программа сопоставила со списком вашей фракции, больше не пишет «проверьте», если ему можно доверять: теперь там «Сопоставлено с известным названием». Если каждое значение равно последнему сохранённому снимку, при сохранении спросит «С последнего сохранённого снимка ничего не изменилось. Всё равно сохранить?», чтобы не хранить одно и то же дважды. В настройке сравнения новый вариант «концом вчерашнего дня» (последнее чтение до 00:00 UTC) рядом с предыдущим снимком, 24 часами и 7 днями."
+      ]
+    },
+    {
       "v": "0.9.47",
       "en": [
         "BGS WATCH reads other screens with far fewer doubts. It was too cautious: on pages it had never seen, including real 4K (3840x2160), it read every value and name right, yet marked most rows to check. Now a row is marked only when there is a real reason. A look-alike digit (6, 8, 9, 0, 3, 5) is cleared when the list order or the same system's last value agrees. Names with a 0 read as the letter O or a lost hyphen now snap to the one known name. A name that has a twin differing by one look-alike digit is still marked when the reading was not clear."

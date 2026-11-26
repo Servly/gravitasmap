@@ -1118,7 +1118,7 @@
   "bgs.bar.show": "Mostrar",
   "tip.bgs.bar.minor": "Uma mudança menor é desenhada pálida, não em negrito. O jogo mostra passos de 0,1. Só enquanto esta página está aberta.",
   "tip.bgs.bar.tick": "Um tick é contado quando pelo menos essa parte dos sistemas mudou entre dois snapshots. Só enquanto esta página está aberta.",
-  "tip.bgs.bar.base": "Com qual leitura anterior a mudança é medida.",
+  "tip.bgs.bar.base": "Com qual leitura anterior a mudança é comparada: a anterior, cerca de 24 h atrás, a última de ontem (UTC) ou cerca de 7 dias atrás.",
   "tip.bgs.bar.show": "Limita as visões de histórico (faixa de calor, tendências, conjunto).",
   "bgs.base.prev": "o snapshot anterior",
   "bgs.base.24h": "cerca de 24 h atrás",
@@ -1538,5 +1538,10 @@
   "tip.bgs.res": "Automático: cada instantâneo é sua própria coluna enquanto seus dados tiverem menos de 10 dias, depois uma coluna por dia UTC. Diário: sempre uma coluna por dia (o último instantâneo do dia). Cada instantâneo: sempre uma coluna cada. Nada é apagado.",
   "bgs.tp.step": "Mudou entre {a} e {b}: {d}",
   "bgs.tp.snaps": "Instantâneos nesse dia: {n} (o último é mostrado)",
-  "bgs.res.auto": "Automático"
+  "bgs.res.auto": "Automático",
+  "bgs.base.eod": "o fim de ontem",
+  "bgs.state.snapped_ok": "Ligado a um nome conhecido",
+  "bgs.cf.same": "Nada mudou desde o último snapshot salvo. Salvar mesmo assim?",
+  "bgs.cf.same_go": "Salvar mesmo assim",
+  "tip.bgs.cf.same_go": "Salva esta leitura mesmo que cada valor seja igual ao do último snapshot salvo."
 }

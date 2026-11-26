@@ -8,7 +8,7 @@
   function rowsOf(p) {
     return (p.rows || []).map(function (c) {
       return { page: c.page, pos: c.pos, name: c.system || c.read_name || "", read: c.read_name, nstate: c.name_state, nalts: (c.name_alts || []).slice(0, 4), x10: c.inf_x10 == null ? null : c.inf_x10, inf: c.inf, ialts: (c.inf_alts || []).slice(0, 4),
-        iunsure: !!c.inf_unsure, star: c.star || null, conf: Math.min(c.name_conf == null ? 1 : c.name_conf, c.inf_conf == null ? 1 : c.inf_conf), state: c.state, prev: c.prev_x10, unc: !!c.uncertain, ok: false, nfix: false, vfix: false, ncrop: c.name_crop || c.crop || null, icrop: c.inf_crop || null, nbad: c.name_state === "snapped" || c.name_state === "not_in_list" || c.name_state === "unsure" };
+        iunsure: !!c.inf_unsure, star: c.star || null, conf: Math.min(c.name_conf == null ? 1 : c.name_conf, c.inf_conf == null ? 1 : c.inf_conf), state: c.state, prev: c.prev_x10, unc: !!c.uncertain, ok: false, nfix: false, vfix: false, ncrop: c.name_crop || c.crop || null, icrop: c.inf_crop || null, nbad: (c.name_state === "snapped" && !!c.uncertain) || c.name_state === "not_in_list" || c.name_state === "unsure" };
     });
   }
   function parseVal(s) { var m = String(s).replace(",", ".").match(/^\s*(\d{1,3}(?:\.\d)?)\s*%?\s*$/); if (!m) return null; var v = Math.round(parseFloat(m[1]) * 10); return v >= 0 && v <= 1000 ? v : null; }
@@ -62,8 +62,12 @@
       }
       return wrap;
     }
-    function save() {
+    // every value equals the same system's value in the last saved snapshot (and no system is new)
+    function unchanged() { return !!sc.rows && sc.rows.length > 0 && sc.rows.every(function (r) { return r.prev != null && r.x10 != null && r.prev === r.x10; }); }
+    function save(force) {
       var p = prop(); if (!p || !sc.rows) return;
+      if (force !== true && unchanged()) { sc.same = true; draw(); return; }
+      sc.same = false;
       var snap = { taken_utc: p.taken_utc, data_utc: p.data_utc, minutes_old: p.minutes_old == null ? null : p.minutes_old, resolution: p.resolution, sources: (p.files || []).map(function (f) { return typeof f === "string" ? f : f.name; }),
         pages: (p.pages_found || []).length, complete: !!p.complete, rows: sc.rows.map(function (r) { return { system: r.name, inf_x10: r.x10, star: r.star, conf: r.conf, confirmed: !!r.ok, pos: r.pos, flagged: !!r.unc }; }), proposal_id: p.id };
       sc.busy = true; draw();
@@ -127,15 +131,19 @@
         t.appendChild(mk("td", "bg-fl", rw.prev == null ? "" : fmt(rw.prev)));
         t.appendChild(mk("td", "bg-fl", rw.star ? "★" : ""));
         td = mk("td");
-        var skey = "bgs.state." + (rw.state || "sure"), st = tr(skey);
+        var skey = "bgs.state." + (rw.state === "snapped" && !rw.unc ? "snapped_ok" : (rw.state || "sure")), st = tr(skey);
         td.appendChild(mk("span", rw.unc && !rw.ok ? "bg-wt" : "bg-fl", st === skey ? (rw.state || "") : st));
         if (rw.unc) { var ok = mk("button", "bg-ok" + (rw.ok ? " done" : ""), rw.ok ? tr("bgs.cf.done") : tr("bgs.cf.ok")); ok.type = "button"; h.tip(ok, "tip.bgs.cf.ok"); ok.style.marginLeft = "8px"; ok.onclick = function () { rw.ok = !rw.ok; draw(); }; td.appendChild(ok); }
         t.appendChild(td); tbd.appendChild(t);
       });
       tb.appendChild(tbd); sc2.appendChild(tb); body.appendChild(sc2);
       var can = p.can_save && !p.already_saved && !pend && !sc.busy;
-      var sv = h.tip(mk("button", "btn go", tr("bgs.cf.save")), "tip.bgs.cf.save"); sv.type = "button"; sv.disabled = !can; sv.onclick = save; sv.style.marginTop = "10px";
+      var sv = h.tip(mk("button", "btn go", tr("bgs.cf.save")), "tip.bgs.cf.save"); sv.type = "button"; sv.disabled = !can; sv.onclick = function () { save(); }; sv.style.marginTop = "10px";
       body.appendChild(sv);
+      if (sc.same && can) {
+        var sm = mk("p", "bg-msg", tr("bgs.cf.same")); sm.style.marginTop = "8px"; body.appendChild(sm);
+        var sg = h.tip(mk("button", "btn", tr("bgs.cf.same_go")), "tip.bgs.cf.same_go"); sg.type = "button"; sg.onclick = function () { save(true); }; body.appendChild(sg);
+      }
       if (!can) body.appendChild(mk("p", "bg-msg", !p.can_save ? tr("bgs.cf.blocked") : pend ? tr("bgs.cf.pend", { n: pend }) : ""));
       else body.appendChild(mk("p", "note", tr("bgs.cf.note")));
     }

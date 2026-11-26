@@ -1118,7 +1118,7 @@
   "bgs.bar.show": "Show",
   "tip.bgs.bar.minor": "A change smaller than this is drawn pale, not bold. The game shows 0.1 steps. Kept only while this page is open.",
   "tip.bgs.bar.tick": "A tick is counted when at least this share of the systems changed between two snapshots. Kept only while this page is open.",
-  "tip.bgs.bar.base": "Which earlier reading the change is measured against.",
+  "tip.bgs.bar.base": "Which earlier reading the change is measured against: the one before, about 24 h ago, the last reading of yesterday (UTC), or about 7 days ago.",
   "tip.bgs.bar.show": "Limits the history views (heat strip, trends, fleet).",
   "bgs.base.prev": "the previous snapshot",
   "bgs.base.24h": "about 24 h ago",
@@ -1538,5 +1538,10 @@
   "tip.bgs.res": "Automatic: every snapshot is its own column while your data is under 10 days old, then one column per UTC day. Daily: always one column per day (the last snapshot of that day). Every snapshot: always one column each. Nothing is ever deleted.",
   "bgs.tp.step": "Changed between {a} and {b}: {d}",
   "bgs.tp.snaps": "Snapshots that day: {n} (the last one is shown)",
-  "bgs.res.auto": "Automatic"
+  "bgs.res.auto": "Automatic",
+  "bgs.base.eod": "the end of yesterday",
+  "bgs.state.snapped_ok": "Matched to a known name",
+  "bgs.cf.same": "Nothing changed since the last saved snapshot. Save it anyway?",
+  "bgs.cf.same_go": "Save anyway",
+  "tip.bgs.cf.same_go": "Saves this reading even though every value equals the last saved snapshot."
 }

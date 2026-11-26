@@ -99,7 +99,7 @@
     return lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
       lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">') +
-      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["7d", t("bgs.base.7d")]])) +
+      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
   }
   function head(M) {
@@ -114,7 +114,7 @@
     function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
     var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
-      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["7d", t("bgs.base.7d")]])) +
+      lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
       lab("tip.bgs.res", t("bgs.res"), sel("bres", ui.res, [["auto", t("bgs.res.auto")], ["daily", t("bgs.res.daily")], ["snap", t("bgs.res.snap")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
     var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +

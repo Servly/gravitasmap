@@ -1118,7 +1118,7 @@
   "bgs.bar.show": "Zeigen",
   "tip.bgs.bar.minor": "Eine kleinere Änderung wird blass statt fett gezeichnet. Das Spiel zeigt 0,1-Schritte. Gilt nur, solange diese Seite offen ist.",
   "tip.bgs.bar.tick": "Ein Tick zählt, wenn sich mindestens dieser Anteil der Systeme zwischen zwei Snapshots geändert hat. Gilt nur, solange diese Seite offen ist.",
-  "tip.bgs.bar.base": "Mit welchem früheren Wert die Änderung verglichen wird.",
+  "tip.bgs.bar.base": "Mit welcher früheren Messung die Änderung verglichen wird: die vorige, etwa 24 Std. zuvor, die letzte von gestern (UTC) oder etwa 7 Tage zuvor.",
   "tip.bgs.bar.show": "Begrenzt die Verlaufsansichten (Wärmestreifen, Verläufe, Gesamtbild).",
   "bgs.base.prev": "dem vorigen Snapshot",
   "bgs.base.24h": "vor etwa 24 Std.",
@@ -1538,5 +1538,10 @@
   "tip.bgs.res": "Automatisch: Jede Momentaufnahme ist eine eigene Spalte, solange deine Daten jünger als 10 Tage sind, danach eine Spalte pro UTC-Tag. Täglich: immer eine Spalte pro Tag (die letzte Momentaufnahme des Tages). Jede Momentaufnahme: immer je eine Spalte. Nichts wird je gelöscht.",
   "bgs.tp.step": "Geändert zwischen {a} und {b}: {d}",
   "bgs.tp.snaps": "Momentaufnahmen an diesem Tag: {n} (die letzte wird gezeigt)",
-  "bgs.res.auto": "Automatisch"
+  "bgs.res.auto": "Automatisch",
+  "bgs.base.eod": "dem Ende von gestern",
+  "bgs.state.snapped_ok": "Einem bekannten Namen zugeordnet",
+  "bgs.cf.same": "Seit der letzten gespeicherten Momentaufnahme hat sich nichts geändert. Trotzdem speichern?",
+  "bgs.cf.same_go": "Trotzdem speichern",
+  "tip.bgs.cf.same_go": "Speichert diese Messung, obwohl jeder Wert dem letzten gespeicherten Snapshot entspricht."
 }
