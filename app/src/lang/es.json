@@ -1491,7 +1491,7 @@
   "bgs.c.axis": "cambio en puntos desde {b}",
   "bgs.o.h": "Resumen",
   "bgs.o.title": "{n} de {t} sistemas están ahora fuera de tu rango objetivo",
-  "bgs.o.how": "Cada fila es un sistema, cada columna una instantánea. Una celda muestra el cambio desde la instantánea anterior: verde subió, rojo bajó, gris menos de {m}. Una columna que se ilumina entera es un tick. Pasa el ratón por una celda para ver hora y valor.",
+  "bgs.o.how": "Cada fila es un sistema, cada columna una instantánea. Una celda muestra el cambio desde la instantánea anterior: verde subió, rojo bajó, gris sin cambio (el juego avanza en pasos de 0,1, así que se ve incluso +0,1). Una columna que se ilumina entera es un tick. Pasa el ratón por una celda para ver hora y valor.",
   "bgs.o.rose": "subió",
   "bgs.o.fell": "bajó",
   "bgs.o.same": "sin cambio",
@@ -1583,5 +1583,6 @@
   "bgs.dq.data": "Datos {t}",
   "bgs.dq.checked2": "Comprobado {t}: el panel del juego tenía {n} min",
   "map.ov.pos": "Dónde aparece el mapa del sistema",
-  "map.ov.pnote": "Como las ventanas de combate: elige en qué panel del juego va el mapa del sistema (Se muestra con), mantén o quita la perspectiva, pon su color o arrástralo en Editar HUD."
+  "map.ov.pnote": "Como las ventanas de combate: elige en qué panel del juego va el mapa del sistema (Se muestra con), mantén o quita la perspectiva, pon su color o arrástralo en Editar HUD.",
+  "bgs.err.num": "Escribe un número, por ejemplo 62,5. Sirven la coma y el punto."
 }

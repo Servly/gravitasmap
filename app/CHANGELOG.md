@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.59
+- BGS WATCH: every change shows now, however small. The Changes tab lists even +0.1, and the Overview colours it (grey only means no change). The Band, Minor and Tick boxes take a point or a comma (62.5 or 62,5), and a wrong value goes back to the saved one and tells you why, so the Band no longer snaps back by itself.
+
 ## 0.9.58
 - The System map panel over the game now draws every planet and star as a shaded disc instead of a picture. Before, the pictures could turn empty after a while and the bodies disappeared. Textures stay in the normal GRAVITAS MAP window.
 

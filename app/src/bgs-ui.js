@@ -4,7 +4,7 @@
 (function () {
   var T = window.__TAURI__ || {}, invoke = T.core && T.core.invoke, BG = window.BG = window.BG || {}, S = BG.svg, V = BG.views, C = BG.calc, esc = S.esc;
   var t = function (k, v) { return BG.tr(k, v); };
-  var ui = BG.ui = { res: "auto", tmode: "top", base: "24h", minor: 0.3, tickPct: 20, days: 0, msort: "drop", rfilter: "all", tsort: "low", hsort: "low", hmode: "chg", q: "", sel: null, faction: "", rep: { att: 1, drops: 1, gains: 1, cross: 1, tick: 1 } };
+  var ui = BG.ui = { res: "auto", tmode: "top", base: "24h", minor: 0.1, tickPct: 20, days: 0, msort: "drop", rfilter: "all", tsort: "low", hsort: "low", hmode: "chg", q: "", sel: null, faction: "", rep: { att: 1, drops: 1, gains: 1, cross: 1, tick: 1 } };
   var store = BG.store = { sig: "", data: null, M: null, rev: 0, last: 0, busy: false, g: null };
   var panes = [];
 
@@ -56,6 +56,13 @@
       uiSaved[k] = ui[k];
       invoke("bgs_settings_set", { key: "ui." + k, value: ui[k] });
     });
+  }
+  // 0.9.59: a number typed with a point OR a comma ("62.5" or "62,5"), whatever the keyboard or the Windows region says
+  function num(v) {
+    var x = String(v == null ? "" : v).replace(/\s/g, "");
+    if (x.indexOf(",") >= 0 && x.indexOf(".") >= 0) x = x.lastIndexOf(",") > x.lastIndexOf(".") ? x.replace(/\./g, "").replace(",", ".") : x.replace(/,/g, "");   // 1.234,5 or 1,234.5
+    else x = x.replace(",", ".");
+    return /^[-+]?(\d+\.?\d*|\.\d+)$/.test(x) ? parseFloat(x) : NaN;
   }
   function build() {
     var g = store.g, s = (g && g.settings) || {};
@@ -118,9 +125,9 @@
     var s = (store.g && store.g.settings) || {};
     function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
-    return lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
-      lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
-      lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">') +
+    return lab("tip.bgs.band", t("bgs.bar.band"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="blo" value="' + (s.low == null ? 50 : s.low) + '"> ' + t("bgs.bar.to") + ' <input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="bhi" value="' + (s.high == null ? 65 : s.high) + '">') +
+      lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="bmin" value="' + ui.minor + '">') +
+      lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="btick" value="' + ui.tickPct + '">') +
       lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["6h", t("bgs.base.6h")], ["12h", t("bgs.base.12h")], ["18h", t("bgs.base.18h")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
   }
@@ -135,12 +142,12 @@
     var s = (store.g && store.g.settings) || {};
     function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
-    var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="number" id="blo" value="' + (s.low == null ? 50 : s.low) + '" min="0" max="100" step="0.5"> ' + t("bgs.bar.to") + ' <input type="number" id="bhi" value="' + (s.high == null ? 65 : s.high) + '" min="0" max="100" step="0.5">') +
+    var main = lab("tip.bgs.band", t("bgs.bar.band"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="blo" value="' + (s.low == null ? 50 : s.low) + '"> ' + t("bgs.bar.to") + ' <input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="bhi" value="' + (s.high == null ? 65 : s.high) + '">') +
       lab("tip.bgs.bar.base", t("bgs.bar.base"), sel("bbase", ui.base, [["prev", t("bgs.base.prev")], ["6h", t("bgs.base.6h")], ["12h", t("bgs.base.12h")], ["18h", t("bgs.base.18h")], ["24h", t("bgs.base.24h")], ["eod", t("bgs.base.eod")], ["7d", t("bgs.base.7d")]])) +
       lab("tip.bgs.res", t("bgs.res"), sel("bres", ui.res, [["auto", t("bgs.res.auto")], ["daily", t("bgs.res.daily")], ["snap", t("bgs.res.snap")]])) +
       lab("tip.bgs.bar.show", t("bgs.bar.show"), sel("bdays", ui.days, [[0, t("bgs.show.all")], [3, t("bgs.show.3")], [7, t("bgs.show.7")]]));
-    var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="number" step="0.1" min="0.1" max="5" id="bmin" value="' + ui.minor + '">') +
-      lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');
+    var more = lab("tip.bgs.bar.minor", t("bgs.bar.minor"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="bmin" value="' + ui.minor + '">') +
+      lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="btick" value="' + ui.tickPct + '">');
     var names = M.sys.map(function (x) { return x.n; }).sort();
     var srch = '<input type="search" id="bgq" class="bg-search" list="bgnames" autocomplete="off" spellcheck="false" placeholder="' + esc(t("bgs.search.ph")) + '" value="' + esc(ui.sq || "") + '" data-tip="' + esc(t("tip.bgs.search")) + '"><datalist id="bgnames">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
     return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + (sn.tk ? '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + esc(sn.minOld > 0 ? t("bgs.dq.checked2", { t: C.dl(sn.tk), n: sn.minOld }) : t("bgs.dq.checked", { t: C.dl(sn.tk) })) + "</span>" : "") + main +
@@ -193,11 +200,17 @@
       var x = e.target, id = x.id;
       if (id === "bgq") { searchSys(x); return; }
       if (id === "blo" || id === "bhi") {
-        var lo = parseFloat(document.getElementById("blo").value), hi = parseFloat(document.getElementById("bhi").value);
-        invoke("bgs_settings_set", { key: "band", value: [lo, hi] }).then(function (r) { if (r && r.ok) load(true); else { BG.toast && BG.toast(BG.errText(r && r.error)); load(true); } });
+        var lo = num(document.getElementById("blo").value), hi = num(document.getElementById("bhi").value);
+        if (!isFinite(lo) || !isFinite(hi)) { BG.toast && BG.toast(t("bgs.err.num")); load(true).then(renderAll); return; }   // the boxes go back to the saved band, and you are told why
+        invoke("bgs_settings_set", { key: "band", value: [lo, hi] }).then(function (r) { if (!(r && r.ok)) BG.toast && BG.toast(BG.errText(r && r.error)); return load(true); }).then(renderAll);
         return;
       }
-      if (id === "bmin") { ui.minor = Math.max(0.1, +x.value || 0.3); invoke("bgs_settings_set", { key: "minor", value: ui.minor }); } else if (id === "btick") { ui.tickPct = Math.max(2, Math.min(90, +x.value || 20)); invoke("bgs_settings_set", { key: "tick_pct", value: ui.tickPct }); } else if (id === "bbase") ui.base = x.value; else if (id === "bdays") ui.days = +x.value; else if (id === "bres") ui.res = x.value;
+      if (id === "bmin" || id === "btick") {
+        var nv = num(x.value);
+        if (!isFinite(nv)) { BG.toast && BG.toast(t("bgs.err.num")); renderAll(); return; }
+        if (id === "bmin") { ui.minor = Math.max(0.1, Math.min(5, Math.round(nv * 10) / 10)); invoke("bgs_settings_set", { key: "minor", value: ui.minor }); }
+        else { ui.tickPct = Math.max(2, Math.min(90, nv)); invoke("bgs_settings_set", { key: "tick_pct", value: ui.tickPct }); }
+      } else if (id === "bbase") ui.base = x.value; else if (id === "bdays") ui.days = +x.value; else if (id === "bres") ui.res = x.value;
       else if (x.dataset.rep) ui.rep[x.dataset.rep] = x.checked ? 1 : 0; else return;
       persistUi();
       build(); store.rev++; renderAll();

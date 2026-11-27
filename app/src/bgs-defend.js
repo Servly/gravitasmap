@@ -56,10 +56,10 @@
   // ---------- CHANGES: diverging bars ----------
   V.changes = function (M) {
     if (need2(M)) return needMsg();
-    var st = M.st, LIM = Math.max(0.5, st.minor || 0.3), base = V.baseLabel(M);
+    var st = M.st, LIM = 0.1, base = V.baseLabel(M);   // 0.9.59: every change shows, however small (the game moves in 0.1 steps)
     var mv = M.sys.filter(function (s) { return s.d != null && Math.abs(s.d) >= LIM; }).sort(function (a, b) { return a.d - b.d; });
     var dn = mv.filter(function (s) { return s.d < 0; }), up = mv.filter(function (s) { return s.d > 0; });
-    var rows = dn.slice(0, 15).concat(up.slice(-15));
+    var rows = dn.slice(0, 40).concat(up.slice(-40));
     if (!rows.length) return '<section class="bg-card"><h3>' + t("bgs.c.h") + '</h3><p class="bg-find">' + t("bgs.c.none", { x: f1(LIM), b: base }) + "</p></section>";
     var W = 760, RH = 24, top = 34, H = top + rows.length * RH + 26, mx = Math.max.apply(null, rows.map(function (s) { return Math.abs(s.d); })) + 0.4, X0 = 400, sc = 220 / mx, o = "", g;
     for (g = -Math.floor(mx); g <= Math.floor(mx); g++) o += '<line x1="' + (X0 + g * sc) + '" x2="' + (X0 + g * sc) + '" y1="' + (top - 8) + '" y2="' + (H - 20) + '" style="stroke:' + (g === 0 ? "var(--faint)" : "var(--line)") + '"/><text class="bg-ax" x="' + (X0 + g * sc) + '" y="' + (H - 6) + '" text-anchor="middle">' + (g > 0 ? "+" : g < 0 ? "−" : "") + Math.abs(g) + "</text>";
@@ -68,7 +68,7 @@
       var y = top + i * RH + 12, c = col(s.d), x2 = X0 + s.d * sc, bt = M.snaps[s.bi] ? M.snaps[s.bi].t : null;
       var tp = s.n + "\n" + f1(s.base) + " → " + f1(s.last) + " (" + sg(s.d) + ")\n" + (bt ? when(bt) + " → " : "") + when(M.snaps[s.li].t) + "\n" + lastChg(M, s);
       o += '<g data-sys="' + esc(s.n) + '"' + tip(tp) + ' class="bg-hit"><rect x="0" y="' + (y - 11) + '" width="' + W + '" height="22" fill="transparent"/><text x="10" y="' + (y + 4) + '">' + esc(s.n) + "</text>" +
-        '<rect x="' + Math.min(X0, x2) + '" y="' + (y - 8) + '" width="' + Math.max(1, Math.abs(x2 - X0)) + '" height="16" rx="3" style="fill:' + c + ';opacity:.9"/>' +
+        '<rect x="' + Math.min(X0, x2) + '" y="' + (y - 8) + '" width="' + Math.max(1, Math.abs(x2 - X0)) + '" height="16" rx="3" style="fill:' + c + ';opacity:' + (Math.abs(s.d) < (st.minor || 0.1) ? '.55' : '.9') + '"/>' +
         '<text x="' + (s.d < 0 ? x2 - 8 : x2 + 8) + '" y="' + (y + 4) + '" text-anchor="' + (s.d < 0 ? "end" : "start") + '" style="fill:' + c + ';font-weight:600">' + arrow(s.d) + " " + sg(s.d) + "</text>" +
         '<text class="bg-ax" x="' + (W - 8) + '" y="' + (y + 4) + '" text-anchor="end">' + f1(s.base) + " → " + f1(s.last) + "</text></g>";
     });
@@ -79,7 +79,7 @@
   // ---------- OVERVIEW: change heat map ----------
   V.overview = function (M) {
     if (need2(M)) return needMsg();
-    var st = M.st, minor = Math.max(0.3, st.minor || 0.3), ord = M.sys.slice().sort(function (a, b) { return a.last - b.last; });
+    var st = M.st, minor = st.minor || 0.1, ord = M.sys.slice().sort(function (a, b) { return a.last - b.last; });
     var n = M.K - M.first + 1, L = 200, RH = 13, CH = 86, W = 900, cw = Math.max(6, Math.min(24, Math.floor((W - L - 10) / n))), H = CH + ord.length * RH + 6, o = "", k;
     var every = Math.max(1, Math.ceil(13 / cw));   // a vertical label needs about 13 px of width
     for (k = M.first; k <= M.K; k++) {
@@ -93,7 +93,7 @@
       for (k = M.first; k <= M.K; k++) {
         var v = s.v[k], pv = null, j; for (j = k - 1; j >= M.first; j--) if (s.v[j] != null) { pv = s.v[j]; break; }
         var dd = v != null && pv != null ? Math.round((v - pv) * 10) / 10 : null, c, x = L + (k - M.first) * cw;
-        if (v == null) c = "transparent"; else if (dd == null || Math.abs(dd) < minor) c = "rgba(255,255,255,.07)"; else c = (dd > 0 ? "rgba(var(--good-rgb)," : "rgba(var(--bad-rgb),") + Math.min(1, 0.3 + Math.abs(dd) / 3).toFixed(2) + ")";
+        if (v == null) c = "transparent"; else if (dd == null || Math.abs(dd) < 0.05) c = "rgba(255,255,255,.07)";   // only 'no change' is grey now: even +0.1 is coloured else c = (dd > 0 ? "rgba(var(--good-rgb)," : "rgba(var(--bad-rgb),") + Math.min(1, 0.3 + Math.abs(dd) / 3).toFixed(2) + ")";
         var tp = s.n + "\n" + when(M.snaps[k].t) + (M.snaps[k].n > 1 ? "\n" + t("bgs.tp.snaps", { n: M.snaps[k].n }) : "") + "\n" + (v == null ? t("bgs.tp.noread") : f1(v) + (dd == null ? "" : " (" + sg(dd) + ")")) + stepsText(s, k);
         o += '<rect x="' + x + '" y="' + y + '" width="' + (cw - 1) + '" height="' + (RH - 1) + '" style="fill:' + c + '" data-sys="' + esc(s.n) + '"' + tip(tp) + "/>";
       }

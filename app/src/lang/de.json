@@ -1491,7 +1491,7 @@
   "bgs.c.axis": "Änderung in Punkten seit {b}",
   "bgs.o.h": "Übersicht",
   "bgs.o.title": "{n} von {t} Systemen liegen jetzt außerhalb deines Zielbereichs",
-  "bgs.o.how": "Jede Zeile ist ein System, jede Spalte eine Momentaufnahme. Eine Zelle zeigt die Änderung seit der Aufnahme davor: grün gestiegen, rot gefallen, grau unter {m}. Eine Spalte, die ganz durchleuchtet, ist ein Tick. Zelle berühren für Zeit und Wert.",
+  "bgs.o.how": "Jede Zeile ist ein System, jede Spalte eine Momentaufnahme. Eine Zelle zeigt die Änderung seit der Aufnahme davor: grün gestiegen, rot gefallen, grau keine Änderung (das Spiel zählt in 0,1-Schritten, auch +0,1 wird gezeigt). Eine Spalte, die ganz durchleuchtet, ist ein Tick. Zelle berühren für Zeit und Wert.",
   "bgs.o.rose": "gestiegen",
   "bgs.o.fell": "gefallen",
   "bgs.o.same": "keine Änderung",
@@ -1583,5 +1583,6 @@
   "bgs.dq.data": "Daten {t}",
   "bgs.dq.checked2": "Geprüft {t}: das Panel des Spiels war {n} Min. alt",
   "map.ov.pos": "Wo die Systemkarte erscheint",
-  "map.ov.pnote": "Wie bei den Kampffenstern: wähle, auf welchem Spielpanel die Systemkarte sitzt (Zeigen mit), Perspektive behalten oder ausschalten, Farbe setzen oder sie im HUD-Editor ziehen."
+  "map.ov.pnote": "Wie bei den Kampffenstern: wähle, auf welchem Spielpanel die Systemkarte sitzt (Zeigen mit), Perspektive behalten oder ausschalten, Farbe setzen oder sie im HUD-Editor ziehen.",
+  "bgs.err.num": "Bitte eine Zahl eingeben, zum Beispiel 62,5. Punkt oder Komma geht beides."
 }

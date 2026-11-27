@@ -1491,7 +1491,7 @@
   "bgs.c.axis": "change in points since {b}",
   "bgs.o.h": "Overview",
   "bgs.o.title": "{n} of {t} systems are outside your target range now",
-  "bgs.o.how": "Each row is a system, each column a snapshot. A cell shows the change since the snapshot before: green rose, red fell, grey is under {m}. A column that lights up all the way down is a tick. Hover a cell for the time and value.",
+  "bgs.o.how": "Each row is a system, each column a snapshot. A cell shows the change since the snapshot before: green rose, red fell, grey no change (the game moves in 0.1 steps, so even +0.1 shows). A column that lights up all the way down is a tick. Hover a cell for the time and value.",
   "bgs.o.rose": "rose",
   "bgs.o.fell": "fell",
   "bgs.o.same": "no change",
@@ -1583,5 +1583,6 @@
   "bgs.dq.data": "Data {t}",
   "bgs.dq.checked2": "Checked {t}: the game's panel was {n} min old",
   "map.ov.pos": "Where the System map shows",
-  "map.ov.pnote": "Like the Combat windows: choose which game panel the System map sits on (Shows with), keep or switch off the perspective, set its colour, or drag it in Edit HUD."
+  "map.ov.pnote": "Like the Combat windows: choose which game panel the System map sits on (Shows with), keep or switch off the perspective, set its colour, or drag it in Edit HUD.",
+  "bgs.err.num": "Please type a number, for example 62.5. A point or a comma both work."
 }

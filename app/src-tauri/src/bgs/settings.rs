@@ -36,7 +36,7 @@ pub struct Settings {
 pub const UI_KEYS: &[&str] = &["res", "tmode", "base", "days", "msort", "rfilter", "tsort", "hsort", "hmode", "tmore"];
 
 impl Default for Settings {
-    fn default() -> Self { Settings { on: false, n: 8, window_min: 5, low: 50.0, high: 65.0, jump: 3.0, use_learned: true, shots_dir: String::new(), inara_id: String::new(), minor: 0.3, tick_pct: 20.0, population: true, ui: Default::default() } }
+    fn default() -> Self { Settings { on: false, n: 8, window_min: 5, low: 50.0, high: 65.0, jump: 3.0, use_learned: true, shots_dir: String::new(), inara_id: String::new(), minor: 0.1, tick_pct: 20.0, population: true, ui: Default::default() } }
 }
 
 pub fn get() -> Settings { from_value(crate::store::read().get("bgs")) }

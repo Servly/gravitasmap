@@ -1491,7 +1491,7 @@
   "bgs.c.axis": "changement en points depuis {b}",
   "bgs.o.h": "Aperçu",
   "bgs.o.title": "{n} systèmes sur {t} sont maintenant hors de votre plage cible",
-  "bgs.o.how": "Chaque ligne est un système, chaque colonne un instantané. Une cellule montre le changement depuis l'instantané précédent : vert monté, rouge baissé, gris moins de {m}. Une colonne qui s'allume sur toute la hauteur est un tick. Survolez une cellule pour l'heure et la valeur.",
+  "bgs.o.how": "Chaque ligne est un système, chaque colonne un instantané. Une cellule montre le changement depuis l'instantané précédent : vert monté, rouge baissé, gris aucun changement (le jeu avance par pas de 0,1, donc même +0,1 se voit). Une colonne qui s'allume sur toute la hauteur est un tick. Survolez une cellule pour l'heure et la valeur.",
   "bgs.o.rose": "monté",
   "bgs.o.fell": "baissé",
   "bgs.o.same": "pas de changement",
@@ -1583,5 +1583,6 @@
   "bgs.dq.data": "Données {t}",
   "bgs.dq.checked2": "Vérifié {t} : le panneau du jeu datait de {n} min",
   "map.ov.pos": "Où s'affiche la carte du système",
-  "map.ov.pnote": "Comme les fenêtres de combat : choisissez sur quel panneau du jeu se place la carte du système (S'affiche avec), gardez ou coupez la perspective, réglez sa couleur ou déplacez-la dans Modifier le HUD."
+  "map.ov.pnote": "Comme les fenêtres de combat : choisissez sur quel panneau du jeu se place la carte du système (S'affiche avec), gardez ou coupez la perspective, réglez sa couleur ou déplacez-la dans Modifier le HUD.",
+  "bgs.err.num": "Tapez un nombre, par exemple 62,5. La virgule et le point conviennent tous les deux."
 }

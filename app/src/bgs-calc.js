@@ -4,7 +4,7 @@
    flag: "" = read and sure, "w" = the player accepted an unsure reading, "e" = typed by the player. Both band edges are risks: LOW (defend) and HIGH (too high). */
 (function () {
   var BG = window.BG = window.BG || {}, H = 36e5, DAY = 864e5;
-  var DEF = { lo: 50, hi: 65, minor: 0.3, base: "prev", days: 0, tickPct: 20, quietPct: 5 };
+  var DEF = { lo: 50, hi: 65, minor: 0.1, base: "prev", days: 0, tickPct: 20, quietPct: 5 };
   var tr = function (k, v) { return BG.tr ? BG.tr(k, v) : k; };
   function r1(x) { return Math.round(x * 10) / 10; }
   function median(a) { var b = a.slice().sort(function (x, y) { return x - y; }), n = b.length; return n ? (n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2) : null; }

@@ -6,8 +6,8 @@
 .bg-dq b{color:var(--text);font-weight:600}.bg-dq .w,.bg-dq b.w{color:var(--warn)}
 .bg-bar{display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap;margin:0 0 12px;color:var(--dim);font-size:12.5px}
 .bg-bar label{display:inline-flex;gap:6px;align-items:center}
-.bg-wrap input[type=number],.bg-wrap .bg-in,.bg-wrap select.bg-in{background:rgba(255,255,255,.06);border:1px solid var(--line-2);color:var(--text);border-radius:8px;padding:4px 8px;font:inherit;font-size:12.5px;height:30px;min-width:0}
-.bg-wrap input[type=number]{width:66px}
+.bg-wrap input[type=number],.bg-wrap input.bg-num,.bg-wrap .bg-in,.bg-wrap select.bg-in{background:rgba(255,255,255,.06);border:1px solid var(--line-2);color:var(--text);border-radius:8px;padding:4px 8px;font:inherit;font-size:12.5px;height:30px;min-width:0}
+.bg-wrap input[type=number],.bg-wrap input.bg-num{width:66px}
 .bg-wrap select.bg-in option{background:var(--opt)}
 .bg-seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:3px;background:rgba(255,255,255,.03);gap:2px;margin:0 6px 10px 0}
 .bg-seg button{padding:4px 12px;border-radius:9px;font-size:12px;font-weight:600;color:var(--dim)}.bg-seg button:hover{color:var(--text)}

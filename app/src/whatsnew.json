@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.59",
+      "en": [
+        "BGS WATCH: every change shows now, however small. The Changes tab lists even +0.1, and the Overview colours it (grey only means no change). The Band, Minor and Tick boxes take a point or a comma (62.5 or 62,5), and a wrong value goes back to the saved one and tells you why, so the Band no longer snaps back by itself."
+      ],
+      "de": [
+        "BGS WATCH: Jede Änderung wird jetzt gezeigt, auch die kleinste. Der Reiter Änderungen listet schon +0,1, und die Übersicht färbt es (grau heißt nur: keine Änderung). Die Felder Band, Minor und Tick nehmen Punkt oder Komma (62.5 oder 62,5), und ein falscher Wert geht auf den gespeicherten zurück und sagt dir warum, damit das Band nicht mehr von selbst zurückspringt."
+      ],
+      "es": [
+        "BGS WATCH: ahora se ve cada cambio, por pequeño que sea. La pestaña Cambios lista incluso +0,1 y el Resumen lo colorea (gris solo significa sin cambio). Las casillas Banda, Menor y Tick aceptan punto o coma (62.5 o 62,5), y un valor incorrecto vuelve al guardado y te dice por qué, así la banda ya no vuelve sola atrás."
+      ],
+      "fr": [
+        "BGS WATCH : chaque changement s'affiche maintenant, même le plus petit. L'onglet Changements liste même +0,1 et l'Aperçu le colore (gris veut seulement dire aucun changement). Les cases Bande, Mineur et Tick acceptent le point ou la virgule (62.5 ou 62,5), et une valeur incorrecte revient à celle enregistrée en vous disant pourquoi, donc la bande ne revient plus toute seule en arrière."
+      ],
+      "pt-br": [
+        "BGS WATCH: agora toda mudança aparece, por menor que seja. A aba Mudanças lista até +0,1 e a Visão geral a colore (cinza só quer dizer sem mudança). As caixas Faixa, Menor e Tick aceitam ponto ou vírgula (62.5 ou 62,5), e um valor errado volta ao salvo e diz o motivo, então a faixa não volta mais sozinha."
+      ],
+      "ru": [
+        "BGS WATCH: теперь видно любое изменение, даже самое малое. Вкладка «Изменения» показывает даже +0,1, а «Обзор» красит его (серый означает только «без изменений»). Поля «Полоса», «Малое» и «Тик» принимают точку или запятую (62.5 или 62,5), а неверное значение возвращается к сохранённому с пояснением, поэтому полоса больше не откатывается сама."
+      ]
+    },
+    {
       "v": "0.9.58",
       "en": [
         "The System map panel over the game now draws every planet and star as a shaded disc instead of a picture. Before, the pictures could turn empty after a while and the bodies disappeared. Textures stay in the normal GRAVITAS MAP window."

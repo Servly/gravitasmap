@@ -1491,7 +1491,7 @@
   "bgs.c.axis": "mudança em pontos desde {b}",
   "bgs.o.h": "Visão geral",
   "bgs.o.title": "{n} de {t} sistemas estão agora fora do seu intervalo alvo",
-  "bgs.o.how": "Cada linha é um sistema, cada coluna um instantâneo. Uma célula mostra a mudança desde o instantâneo anterior: verde subiu, vermelho caiu, cinza menos de {m}. Uma coluna que acende inteira é um tick. Passe o mouse numa célula para ver hora e valor.",
+  "bgs.o.how": "Cada linha é um sistema, cada coluna um instantâneo. Uma célula mostra a mudança desde o instantâneo anterior: verde subiu, vermelho caiu, cinza sem mudança (o jogo anda em passos de 0,1, então até +0,1 aparece). Uma coluna que acende inteira é um tick. Passe o mouse numa célula para ver hora e valor.",
   "bgs.o.rose": "subiu",
   "bgs.o.fell": "caiu",
   "bgs.o.same": "sem mudança",
@@ -1583,5 +1583,6 @@
   "bgs.dq.data": "Dados {t}",
   "bgs.dq.checked2": "Verificado {t}: o painel do jogo tinha {n} min",
   "map.ov.pos": "Onde o mapa do sistema aparece",
-  "map.ov.pnote": "Como as janelas de combate: escolha em qual painel do jogo o mapa do sistema fica (Mostrar com), mantenha ou desligue a perspectiva, defina a cor ou arraste no Editar HUD."
+  "map.ov.pnote": "Como as janelas de combate: escolha em qual painel do jogo o mapa do sistema fica (Mostrar com), mantenha ou desligue a perspectiva, defina a cor ou arraste no Editar HUD.",
+  "bgs.err.num": "Digite um número, por exemplo 62,5. Vírgula e ponto funcionam."
 }
