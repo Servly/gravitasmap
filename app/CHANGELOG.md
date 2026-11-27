@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.54
+- The Visits map now opens with the Galactic core UP, like most community maps (Colonia up-left, Sol below the core). The new Rotate button next to Tilt turns the whole map by 180 degrees to the game's own Galaxy Map view and back, and GRAVITAS remembers your choice.
+
 ## 0.9.53
 - BGS WATCH no longer says 'This snapshot was already saved' for new screenshots. The game reuses file names, and players delete or rename their pictures, so the app now decides by the time the screenshots were written, never by their names: the same names an hour later are a new snapshot. The bar shows when you last checked (Checked ...). In the GRAVITAS menu over the game, Import from screenshots now tells you the values are waiting in the GRAVITAS window, with a button that opens the window on the BGS page with the table already filled.
 

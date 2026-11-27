@@ -133,7 +133,7 @@
     if (!disc) makeDisc();
     var da = clamp((0.3 - sc) / 0.28, 0, 1) * .9;
     if (s.e && s.e.ill) s.e.ill.style.display = da > 0.02 ? "" : "none";   // the spiral is decoration: say so while it shows
-    if (da > 0.02) { bg.save(); bg.globalAlpha = da; bg.translate(cam.ox + (-25 - cam.cx) * sc, cam.oy + (25899 - cam.cz) * cp * sc); bg.scale(sc, sc * cp); bg.drawImage(disc, -48000, -48000, 96000, 96000); bg.restore(); }
+    if (da > 0.02) { bg.save(); bg.globalAlpha = da; bg.translate(cam.ox + (G.SX * 25 - cam.cx) * sc, cam.oy + (G.SZ * 25899 - cam.cz) * cp * sc); var rs = G.SZ < 0 ? -1 : 1; bg.scale(rs * sc, rs * sc * cp); bg.drawImage(disc, -48000, -48000, 96000, 96000); bg.restore(); }
     for (var ti = 0; ti < tiles.length; ti++) { var t = tiles[ti], ox = ((s.accPan[0] * t.f) % TILE + TILE) % TILE, oy = ((s.accPan[1] * t.f) % TILE + TILE) % TILE; for (var x = ox - TILE; x < W; x += TILE) for (var y = oy - TILE; y < H; y += TILE) bg.drawImage(t.c, x | 0, y | 0); }
   }
   function pickKind(kc, q) { for (var i = 0; i < PRI.length; i++) if (kc[q * 6 + PRI[i]] > 0) return PRI[i]; return 0; }
@@ -192,7 +192,7 @@
     }
     c.font = "600 10.5px " + (fontFam || (fontFam = getComputedStyle(document.body).fontFamily)); c.textBaseline = "middle";
     G.LANDMARKS.forEach(function (m) {
-      var X = ox + (m.x - cam.cx) * sc, Y = oy + ((m.z - cam.cz) * cp - (m.y - cam.cy) * sp) * sc; if (X < -40 || X > W + 40 || Y < -20 || Y > H + 20) return;
+      var X = ox + (-G.SX * m.x - cam.cx) * sc, Y = oy + ((G.SZ * m.z - cam.cz) * cp - (m.y - cam.cy) * sp) * sc; if (X < -40 || X > W + 40 || Y < -20 || Y > H + 20) return;
       c.strokeStyle = TH("rgba(233,221,255,.45)"); c.lineWidth = 1; c.beginPath(); c.moveTo(X, Y - 5); c.lineTo(X + 5, Y); c.lineTo(X, Y + 5); c.lineTo(X - 5, Y); c.closePath(); c.stroke();
       c.fillStyle = TH("rgba(233,221,255,.55)"); c.fillText(m.n, X + 9, Y);
     });

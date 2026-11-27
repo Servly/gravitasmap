@@ -9,6 +9,11 @@
   G.KCOL = { dock: "#c9b6ff", sell: "#7dff9b", buy: "#6ae8ff", explore: "#a77bff", voucher: "#ffcc66", mission: "#ff6ad5" };
   G.PRI = [1, 2, 3, 4, 5, 0];                        // colour priority of a stop: sell, buy, explore, voucher, mission, dock
   G.SESSION_GAP = 3 * 3600e3;                        // a gap of more than 3 h between two stops starts a new play session
+  /* 0.9.54: the map can be seen two ways. Default (SX 1, SZ -1): the Galactic core UP, Colonia up-left, like most community maps. Game view (SX -1, SZ 1): like the game's own
+     Galaxy Map, core DOWN. The screen X is SX times StarPos x, the screen Z is SZ times StarPos z. The player's choice is remembered. */
+  G.SX = 1; G.SZ = -1;
+  try { if (localStorage.getItem("gvVisView") === "game") { G.SX = -1; G.SZ = 1; } } catch (e) {}
+  G.setView = function (game) { G.SX = game ? -1 : 1; G.SZ = game ? 1 : -1; try { localStorage.setItem("gvVisView", game ? "game" : "core"); } catch (e) {} };
   G.LANDMARKS = [{ n: "Sol", x: 0, y: 0, z: 0 }, { n: "Colonia", x: 9530, y: -910, z: 19808 }, { n: "Sagittarius A*", x: -25, y: -21, z: 25899 }];
   G.esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   G.clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
@@ -61,7 +66,7 @@
       EARN: new Float64Array(n), SPEND: new Float64Array(n), DIST: new Float32Array(n), S: new Array(n), how: new Uint8Array(n) };
     var sysSet = new Set(), dist = 0, i, k;
     for (i = 0; i < n; i++) {
-      var v = a[i]; d.T[i] = Date.parse(v.t) || 0; d.X[i] = -(+v.x || 0);   /* the map is drawn like the game's galaxy map: Sag A* below, Colonia to the RIGHT (the game's X runs the other way), so the screen X is the negative of StarPos x */ d.Y[i] = +v.y || 0; d.Z[i] = +v.z || 0;
+      var v = a[i]; d.T[i] = Date.parse(v.t) || 0; d.X[i] = G.SX * (+v.x || 0);   /* the screen X and Z follow the chosen view (G.SX, G.SZ above) */ d.Y[i] = +v.y || 0; d.Z[i] = G.SZ * (+v.z || 0);
       d.how[i] = v.how === "carrier" ? 2 : v.how === "start" ? 1 : 0;
       var s = String(v.sys || "").toLowerCase(), f = 0, e = 0, sp = 0, acts = v.acts || [];
       for (var j = 0; j < acts.length; j++) {

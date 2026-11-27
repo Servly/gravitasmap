@@ -10,6 +10,7 @@
     fit: '<svg viewBox="0 0 20 20"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg>',
     replay: '<svg viewBox="0 0 20 20"><path d="M6 4l10 6-10 6z"/></svg>',
     tilt: '<svg viewBox="0 0 20 20"><path d="M2 12l8-5 8 5-8 5zM10 7V2"/></svg>',
+    flip: '<svg viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 10-4.5M16 10a6 6 0 0 1-10 4.5M13.5 2.5l.6 3.2-3.2.4M6.5 17.5l-.6-3.2 3.2-.4"/></svg>',
     panel: '<svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M12 3v14"/></svg>',
     help: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5"/><path d="M8 8a2 2 0 114 0c0 1.5-2 1.6-2 3.2M10 14.2v.1"/></svg>',
     old: '<svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>', nw: '<svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg>',
@@ -48,7 +49,7 @@
   function build(s, parent) {
     var tr = s.tr, root = document.createElement("div"); root.className = "vs" + (s.FX ? "" : " vs-lite"); s.root = root;
     var t = function (k) { return esc(tr(k)); };
-    var tools = [["fit", "bFit"], ["replay", "bReplay"], ["tilt", "bTilt"], ["panel", "bPanel"], ["help", "bHelp"]].map(function (a) {
+    var tools = [["fit", "bFit"], ["replay", "bReplay"], ["tilt", "bTilt"], ["flip", "bFlip"], ["panel", "bPanel"], ["help", "bHelp"]].map(function (a) {
       return '<button class="vs-tb vs-gl" data-r="' + a[1] + '" title="' + t("tip.vis." + a[0]) + '" aria-label="' + t("tip.vis." + a[0]) + '">' + SVG[a[0]] + "</button>"; }).join("");
     var units = ["session", "day", "week", "month", "year", "all"].map(function (u) { return '<button data-u="' + u + '" title="' + t("tip.vis.u." + u) + '">' + t("vis.u." + u) + "</button>"; }).join("");
     var help = HELP.map(function (r) { return "<div>" + t("vis.help." + r[0]) + "<kbd>" + t("vis.help." + r[0] + ".k") + "</kbd></div>"; }).join("");
@@ -78,7 +79,7 @@
     e.res = q(".vs-res"); e.chips = q(".vs-chips"); e.tools = q(".vs-tools"); e.panel = q(".vs-panel"); e.pbody = q(".vs-pbody"); e.help = q(".vs-help"); e.dock = q(".vs-dock"); e.pgl = q(".vs-pgl");
     e.tip = q(".vs-tip"); e.toast = q(".vs-toast"); e.perf = q(".vs-perf"); e.lod = q(".vs-lod"); e.ill = q(".vs-ill"); e.ill.textContent = tr("vis.ill"); e.ill.title = tr("tip.vis.ill"); e.scBar = q(".vs-scale i"); e.scTxt = q(".vs-scale span"); e.st = q(".vs-st");
     e.arch = q(".vs-arch"); e.ach = q(".vs-ach"); e.al = q(".vs-al"); e.an = q(".vs-an"); e.ldv = q(".vs-ldv"); e.ldb = q(".vs-ldv b"); e.ldp = q(".vs-ldv i"); e.none = q(".vs-none"); e.prog = q(".vs-prog i"); e.plog = q(".vs-log"); e.noneH = q(".vs-nc h3"); e.noneP = q(".vs-nc p"); e.hud = q(".vs-hud");
-    ["bFit", "bReplay", "bTilt", "bPanel", "bHelp", "pOld", "pNew", "unitSeg", "fx", "fxr", "keep", "keepr", "forget", "fconf", "fyes", "fno", "toastBtn", "toastX", "qx", "lastBox", "lastIn", "lastGo", "lastBad", "archX"].forEach(function (r) { e[r] = q('[data-r="' + r + '"]'); });
+    ["bFit", "bReplay", "bTilt", "bFlip", "bPanel", "bHelp", "pOld", "pNew", "unitSeg", "fx", "fxr", "keep", "keepr", "forget", "fconf", "fyes", "fno", "toastBtn", "toastX", "qx", "lastBox", "lastIn", "lastGo", "lastBad", "archX"].forEach(function (r) { e[r] = q('[data-r="' + r + '"]'); });
     e.keep2 = off.querySelector('[data-r="keep2"]');
     s.bg = e.bg.getContext("2d", { alpha: false }); s.fg = e.fg.getContext("2d"); s.tl = e.tlc.getContext("2d");
     e.fx.setAttribute("aria-checked", s.FX ? "false" : "true");
@@ -125,6 +126,13 @@
   function setFX(s, on) {
     s.FX = on; G.lsSet("gvVisitsLite", on ? "0" : "1"); s.root.classList.toggle("vs-lite", !on); s.e.fx.setAttribute("aria-checked", on ? "false" : "true");
     G.resize(s); if (!on) { cancelReplay(s); Object.assign(s.cam, s.tgt); } s.invalidate();
+  }
+  // 0.9.54: turns the whole map by 180 degrees: Galactic core up (default) or the game's own view. The camera keeps looking at the same place.
+  function flipView(s) {
+    var game = G.SX > 0; G.setView(game);
+    s.cam.cx = -s.cam.cx; s.cam.cz = -s.cam.cz; s.tgt.cx = -s.tgt.cx; s.tgt.cz = -s.tgt.cz;
+    s.e.bFlip.classList.toggle("on", game);
+    G.store.rebuild(s); s.invalidate();
   }
   function toggleTilt(s) { s.tgt.pitch = s.tgt.pitch > .1 ? 0 : .95; s.e.bTilt.classList.toggle("on", s.tgt.pitch > .1); if (!s.FX) s.cam.pitch = s.tgt.pitch; s.invalidate(); }
   function pageChanged(s) { G.fit(s, false); startReplay(s, .9); }
@@ -227,6 +235,8 @@
     on(e.bFit, "click", function () { touch(); G.fit(s, false); });
     on(e.bReplay, "click", function () { startReplay(s); });
     on(e.bTilt, "click", function () { toggleTilt(s); });
+    on(e.bFlip, "click", function () { flipView(s); });
+    e.bFlip.classList.toggle("on", G.SX < 0);
     on(e.bPanel, "click", function () { s.panelOpen = !s.panelOpen; applyPanel(s); });
     on(e.bHelp, "click", function () { e.help.classList.toggle("on"); });
     on(e.pOld, "click", function () { touch(); if (G.stepPage(s, -1)) pageChanged(s); });

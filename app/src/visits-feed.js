@@ -54,7 +54,7 @@
     var ix = s.idx, map = new Map(), xs = [], zs = [], ns = []; s.idxDust = null; if (!ix) return;
     ix.months.forEach(function (mo) {
       if (st.loaded(s, mo.m)) return;
-      for (var i = 0; i < mo.grid.length; i++) { var g = mo.grid[i], k = (g[0] + 4096) * 16384 + (g[1] + 4096), c = map.get(k); if (c === undefined) { c = xs.length; map.set(k, c); xs.push(-(g[0] + .5) * 500); zs.push((g[1] + .5) * 500); ns.push(0); } ns[c] += g[2]; }
+      for (var i = 0; i < mo.grid.length; i++) { var g = mo.grid[i], k = (g[0] + 4096) * 16384 + (g[1] + 4096), c = map.get(k); if (c === undefined) { c = xs.length; map.set(k, c); xs.push(G.SX * (g[0] + .5) * 500); zs.push(G.SZ * (g[1] + .5) * 500); ns.push(0); } ns[c] += g[2]; }
     });
     if (xs.length) s.idxDust = { x: Float32Array.from(xs), z: Float32Array.from(zs), n: Float32Array.from(ns) };
   };

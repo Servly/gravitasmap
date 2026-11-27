@@ -1577,5 +1577,6 @@
   "bgs.menu.openapp": "Abrir a janela do GRAVITAS",
   "tip.bgs.menu.openapp": "Traz a janela do GRAVITAS para a frente na página BGS, onde está a tabela para conferir e salvar os valores.",
   "bgs.dq.checked": "Verificado {t}",
-  "tip.bgs.dq.checked": "Quando as capturas do snapshot mais recente foram feitas: sua última verificação (seu relógio, UTC entre parênteses). Os números são do horário mostrado antes."
+  "tip.bgs.dq.checked": "Quando as capturas do snapshot mais recente foram feitas: sua última verificação (seu relógio, UTC entre parênteses). Os números são do horário mostrado antes.",
+  "tip.vis.flip": "Gira todo o mapa 180 graus: o núcleo galáctico em cima (como a maioria dos mapas da comunidade, o padrão) ou a visão do mapa galáctico do jogo. Fica lembrado."
 }

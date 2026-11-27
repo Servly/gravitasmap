@@ -1577,5 +1577,6 @@
   "bgs.menu.openapp": "Open the GRAVITAS window",
   "tip.bgs.menu.openapp": "Brings the GRAVITAS window to the front on the BGS page, where the table to check and save the values is.",
   "bgs.dq.checked": "Checked {t}",
-  "tip.bgs.dq.checked": "When the screenshots of the newest snapshot were taken: your last check (your clock, UTC in brackets). The numbers themselves are from the time shown before it."
+  "tip.bgs.dq.checked": "When the screenshots of the newest snapshot were taken: your last check (your clock, UTC in brackets). The numbers themselves are from the time shown before it.",
+  "tip.vis.flip": "Turns the whole map by 180 degrees: the Galactic core up (like most community maps, the default) or the game's own Galaxy Map view. Remembered."
 }

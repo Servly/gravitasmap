@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.54",
+      "en": [
+        "The Visits map now opens with the Galactic core UP, like most community maps (Colonia up-left, Sol below the core). The new Rotate button next to Tilt turns the whole map by 180 degrees to the game's own Galaxy Map view and back, and GRAVITAS remembers your choice."
+      ],
+      "de": [
+        "Die Visits-Karte öffnet jetzt mit dem Galaxiekern OBEN, wie die meisten Community-Karten (Colonia oben links, Sol unter dem Kern). Die neue Drehen-Schaltfläche neben Neigen dreht die ganze Karte um 180 Grad zur Ansicht der Galaxiekarte des Spiels und zurück, und GRAVITAS merkt sich deine Wahl."
+      ],
+      "es": [
+        "El mapa de Visits ahora se abre con el núcleo galáctico ARRIBA, como la mayoría de los mapas de la comunidad (Colonia arriba a la izquierda, Sol bajo el núcleo). El nuevo botón Girar junto a Inclinar gira todo el mapa 180 grados hasta la vista del mapa galáctico del juego y de vuelta, y GRAVITAS recuerda tu elección."
+      ],
+      "fr": [
+        "La carte de Visits s'ouvre maintenant avec le cœur galactique EN HAUT, comme la plupart des cartes de la communauté (Colonia en haut à gauche, Sol sous le cœur). Le nouveau bouton Pivoter à côté d'Incliner tourne toute la carte de 180 degrés vers la vue de la carte galactique du jeu et inversement, et GRAVITAS mémorise votre choix."
+      ],
+      "pt-br": [
+        "O mapa de Visits agora abre com o núcleo galáctico EM CIMA, como a maioria dos mapas da comunidade (Colonia no alto à esquerda, Sol abaixo do núcleo). O novo botão Girar ao lado de Inclinar gira o mapa inteiro 180 graus para a visão do mapa galáctico do jogo e de volta, e o GRAVITAS lembra a sua escolha."
+      ],
+      "ru": [
+        "Карта Visits теперь открывается с ядром Галактики СВЕРХУ, как на большинстве карт сообщества (Колония вверху слева, Солнце под ядром). Новая кнопка «Повернуть» рядом с «Наклон» поворачивает всю карту на 180 градусов к виду галактической карты игры и обратно, а GRAVITAS запоминает ваш выбор."
+      ]
+    },
+    {
       "v": "0.9.53",
       "en": [
         "BGS WATCH no longer says 'This snapshot was already saved' for new screenshots. The game reuses file names, and players delete or rename their pictures, so the app now decides by the time the screenshots were written, never by their names: the same names an hour later are a new snapshot. The bar shows when you last checked (Checked ...). In the GRAVITAS menu over the game, Import from screenshots now tells you the values are waiting in the GRAVITAS window, with a button that opens the window on the BGS page with the table already filled."

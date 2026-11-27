@@ -1577,5 +1577,6 @@
   "bgs.menu.openapp": "GRAVITAS-Fenster öffnen",
   "tip.bgs.menu.openapp": "Holt das GRAVITAS-Fenster auf der BGS-Seite nach vorn, wo die Tabelle zum Prüfen und Speichern der Werte ist.",
   "bgs.dq.checked": "Geprüft {t}",
-  "tip.bgs.dq.checked": "Wann die Screenshots der neuesten Momentaufnahme gemacht wurden: deine letzte Prüfung (deine Uhr, UTC in Klammern). Die Zahlen selbst stammen von der davor gezeigten Zeit."
+  "tip.bgs.dq.checked": "Wann die Screenshots der neuesten Momentaufnahme gemacht wurden: deine letzte Prüfung (deine Uhr, UTC in Klammern). Die Zahlen selbst stammen von der davor gezeigten Zeit.",
+  "tip.vis.flip": "Dreht die ganze Karte um 180 Grad: Galaxiekern oben (wie die meisten Community-Karten, Standard) oder wie die Galaxiekarte des Spiels. Wird gemerkt."
 }

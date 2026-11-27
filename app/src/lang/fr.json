@@ -1577,5 +1577,6 @@
   "bgs.menu.openapp": "Ouvrir la fenêtre GRAVITAS",
   "tip.bgs.menu.openapp": "Amène la fenêtre GRAVITAS au premier plan sur la page BGS, où se trouve le tableau pour vérifier et enregistrer les valeurs.",
   "bgs.dq.checked": "Vérifié {t}",
-  "tip.bgs.dq.checked": "Quand les captures du dernier instantané ont été prises : votre dernière vérification (votre horloge, UTC entre parenthèses). Les chiffres datent de l'heure affichée avant."
+  "tip.bgs.dq.checked": "Quand les captures du dernier instantané ont été prises : votre dernière vérification (votre horloge, UTC entre parenthèses). Les chiffres datent de l'heure affichée avant.",
+  "tip.vis.flip": "Fait pivoter toute la carte de 180 degrés : le cœur galactique en haut (comme la plupart des cartes de la communauté, par défaut) ou la vue de la carte galactique du jeu. Mémorisé."
 }
