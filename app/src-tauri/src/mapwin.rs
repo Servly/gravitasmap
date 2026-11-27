@@ -340,7 +340,13 @@ pub fn start(app: AppHandle, state: Arc<Mutex<crate::journal::State>>) {
                         let hash = sh.rgba.iter().step_by(61).fold(1469598103934665603u64, |a, b| (a ^ *b as u64).wrapping_mul(1099511628211));
                         if hash != last_hash || crate::mapcap::current().map(|c| c.system != name).unwrap_or(true) {
                             last_hash = hash;
-                            if dbg { crate::store::log(&format!("map picture published {}x{} in {} ms", sh.w, sh.h, sh.ms)); }
+                            if dbg {
+                                crate::store::log(&format!("map picture published {}x{} in {} ms", sh.w, sh.h, sh.ms));
+                                // what the page gave, as a file (so a wrong picture can be looked at): one file, overwritten
+                                if let (Some(dir), Some(pm)) = (crate::store::dir(), tiny_skia::Pixmap::from_vec(sh.rgba.clone(), tiny_skia::IntSize::from_wh(sh.w, sh.h).unwrap_or(tiny_skia::IntSize::from_wh(1, 1).unwrap()))) {
+                                    let _ = pm.save_png(dir.join("sysmap-capture.png"));
+                                }
+                            }
                             crate::mapcap::publish(sh, &name);
                         }
                         asked = None;

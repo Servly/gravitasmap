@@ -194,8 +194,11 @@ let CRUMB_LAST = null, CRASH_LAST = null;
 try { CRUMB_LAST = JSON.parse(localStorage.getItem(CRUMB_K) || "null"); } catch (e) {}
 // v0.75.7: an unexpected stop is kept apart for a week (until a report carries it), so a later normal visit or a reload
 // does not wipe it before the visitor gets to the Report button
+// v0.99.25: inside the GRAVITAS app the windows are closed from outside (the app quits, updates, hides the map picture window) without a goodbye: that is no crash.
+// The "stopped unexpectedly" note, the Low quality and the crash line in a report are for a browser only.
+const CRUMB_IN_APP = /[?&]app=(window|smap)(&|$)/.test(location.search);
 try {
-  if (CRUMB_LAST && !CRUMB_LAST.clean) localStorage.setItem("gravitas.lastCrash", JSON.stringify(CRUMB_LAST));
+  if (CRUMB_LAST && !CRUMB_LAST.clean && !CRUMB_IN_APP) localStorage.setItem("gravitas.lastCrash", JSON.stringify(CRUMB_LAST));
   CRASH_LAST = JSON.parse(localStorage.getItem("gravitas.lastCrash") || "null");
   if (CRASH_LAST && Date.now() - CRASH_LAST.t > 7 * 86400e3) { CRASH_LAST = null; localStorage.removeItem("gravitas.lastCrash"); }
 } catch (e) {}
@@ -215,7 +218,7 @@ setInterval(() => { if (document.visibilityState === "visible") crumbWrite(false
 addEventListener("pagehide", () => crumbWrite(true));
 document.addEventListener("visibilitychange", () => crumbWrite(document.visibilityState !== "visible"));
 document.addEventListener("freeze", () => crumbWrite(true));
-if (CRUMB_LAST && !CRUMB_LAST.clean && Date.now() - CRUMB_LAST.t < 6 * 3600e3) {
+if (CRUMB_LAST && !CRUMB_LAST.clean && !CRUMB_IN_APP && Date.now() - CRUMB_LAST.t < 6 * 3600e3) {
   const was = CRUMB_LAST.q;
   if (was && was !== "low") setQuality("low", false);   // v0.78.2: Low for this visit only (it was saved, and a strong card stayed on Low)
   gpuNote("crash");

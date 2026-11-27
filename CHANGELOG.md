@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.25 · minor · 27 Nov 2026
+- Fix: the GRAVITAS app's own windows no longer show the note "Last time GRAVITAS stopped unexpectedly" and no longer drop to Low quality after the app was closed or updated. The app closes its windows from outside without a goodbye, which looked like a crash to the page. A browser still gets the note when it really stops unexpectedly.
+
 ### v0.99.24 · minor · 26 Nov 2026
 - Much lighter on the graphics card inside the GRAVITAS app's map window: the page's two endless little animations (the logo's orbiting dot and the breathing Sync dot) kept the browser's graphics process busy all the time, about one full processor core on our test PC even while the map drew only three pictures a second. They now stand still in the app's map window, and in any browser while the page is not the one in front. Nothing else on the page changes. The map window of the GRAVITAS app now also slows down whenever it is not the window in front, even with a fast clock or while a system is still loading (before, those kept it drawing 15 to 60 pictures a second next to the game).
 

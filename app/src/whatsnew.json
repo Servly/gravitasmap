@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.56",
+      "en": [
+        "SYSTEM MAP OVER THE GAME can now sit on any game panel, like the Combat windows. On the Map page and in the GRAVITAS menu, the new card 'Where the System map shows' has Shows with, Perspective, Colour and Default position. The GRAVITAS MAP window no longer says 'stopped unexpectedly' after the app closed it or updated it."
+      ],
+      "de": [
+        "DIE SYSTEMKARTE IM SPIEL kann jetzt auf jedem Spielpanel sitzen, wie die Kampffenster. Auf der Karten-Seite und im GRAVITAS-Menü hat die neue Karte 'Wo die Systemkarte erscheint' Zeigen mit, Perspektive, Farbe und Standardposition. Das GRAVITAS-MAP-Fenster meldet nicht mehr 'unerwartet beendet', wenn die App es geschlossen oder aktualisiert hat."
+      ],
+      "es": [
+        "EL MAPA DEL SISTEMA SOBRE EL JUEGO ahora puede ir en cualquier panel del juego, como las ventanas de combate. En la página Mapa y en el menú GRAVITAS, la nueva tarjeta 'Dónde aparece el mapa del sistema' tiene Se muestra con, Perspectiva, Color y Posición por defecto. La ventana GRAVITAS MAP ya no dice 'se detuvo inesperadamente' cuando la app la cerró o se actualizó."
+      ],
+      "fr": [
+        "LA CARTE DU SYSTÈME SUR LE JEU peut maintenant se placer sur n'importe quel panneau du jeu, comme les fenêtres de combat. Sur la page Carte et dans le menu GRAVITAS, la nouvelle carte 'Où s'affiche la carte du système' propose S'affiche avec, Perspective, Couleur et Position par défaut. La fenêtre GRAVITAS MAP ne dit plus 'arrêtée de façon inattendue' quand l'appli l'a fermée ou mise à jour."
+      ],
+      "pt-br": [
+        "O MAPA DO SISTEMA SOBRE O JOGO agora pode ficar em qualquer painel do jogo, como as janelas de combate. Na página Mapa e no menu GRAVITAS, o novo cartão 'Onde o mapa do sistema aparece' tem Mostrar com, Perspectiva, Cor e Posição padrão. A janela GRAVITAS MAP não diz mais 'parou inesperadamente' quando o app a fechou ou atualizou."
+      ],
+      "ru": [
+        "КАРТА СИСТЕМЫ ПОВЕРХ ИГРЫ теперь может находиться на любой панели игры, как окна боя. На странице «Карта» и в меню GRAVITAS новая карточка «Где показывается карта системы» содержит «Показывать с», «Перспектива», «Цвет» и «Позиция по умолчанию». Окно GRAVITAS MAP больше не пишет «неожиданно остановилось», когда приложение закрыло или обновило его."
+      ]
+    },
+    {
       "v": "0.9.55",
       "en": [
         "BGS WATCH now shows two times clearly. 'Data' is the time the numbers are really from (the game's panel is a few minutes old, and the charts and the tick estimate use this time). 'Checked' is when YOU took the screenshots, on your clock. The top bar says both, and every tooltip, table and list of snapshots adds 'checked' next to the data time, so you can always find the snapshot you added at 17:03."

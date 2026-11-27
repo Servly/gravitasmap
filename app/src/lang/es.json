@@ -1581,5 +1581,7 @@
   "tip.vis.flip": "Gira todo el mapa 180 grados: el núcleo galáctico arriba (como la mayoría de los mapas de la comunidad, por defecto) o la vista del mapa galáctico del juego. Se recuerda.",
   "bgs.chk": "comprobado {t}",
   "bgs.dq.data": "Datos {t}",
-  "bgs.dq.checked2": "Comprobado {t}: el panel del juego tenía {n} min"
+  "bgs.dq.checked2": "Comprobado {t}: el panel del juego tenía {n} min",
+  "map.ov.pos": "Dónde aparece el mapa del sistema",
+  "map.ov.pnote": "Como las ventanas de combate: elige en qué panel del juego va el mapa del sistema (Se muestra con), mantén o quita la perspectiva, pon su color o arrástralo en Editar HUD."
 }

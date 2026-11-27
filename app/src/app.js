@@ -309,7 +309,7 @@
     fillPane("keys-combat", ["kbcombat"]); fillPane("keys-thargoid", ["kbsoon"]); fillPane("keys-foot", ["kbsoon"]);
     fillPane("combat-past", ["past"]);
     fillPane("prefs-x", ["themes", "prefsx"]);
-    fillPane("map-overview", ["mapopen", "mapov", "mapsite"]);          fillPane("map-past", ["visits"]);
+    fillPane("map-overview", ["mapopen", "mapov", "mapwin", "mapsite"]);          fillPane("map-past", ["visits"]);
     fillPane("thargoid-overview", ["thwin", "threc"]); fillPane("thargoid-past", ["thpast"]);
     fillPane("debrief-overview", ["dbmode", "dbwin", "dbbinds"]);   // (the Past debriefs list is not reachable from the UI for now: SEC.dbpast and the db_* commands stay)
     fillPane("pvp-overview", ["pvpmode", "pvpwin"]); fillPane("pvp-past", ["pvpfights"]); fillPane("pvp-cmp", ["pvpcompare"]);

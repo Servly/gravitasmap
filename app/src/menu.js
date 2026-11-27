@@ -19,7 +19,7 @@
     GVC.init({ t: t, lang: function () { return lang; } });
     GVC.reset();
     fill("p-main", ["modes", "profiles", "tests"]);
-    fill("p-map", ["mapopen", "mapov"]);
+    fill("p-map", ["mapopen", "mapov", "mapwin"]);
     fill("p-combat", ["actions", "wing", "windows", "profiles", "look", "targets", "behave", "claims"]);
     fill("p-debrief", ["dbmode", "dbwin"]);
     fill("p-pvp", ["pvpmode", "pvpwin"]);

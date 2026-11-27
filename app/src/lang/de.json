@@ -1581,5 +1581,7 @@
   "tip.vis.flip": "Dreht die ganze Karte um 180 Grad: Galaxiekern oben (wie die meisten Community-Karten, Standard) oder wie die Galaxiekarte des Spiels. Wird gemerkt.",
   "bgs.chk": "geprüft {t}",
   "bgs.dq.data": "Daten {t}",
-  "bgs.dq.checked2": "Geprüft {t}: das Panel des Spiels war {n} Min. alt"
+  "bgs.dq.checked2": "Geprüft {t}: das Panel des Spiels war {n} Min. alt",
+  "map.ov.pos": "Wo die Systemkarte erscheint",
+  "map.ov.pnote": "Wie bei den Kampffenstern: wähle, auf welchem Spielpanel die Systemkarte sitzt (Zeigen mit), Perspektive behalten oder ausschalten, Farbe setzen oder sie im HUD-Editor ziehen."
 }

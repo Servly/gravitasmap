@@ -118,11 +118,11 @@
       c.appendChild(a);
     },
     windows: function (p, which) {
-      var pv = which === "pvp", db = which === "db" || pv, th = which === "th" || db, list = pv ? PWINS : which === "db" ? DWINS : th ? TWINS : WINS;
-      var c = card(pv ? "menu.pvp.windows" : db ? "menu.db.windows" : th ? "menu.th.windows" : "menu.combat.windows", p);
+      var pv = which === "pvp", db = which === "db" || pv, th = which === "th" || db, mp = which === "map", list = mp ? [["sysmap", "System map"]] : pv ? PWINS : which === "db" ? DWINS : th ? TWINS : WINS;
+      var c = card(mp ? "map.ov.pos" : pv ? "menu.pvp.windows" : db ? "menu.db.windows" : th ? "menu.th.windows" : "menu.combat.windows", p);
       var need = mk("p", "note"); c.appendChild(need);
-      renders.push(function () { need.textContent = pv ? tr("menu.pvp.wnote") : db ? tr("menu.db.wnote") : th ? tr("menu.th.wnote") : info.on ? tr("menu.w.edit") : tr("menu.w.needon"); });
-      if (!th) {
+      renders.push(function () { need.textContent = mp ? tr("map.ov.pnote") : pv ? tr("menu.pvp.wnote") : db ? tr("menu.db.wnote") : th ? tr("menu.th.wnote") : info.on ? tr("menu.w.edit") : tr("menu.w.needon"); });
+      if (!th && !mp) {
         c.appendChild(row(tr("menu.w.auto"), sw(function () { return S.auto; }, function (n) { set("auto", n); }), tr("menu.w.auto.d"), "tip.w.auto"));
         c.appendChild(row(tr("menu.k.bg"), sw(function () { return S.bg; }, function (n) { set("bg", n); }), tr("menu.k.bg.d"), "tip.w.bg"));
         var top = mk("div", "opt"), def = mk("button", "btn", tr("menu.w.defaults")); tip(def, "tip.w.defaults"); def.onclick = function () { op("defaults", {}); };
@@ -295,6 +295,8 @@
     past: function (p) { pastList(p, { pre: "past", h: "past.h", note: "past.note", none: "past.none", tip: "tip.past.list" }); },
     thpast: function (p) { pastList(p, { pre: "th", h: "th.past.h", note: "th.past.note", none: "th.past.none", tip: "tip.th.past.list" }); },
     /** the System map over the game (mapwin.rs): on or off, how big, where */
+    /** 0.9.56: where the System map shows (which game panel, perspective, colour, default position): the same row as every other window */
+    mapwin: function (p) { SEC.windows(p, "map"); },
     mapov: function (p) {
       var c = card("map.ov.h", p), M = {};
       c.appendChild(mk("p", "note", tr("map.ov.note")));

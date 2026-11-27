@@ -1581,5 +1581,7 @@
   "tip.vis.flip": "Fait pivoter toute la carte de 180 degrés : le cœur galactique en haut (comme la plupart des cartes de la communauté, par défaut) ou la vue de la carte galactique du jeu. Mémorisé.",
   "bgs.chk": "vérifié {t}",
   "bgs.dq.data": "Données {t}",
-  "bgs.dq.checked2": "Vérifié {t} : le panneau du jeu datait de {n} min"
+  "bgs.dq.checked2": "Vérifié {t} : le panneau du jeu datait de {n} min",
+  "map.ov.pos": "Où s'affiche la carte du système",
+  "map.ov.pnote": "Comme les fenêtres de combat : choisissez sur quel panneau du jeu se place la carte du système (S'affiche avec), gardez ou coupez la perspective, réglez sa couleur ou déplacez-la dans Modifier le HUD."
 }

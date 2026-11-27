@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.56
+- SYSTEM MAP OVER THE GAME can now sit on any game panel, like the Combat windows. On the Map page and in the GRAVITAS menu, the new card 'Where the System map shows' has Shows with, Perspective, Colour and Default position. The GRAVITAS MAP window no longer says 'stopped unexpectedly' after the app closed it or updated it.
+
 ## 0.9.55
 - BGS WATCH now shows two times clearly. 'Data' is the time the numbers are really from (the game's panel is a few minutes old, and the charts and the tick estimate use this time). 'Checked' is when YOU took the screenshots, on your clock. The top bar says both, and every tooltip, table and list of snapshots adds 'checked' next to the data time, so you can always find the snapshot you added at 17:03.
 
