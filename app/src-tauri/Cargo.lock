@@ -1478,7 +1478,7 @@ dependencies = [
 
 [[package]]
 name = "gravitas"
-version = "0.9.54"
+version = "0.9.55"
 dependencies = [
  "ab_glyph",
  "ed25519-dalek",

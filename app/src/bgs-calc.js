@@ -18,7 +18,13 @@
   function dl(t) { try { return new Date(t).toLocaleString(BG.lang || "en", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }); } catch (e) { return new Date(t).toString(); } }
   function dml(t) { try { return new Date(t).toLocaleDateString(BG.lang || "en", { day: "numeric", month: "short" }); } catch (e) { return ""; } }
   function hml(t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
-  function tm(t) { var u = hhmm(tod(t)) + " UTC"; if (dmy(t) !== dml(t)) u = dmy(t) + " " + u; return dl(t) + " (" + u + ")"; }
+  function tm(t, noChk) {
+    var u = hhmm(tod(t)) + " UTC"; if (dmy(t) !== dml(t)) u = dmy(t) + " " + u;
+    var k = !noChk && BG.chk ? BG.chk[t] : null;
+    return dl(t) + " (" + u + ")" + (k && Math.abs(k - t) > 60e3 ? " \u00b7 " + BG.tr("bgs.chk", { t: dl(k) }) : "");
+  }
+  // data time with the time the screenshots were taken ("checked"), when they differ by more than a minute
+  function tmc(d, k) { return tm(d, true) + (k && Math.abs(k - d) > 60e3 ? " \u00b7 " + BG.tr("bgs.chk", { t: dl(k) }) : ""); }
   function lhm(m) { return hhmm(m + offMin()); }                                         // minute of the UTC day shown on this PC's clock
   function both(m) { return lhm(m) + " (" + hhmm(m) + " UTC)"; }
   function offMin() { return -new Date().getTimezoneOffset(); }                       // minutes this PC is ahead of UTC (+180 in Turkey)
@@ -185,5 +191,5 @@
       return out;
     });
   }
-  BG.calc = { tickSys: tickSys, DEF: DEF, model: model, hhmm: hhmm, dmy: dmy, dt: dt, dtl: dtl, dl: dl, lhm: lhm, both: both, dml: dml, hml: hml, tm: tm, offMin: offMin, tod: tod, ago: ago, r1: r1, median: median, quant: quant };
+  BG.calc = { tickSys: tickSys, DEF: DEF, model: model, hhmm: hhmm, dmy: dmy, dt: dt, dtl: dtl, dl: dl, tmc: tmc, lhm: lhm, both: both, dml: dml, hml: hml, tm: tm, offMin: offMin, tod: tod, ago: ago, r1: r1, median: median, quant: quant };
 })();

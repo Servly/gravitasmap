@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Unter der unteren Grenze",
   "bgs.dt.abovesince": "Über der oberen Grenze",
   "bgs.dt.since": "seit {d}",
-  "bgs.dt.snap": "Snapshot (deine Uhr)",
+  "bgs.dt.snap": "Datenzeit (deine Uhr)",
   "bgs.dt.val": "Wert",
   "bgs.dt.notread": "nicht gelesen",
   "bgs.dt.acc": "nach Warnung übernommen",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Jede Linie ist ein System, vom früheren Wert (links) zum jetzigen (rechts). Bernsteinfarbene Linien fielen, blaue stiegen. Die Fläche ist dein Zielbereich.",
   "bgs.more": "Details",
   "tip.bgs.more": "Datenqualität und die zwei feineren Einstellungen (Größe einer kleinen Änderung und Tick-Schwelle).",
-  "tip.bgs.qchip": "Wie viele Systeme die neueste Momentaufnahme hat und von wann ihre Zahlen sind (deine Uhr, UTC in Klammern). Mehr unter Details.",
+  "tip.bgs.qchip": "Wie viele Systeme die neueste Momentaufnahme hat und die Zeit, aus der ihre Zahlen wirklich stammen (deine Uhr, UTC in Klammern). Das Panel des Spiels ist einige Minuten alt: der nächste Chip sagt, wann du die Screenshots gemacht hast.",
   "bgs.r2.expand": "Bei {v}: über 75 kann eine Expansion beginnen (etwa 15 Punkte werden am Ende abgezogen)",
   "bgs.tab.squad": "Squad",
   "tip.bgs.tab.squad": "Wie viele Systeme unter, in und über deinem Zielbereich liegen, im Zeitverlauf.",
@@ -1577,6 +1577,9 @@
   "bgs.menu.openapp": "GRAVITAS-Fenster öffnen",
   "tip.bgs.menu.openapp": "Holt das GRAVITAS-Fenster auf der BGS-Seite nach vorn, wo die Tabelle zum Prüfen und Speichern der Werte ist.",
   "bgs.dq.checked": "Geprüft {t}",
-  "tip.bgs.dq.checked": "Wann die Screenshots der neuesten Momentaufnahme gemacht wurden: deine letzte Prüfung (deine Uhr, UTC in Klammern). Die Zahlen selbst stammen von der davor gezeigten Zeit.",
-  "tip.vis.flip": "Dreht die ganze Karte um 180 Grad: Galaxiekern oben (wie die meisten Community-Karten, Standard) oder wie die Galaxiekarte des Spiels. Wird gemerkt."
+  "tip.bgs.dq.checked": "Wann DU die Screenshots gemacht hast (deine Uhr). Das Panel des Spiels zeigt Daten, die einige Minuten alt sind; die Zahlen tragen deshalb die Zeit, aus der sie wirklich stammen (die Datenzeit davor). Diese nutzen Diagramme und Tick-Schätzung.",
+  "tip.vis.flip": "Dreht die ganze Karte um 180 Grad: Galaxiekern oben (wie die meisten Community-Karten, Standard) oder wie die Galaxiekarte des Spiels. Wird gemerkt.",
+  "bgs.chk": "geprüft {t}",
+  "bgs.dq.data": "Daten {t}",
+  "bgs.dq.checked2": "Geprüft {t}: das Panel des Spiels war {n} Min. alt"
 }

@@ -62,6 +62,7 @@
     if (!ui.uiSeen && g && g.settings) { restoreUi(s.ui); ui.uiSeen = true; }
     if (!ui.setSeen && s.minor != null) { ui.minor = Math.round(s.minor * 10) / 10; ui.tickPct = s.tick_pct == null ? 20 : Math.round(s.tick_pct); ui.setSeen = true; } // (kept from the last session)
     if (!store.data || !store.data.snaps.length) { store.M = null; return; }
+    BG.chk = {}; store.data.snaps.forEach(function (x) { if (x.tk) BG.chk[x.t] = x.tk; });   // 0.9.55: data time -> the time you took the screenshots
     var nDays = {}; store.data.snaps.forEach(function (x) { nDays[new Date(x.t).toISOString().slice(0, 10)] = 1; });
     var span = store.data.snaps.length > 1 ? store.data.snaps[store.data.snaps.length - 1].t - store.data.snaps[0].t : 0;
     // Automatic: every snapshot is its own column while the data is younger than 10 days, one column per day from then on
@@ -125,12 +126,12 @@
   }
   function head(M) {
     var sn = M.snaps[M.K], fw = M.sys.reduce(function (a, s) { return a + (s.f[M.K] ? 1 : 0); }, 0), tot = M.sys.length;
-    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t) + "</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span>" + (sn.tk ? '<span data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + t("bgs.dq.checked", { t: C.tm(sn.tk) }) + "</span>" : "") + "<span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
+    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t, true) + "</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span>" + (sn.tk ? '<span data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + t("bgs.dq.checked", { t: C.tm(sn.tk) }) + "</span>" : "") + "<span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
       (fw ? "<span class='w'>" + t("bgs.dq.warn", { n: fw }) + "</span>" : "") + (M.nS > 1 ? "<span>" + t("bgs.dq.inc", { n: M.snaps.filter(function (x) { return !x.complete; }).length }) + "</span>" : "") + "<span class='bg-fl'>" + t("bgs.dq.utc") + "</span>";
   }
   // the slim bar: one quality chip, the three filters that matter, everything else under "more"
   function pin(M) {
-    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + C.tm(sn.t);
+    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + t("bgs.dq.data", { t: C.tm(sn.t, true) });
     var s = (store.g && store.g.settings) || {};
     function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
@@ -142,7 +143,7 @@
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');
     var names = M.sys.map(function (x) { return x.n; }).sort();
     var srch = '<input type="search" id="bgq" class="bg-search" list="bgnames" autocomplete="off" spellcheck="false" placeholder="' + esc(t("bgs.search.ph")) + '" value="' + esc(ui.sq || "") + '" data-tip="' + esc(t("tip.bgs.search")) + '"><datalist id="bgnames">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
-    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + (sn.tk ? '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + esc(t("bgs.dq.checked", { t: C.dl(sn.tk) })) + "</span>" : "") + main +
+    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + (sn.tk ? '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + esc(sn.minOld > 0 ? t("bgs.dq.checked2", { t: C.dl(sn.tk), n: sn.minOld }) : t("bgs.dq.checked", { t: C.dl(sn.tk) })) + "</span>" : "") + main +
       '<details class="bg-more"><summary data-tip="' + esc(t("tip.bgs.more")) + '">' + t("bgs.more") + '</summary><div class="bg-moreb"><div class="bg-dq">' + head(M) + '</div><div class="bg-bar">' + more + "</div></div></details></div>";
   }
   function empty() {

@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Below the low edge",
   "bgs.dt.abovesince": "Above the high edge",
   "bgs.dt.since": "since {d}",
-  "bgs.dt.snap": "Snapshot (your clock)",
+  "bgs.dt.snap": "Data time (your clock)",
   "bgs.dt.val": "Value",
   "bgs.dt.notread": "not read",
   "bgs.dt.acc": "accepted after a warning",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Each line is one system from its earlier value (left) to its value now (right). Amber lines fell, blue lines rose. The shaded area is your target range.",
   "bgs.more": "Details",
   "tip.bgs.more": "Data quality and the two finer settings (the size of a minor change and the tick threshold).",
-  "tip.bgs.qchip": "How many systems the newest snapshot has, and when its numbers are from (your clock, UTC in brackets). Open Details for more.",
+  "tip.bgs.qchip": "How many systems the newest snapshot has and the time its numbers are really from (your clock, UTC in brackets). The game's panel is a few minutes old: the next chip says when you took the screenshots.",
   "bgs.r2.expand": "At {v}: above 75 an expansion may start (about 15 points are taken when it ends)",
   "bgs.tab.squad": "Squad",
   "tip.bgs.tab.squad": "How many systems are below, inside and above your target range, over time.",
@@ -1577,6 +1577,9 @@
   "bgs.menu.openapp": "Open the GRAVITAS window",
   "tip.bgs.menu.openapp": "Brings the GRAVITAS window to the front on the BGS page, where the table to check and save the values is.",
   "bgs.dq.checked": "Checked {t}",
-  "tip.bgs.dq.checked": "When the screenshots of the newest snapshot were taken: your last check (your clock, UTC in brackets). The numbers themselves are from the time shown before it.",
-  "tip.vis.flip": "Turns the whole map by 180 degrees: the Galactic core up (like most community maps, the default) or the game's own Galaxy Map view. Remembered."
+  "tip.bgs.dq.checked": "When YOU took the screenshots (your clock). The game's panel shows data that is some minutes old, so the numbers are stamped with the time they are really from (the Data time before it), which is what the charts and the tick estimate use.",
+  "tip.vis.flip": "Turns the whole map by 180 degrees: the Galactic core up (like most community maps, the default) or the game's own Galaxy Map view. Remembered.",
+  "bgs.chk": "checked {t}",
+  "bgs.dq.data": "Data {t}",
+  "bgs.dq.checked2": "Checked {t}: the game's panel was {n} min old"
 }

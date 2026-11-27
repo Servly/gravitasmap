@@ -147,7 +147,7 @@
       impBox.appendChild(mk("p", "bg-msg", tr("bgs.imp.sum", { n: r.snapshots, a: r.to_add, s: skipped, b: r.bad_rows || 0 })));
       var list = mk("ul", "bg-issues");
       gs.forEach(function (x) {
-        var when = BG.calc ? BG.calc.tm(Date.parse(x.data_utc)) : x.data_utc;
+        var when = BG.calc ? BG.calc.tmc(Date.parse(x.data_utc), Date.parse(x.taken_utc)) : x.data_utc;
         list.appendChild(mk("li", x.action === "add" ? "" : "blk", when + ": " + x.rows + " " + tr("bgs.imp.rows") + (x.action === "add" ? "" : " (" + tr("bgs.imp.have") + ")") + (x.unchecked_rows ? ", " + tr("bgs.imp.unchecked", { n: x.unchecked_rows }) : "") + (x.not_in_list_count ? ", " + tr("bgs.imp.names", { n: x.not_in_list_count, list: (x.not_in_list || []).slice(0, 6).join(", ") }) : "")));
       });
       impBox.appendChild(list);

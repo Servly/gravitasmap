@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Bajo el borde inferior",
   "bgs.dt.abovesince": "Sobre el borde superior",
   "bgs.dt.since": "desde {d}",
-  "bgs.dt.snap": "Captura (tu reloj)",
+  "bgs.dt.snap": "Hora de los datos (tu reloj)",
   "bgs.dt.val": "Valor",
   "bgs.dt.notread": "no leído",
   "bgs.dt.acc": "aceptado tras un aviso",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Cada línea es un sistema, de su valor anterior (izquierda) al actual (derecha). Las líneas ámbar bajaron, las azules subieron. La zona sombreada es tu rango objetivo.",
   "bgs.more": "Detalles",
   "tip.bgs.more": "Calidad de los datos y los dos ajustes finos (tamaño de un cambio menor y umbral del tick).",
-  "tip.bgs.qchip": "Cuántos sistemas tiene la última instantánea y de cuándo son sus números (tu reloj, UTC entre paréntesis). Más en Detalles.",
+  "tip.bgs.qchip": "Cuántos sistemas tiene la última instantánea y la hora de la que son realmente sus números (tu reloj, UTC entre paréntesis). El panel del juego tiene unos minutos de antigüedad: el siguiente chip dice cuándo hiciste las capturas.",
   "bgs.r2.expand": "En {v}: por encima de 75 puede empezar una expansión (se restan unos 15 puntos al terminar)",
   "bgs.tab.squad": "Escuadrón",
   "tip.bgs.tab.squad": "Cuántos sistemas están por debajo, dentro y por encima de tu rango objetivo, a lo largo del tiempo.",
@@ -1577,6 +1577,9 @@
   "bgs.menu.openapp": "Abrir la ventana de GRAVITAS",
   "tip.bgs.menu.openapp": "Trae la ventana de GRAVITAS al frente en la página BGS, donde está la tabla para revisar y guardar los valores.",
   "bgs.dq.checked": "Comprobado {t}",
-  "tip.bgs.dq.checked": "Cuándo se hicieron las capturas de la última instantánea: tu última comprobación (tu reloj, UTC entre paréntesis). Los números son de la hora mostrada antes.",
-  "tip.vis.flip": "Gira todo el mapa 180 grados: el núcleo galáctico arriba (como la mayoría de los mapas de la comunidad, por defecto) o la vista del mapa galáctico del juego. Se recuerda."
+  "tip.bgs.dq.checked": "Cuándo hiciste TÚ las capturas (tu reloj). El panel del juego muestra datos con algunos minutos de antigüedad, así que los números llevan la hora de la que realmente son (la hora de los datos mostrada antes), que es la que usan los gráficos y la estimación del tick.",
+  "tip.vis.flip": "Gira todo el mapa 180 grados: el núcleo galáctico arriba (como la mayoría de los mapas de la comunidad, por defecto) o la vista del mapa galáctico del juego. Se recuerda.",
+  "bgs.chk": "comprobado {t}",
+  "bgs.dq.data": "Datos {t}",
+  "bgs.dq.checked2": "Comprobado {t}: el panel del juego tenía {n} min"
 }

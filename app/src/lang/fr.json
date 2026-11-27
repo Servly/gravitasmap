@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Sous le bord bas",
   "bgs.dt.abovesince": "Au-dessus du bord haut",
   "bgs.dt.since": "depuis {d}",
-  "bgs.dt.snap": "Instantané (votre horloge)",
+  "bgs.dt.snap": "Heure des données (votre horloge)",
   "bgs.dt.val": "Valeur",
   "bgs.dt.notread": "non lu",
   "bgs.dt.acc": "accepté après un avertissement",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Chaque ligne est un système, de sa valeur précédente (gauche) à sa valeur actuelle (droite). Les lignes ambre ont baissé, les bleues ont monté. La zone ombrée est votre plage cible.",
   "bgs.more": "Détails",
   "tip.bgs.more": "Qualité des données et les deux réglages fins (taille d'un petit changement et seuil du tick).",
-  "tip.bgs.qchip": "Combien de systèmes contient le dernier instantané et de quand datent ses chiffres (votre horloge, UTC entre parenthèses). Plus dans Détails.",
+  "tip.bgs.qchip": "Combien de systèmes contient le dernier instantané et l'heure dont ses chiffres datent vraiment (votre horloge, UTC entre parenthèses). Le panneau du jeu a quelques minutes de retard : la pastille suivante dit quand vous avez pris les captures.",
   "bgs.r2.expand": "À {v} : au-dessus de 75, une expansion peut commencer (environ 15 points sont retirés à la fin)",
   "bgs.tab.squad": "Escouade",
   "tip.bgs.tab.squad": "Combien de systèmes sont sous, dans et au-dessus de votre plage cible, dans le temps.",
@@ -1577,6 +1577,9 @@
   "bgs.menu.openapp": "Ouvrir la fenêtre GRAVITAS",
   "tip.bgs.menu.openapp": "Amène la fenêtre GRAVITAS au premier plan sur la page BGS, où se trouve le tableau pour vérifier et enregistrer les valeurs.",
   "bgs.dq.checked": "Vérifié {t}",
-  "tip.bgs.dq.checked": "Quand les captures du dernier instantané ont été prises : votre dernière vérification (votre horloge, UTC entre parenthèses). Les chiffres datent de l'heure affichée avant.",
-  "tip.vis.flip": "Fait pivoter toute la carte de 180 degrés : le cœur galactique en haut (comme la plupart des cartes de la communauté, par défaut) ou la vue de la carte galactique du jeu. Mémorisé."
+  "tip.bgs.dq.checked": "Quand VOUS avez pris les captures (votre horloge). Le panneau du jeu montre des données vieilles de quelques minutes : les chiffres portent donc l'heure dont ils datent vraiment (l'heure des données avant), celle qu'utilisent les graphiques et l'estimation du tick.",
+  "tip.vis.flip": "Fait pivoter toute la carte de 180 degrés : le cœur galactique en haut (comme la plupart des cartes de la communauté, par défaut) ou la vue de la carte galactique du jeu. Mémorisé.",
+  "bgs.chk": "vérifié {t}",
+  "bgs.dq.data": "Données {t}",
+  "bgs.dq.checked2": "Vérifié {t} : le panneau du jeu datait de {n} min"
 }

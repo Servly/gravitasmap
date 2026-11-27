@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.55",
+      "en": [
+        "BGS WATCH now shows two times clearly. 'Data' is the time the numbers are really from (the game's panel is a few minutes old, and the charts and the tick estimate use this time). 'Checked' is when YOU took the screenshots, on your clock. The top bar says both, and every tooltip, table and list of snapshots adds 'checked' next to the data time, so you can always find the snapshot you added at 17:03."
+      ],
+      "de": [
+        "BGS WATCH zeigt jetzt zwei Zeiten klar an. 'Daten' ist die Zeit, aus der die Zahlen wirklich stammen (das Panel des Spiels ist einige Minuten alt, und Diagramme und Tick-Schätzung nutzen diese Zeit). 'Geprüft' ist, wann DU die Screenshots gemacht hast, nach deiner Uhr. Die obere Leiste nennt beide, und jeder Tooltip, jede Tabelle und jede Snapshot-Liste ergänzt 'geprüft' neben der Datenzeit, sodass du den um 17:03 hinzugefügten Snapshot immer findest."
+      ],
+      "es": [
+        "BGS WATCH ahora muestra dos horas con claridad. 'Datos' es la hora de la que realmente son los números (el panel del juego tiene unos minutos de antigüedad, y los gráficos y la estimación del tick usan esta hora). 'Comprobado' es cuándo hiciste TÚ las capturas, según tu reloj. La barra superior dice ambas, y cada tooltip, tabla y lista de instantáneas añade 'comprobado' junto a la hora de los datos, así siempre encuentras la instantánea que añadiste a las 17:03."
+      ],
+      "fr": [
+        "BGS WATCH affiche maintenant clairement deux heures. 'Données' est l'heure dont les chiffres datent vraiment (le panneau du jeu a quelques minutes de retard, et les graphiques et l'estimation du tick utilisent cette heure). 'Vérifié' est le moment où VOUS avez pris les captures, à votre horloge. La barre du haut indique les deux, et chaque infobulle, tableau et liste d'instantanés ajoute 'vérifié' à côté de l'heure des données, pour retrouver toujours l'instantané ajouté à 17:03."
+      ],
+      "pt-br": [
+        "O BGS WATCH agora mostra duas horas com clareza. 'Dados' é o horário a que os números realmente pertencem (o painel do jogo tem alguns minutos de idade, e os gráficos e a estimativa do tick usam este horário). 'Verificado' é quando VOCÊ tirou as capturas, no seu relógio. A barra superior diz os dois, e cada tooltip, tabela e lista de snapshots acrescenta 'verificado' ao lado do horário dos dados, para você sempre achar o snapshot que adicionou às 17:03."
+      ],
+      "ru": [
+        "BGS WATCH теперь ясно показывает два времени. «Данные» — время, к которому числа относятся на самом деле (панель игры отстаёт на несколько минут, и графики с оценкой тика используют это время). «Проверено» — когда ВЫ сделали скриншоты, по вашим часам. Верхняя строка показывает оба, а каждая подсказка, таблица и список снимков добавляет «проверено» рядом со временем данных, так что снимок, добавленный в 17:03, всегда легко найти."
+      ]
+    },
+    {
       "v": "0.9.54",
       "en": [
         "The Visits map now opens with the Galactic core UP, like most community maps (Colonia up-left, Sol below the core). The new Rotate button next to Tilt turns the whole map by 180 degrees to the game's own Galaxy Map view and back, and GRAVITAS remembers your choice."

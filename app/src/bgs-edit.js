@@ -12,7 +12,7 @@
   // times are shown and typed in THIS PC's time (0.9.51); stored as UTC
   function fmtT(iso) { var d = new Date(iso); return isNaN(d) ? iso : d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
   function parseT(s) { var m = /^\s*(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?\s*$/.exec(s); if (!m) return null; var d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)); return isNaN(d) ? null : d.toISOString().replace(/\.\d+Z$/, "Z"); }
-  function tmx(iso) { var ms = new Date(iso).getTime(); return BG.calc && !isNaN(ms) ? BG.calc.tm(ms) : fmtT(iso); }
+  function tmx(iso, takenIso) { var ms = new Date(iso).getTime(), kt = takenIso ? new Date(takenIso).getTime() : 0; return BG.calc && !isNaN(ms) ? BG.calc.tmc(ms, kt) : fmtT(iso); }
   function parseV(s) { s = String(s).trim().replace(",", "."); if (!s) return null; var m = /^(\d{1,3})(?:\.(\d))?$/.exec(s.replace("%", "")); if (!m) return undefined; var v = +m[1] * 10 + (m[2] ? +m[2] : 0); return v >= 0 && v <= 1000 ? v : undefined; }
   var fv = function (x) { return x == null ? "" : (x / 10).toFixed(1); };
 
@@ -41,7 +41,7 @@
         if (sig === st.sig && !st.force) return;
         if (nChanges() && !st.force) return;                      // never replace the table under unsaved typing
         st.sig = sig; st.force = false;
-        st.cols = list.map(function (s) { return { id: s.id, t: s.data_utc, imported: !!s.imported, complete: !!s.complete }; });
+        st.cols = list.map(function (s) { return { id: s.id, t: s.data_utc, k: s.taken_utc, imported: !!s.imported, complete: !!s.complete }; });
         st.cell = {}; st.flags = {}; var names = {};
         list.forEach(function (s, ci) { s.rows.forEach(function (x) { names[x.system] = 1; st.cell[key(ci, x.system)] = x.inf_x10; st.flags[key(ci, x.system)] = x.edited ? "c" : (x.accepted_unchecked || (x.conf != null && x.conf < 0.6 && !x.confirmed)) ? "w" : ""; }); });
         st.rows = Object.keys(names).sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : 1; });
@@ -65,7 +65,7 @@
         o += '<tr><th class="bg-rowh">' + rw.i + '</th><th class="bg-sysn" data-sys="' + esc(rw.n) + '">' + esc(rw.n) + (BG.popHtml ? BG.popHtml(rw.n) : "") + "</th>";
         st.cols.forEach(function (col, ci) {
           var k = key(ci, rw.n), ch = k in st.pend, v = valueAt(ci, rw.n), fl = st.flags[k] || "";
-          var tp = rw.n + "\n" + tmx(col.t) + (ch ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : fl === "w" ? "\n" + tr("bgs.ed.unsure") : fl === "c" ? "\n" + tr("bgs.ed.corrected") : "");
+          var tp = rw.n + "\n" + tmx(col.t, col.k) + (ch ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : fl === "w" ? "\n" + tr("bgs.ed.unsure") : fl === "c" ? "\n" + tr("bgs.ed.corrected") : "");
           o += '<td class="bg-c' + (ch ? " chg" : "") + (fl && !ch ? " f" + fl : "") + (st.sel.r === rw.i && st.sel.c === ci ? " sel" : "") + '" data-r="' + rw.i + '" data-c="' + ci + '" data-tip="' + esc(tp) + '">' + esc(fv(v)) + "</td>";
         });
         o += "</tr>";
@@ -85,7 +85,7 @@
         if (commit && val === undefined) { i.classList.add("bad"); say(tr("bgs.ed.badval"), "err"); return; }
         st.editing = null; if (commit) { setVal(r, ci, val); say("", ""); }
         td.textContent = fv(valueAt(ci, name)); var k = key(ci, name); td.classList.toggle("chg", k in st.pend); td.classList.remove("ff"); updBtns(); select(r + dr, ci + dc);
-        if (commit) { td.setAttribute("data-tip", name + "\n" + tmx(st.cols[ci].t) + (k in st.pend ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : "")); }
+        if (commit) { td.setAttribute("data-tip", name + "\n" + tmx(st.cols[ci].t, st.cols[ci].k) + (k in st.pend ? "\n" + tr("bgs.ed.was", { v: fv(st.cell[k]) || "–" }) : "")); }
       }
       i.onkeydown = function (e) {
         if (e.key === "Enter") { e.preventDefault(); fin(true, e.shiftKey ? -1 : 1, 0); }
