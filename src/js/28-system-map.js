@@ -900,7 +900,7 @@ function maplItem(b) {
   MAPL.scene.add(g); MAPL.items.set(b, it); MAPL.gen = (MAPL.gen || 0) + 1; return it;   // v0.9: a new picture: its shaders are compiled before the next live draw (v0.90.2: only when one is really added)
 }
 function maplDrop(it) { MAPL.scene.remove(it.g); it.g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); MAPL.items.delete(it.b); }
-function maplWanted() { return MAPMODE && S && QUALITY !== PRESETS.low && !SOFT_GL_MAP; }
+function maplWanted() { return MAPMODE && S && QUALITY !== PRESETS.low && !SOFT_GL_MAP && !APP_SMAP; }   // v0.99.28: never in the app's panel over the game: its 3D scene is hidden there, and the live map hides the flat discs, so the bodies vanished (it only showed while the quality was Low)
 const SOFT_GL_MAP = typeof SOFT_GL !== "undefined" && SOFT_GL && !/[?&]maplive=1/.test(location.search);   // no graphics card: keep the still pictures
 function maplTick() {
   const want = maplWanted(), svg = $("smapSvg");

@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.28", k: "minor", d: "27 Nov 2026", t: [
+      "Fix: in the GRAVITAS app's System map panel over the game, the planets and stars vanished (only rings and labels stayed) whenever the quality was not Low. The map's \"live\" mode, which draws the bodies from the 3D view under the map, was switched on in that panel, where the 3D view is hidden. It stays off there now."
+    ] },
     { v: "v0.99.27", k: "minor", d: "27 Nov 2026", t: [
       "Fix: in the GRAVITAS app's System map panel over the game, planets and stars no longer turn empty after a while. That panel now draws every body as a shaded disc instead of a picture, which also saves graphics work. The map in the normal window and on the site is unchanged."
     ] },

@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.28 · minor · 27 Nov 2026
+- Fix: in the GRAVITAS app's System map panel over the game, the planets and stars vanished (only rings and labels stayed) whenever the quality was not Low. The map's "live" mode, which draws the bodies from the 3D view under the map, was switched on in that panel, where the 3D view is hidden. It stays off there now.
+
 ### v0.99.27 · minor · 27 Nov 2026
 - Fix: in the GRAVITAS app's System map panel over the game, planets and stars no longer turn empty after a while. That panel now draws every body as a shaded disc instead of a picture, which also saves graphics work. The map in the normal window and on the site is unchanged.
 
