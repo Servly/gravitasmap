@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.60
+- BGS WATCH: the Band boxes now work in every tab (before, only the Attention tab read them). The Overview colours are back (0.9.59 had lost them by mistake). New: type a system in the search box and it is lit in Attention, Changes, Overview, Trends and Tick, so you no longer look for it among 77.
+
 ## 0.9.59
 - BGS WATCH: every change shows now, however small. The Changes tab lists even +0.1, and the Overview colours it (grey only means no change). The Band, Minor and Tick boxes take a point or a comma (62.5 or 62,5), and a wrong value goes back to the saved one and tells you why, so the Band no longer snaps back by itself.
 

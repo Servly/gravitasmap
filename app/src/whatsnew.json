@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.60",
+      "en": [
+        "BGS WATCH: the Band boxes now work in every tab (before, only the Attention tab read them). The Overview colours are back (0.9.59 had lost them by mistake). New: type a system in the search box and it is lit in Attention, Changes, Overview, Trends and Tick, so you no longer look for it among 77."
+      ],
+      "de": [
+        "BGS WATCH: Die Band-Felder funktionieren jetzt in jedem Reiter (vorher las sie nur der Reiter Aufmerksamkeit). Die Farben der Übersicht sind zurück (0.9.59 hatte sie versehentlich verloren). Neu: Gib im Suchfeld ein System ein, und es leuchtet in Aufmerksamkeit, Änderungen, Übersicht, Trends und Tick, du musst es nicht mehr unter 77 suchen."
+      ],
+      "es": [
+        "BGS WATCH: las casillas de Banda ahora funcionan en todas las pestañas (antes solo las leía la pestaña Atención). Los colores del Resumen han vuelto (0.9.59 los perdió por error). Nuevo: escribe un sistema en el buscador y se ilumina en Atención, Cambios, Resumen, Tendencias y Tick, ya no hay que buscarlo entre 77."
+      ],
+      "fr": [
+        "BGS WATCH : les cases Bande fonctionnent maintenant dans chaque onglet (avant, seul l'onglet Attention les lisait). Les couleurs de l'Aperçu sont de retour (0.9.59 les avait perdues par erreur). Nouveau : tapez un système dans la recherche et il s'illumine dans Attention, Changements, Aperçu, Tendances et Tick, plus besoin de le chercher parmi 77."
+      ],
+      "pt-br": [
+        "BGS WATCH: as caixas de Faixa agora funcionam em todas as abas (antes só a aba Atenção as lia). As cores da Visão geral voltaram (a 0.9.59 as perdeu por engano). Novo: digite um sistema na busca e ele acende em Atenção, Mudanças, Visão geral, Tendências e Tick, sem precisar procurar entre 77."
+      ],
+      "ru": [
+        "BGS WATCH: поля «Полоса» теперь работают во всех вкладках (раньше их читала только вкладка «Внимание»). Цвета «Обзора» вернулись (в 0.9.59 они пропали по ошибке). Новое: введите систему в поиске, и она подсветится во вкладках «Внимание», «Изменения», «Обзор», «Тренды» и «Тик», больше не нужно искать её среди 77."
+      ]
+    },
+    {
       "v": "0.9.59",
       "en": [
         "BGS WATCH: every change shows now, however small. The Changes tab lists even +0.1, and the Overview colours it (grey only means no change). The Band, Minor and Tick boxes take a point or a comma (62.5 or 62,5), and a wrong value goes back to the saved one and tells you why, so the Band no longer snaps back by itself."

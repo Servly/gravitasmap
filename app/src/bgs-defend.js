@@ -93,7 +93,7 @@
       for (k = M.first; k <= M.K; k++) {
         var v = s.v[k], pv = null, j; for (j = k - 1; j >= M.first; j--) if (s.v[j] != null) { pv = s.v[j]; break; }
         var dd = v != null && pv != null ? Math.round((v - pv) * 10) / 10 : null, c, x = L + (k - M.first) * cw;
-        if (v == null) c = "transparent"; else if (dd == null || Math.abs(dd) < 0.05) c = "rgba(255,255,255,.07)";   // only 'no change' is grey now: even +0.1 is coloured else c = (dd > 0 ? "rgba(var(--good-rgb)," : "rgba(var(--bad-rgb),") + Math.min(1, 0.3 + Math.abs(dd) / 3).toFixed(2) + ")";
+        if (v == null) c = "transparent"; else if (dd == null || Math.abs(dd) < 0.05) c = "rgba(255,255,255,.07)"; else c = (dd > 0 ? "rgba(var(--good-rgb)," : "rgba(var(--bad-rgb),") + Math.min(1, 0.3 + Math.abs(dd) / 3).toFixed(2) + ")";
         var tp = s.n + "\n" + when(M.snaps[k].t) + (M.snaps[k].n > 1 ? "\n" + t("bgs.tp.snaps", { n: M.snaps[k].n }) : "") + "\n" + (v == null ? t("bgs.tp.noread") : f1(v) + (dd == null ? "" : " (" + sg(dd) + ")")) + stepsText(s, k);
         o += '<rect x="' + x + '" y="' + y + '" width="' + (cw - 1) + '" height="' + (RH - 1) + '" style="fill:' + c + '" data-sys="' + esc(s.n) + '"' + tip(tp) + "/>";
       }

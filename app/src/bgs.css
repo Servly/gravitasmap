@@ -101,3 +101,11 @@ html.calm .bg-prog i{animation:none;margin-left:0;width:100%}
 .bg-imp{margin-top:8px}
 .bg-one{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}.bg-edlegend{color:var(--dim)}
 .bg-pop{color:var(--dim);font-size:.82em;font-weight:400;white-space:nowrap}
+
+/* 0.9.60: the system you search for is lit in every tab */
+.bg-wrap tr.bg-hl,.bg-wrap .bg-row.bg-hl,.bg-wrap .bg-mt.bg-hl,.bg-wrap .bg-trow.bg-hl{background:rgba(255,214,102,.16);outline:1.5px solid #ffd666;outline-offset:-1px}
+.bg-wrap th.bg-sysn.bg-hl{background:rgba(255,214,102,.22);outline:1.5px solid #ffd666;outline-offset:-1px}
+.bg-wrap svg text.bg-hl{fill:#ffd666 !important;font-weight:700}
+.bg-wrap svg rect.bg-hl{stroke:#ffd666;stroke-width:1.6}
+.bg-wrap svg g.bg-hl>rect:first-child{fill:rgba(255,214,102,.2)}
+.bg-wrap svg g.bg-hl>text{fill:#ffd666;font-weight:700}

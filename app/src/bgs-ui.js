@@ -161,7 +161,7 @@
     var M = store.M; p.rev = store.rev;
     var keep = p.el.querySelector(".bg-scroll"), sx = keep ? keep.scrollLeft : 0, sy = p.sc ? p.sc.scrollTop : 0;
     if (!M) { p.el.innerHTML = empty(); return; }
-    p.el.innerHTML = pin(M) + '<div class="bg-view">' + (V[p.tab] || V.defend)(M, ui) + "</div>";
+    p.el.innerHTML = pin(M) + '<div class="bg-view">' + (V[p.tab] || V.defend)(M, ui) + "</div>"; applyHl(p.el);
     var k2 = p.el.querySelector(".bg-scroll"); if (k2) k2.scrollLeft = sx;
     if (ui.sel && drawer && drawer.classList.contains("on")) drawer.innerHTML = V.detail(M, ui.sel);
   }
@@ -173,6 +173,18 @@
     q = String(q || "").trim().toLowerCase();
     var ns = store.M ? store.M.sys.map(function (s) { return s.n; }) : [];
     return q ? (ns.filter(function (n) { return n.toLowerCase() === q; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) === 0; })[0] || ns.filter(function (n) { return n.toLowerCase().indexOf(q) >= 0; })[0]) : undefined;
+  }
+  // 0.9.60: the searched system is lit wherever it is on the page (rows, bars, cells, cards), in every tab
+  function applyHl(root) {
+    var q = String(ui.sq || "").trim().toLowerCase(), first = null;
+    root.querySelectorAll(".bg-hl").forEach(function (e) { e.classList.remove("bg-hl"); });
+    if (q.length < 2) return null;
+    root.querySelectorAll("[data-sys]").forEach(function (e) {
+      if ((e.getAttribute("data-sys") || "").toLowerCase().indexOf(q) < 0) return;
+      var tg = e.closest("tr,.bg-row,.bg-mt,.bg-trow") || e;
+      tg.classList.add("bg-hl"); if (!first) first = tg;
+    });
+    return first;
   }
   function searchSys(x) {
     var q = x.value.trim(), hit = findSys(q);
@@ -200,7 +212,8 @@
       var x = e.target, id = x.id;
       if (id === "bgq") { searchSys(x); return; }
       if (id === "blo" || id === "bhi") {
-        var lo = num(document.getElementById("blo").value), hi = num(document.getElementById("bhi").value);
+        var bx = x.closest(".bg-pin") || document;   // 0.9.60: every tab has its own Band boxes with the same ids: read the ones you typed in, not the first on the page
+        var lo = num(bx.querySelector("#blo").value), hi = num(bx.querySelector("#bhi").value);
         if (!isFinite(lo) || !isFinite(hi)) { BG.toast && BG.toast(t("bgs.err.num")); load(true).then(renderAll); return; }   // the boxes go back to the saved band, and you are told why
         invoke("bgs_settings_set", { key: "band", value: [lo, hi] }).then(function (r) { if (!(r && r.ok)) BG.toast && BG.toast(BG.errText(r && r.error)); return load(true); }).then(renderAll);
         return;
@@ -217,6 +230,12 @@
     });
     el.addEventListener("input", function (e) {
       var x = e.target;
+      if (x.id === "bgq") {   // typing in the search box lights the system at once (no redraw: the box keeps the focus)
+        ui.sq = x.value; var f1st = null;
+        panes.forEach(function (p) { if (!p.el.isConnected) return; var f = applyHl(p.el); if (f && p.el.offsetParent && !f1st) f1st = f; });
+        if (f1st && f1st.scrollIntoView) f1st.scrollIntoView({ block: "center", inline: "nearest" });
+        return;
+      }
       if (x.id === "tq") { ui.q = x.value; renderAll(); var i = document.getElementById("tq"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
       else if (x.id === "rfac") { ui.faction = x.value.replace(/[`\r\n]/g, ""); var pre = document.getElementById("reptxt"); if (pre) { pre.textContent = V.reportText(store.M, ui); } }
     });
