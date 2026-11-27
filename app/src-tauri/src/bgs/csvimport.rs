@@ -90,7 +90,7 @@ pub fn apply(p: &Plan, st: &Store, known_count: usize) -> Result<Vec<String>, St
     for g in p.groups.iter().filter(|g| g.skip.is_empty()) {
         super::snapstore::check_rows(&g.rows)?;
         let s = Snapshot {
-            v: 1, id: timeutil::fmt_id(g.t), taken_utc: timeutil::fmt_iso(g.t), data_utc: timeutil::fmt_iso(g.t), minutes_old: None, resolution: String::new(),
+            v: 1, id: timeutil::fmt_id(g.t), taken_utc: timeutil::fmt_iso(g.t), data_utc: timeutil::fmt_iso(g.t), legacy_minutes: None, resolution: String::new(),
             sources: Vec::new(), pages: None, complete: known_count == 0 || g.rows.len() >= known_count, rows: g.rows.clone(), reader: "csv".into(), imported: true, proposal_id: String::new(),
         };
         ids.push(st.save(s)?);

@@ -96,7 +96,7 @@ pub fn pop_refresh(force: bool) -> Value {
     let Some(dir) = names_dir() else { return err("no data folder") };
     let Some(st) = store() else { return err("the snapshots could not be opened") };
     let all = st.all();
-    let Some(newest) = all.iter().max_by(|a, b| a.data_utc.cmp(&b.data_utc)) else { return json!({"ok": true, "empty": true}) };
+    let Some(newest) = all.iter().max_by(|a, b| snapstore::order(a, b)) else { return json!({"ok": true, "empty": true}) };
     let names: Vec<String> = newest.rows.iter().map(|r| r.system.clone()).collect();
     match pop::refresh(&dir, &names, force, timeutil::now()) {
         Ok(p) => json!({"ok": true, "count": p.map.len(), "updated_utc": timeutil::fmt_iso(p.updated)}),
@@ -248,7 +248,9 @@ pub fn commit_to(st: &snapstore::Store, v: &Value, names_dir: &Option<std::path:
     if !v.is_object() { return err("not a snapshot"); }
     v["id"] = json!("x");
     let mut s: Snapshot = match serde_json::from_value(v) { Ok(s) => s, Err(e) => return err(format!("the snapshot is not valid: {e}")) };
-    let (Some(taken), Some(data)) = (timeutil::parse_iso(&s.taken_utc), timeutil::parse_iso(&s.data_utc)) else { return err("the snapshot times are not valid") };
+    // the time of a new snapshot is the time its screenshots were taken, whatever data_utc the page sends
+    let Some(taken) = timeutil::parse_iso(&s.taken_utc) else { return err("the snapshot times are not valid") };
+    let data = taken;
     if let Err(e) = snapstore::check_rows(&s.rows) { return err(e); }
     let cells = props_get(&s.proposal_id).unwrap_or_default();
     // open rows: uncertain in the scan (or marked by the UI) and not looked at by the player

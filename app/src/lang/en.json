@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Below the low edge",
   "bgs.dt.abovesince": "Above the high edge",
   "bgs.dt.since": "since {d}",
-  "bgs.dt.snap": "Data time (your clock)",
+  "bgs.dt.snap": "Screenshot time (your clock)",
   "bgs.dt.val": "Value",
   "bgs.dt.notread": "not read",
   "bgs.dt.acc": "accepted after a warning",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Each line is one system from its earlier value (left) to its value now (right). Amber lines fell, blue lines rose. The shaded area is your target range.",
   "bgs.more": "Details",
   "tip.bgs.more": "Data quality and the two finer settings (the size of a minor change and the tick threshold).",
-  "tip.bgs.qchip": "How many systems the newest snapshot has and the time its numbers are really from (your clock, UTC in brackets). The game's panel is a few minutes old: the next chip says when you took the screenshots.",
+  "tip.bgs.qchip": "How many systems the newest snapshot has and the time you took its screenshots (your clock, UTC in brackets). Only this time is used: the game's own \"last updated\" text is never read.",
   "bgs.r2.expand": "At {v}: above 75 an expansion may start (about 15 points are taken when it ends)",
   "bgs.tab.squad": "Squad",
   "tip.bgs.tab.squad": "How many systems are below, inside and above your target range, over time.",
@@ -1584,5 +1584,6 @@
   "bgs.dq.checked2": "Checked {t}: the game's panel was {n} min old",
   "map.ov.pos": "Where the System map shows",
   "map.ov.pnote": "Like the Combat windows: choose which game panel the System map sits on (Shows with), keep or switch off the perspective, set its colour, or drag it in Edit HUD.",
-  "bgs.err.num": "Please type a number, for example 62.5. A point or a comma both work."
+  "bgs.err.num": "Please type a number, for example 62.5. A point or a comma both work.",
+  "bgs.dq.shots": "Screenshots {t}"
 }

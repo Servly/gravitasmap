@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.61
+- BGS WATCH: the time of every snapshot is now the time you took the screenshots, and nothing else. The game's "LAST UPDATED" text on the page is wrong, so it is no longer read and no longer used anywhere. Snapshots are put in order by that time (before, two checks with the same data time could swap places, a later check landing before an earlier one), and the tick estimate is built on those times. Your saved snapshots are moved to their screenshot times by themselves, once.
+
 ## 0.9.60
 - BGS WATCH: the Band boxes now work in every tab (before, only the Attention tab read them). The Overview colours are back (0.9.59 had lost them by mistake). New: type a system in the search box and it is lit in Attention, Changes, Overview, Trends and Tick, so you no longer look for it among 77.
 

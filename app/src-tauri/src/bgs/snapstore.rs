@@ -28,12 +28,41 @@ pub fn safe_dir(d: &Path) -> bool {
     true
 }
 
+/// the order of snapshots: by the snapshot time (= the time the screenshots were taken, unless the player edited it), then by the time the screenshots were taken, then the id.
+/// (Two snapshots with the same snapshot time used to be ordered by their id = by the order they were saved: a later check could land before an earlier one.)
+pub fn order(a: &Snapshot, b: &Snapshot) -> std::cmp::Ordering {
+    a.data_utc.cmp(&b.data_utc).then(a.taken_utc.cmp(&b.taken_utc)).then(a.id.cmp(&b.id))
+}
+
 fn id_ok(id: &str) -> bool { !id.is_empty() && id.len() <= 40 && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') }
 
 impl Store {
     /// the real store: <app data>/bgs
     pub fn open() -> Option<Store> { Store::at(crate::store::dir()?.join("bgs")) }
-    pub fn at(dir: PathBuf) -> Option<Store> { safe_dir(&dir).then_some(Store { dir }) }
+    pub fn at(dir: PathBuf) -> Option<Store> {
+        if !safe_dir(&dir) { return None; }
+        let s = Store { dir };
+        s.migrate();
+        Some(s)
+    }
+
+    /// ONCE (a marker file): snapshots made by old versions have data_utc = taken - the game's LAST UPDATED minutes. That time is wrong, so it goes back to the time
+    /// the screenshots were taken (a time the player edited by hand is kept). Only this module's own files in the bgs folder are written.
+    fn migrate(&self) {
+        let mark = self.dir.join("times-from-screenshots.done");
+        if mark.exists() || !self.dir.exists() { return; }
+        let (mut changed, mut failed) = (0, false);
+        for id in self.ids() {
+            let Some(mut s) = self.get(&id) else { failed = true; continue };   // not readable now: no marker, the next start tries again
+            let Some(m) = s.legacy_minutes.take() else { continue };
+            if let (Some(t), Some(d)) = (parse_iso(&s.taken_utc), parse_iso(&s.data_utc)) {
+                if d == t - m as i64 * 60 { s.data_utc = s.taken_utc.clone(); }
+            }
+            if serde_json::to_value(&s).ok().map_or(false, |v| self.write(&self.snap_path(&id), &v)) { changed += 1; } else { failed = true; }
+        }
+        if changed > 0 { let all = self.all(); self.write_index(&all); }
+        if !failed { let _ = crate::store::write_atomic(&mark, "1"); }
+    }
 
     fn index_path(&self) -> PathBuf { self.dir.join("index.json") }
     fn snap_path(&self, id: &str) -> PathBuf { self.dir.join(format!("snap-{id}.json")) }
@@ -79,7 +108,7 @@ impl Store {
     /// every snapshot, oldest first (a file that cannot be read is skipped)
     pub fn all(&self) -> Vec<Snapshot> {
         let mut v: Vec<Snapshot> = self.ids().iter().filter_map(|id| self.get(id)).collect();
-        v.sort_by(|a, b| a.data_utc.cmp(&b.data_utc).then(a.id.cmp(&b.id)));
+        v.sort_by(|a, b| order(a, b));
         v
     }
 
@@ -104,7 +133,7 @@ impl Store {
         if !self.write(&self.snap_path(&id), &serde_json::to_value(&s).map_err(|e| e.to_string())?) { return Err("the snapshot could not be saved".into()); }
         let mut all = self.all();
         if !all.iter().any(|x| x.id == id) { all.push(s); }
-        all.sort_by(|a, b| a.data_utc.cmp(&b.data_utc).then(a.id.cmp(&b.id)));
+        all.sort_by(|a, b| order(a, b));
         self.write_index(&all);
         Ok(id)
     }
@@ -112,10 +141,11 @@ impl Store {
     /// Replaces a stored snapshot by an edited one. When its data time changed it moves to the id of the new time (never onto another snapshot).
     /// Returns the id it has now. Only this module's own files in the bgs folder are written or removed.
     pub fn replace(&self, old_id: &str, mut s: Snapshot) -> Result<String, String> {
-        if !id_ok(old_id) || self.get(old_id).is_none() { return Err("snapshot not found".into()); }
+        let Some(old) = self.get(old_id).filter(|_| id_ok(old_id)) else { return Err("snapshot not found".into()) };
         let t = super::timeutil::parse_iso(&s.data_utc).ok_or("the snapshot time is not valid")?;
         s.data_utc = super::timeutil::fmt_iso(t);
-        let new_id = super::timeutil::fmt_id(t);
+        // the id follows the time only when the time was changed: a cell-only edit keeps its id (a migrated snapshot's id no longer equals its time)
+        let new_id = if super::timeutil::parse_iso(&old.data_utc) == Some(t) { old_id.to_string() } else { super::timeutil::fmt_id(t) };
         if new_id != old_id && (self.snap_path(&new_id).exists() || self.ids().iter().any(|i| *i == new_id)) { return Err("a snapshot already exists at that time".into()); }
         s.id = new_id.clone();
         if !self.write(&self.snap_path(&new_id), &serde_json::to_value(&s).map_err(|e| e.to_string())?) { return Err("the snapshot could not be saved".into()); }
@@ -123,7 +153,7 @@ impl Store {
         // the index is rebuilt from what is stored now (the old index still names the old id and not the new one)
         let mut all: Vec<Snapshot> = self.all().into_iter().filter(|x| x.id != old_id && x.id != new_id).collect();
         all.push(s);
-        all.sort_by(|a, b| a.data_utc.cmp(&b.data_utc).then(a.id.cmp(&b.id)));
+        all.sort_by(|a, b| order(a, b));
         self.write_index(&all);
         Ok(new_id)
     }
@@ -144,7 +174,7 @@ impl Store {
 
     /// the newest stored snapshot taken before `t` (UTC seconds), else None
     pub fn previous(&self, t: i64) -> Option<Snapshot> {
-        self.all().into_iter().filter(|s| parse_iso(&s.taken_utc).map_or(false, |x| x < t)).max_by(|a, b| a.data_utc.cmp(&b.data_utc))
+        self.all().into_iter().filter(|s| parse_iso(&s.taken_utc).map_or(false, |x| x < t)).max_by(|a, b| order(a, b))
     }
 
     /// forgets every snapshot and the index (only files this module made)
@@ -192,3 +222,4 @@ pub fn check_rows(rows: &[StoredRow]) -> Result<(), String> {
     }
     Ok(())
 }
+

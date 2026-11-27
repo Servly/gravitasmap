@@ -214,7 +214,7 @@ fn dbg_systems_cell() {
     let img = Img::new(super::decode::Rgb { w: im.w, h: im.h, px: im.px.clone() });
     let sc = super::reader::segment_screen(&img).unwrap();
     println!("hlines {:?} title {:?} div {} rows {}", sc.lay.hlines, sc.lay.title_line, sc.lay.div_x, sc.lay.rows.len());
-    for (n, s) in [("systems", &sc.systems), ("page", &sc.page), ("updated", &sc.updated)] {
+    for (n, s) in [("systems", &sc.systems), ("page", &sc.page)] {
         match s { Some(s) => println!("{n}: {} glyphs cap_h {:.1} boxes {:?}", s.glyphs.len(), s.cap_h, s.glyphs.iter().take(14).map(|g| g.bx).collect::<Vec<_>>()), None => println!("{n}: none") }
     }
 }
@@ -246,4 +246,32 @@ fn dump_folder_reading() {
         }
     }
     std::fs::write(out, s).unwrap();
+}
+
+/// 0.9.61, local data only: the two sets in inbox/NewSSs (8 pages at 01:42 and 8 pages at 02:02 local) must come out as two snapshots stamped with the time of their FIRST screenshot,
+/// in that order, with data time = taken time. cargo test --release bgs::tests7::new_ss_sets_get_their_screenshot_times -- --ignored --nocapture
+#[test]
+#[ignore]
+fn new_ss_sets_get_their_screenshot_times() {
+    let dir = super::train::root().join("inbox/NewSSs");
+    let t = super::tpl::bundled().unwrap();
+    let mut files: Vec<_> = std::fs::read_dir(dir).unwrap().filter_map(|e| e.ok()).map(|e| e.path()).collect();
+    files.sort();
+    let mut sets: Vec<Vec<super::gates::PageIn>> = vec![Vec::new(), Vec::new()];
+    for f in files {
+        let taken = std::fs::metadata(&f).unwrap().modified().unwrap().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
+        let im = super::decode::decode_file(&f).unwrap();
+        let mut pr = read_screen(&Img::new(super::decode::Rgb { w: im.w, h: im.h, px: im.px.clone() }), t).expect("list found");
+        let k = if f.file_name().unwrap().to_string_lossy().as_ref() < "Screenshot_0112.bmp" { 0 } else { 1 };
+        if pr.page.is_none() { pr.page = Some(sets[k].len() as u32 + 1); }
+        sets[k].push(super::gates::PageIn { file: f.file_name().unwrap().to_string_lossy().into_owned(), taken, read: pr });
+    }
+    let mut out = Vec::new();
+    for pages in sets {
+        let p = super::gates::build(pages, &super::gates::Ctx { known: &[], prev: None, jump_x10: 30 });
+        println!("taken {} data {} id {} rows {} complete {} pages {:?} issues {:?}", p.taken_utc, p.data_utc, p.id, p.rows.len(), p.complete, p.pages_found, p.issues.iter().map(|i| i.code).collect::<Vec<_>>());
+        assert_eq!(p.taken_utc, p.data_utc);
+        out.push(p.taken_utc.clone());
+    }
+    assert!(out[0] < out[1], "the 01:42 set comes before the 02:01 set: {out:?}");
 }

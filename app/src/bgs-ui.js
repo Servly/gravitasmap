@@ -10,12 +10,14 @@
 
   // snapshots (newest first, from the backend) -> the shape bgs-calc.js wants
   function toData(list) {
-    var a = list.slice().reverse(), by = {}, order = [], N = 0;
+    // oldest first, by the snapshot time = when the screenshots were taken (then the time they were taken, then the id): the order never depends on the order the backend sent them in
+    var tms = function (x) { return Date.parse(x) || 0; };
+    var a = list.slice().sort(function (x, y) { return (tms(x.data_utc) - tms(y.data_utc)) || (tms(x.taken_utc) - tms(y.taken_utc)) || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0); }), by = {}, order = [], N = 0;
     a.forEach(function (sn) { N = Math.max(N, sn.rows.length); });
     var snaps = a.map(function (sn, i) {
       var got = 0;
       sn.rows.forEach(function (r) { var o = by[r.system]; if (!o) { o = by[r.system] = { n: r.system, v: [], f: [] }; order.push(o); } if (r.inf_x10 != null) got++; });
-      return { t: Date.parse(sn.data_utc || sn.taken_utc), tk: Date.parse(sn.taken_utc || sn.data_utc), complete: !!sn.complete, missing: Math.max(0, N - got), minOld: sn.minutes_old == null ? 0 : sn.minutes_old, id: sn.id };
+      return { t: Date.parse(sn.data_utc || sn.taken_utc), tk: Date.parse(sn.taken_utc || sn.data_utc), complete: !!sn.complete, missing: Math.max(0, N - got), id: sn.id };
     });
     a.forEach(function (sn, i) {
       order.forEach(function (o) { o.v[i] = null; o.f[i] = ""; });
@@ -29,7 +31,7 @@
     var days = [], idx = {};
     d.snaps.forEach(function (sn, i) { var k = new Date(sn.t).toISOString().slice(0, 10); if (!(k in idx)) { idx[k] = days.length; days.push({ k: k, last: i, n: 0 }); } var g = days[idx[k]]; g.last = i; g.n++; });
     var dayOf = d.snaps.map(function (sn) { return idx[new Date(sn.t).toISOString().slice(0, 10)]; });
-    var snaps = days.map(function (g) { var sn = d.snaps[g.last]; return { t: sn.t, tk: sn.tk, complete: sn.complete, missing: sn.missing, minOld: sn.minOld, id: sn.id, n: g.n, day: g.k }; });
+    var snaps = days.map(function (g) { var sn = d.snaps[g.last]; return { t: sn.t, tk: sn.tk, complete: sn.complete, missing: sn.missing, id: sn.id, n: g.n, day: g.k }; });
     var sys = d.sys.map(function (o) {
       var v = [], f = [], steps = [], pv = null, pt = null, i;
       days.forEach(function (g, di) { v[di] = null; f[di] = ""; steps[di] = []; });
@@ -69,7 +71,7 @@
     if (!ui.uiSeen && g && g.settings) { restoreUi(s.ui); ui.uiSeen = true; }
     if (!ui.setSeen && s.minor != null) { ui.minor = Math.round(s.minor * 10) / 10; ui.tickPct = s.tick_pct == null ? 20 : Math.round(s.tick_pct); ui.setSeen = true; } // (kept from the last session)
     if (!store.data || !store.data.snaps.length) { store.M = null; return; }
-    BG.chk = {}; store.data.snaps.forEach(function (x) { if (x.tk) BG.chk[x.t] = x.tk; });   // 0.9.55: data time -> the time you took the screenshots
+    BG.chk = {}; store.data.snaps.forEach(function (x) { if (x.tk && Math.abs(x.tk - x.t) > 60000) BG.chk[x.t] = x.tk; });   // 0.9.55: data time -> the time you took the screenshots
     var nDays = {}; store.data.snaps.forEach(function (x) { nDays[new Date(x.t).toISOString().slice(0, 10)] = 1; });
     var span = store.data.snaps.length > 1 ? store.data.snaps[store.data.snaps.length - 1].t - store.data.snaps[0].t : 0;
     // Automatic: every snapshot is its own column while the data is younger than 10 days, one column per day from then on
@@ -133,12 +135,12 @@
   }
   function head(M) {
     var sn = M.snaps[M.K], fw = M.sys.reduce(function (a, s) { return a + (s.f[M.K] ? 1 : 0); }, 0), tot = M.sys.length;
-    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t, true) + "</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span>" + (sn.tk ? '<span data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + t("bgs.dq.checked", { t: C.tm(sn.tk) }) + "</span>" : "") + "<span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
+    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t, true) + "</b></span><span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
       (fw ? "<span class='w'>" + t("bgs.dq.warn", { n: fw }) + "</span>" : "") + (M.nS > 1 ? "<span>" + t("bgs.dq.inc", { n: M.snaps.filter(function (x) { return !x.complete; }).length }) + "</span>" : "") + "<span class='bg-fl'>" + t("bgs.dq.utc") + "</span>";
   }
   // the slim bar: one quality chip, the three filters that matter, everything else under "more"
   function pin(M) {
-    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + t("bgs.dq.data", { t: C.tm(sn.t, true) });
+    var sn = M.snaps[M.K], chip = M.fleet[M.K].n + "/" + M.sys.length + " · " + t("bgs.dq.shots", { t: C.tm(sn.t, true) });
     var s = (store.g && store.g.settings) || {};
     function lab(tipk, txt, ctl) { return '<label data-tip="' + esc(t(tipk)) + '">' + txt + " " + ctl + "</label>"; }
     function sel(id, cur, opts) { return '<select class="bg-in" id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
@@ -150,7 +152,7 @@
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="text" inputmode="decimal" class="bg-num" autocomplete="off" id="btick" value="' + ui.tickPct + '">');
     var names = M.sys.map(function (x) { return x.n; }).sort();
     var srch = '<input type="search" id="bgq" class="bg-search" list="bgnames" autocomplete="off" spellcheck="false" placeholder="' + esc(t("bgs.search.ph")) + '" value="' + esc(ui.sq || "") + '" data-tip="' + esc(t("tip.bgs.search")) + '"><datalist id="bgnames">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
-    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + (sn.tk ? '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + esc(sn.minOld > 0 ? t("bgs.dq.checked2", { t: C.dl(sn.tk), n: sn.minOld }) : t("bgs.dq.checked", { t: C.dl(sn.tk) })) + "</span>" : "") + main +
+    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + main +
       '<details class="bg-more"><summary data-tip="' + esc(t("tip.bgs.more")) + '">' + t("bgs.more") + '</summary><div class="bg-moreb"><div class="bg-dq">' + head(M) + '</div><div class="bg-bar">' + more + "</div></div></details></div>";
   }
   function empty() {

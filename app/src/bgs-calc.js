@@ -1,6 +1,6 @@
 "use strict";
 /* BGS Watch, part 1: all the numbers, worked out from the saved snapshots only. No drawing here.
-   DATA shape (made from bgs_snapshots by bgs-ui.js): { squad, snaps:[{t (ms), complete, missing, minOld}], sys:[{n, v:[per snapshot or null], f:[per snapshot flag]}] }
+   DATA shape (made from bgs_snapshots by bgs-ui.js): { squad, snaps:[{t (ms = when the screenshots were taken), complete, missing}], sys:[{n, v:[per snapshot or null], f:[per snapshot flag]}] }
    flag: "" = read and sure, "w" = the player accepted an unsure reading, "e" = typed by the player. Both band edges are risks: LOW (defend) and HIGH (too high). */
 (function () {
   var BG = window.BG = window.BG || {}, H = 36e5, DAY = 864e5;

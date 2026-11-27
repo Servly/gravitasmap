@@ -113,7 +113,7 @@ fn bgs_leave_one_page_out() {
             let pr = read_screen(&Img::new(Rgb { w: pages[p - 1].w, h: pages[p - 1].h, px: pages[p - 1].px.clone() }), &t).expect("layout found");
             read_ms.push(t1.elapsed().as_millis());
             assert_eq!(pr.rows.len(), gt.pages[p - 1].len(), "{res} page {p}: row count");
-            page_info.push((res.to_string(), p, pr.page, pr.pages, pr.systems, pr.minutes));
+            page_info.push((res.to_string(), p, pr.page, pr.pages, pr.systems));
             // the page digit cannot be read when its own page was left out of the templates: the order of the files stands in for it
             let mut pr2 = pr.clone();
             pr2.page = Some(p as u32);
@@ -154,6 +154,6 @@ fn bgs_leave_one_page_out() {
     println!("{}", all[2].line("both"));
     println!("{}", all[2].value_line("both sizes, 154 rows"));
     println!("read ms per page: {:?}", read_ms);
-    println!("page labels (res, page, read page, pages, systems, minutes): {:?}", page_info);
+    println!("page labels (res, page, read page, pages, systems): {:?}", page_info);
     assert!(all[2].val_exact * 100 >= all[2].rows * 90, "value exact");
 }

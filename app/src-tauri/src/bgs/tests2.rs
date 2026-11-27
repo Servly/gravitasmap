@@ -213,7 +213,7 @@ fn row(name: &str, x10: i32) -> RowRead {
 }
 
 fn page(n: u32, m: u32, systems: u32, rows: Vec<RowRead>, taken: i64) -> PageIn {
-    PageIn { file: format!("Screenshot_{n:04}.bmp"), taken, read: PageRead { page: Some(n), pages: Some(m), systems: Some(systems), minutes: Some(5), rows, width: 1920, height: 1080 } }
+    PageIn { file: format!("Screenshot_{n:04}.bmp"), taken, read: PageRead { page: Some(n), pages: Some(m), systems: Some(systems), rows, width: 1920, height: 1080 } }
 }
 
 fn list(n: usize, start: i32) -> Vec<RowRead> { (0..n).map(|i| row(&format!("SYS {i:03}"), start - i as i32)).collect() }
@@ -230,8 +230,9 @@ fn a_complete_list_passes_the_gates() {
     assert_eq!(p.pages_found, vec![1, 2, 3]);
     assert_eq!(p.rows[0].pos, 1);
     assert_eq!(p.rows[22].page, 3);
-    assert_eq!(p.minutes_old, Some(5));
-    assert_eq!(parse_iso(&p.data_utc).unwrap(), 1000 - 300, "data time = first page time minus LAST UPDATED");
+    assert_eq!(parse_iso(&p.data_utc).unwrap(), 1000, "the time of the snapshot = the time the first screenshot was taken, nothing else");
+    assert_eq!(p.data_utc, p.taken_utc);
+    assert_eq!(p.id, crate::bgs::timeutil::fmt_id(1000));
     assert!(p.rows.iter().all(|c| c.state == "sure"));
 }
 
@@ -283,7 +284,7 @@ fn the_sorted_order_marks_the_rows_around_a_wrong_digit() {
 }
 
 fn prev_snapshot(rows: &[(&str, i32)]) -> Snapshot {
-    Snapshot { v: 1, id: "p".into(), taken_utc: fmt_iso(500), data_utc: fmt_iso(500), minutes_old: None, resolution: String::new(), sources: vec![], pages: None, complete: true,
+    Snapshot { v: 1, id: "p".into(), taken_utc: fmt_iso(500), data_utc: fmt_iso(500), legacy_minutes: None, resolution: String::new(), sources: vec![], pages: None, complete: true,
         rows: rows.iter().map(|(n, v)| StoredRow { system: n.to_string(), inf_x10: Some(*v), star: false, conf: 1.0, confirmed: true, ..Default::default() }).collect(), reader: String::new(), ..Default::default() }
 }
 
@@ -353,7 +354,7 @@ fn utc_time_round_trips() {
 }
 
 fn snap(id: &str, data: &str, rows: &[(&str, i32)]) -> Snapshot {
-    Snapshot { v: 1, id: id.into(), taken_utc: data.into(), data_utc: data.into(), minutes_old: None, resolution: "1920x1080".into(), sources: vec!["Screenshot_0001.bmp".into()], pages: Some(1), complete: true,
+    Snapshot { v: 1, id: id.into(), taken_utc: data.into(), data_utc: data.into(), legacy_minutes: None, resolution: "1920x1080".into(), sources: vec!["Screenshot_0001.bmp".into()], pages: Some(1), complete: true,
         rows: rows.iter().map(|(n, v)| StoredRow { system: n.to_string(), inf_x10: Some(*v), star: true, conf: 0.9, confirmed: true, ..Default::default() }).collect(), reader: "bgs1".into(), ..Default::default() }
 }
 
@@ -409,12 +410,13 @@ fn commit_validates_and_the_first_snapshot_makes_the_known_names() {
     let base = tmp("commit");
     let st = Store::at(base.join("bgs")).unwrap();
     let nd = Some(base.clone());
-    let good = json!({"taken_utc": "2026-11-25T06:18:37Z", "data_utc": "2026-11-25T06:03:37Z", "minutes_old": 15, "resolution": "1920x1080", "sources": ["C:\\x\\Screenshot_0074.bmp"], "pages": 1, "complete": true,
+    let good = json!({"taken_utc": "2026-11-25T06:18:37Z", "data_utc": "2026-11-25T06:03:37Z", "resolution": "1920x1080", "sources": ["C:\\x\\Screenshot_0074.bmp"], "pages": 1, "complete": true,
         "rows": [{"system": "GUNWIN", "inf_x10": 669, "star": true, "conf": 0.9, "confirmed": true}, {"system": "Hip 88785", "inf_x10": 656, "confirmed": false}]});
     let r = super::commit_to(&st, &good, &nd, false);
     assert_eq!(r["ok"], true, "{r}");
-    assert_eq!(r["id"], "20261125T060337");
-    let s = st.get("20261125T060337").unwrap();
+    assert_eq!(r["id"], "20261125T061837", "the id and the time come from the screenshot time, whatever data_utc the page sends");
+    let s = st.get("20261125T061837").unwrap();
+    assert_eq!(s.data_utc, s.taken_utc);
     assert_eq!(s.sources, vec!["Screenshot_0074.bmp"], "file names only");
     assert_eq!(super::names::load(&base).names, vec!["GUNWIN", "Hip 88785"]);
     assert_eq!(super::names::load(&base).source, "snapshot");
@@ -530,7 +532,6 @@ fn the_real_screenshots_read_end_to_end_with_the_bundled_templates() {
             assert_eq!(p.read.page, Some(i as u32 + 1), "{res}: page number (the templates have seen these pages)");
             assert_eq!(p.read.pages, Some(8));
             assert_eq!(p.read.systems, Some(77));
-            assert!(p.read.minutes == Some(52) || p.read.minutes == Some(55), "LAST UPDATED {:?}", p.read.minutes);
         }
         let p = build(reads, &ctx(&names, None));
         assert!(p.complete && p.can_save, "{res}: {:?}", p.issues.iter().map(|i| (i.code, &i.msg)).collect::<Vec<_>>());
@@ -645,4 +646,66 @@ fn a_stray_separator_and_one_wrong_letter_still_snap_and_two_rows_never_share_a_
     let h2 = super::snap::snap_all(&["DURYAMF-AS -".to_string(), "DURYAMQ-AS -".to_string()], &known);
     assert_eq!(h2[0], super::snap::Hit::None);
     assert_eq!(h2[1], super::snap::Hit::None);
+}
+
+// ---- 0.9.61: the screenshot time is the only time
+fn snap_at(id: &str, taken: &str, data: &str, legacy: Option<u32>) -> Snapshot {
+    Snapshot { v: 1, id: id.into(), taken_utc: taken.into(), data_utc: data.into(), legacy_minutes: legacy, resolution: "1920x1080".into(), sources: vec!["Screenshot_0001.bmp".into()], pages: None, complete: true,
+        ..Default::default() }
+}
+
+#[test]
+fn snapshots_are_ordered_by_the_time_the_screenshots_were_taken() {
+    // two checks that carried the same (wrong) data time: the later check was saved first and used to land BEFORE the earlier one
+    let base = tmp("order");
+    let st = Store::at(base.join("bgs")).unwrap();
+    let late = snap_at("20261127T215803", "2026-11-27T23:01:10Z", "2026-11-27T21:58:03Z", None);
+    let early = snap_at("20261127T215803-x", "2026-11-27T22:42:03Z", "2026-11-27T21:58:03Z", None);
+    st.save(late).unwrap();
+    st.save(early).unwrap();
+    let all = st.all();
+    assert_eq!(all.iter().map(|s| s.taken_utc.as_str()).collect::<Vec<_>>(), vec!["2026-11-27T22:42:03Z", "2026-11-27T23:01:10Z"], "earlier screenshots first");
+    let _ = std::fs::remove_dir_all(&base);
+}
+
+#[test]
+fn old_snapshots_move_back_to_the_time_their_screenshots_were_taken() {
+    let base = tmp("migrate");
+    let dir = base.join("bgs");
+    std::fs::create_dir_all(&dir).unwrap();
+    // an old file: data time = taken - 13 minutes (the game's LAST UPDATED), written by 0.9.55 to 0.9.60 with the field minutes_old
+    let old = serde_json::json!({"v": 1, "id": "20261127T225900", "taken_utc": "2026-11-27T23:12:00Z", "data_utc": "2026-11-27T22:59:00Z", "minutes_old": 13, "resolution": "1920x1080",
+        "sources": ["Screenshot_0001.bmp"], "complete": true, "rows": []});
+    // a player-edited time must stay: data is NOT taken - minutes
+    let edited = serde_json::json!({"v": 1, "id": "20261127T230000", "taken_utc": "2026-11-27T23:30:00Z", "data_utc": "2026-11-27T23:05:00Z", "minutes_old": 13, "resolution": "1920x1080",
+        "sources": ["Screenshot_0002.bmp"], "complete": true, "rows": []});
+    for (id, v) in [("20261127T225900", &old), ("20261127T230000", &edited)] {
+        std::fs::write(dir.join(format!("snap-{id}.json")), serde_json::to_string(v).unwrap()).unwrap();
+    }
+    let st = Store::at(dir.clone()).unwrap();
+    let a = st.get("20261127T225900").unwrap();
+    assert_eq!(a.data_utc, "2026-11-27T23:12:00Z", "the wrong LAST UPDATED shift is gone");
+    assert!(a.legacy_minutes.is_none());
+    let e = st.get("20261127T230000").unwrap();
+    assert_eq!(e.data_utc, "2026-11-27T23:05:00Z", "a time the player edited by hand is kept");
+    assert!(!std::fs::read_to_string(dir.join("snap-20261127T225900.json")).unwrap().contains("minutes_old"), "the old field is not written again");
+    assert!(dir.join("times-from-screenshots.done").exists(), "done once");
+    let _ = std::fs::remove_dir_all(&base);
+}
+
+#[test]
+fn a_cell_edit_of_a_migrated_snapshot_keeps_its_id() {
+    let base = tmp("keepid");
+    let st = Store::at(base.join("bgs")).unwrap();
+    // snapshot A: taken 23:12, old id from the shifted time 22:59 ; snapshot B already owns the id of A's taken time
+    let a = snap_at("20261127T225900", "2026-11-27T23:12:00Z", "2026-11-27T23:12:00Z", None);
+    let b = snap_at("20261127T231200", "2026-11-27T23:40:00Z", "2026-11-27T23:40:00Z", None);
+    st.save(a.clone()).unwrap();
+    st.save(b).unwrap();
+    let mut edited = st.get("20261127T225900").unwrap();
+    edited.rows.push(crate::bgs::model::StoredRow { system: "X".into(), inf_x10: Some(500), ..Default::default() });
+    let id = st.replace("20261127T225900", edited).expect("a cell-only edit must not fail on an id clash");
+    assert_eq!(id, "20261127T225900");
+    assert_eq!(st.get(&id).unwrap().rows.len(), 1);
+    let _ = std::fs::remove_dir_all(&base);
 }

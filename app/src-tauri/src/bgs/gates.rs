@@ -105,12 +105,10 @@ pub fn build(mut pages: Vec<PageIn>, ctx: &Ctx) -> Proposal {
     }
     // times
     let first = &pages[0];
+    // the time of the snapshot IS the time the first screenshot was taken (Journal Screenshot event, else the file's write time). Never anything read from the picture.
     p.taken_utc = fmt_iso(first.taken);
-    p.minutes_old = pages.iter().find(|x| x.taken == first.taken).and_then(|x| x.read.minutes).or_else(|| pages.iter().find_map(|x| x.read.minutes));
-    let data = first.taken - p.minutes_old.unwrap_or(0) as i64 * 60;
-    p.data_utc = fmt_iso(data);
-    if p.minutes_old.is_none() { issues.push(issue("no_last_updated", "LAST UPDATED could not be read: the time of the screenshot is used", None, false)); }
-    p.id = fmt_id(data);
+    p.data_utc = p.taken_utc.clone();
+    p.id = fmt_id(first.taken);
 
     snap_names(&mut cells, ctx.known, &mut issues);
     order_gate(&mut cells, &mut issues);
@@ -336,7 +334,7 @@ fn finish(c: &mut Cell) {
 
 pub fn snapshot_of(p: &Proposal) -> Snapshot {
     Snapshot {
-        v: 1, id: p.id.clone(), taken_utc: p.taken_utc.clone(), data_utc: p.data_utc.clone(), minutes_old: p.minutes_old, resolution: p.resolution.clone(),
+        v: 1, id: p.id.clone(), taken_utc: p.taken_utc.clone(), data_utc: p.data_utc.clone(), legacy_minutes: None, resolution: p.resolution.clone(),
         sources: p.files.clone(), pages: p.pages_total, complete: p.complete,
         rows: p.rows.iter().map(|c| super::model::StoredRow { system: c.system.clone(), inf_x10: c.inf_x10, star: c.star, conf: c.name_conf.min(c.inf_conf), confirmed: false, accepted_unchecked: false, edited: false, flagged: false, pos: 0 }).collect(),
         reader: "bgs1".into(), imported: false, proposal_id: p.id.clone(),

@@ -24,7 +24,6 @@ pub struct Screen {
     pub rows: Vec<RowSeg>,
     pub page: Option<Seg>,
     pub systems: Option<Seg>,
-    pub updated: Option<Seg>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -62,8 +61,6 @@ pub struct PageRead {
     pub page: Option<u32>,
     pub pages: Option<u32>,
     pub systems: Option<u32>,
-    /// "LAST UPDATED: N MINUTES AGO" as minutes
-    pub minutes: Option<u32>,
     pub rows: Vec<RowRead>,
     pub width: usize,
     pub height: usize,
@@ -105,11 +102,8 @@ pub fn segment_screen(img: &Img) -> Option<Screen> {
     // "77 SYSTEMS": the line above the first frame line of the list
     let top = lay.hlines[0].0 as i64;
     let systems = segment_line(img, None, [lay.list_left as i64, lay.list_left as i64 + (0.30 * hf) as i64, top - (0.040 * hf) as i64, top - (0.006 * hf) as i64], hf, num_frac, false);
-    // "LAST UPDATED: 52 MINUTES AGO": right aligned above the underline of the title row
-    let updated = lay.title_line.and_then(|(ty, _, tx1)| {
-        segment_line(img, None, [tx1 as i64 - (0.60 * hf) as i64, tx1 as i64, ty as i64 - (0.040 * hf) as i64, ty as i64 - (0.006 * hf) as i64], hf, 0.4, false)
-    });
-    Some(Screen { lay, rows, page, systems, updated })
+    // (the game's "LAST UPDATED: N MINUTES AGO" is NOT read: it is wrong, the time the screenshot was taken is the only time)
+    Some(Screen { lay, rows, page, systems })
 }
 
 /// "66.9%" -> 669, only for the exact shape d.d% / dd.d% / ddd.d%
@@ -170,7 +164,7 @@ pub fn read_screen(img: &Img, tpl: &Templates) -> Option<PageRead> {
             name_glyphs: glyph_data(r.name.as_ref()), inf_glyphs: glyph_data(r.inf.as_ref()), cap_h: r.name.as_ref().map_or(0.0, |s| s.cap_h),
         });
     }
-    let (mut page, mut pages, mut systems, mut minutes) = (None, None, None, None);
+    let (mut page, mut pages, mut systems) = (None, None, None);
     if let Some(p) = &sc.page {
         // position based: only digits and the slash are read (the word PAGE is skipped: the last word is n/m)
         if let Some(w) = split_words(p).last() {
@@ -185,14 +179,5 @@ pub fn read_screen(img: &Img, tpl: &Templates) -> Option<PageRead> {
             systems = digits_only(&recognise_glyphs(w, s.cap_h, &tpl.name, FontKind::Name, false, Some("0123456789")));
         }
     }
-    if let Some(u) = &sc.updated {
-        let w = split_words(u);
-        if w.len() >= 4 {
-            let num = digits_only(&recognise_glyphs(&w[2], u.cap_h, &tpl.name, FontKind::Name, false, Some("0123456789")));
-            let unit = recognise_glyphs(&w[3], u.cap_h, &tpl.name, FontKind::Name, false, Some("MINUTESHORDAY")).text();
-            let mult = match unit.chars().next() { Some('M') => Some(1), Some('H') => Some(60), Some('D') => Some(1440), _ => None };
-            if let (Some(n), Some(m)) = (num, mult) { minutes = Some(n * m); }
-        }
-    }
-    Some(PageRead { page, pages, systems, minutes, rows, width: img.w, height: img.h })
+    Some(PageRead { page, pages, systems, rows, width: img.w, height: img.h })
 }

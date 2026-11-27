@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.61",
+      "en": [
+        "BGS WATCH: the time of every snapshot is now the time you took the screenshots, and nothing else. The game's \"LAST UPDATED\" text on the page is wrong, so it is no longer read and no longer used anywhere. Snapshots are put in order by that time (before, two checks with the same data time could swap places, a later check landing before an earlier one), and the tick estimate is built on those times. Your saved snapshots are moved to their screenshot times by themselves, once."
+      ],
+      "de": [
+        "BGS WATCH: Die Zeit jeder Momentaufnahme ist jetzt die Zeit, zu der du die Screenshots gemacht hast, und sonst nichts. Der Text \"zuletzt aktualisiert\" des Spiels auf der Seite ist falsch, deshalb wird er nicht mehr gelesen und nirgends mehr verwendet. Die Momentaufnahmen werden nach dieser Zeit sortiert (vorher konnten zwei Prüfungen mit gleicher Datenzeit die Plätze tauschen, eine spätere Prüfung landete vor einer früheren), und die Tick-Schätzung baut auf diesen Zeiten auf. Deine gespeicherten Momentaufnahmen werden einmalig von selbst auf ihre Screenshot-Zeiten gesetzt."
+      ],
+      "es": [
+        "BGS WATCH: la hora de cada instantánea es ahora la hora a la que hiciste las capturas, y nada más. El texto \"última actualización\" del juego en la página es incorrecto, así que ya no se lee ni se usa en ningún sitio. Las instantáneas se ordenan por esa hora (antes, dos comprobaciones con la misma hora de datos podían cambiar de lugar, y una posterior quedaba antes de una anterior), y la estimación del tick se basa en esas horas. Tus instantáneas guardadas pasan solas, una vez, a la hora de sus capturas."
+      ],
+      "fr": [
+        "BGS WATCH : l'heure de chaque instantané est maintenant l'heure à laquelle vous avez pris les captures, et rien d'autre. Le texte « dernière mise à jour » du jeu sur la page est faux : il n'est donc plus lu et n'est plus utilisé nulle part. Les instantanés sont classés selon cette heure (avant, deux vérifications avec la même heure de données pouvaient échanger leur place, une vérification plus tardive passant avant une plus ancienne), et l'estimation du tick repose sur ces heures. Vos instantanés enregistrés passent d'eux-mêmes, une seule fois, à l'heure de leurs captures."
+      ],
+      "pt-br": [
+        "BGS WATCH: o horário de cada snapshot agora é o horário em que você tirou as capturas, e mais nada. O texto \"última atualização\" do jogo na página está errado, então não é mais lido nem usado em lugar nenhum. Os snapshots são ordenados por esse horário (antes, duas verificações com o mesmo horário de dados podiam trocar de lugar, e uma verificação posterior ficava antes de uma anterior), e a estimativa do tick é feita sobre esses horários. Seus snapshots salvos passam sozinhos, uma vez, para o horário das capturas."
+      ],
+      "ru": [
+        "BGS WATCH: время каждого снимка теперь — это время, когда вы сделали скриншоты, и ничего больше. Текст игры «последнее обновление» на странице неверен, поэтому его больше не читают и нигде не используют. Снимки упорядочены по этому времени (раньше две проверки с одинаковым временем данных могли поменяться местами, и более поздняя оказывалась перед более ранней), а оценка тика строится на этих временах. Ваши сохранённые снимки один раз сами переносятся на время своих скриншотов."
+      ]
+    },
+    {
       "v": "0.9.60",
       "en": [
         "BGS WATCH: the Band boxes now work in every tab (before, only the Attention tab read them). The Overview colours are back (0.9.59 had lost them by mistake). New: type a system in the search box and it is lit in Attention, Changes, Overview, Trends and Tick, so you no longer look for it among 77."

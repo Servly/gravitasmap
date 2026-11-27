@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Abaixo da borda inferior",
   "bgs.dt.abovesince": "Acima da borda superior",
   "bgs.dt.since": "desde {d}",
-  "bgs.dt.snap": "Horário dos dados (seu relógio)",
+  "bgs.dt.snap": "Horário das capturas (seu relógio)",
   "bgs.dt.val": "Valor",
   "bgs.dt.notread": "não lido",
   "bgs.dt.acc": "aceito após um aviso",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Cada linha é um sistema, do valor anterior (esquerda) ao atual (direita). Linhas âmbar caíram, azuis subiram. A área sombreada é o seu intervalo alvo.",
   "bgs.more": "Detalhes",
   "tip.bgs.more": "Qualidade dos dados e os dois ajustes finos (tamanho de uma mudança pequena e limite do tick).",
-  "tip.bgs.qchip": "Quantos sistemas tem o snapshot mais recente e o horário a que seus números realmente pertencem (seu relógio, UTC entre parênteses). O painel do jogo tem alguns minutos de idade: o próximo chip diz quando você tirou as capturas.",
+  "tip.bgs.qchip": "Quantos sistemas tem o snapshot mais recente e quando você tirou suas capturas (seu relógio, UTC entre parênteses). Só este horário é usado: o texto \"última atualização\" do jogo nunca é lido.",
   "bgs.r2.expand": "Em {v}: acima de 75 uma expansão pode começar (cerca de 15 pontos são retirados ao terminar)",
   "bgs.tab.squad": "Esquadrão",
   "tip.bgs.tab.squad": "Quantos sistemas estão abaixo, dentro e acima do seu intervalo alvo, ao longo do tempo.",
@@ -1584,5 +1584,6 @@
   "bgs.dq.checked2": "Verificado {t}: o painel do jogo tinha {n} min",
   "map.ov.pos": "Onde o mapa do sistema aparece",
   "map.ov.pnote": "Como as janelas de combate: escolha em qual painel do jogo o mapa do sistema fica (Mostrar com), mantenha ou desligue a perspectiva, defina a cor ou arraste no Editar HUD.",
-  "bgs.err.num": "Digite um número, por exemplo 62,5. Vírgula e ponto funcionam."
+  "bgs.err.num": "Digite um número, por exemplo 62,5. Vírgula e ponto funcionam.",
+  "bgs.dq.shots": "Capturas {t}"
 }

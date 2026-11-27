@@ -1400,7 +1400,7 @@
   "bgs.dt.belowsince": "Unter der unteren Grenze",
   "bgs.dt.abovesince": "Über der oberen Grenze",
   "bgs.dt.since": "seit {d}",
-  "bgs.dt.snap": "Datenzeit (deine Uhr)",
+  "bgs.dt.snap": "Screenshot-Zeit (deine Uhr)",
   "bgs.dt.val": "Wert",
   "bgs.dt.notread": "nicht gelesen",
   "bgs.dt.acc": "nach Warnung übernommen",
@@ -1463,7 +1463,7 @@
   "bgs.c.how": "Jede Linie ist ein System, vom früheren Wert (links) zum jetzigen (rechts). Bernsteinfarbene Linien fielen, blaue stiegen. Die Fläche ist dein Zielbereich.",
   "bgs.more": "Details",
   "tip.bgs.more": "Datenqualität und die zwei feineren Einstellungen (Größe einer kleinen Änderung und Tick-Schwelle).",
-  "tip.bgs.qchip": "Wie viele Systeme die neueste Momentaufnahme hat und die Zeit, aus der ihre Zahlen wirklich stammen (deine Uhr, UTC in Klammern). Das Panel des Spiels ist einige Minuten alt: der nächste Chip sagt, wann du die Screenshots gemacht hast.",
+  "tip.bgs.qchip": "Wie viele Systeme die neueste Momentaufnahme hat und wann du ihre Screenshots gemacht hast (deine Uhr, UTC in Klammern). Nur diese Zeit zählt: der Text \"zuletzt aktualisiert\" des Spiels wird nie gelesen.",
   "bgs.r2.expand": "Bei {v}: über 75 kann eine Expansion beginnen (etwa 15 Punkte werden am Ende abgezogen)",
   "bgs.tab.squad": "Squad",
   "tip.bgs.tab.squad": "Wie viele Systeme unter, in und über deinem Zielbereich liegen, im Zeitverlauf.",
@@ -1584,5 +1584,6 @@
   "bgs.dq.checked2": "Geprüft {t}: das Panel des Spiels war {n} Min. alt",
   "map.ov.pos": "Wo die Systemkarte erscheint",
   "map.ov.pnote": "Wie bei den Kampffenstern: wähle, auf welchem Spielpanel die Systemkarte sitzt (Zeigen mit), Perspektive behalten oder ausschalten, Farbe setzen oder sie im HUD-Editor ziehen.",
-  "bgs.err.num": "Bitte eine Zahl eingeben, zum Beispiel 62,5. Punkt oder Komma geht beides."
+  "bgs.err.num": "Bitte eine Zahl eingeben, zum Beispiel 62,5. Punkt oder Komma geht beides.",
+  "bgs.dq.shots": "Screenshots {t}"
 }

@@ -35,10 +35,11 @@ pub struct Snapshot {
     pub id: String,
     /// when the first page was taken (Journal Screenshot event time)
     pub taken_utc: String,
-    /// when the numbers are from: taken time minus the page's LAST UPDATED minutes (equal to taken_utc when not readable)
+    /// the time of the snapshot: the time the screenshots were taken (the game's LAST UPDATED is never read). Equal to taken_utc unless the player edited it in the Edit tab
     pub data_utc: String,
-    #[serde(default)]
-    pub minutes_old: Option<u32>,
+    /// OLD FILES ONLY: the minutes the old versions subtracted. snapstore migrates it away (data_utc goes back to taken_utc) and it is never written again
+    #[serde(default, rename = "minutes_old", skip_serializing_if = "Option::is_none")]
+    pub legacy_minutes: Option<u32>,
     #[serde(default)]
     pub resolution: String,
     /// file names only, never the pictures
@@ -122,7 +123,6 @@ pub struct Proposal {
     pub resolution: String,
     pub taken_utc: String,
     pub data_utc: String,
-    pub minutes_old: Option<u32>,
     pub pages_found: Vec<u32>,
     pub pages_total: Option<u32>,
     pub systems_read: Option<u32>,

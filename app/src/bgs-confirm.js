@@ -68,7 +68,7 @@
       var p = prop(); if (!p || !sc.rows) return;
       if (force !== true && unchanged()) { sc.same = true; draw(); return; }
       sc.same = false;
-      var snap = { taken_utc: p.taken_utc, data_utc: p.data_utc, minutes_old: p.minutes_old == null ? null : p.minutes_old, resolution: p.resolution, sources: (p.files || []).map(function (f) { return typeof f === "string" ? f : f.name; }),
+      var snap = { taken_utc: p.taken_utc, data_utc: p.data_utc, resolution: p.resolution, sources: (p.files || []).map(function (f) { return typeof f === "string" ? f : f.name; }),
         pages: (p.pages_found || []).length, complete: !!p.complete, rows: sc.rows.map(function (r) { return { system: r.name, inf_x10: r.x10, star: r.star, conf: r.conf, confirmed: !!r.ok, pos: r.pos, flagged: !!r.unc }; }), proposal_id: p.id };
       sc.busy = true; draw();
       invoke("bgs_commit", { snapshot: snap }).then(function (r) {
@@ -109,7 +109,7 @@
       var p = ps[sc.sel], rows = sc.rows || [], unsure = rows.filter(function (x) { return x.unc; }).length, pend = pending();
       var sm = mk("div", "bg-sum");
       [[tr("bgs.cf.taken"), BG.calc ? BG.calc.tm(Date.parse(p.taken_utc)) : p.taken_utc], [tr("bgs.cf.pages"), (p.pages_found || []).length + " / " + p.pages_total], [tr("bgs.cf.sys"), p.systems_read],
-        [tr("bgs.cf.sure"), rows.length - unsure], [tr("bgs.cf.unsure"), unsure], [tr("bgs.cf.age"), p.minutes_old == null ? "?" : p.minutes_old + " " + tr("bgs.u.min")], [tr("bgs.cf.res"), p.resolution]].forEach(function (x) {
+        [tr("bgs.cf.sure"), rows.length - unsure], [tr("bgs.cf.unsure"), unsure], [tr("bgs.cf.res"), p.resolution]].forEach(function (x) {
         var s = mk("span"); s.appendChild(document.createTextNode(x[0] + " ")); s.appendChild(mk("b", null, String(x[1]))); sm.appendChild(s);
       });
       body.appendChild(sm);
