@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.58
+- The System map panel over the game now draws every planet and star as a shaded disc instead of a picture. Before, the pictures could turn empty after a while and the bodies disappeared. Textures stay in the normal GRAVITAS MAP window.
+
 ## 0.9.57
 - The System map over the game now shows a small legend under the map with the keys that move it (pan, zoom, fit), exactly the keys you set. Fixed: a planet or star picture that the graphics card lost could show as an empty, ghost-like body on the System map. The map now keeps its normal shaded disc instead.
 

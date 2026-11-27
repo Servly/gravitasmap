@@ -233,7 +233,7 @@ fn run() {
                     h.set.removed = vec!["target"]; // the Target card is gone: the game's own is used
                     profiles = crate::profiles::Profiles::from_json(&saved);
                     { let (b, older, src) = crate::store::load_claims_base(); crate::store::log(&format!("claims base: loaded at start '{b}' (from {src}, {} older)", older.len())); if !b.is_empty() { h.claims.set_base(&b); } h.claims.set_older(older); }
-                    h.key_texts = hotkeys.hint_texts(); // (the footers name the keys the player set)
+                    h.key_texts = hotkeys.hint_texts(); h.key_texts.extend(hotkeys.map_texts()); // (the footers name the keys the player set)
                     host = Some(h);
                 }
                 Err(e) => {
@@ -437,7 +437,7 @@ fn run() {
                         crate::store::set(&[("hotkeys", Value::Object(saved.clone()))]);
                         let custom: Vec<(String, String)> = saved.iter().filter_map(|(k, v)| v.as_str().map(|s| (k.clone(), s.to_string()))).collect();
                         hotkeys = crate::hotkeys::Keys::new(&custom);
-                        h.key_texts = hotkeys.hint_texts(); // (the footers show the new key at once)
+                        h.key_texts = hotkeys.hint_texts(); h.key_texts.extend(hotkeys.map_texts()); // (the footers show the new key at once)
                     }
                 }
                 _ => {}

@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.27 · minor · 27 Nov 2026
+- Fix: in the GRAVITAS app's System map panel over the game, planets and stars no longer turn empty after a while. That panel now draws every body as a shaded disc instead of a picture, which also saves graphics work. The map in the normal window and on the site is unchanged.
+
 ### v0.99.26 · minor · 27 Nov 2026
 - Fix: a planet or star picture that the graphics card lost (it showed as an empty, ghost-like body on the System map, seen in the GRAVITAS app's panel over the game) is now noticed and the map keeps its normal shaded disc instead.
 

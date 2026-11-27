@@ -286,8 +286,8 @@ function smapBodySvg(n) {
   if (b.type === "Star") {
     d += `<radialGradient id="${id}"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="${col}"/><stop offset="1" stop-color="${col}" stop-opacity=".85"/></radialGradient>`
        + `<radialGradient id="${id}h"><stop offset=".6" stop-color="${col}" stop-opacity=".45"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;
-    if (b._thumb === undefined) thumbRequest(b, () => { if (MAPMODE && S) smapBuild(true); });        // v0.62: the same star as in 3D
-    s += `<circle r="${r * 1.35}" fill="url(#${id}h)"/><g class="dsk">` + (b._thumb ? `<image href="${b._thumb}" x="${-r * 1.12}" y="${-r * 1.12}" width="${2.24 * r}" height="${2.24 * r}"/>` : `<circle r="${r}" fill="url(#${id})"/>`) + `</g>`;
+    if (b._thumb === undefined && !APP_SMAP) thumbRequest(b, () => { if (MAPMODE && S) smapBuild(true); });        // v0.62: the same star as in 3D (v0.99.27: not in the app's panel over the game, see APP_SMAP below)
+    s += `<circle r="${r * 1.35}" fill="url(#${id}h)"/><g class="dsk">` + (b._thumb && !APP_SMAP ? `<image href="${b._thumb}" x="${-r * 1.12}" y="${-r * 1.12}" width="${2.24 * r}" height="${2.24 * r}"/>` : `<circle r="${r}" fill="url(#${id})"/>`) + `</g>`;
   } else {
     const c2 = palette(b)[1] ? `rgb(${palette(b)[1].map(v => v | 0)})` : col;
     d += `<radialGradient id="${id}" cx=".36" cy=".34" r=".78"><stop offset="0" stop-color="${col}"/><stop offset=".55" stop-color="${c2}"/><stop offset=".92" stop-color="#140d1c"/><stop offset="1" stop-color="#05030a"/></radialGradient>`;
@@ -335,8 +335,10 @@ function smapBodySvg(n) {
       rim = `<circle r="${r}" fill="none" stroke="${hx}" stroke-opacity="1" stroke-width="${Math.max(1.6, r * 0.13).toFixed(1)}"/><circle r="${(r * 0.9).toFixed(1)}" fill="none" stroke="${hx}" stroke-opacity=".25" stroke-width="${Math.max(1, r * 0.1).toFixed(1)}"/>`;
     }
     // v0.61: the body's own surface (the same one as in 3D) once its thumbnail is ready; the gradient until then
-    if (b._thumb === undefined) thumbRequest(b, () => { if (MAPMODE && S) smapBuild(true); });
-    const disc = b._thumb ? `<image href="${b._thumb}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/>` : `<circle r="${r}" fill="url(#${id})"/>${bands}`;
+    // v0.99.27: the app's panel over the game (APP_SMAP) draws every body as a shaded disc, never from a picture: in that hidden window the
+    // pictures went blank by themselves after a while (empty bodies), a plain vector disc cannot, and no picture work is done for it either
+    if (b._thumb === undefined && !APP_SMAP) thumbRequest(b, () => { if (MAPMODE && S) smapBuild(true); });
+    const disc = b._thumb && !APP_SMAP ? `<image href="${b._thumb}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/>` : `<circle r="${r}" fill="url(#${id})"/>${bands}`;
     s += back + haze + `<g class="dsk">${disc}</g>` + `<circle class="shd" r="${r}" fill="#000" opacity="0"/>${rim}`; n._front = front;   // the front arcs go on top of the body's hit area
   }
   s += `<circle class="hl" r="${(smapRing(b) ? r * 1.15 : r) + 4}"/><circle class="hit" r="${Math.max(r, 11) + 3}"/>` + (n._front || "");
