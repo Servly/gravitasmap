@@ -147,7 +147,10 @@
       if (!can) body.appendChild(mk("p", "bg-msg", !p.can_save ? tr("bgs.cf.blocked") : pend ? tr("bgs.cf.pend", { n: pend }) : ""));
       else body.appendChild(mk("p", "note", tr("bgs.cf.note")));
     }
-    function refresh() { BG.get().then(function (r) { var was = state(); g = r; BG.g = r; if (was !== state()) draw(); }).catch(function () {}); }
+    function takeHandoff() {
+      invoke("bgs_handoff_take").then(function (r) { if (r && r.ok && r.proposals && r.proposals.length) { sc.res = r; sc.sel = 0; sc.err = ""; setRows(); draw(); } }).catch(function () {});
+    }
+    function refresh() { BG.get().then(function (r) { var was = state(); g = r; BG.g = r; if (r && r.handoff && !sc.busy) takeHandoff(); if (was !== state()) draw(); }).catch(function () {}); }
     refresh(); draw(); BG.poll(parent, refresh, 3000);
   }
   if (window.GVC) GVC.add("bgsscan", function (parent) { section(parent, GVC.h); });

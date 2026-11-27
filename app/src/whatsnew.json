@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.53",
+      "en": [
+        "BGS WATCH no longer says 'This snapshot was already saved' for new screenshots. The game reuses file names, and players delete or rename their pictures, so the app now decides by the time the screenshots were written, never by their names: the same names an hour later are a new snapshot. The bar shows when you last checked (Checked ...). In the GRAVITAS menu over the game, Import from screenshots now tells you the values are waiting in the GRAVITAS window, with a button that opens the window on the BGS page with the table already filled."
+      ],
+      "de": [
+        "BGS WATCH sagt bei neuen Screenshots nicht mehr 'Diese Momentaufnahme wurde schon gespeichert'. Das Spiel verwendet Dateinamen wieder und Spieler löschen oder benennen ihre Bilder um, deshalb entscheidet die App nach dem Zeitpunkt, zu dem die Screenshots geschrieben wurden, nie nach ihren Namen: gleiche Namen eine Stunde später sind eine neue Momentaufnahme. Die Leiste zeigt, wann du zuletzt geprüft hast (Geprüft ...). Im GRAVITAS-Menü über dem Spiel sagt Aus Screenshots importieren jetzt, dass die Werte im GRAVITAS-Fenster auf dich warten, mit einer Schaltfläche, die das Fenster auf der BGS-Seite mit gefüllter Tabelle öffnet."
+      ],
+      "es": [
+        "BGS WATCH ya no dice 'Esta instantánea ya se guardó' ante capturas nuevas. El juego reutiliza nombres de archivo y los jugadores borran o renombran sus imágenes, así que la app decide por la hora en que se escribieron las capturas, nunca por sus nombres: los mismos nombres una hora después son una instantánea nueva. La barra muestra cuándo comprobaste por última vez (Comprobado ...). En el menú de GRAVITAS sobre el juego, Importar desde capturas ahora avisa de que los valores te esperan en la ventana de GRAVITAS, con un botón que abre la ventana en la página BGS con la tabla ya llena."
+      ],
+      "fr": [
+        "BGS WATCH ne dit plus 'Cet instantané a déjà été enregistré' pour de nouvelles captures. Le jeu réutilise les noms de fichiers et les joueurs suppriment ou renomment leurs images, donc l'app décide d'après l'heure à laquelle les captures ont été écrites, jamais d'après leurs noms : les mêmes noms une heure plus tard sont un nouvel instantané. La barre montre votre dernière vérification (Vérifié ...). Dans le menu GRAVITAS par-dessus le jeu, Importer depuis les captures indique maintenant que les valeurs vous attendent dans la fenêtre GRAVITAS, avec un bouton qui l'ouvre sur la page BGS avec le tableau déjà rempli."
+      ],
+      "pt-br": [
+        "O BGS WATCH não diz mais 'Este snapshot já foi salvo' para capturas novas. O jogo reutiliza nomes de arquivo e os jogadores apagam ou renomeiam suas imagens, então o app decide pelo horário em que as capturas foram gravadas, nunca pelos nomes: os mesmos nomes uma hora depois são um snapshot novo. A barra mostra quando você verificou pela última vez (Verificado ...). No menu do GRAVITAS sobre o jogo, Importar das capturas agora avisa que os valores esperam por você na janela do GRAVITAS, com um botão que abre a janela na página BGS com a tabela já preenchida."
+      ],
+      "ru": [
+        "BGS WATCH больше не говорит «Этот снимок уже сохранён» для новых скриншотов. Игра повторно использует имена файлов, а игроки удаляют или переименовывают картинки, поэтому приложение решает по времени записи скриншотов, а не по именам: те же имена час спустя — это новый снимок. В строке видно, когда вы проверяли в последний раз (Проверено ...). В меню GRAVITAS поверх игры «Импорт из скриншотов» теперь сообщает, что значения ждут вас в окне GRAVITAS, и есть кнопка, которая открывает окно на странице BGS с уже заполненной таблицей."
+      ]
+    },
+    {
       "v": "0.9.52",
       "en": [
         "BGS WATCH now remembers what you left. The Band edges, Compare with, View, Show and the sorting and filters of every tab come back as you set them, and a new band such as 70 to 80 is no longer pulled back to 50 (both edges are saved together). Next to every system you now see (Pop: number), its population from Spansh. The app asks Spansh only for the system names of your newest snapshot, at most every 6 hours, and the switch in the BGS Setup turns it off completely."

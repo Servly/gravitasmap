@@ -15,7 +15,7 @@
     var snaps = a.map(function (sn, i) {
       var got = 0;
       sn.rows.forEach(function (r) { var o = by[r.system]; if (!o) { o = by[r.system] = { n: r.system, v: [], f: [] }; order.push(o); } if (r.inf_x10 != null) got++; });
-      return { t: Date.parse(sn.data_utc || sn.taken_utc), complete: !!sn.complete, missing: Math.max(0, N - got), minOld: sn.minutes_old == null ? 0 : sn.minutes_old, id: sn.id };
+      return { t: Date.parse(sn.data_utc || sn.taken_utc), tk: Date.parse(sn.taken_utc || sn.data_utc), complete: !!sn.complete, missing: Math.max(0, N - got), minOld: sn.minutes_old == null ? 0 : sn.minutes_old, id: sn.id };
     });
     a.forEach(function (sn, i) {
       order.forEach(function (o) { o.v[i] = null; o.f[i] = ""; });
@@ -29,7 +29,7 @@
     var days = [], idx = {};
     d.snaps.forEach(function (sn, i) { var k = new Date(sn.t).toISOString().slice(0, 10); if (!(k in idx)) { idx[k] = days.length; days.push({ k: k, last: i, n: 0 }); } var g = days[idx[k]]; g.last = i; g.n++; });
     var dayOf = d.snaps.map(function (sn) { return idx[new Date(sn.t).toISOString().slice(0, 10)]; });
-    var snaps = days.map(function (g) { var sn = d.snaps[g.last]; return { t: sn.t, complete: sn.complete, missing: sn.missing, minOld: sn.minOld, id: sn.id, n: g.n, day: g.k }; });
+    var snaps = days.map(function (g) { var sn = d.snaps[g.last]; return { t: sn.t, tk: sn.tk, complete: sn.complete, missing: sn.missing, minOld: sn.minOld, id: sn.id, n: g.n, day: g.k }; });
     var sys = d.sys.map(function (o) {
       var v = [], f = [], steps = [], pv = null, pt = null, i;
       days.forEach(function (g, di) { v[di] = null; f[di] = ""; steps[di] = []; });
@@ -125,7 +125,7 @@
   }
   function head(M) {
     var sn = M.snaps[M.K], fw = M.sys.reduce(function (a, s) { return a + (s.f[M.K] ? 1 : 0); }, 0), tot = M.sys.length;
-    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t) + "</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span><span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
+    return '<span>' + t("bgs.dq.newest") + ' <b data-tip="' + esc(C.dt(sn.t) + " UTC") + '">' + C.tm(sn.t) + "</b> <span class='bg-fl'>(" + t("bgs.dq.old", { n: sn.minOld }) + ")</span></span>" + (sn.tk ? '<span data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + t("bgs.dq.checked", { t: C.tm(sn.tk) }) + "</span>" : "") + "<span>" + (sn.complete ? t("bgs.dq.complete") + " <b>" + M.fleet[M.K].n + " / " + tot + "</b>" : "<b class='w'>" + t("bgs.dq.incomplete", { n: sn.missing }) + "</b>") + "</span><span><b>" + M.nS + "</b> " + t("bgs.dq.snaps") + (M.nS > 1 ? " " + t("bgs.dq.over", { s: C.ago(sn.t - M.snaps[0].t) }) : "") + "</span>" +
       (fw ? "<span class='w'>" + t("bgs.dq.warn", { n: fw }) + "</span>" : "") + (M.nS > 1 ? "<span>" + t("bgs.dq.inc", { n: M.snaps.filter(function (x) { return !x.complete; }).length }) + "</span>" : "") + "<span class='bg-fl'>" + t("bgs.dq.utc") + "</span>";
   }
   // the slim bar: one quality chip, the three filters that matter, everything else under "more"
@@ -142,7 +142,7 @@
       lab("tip.bgs.bar.tick", t("bgs.bar.tick"), '<input type="number" step="1" min="2" max="90" id="btick" value="' + ui.tickPct + '">');
     var names = M.sys.map(function (x) { return x.n; }).sort();
     var srch = '<input type="search" id="bgq" class="bg-search" list="bgnames" autocomplete="off" spellcheck="false" placeholder="' + esc(t("bgs.search.ph")) + '" value="' + esc(ui.sq || "") + '" data-tip="' + esc(t("tip.bgs.search")) + '"><datalist id="bgnames">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
-    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + main +
+    return '<div class="bg-pin">' + srch + '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.qchip")) + '">' + esc(chip) + "</span>" + (sn.tk ? '<span class="bg-qchip" data-tip="' + esc(t("tip.bgs.dq.checked")) + '">' + esc(t("bgs.dq.checked", { t: C.dl(sn.tk) })) + "</span>" : "") + main +
       '<details class="bg-more"><summary data-tip="' + esc(t("tip.bgs.more")) + '">' + t("bgs.more") + '</summary><div class="bg-moreb"><div class="bg-dq">' + head(M) + '</div><div class="bg-bar">' + more + "</div></div></details></div>";
   }
   function empty() {

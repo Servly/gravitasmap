@@ -107,3 +107,26 @@ fn the_list_is_found_on_very_hard_screens() {
         assert_eq!(r.rows.len(), 10, "{name}: rows");
     }
 }
+
+/// 0.9.53: "already saved" never looks at file names. The game reuses them and players delete or rename their screenshots: the time the pictures were written decides.
+#[test]
+fn the_same_scan_is_decided_by_time_and_page_count_not_by_names() {
+    use super::model::Snapshot;
+    let names = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+    let old = Snapshot { taken_utc: "2026-11-27T08:57:00Z".into(), sources: names(&["Screenshot_0001.bmp", "Screenshot_0002.bmp"]), ..Default::default() };
+    // the same names an hour later: a NEW scan (this was refused before)
+    assert!(!crate::bgs::same_scan(&old, "2026-11-27T09:57:00Z", 2));
+    // other names, the same time and the same pages: the same scan (the player renamed the files)
+    assert!(crate::bgs::same_scan(&old, "2026-11-27T08:57:00Z", 2));
+    // the same time but another number of pages: not the same
+    assert!(!crate::bgs::same_scan(&old, "2026-11-27T08:57:00Z", 8));
+    // an imported snapshot has no sources: never the same as a scan
+    let imp = Snapshot { taken_utc: "2026-11-27T08:57:00Z".into(), ..Default::default() };
+    assert!(!crate::bgs::same_scan(&imp, "2026-11-27T08:57:00Z", 0));
+}
+
+/// the scan answer waits for the window once, then it is gone
+#[test]
+fn a_handed_over_scan_is_taken_once() {
+    assert_eq!(crate::bgs::handoff_take()["ok"], false);
+}

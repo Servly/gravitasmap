@@ -1572,5 +1572,10 @@
   "bgs.pop": "Pop: {n}",
   "bgs.pop.sw": "Show the population next to the systems",
   "bgs.pop.d": "When on, the app asks Spansh (spansh.co.uk) for the population of the systems in your newest snapshot, at most once every 6 hours. Only the system names are sent: no CMDR name, no Journal data, no influence values. Off means no call at all.",
-  "tip.bgs.pop": "Shows (Pop: number) next to every system. The numbers come from Spansh and are refreshed every few hours. Only the system names go out."
+  "tip.bgs.pop": "Shows (Pop: number) next to every system. The numbers come from Spansh and are refreshed every few hours. Only the system names go out.",
+  "bgs.menu.waiting": "The values are waiting for you in the GRAVITAS window: check them there and press Save.",
+  "bgs.menu.openapp": "Open the GRAVITAS window",
+  "tip.bgs.menu.openapp": "Brings the GRAVITAS window to the front on the BGS page, where the table to check and save the values is.",
+  "bgs.dq.checked": "Checked {t}",
+  "tip.bgs.dq.checked": "When the screenshots of the newest snapshot were taken: your last check (your clock, UTC in brackets). The numbers themselves are from the time shown before it."
 }

@@ -83,6 +83,7 @@ pub fn get() -> Value {
         "pictures_dir": pics.map(|p| p.to_string_lossy().into_owned()),
         "templates_ok": tpl::bundled().is_ok(),
         "scanning": SCANNING.load(Ordering::SeqCst),
+        "handoff": HANDOFF.lock().unwrap_or_else(|e| e.into_inner()).is_some(),
         "last_scan": LAST.lock().unwrap_or_else(|e| e.into_inner()).clone(),
     })
 }
@@ -132,8 +133,14 @@ fn read_one(path: &std::path::Path, t: &tpl::Templates) -> Outcome {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(run)).unwrap_or_else(|_| Outcome::Skip("could not read this screenshot: unexpected picture".into()))
 }
 
+/// 0.9.53: a stored snapshot counts as "the same scan" only when it was taken at the same time and holds the same number of pages. File NAMES never decide: the game
+/// reuses them, players rename or delete their screenshots. What counts is when the pictures were written (the Journal's Screenshot time, else the file's time).
+pub fn same_scan(o: &Snapshot, taken_utc: &str, pages: usize) -> bool {
+    !o.sources.is_empty() && o.taken_utc == taken_utc && o.sources.len() == pages
+}
+
 /// Reads the newest N screenshots (one click, on a worker thread of the command). Returns one proposal per group of pages taken within the window.
-pub fn scan() -> Value {
+pub fn scan(handoff: bool) -> Value {
     let s = settings::get();
     if !s.on { return err("BGS Watch is off"); }
     if SCANNING.swap(true, Ordering::SeqCst) { return err("a scan is already running"); }
@@ -190,8 +197,7 @@ pub fn scan() -> Value {
         let ctx = gates::Ctx { known: &nf.names, prev: prev.as_ref(), jump_x10: (s.jump * 10.0).round() as i32 };
         let mut p = gates::build(g, &ctx);
         if let Some(x) = &st {
-            let mine: std::collections::BTreeSet<&String> = p.files.iter().collect();
-            p.already_saved = x.all().iter().any(|o| !o.sources.is_empty() && o.sources.iter().collect::<std::collections::BTreeSet<_>>() == mine);
+            p.already_saved = x.all().iter().any(|o| same_scan(o, &p.taken_utc, p.files.len()));
         }
         proposals.push(p);
     }
@@ -213,8 +219,20 @@ pub fn scan() -> Value {
     let ms = t0.elapsed().as_millis() as u64;
     let summary = json!({"ms": ms, "files": found.len(), "skipped": skipped.len(), "proposals": proposals.len(), "at": timeutil::fmt_iso(timeutil::now())});
     *LAST.lock().unwrap_or_else(|e| e.into_inner()) = Some(summary);
-    json!({"ok": true, "ms": ms, "files": found.iter().map(|f| json!({"name": f.name, "taken_utc": timeutil::fmt_iso(f.taken), "from_journal": f.from_journal})).collect::<Vec<_>>(),
-           "skipped": skipped, "proposals": proposals, "pictures_dir": pics.to_string_lossy(), "snapshot_window_min": s.window_min, "learned_shapes": learned_n})
+    let out = json!({"ok": true, "ms": ms, "files": found.iter().map(|f| json!({"name": f.name, "taken_utc": timeutil::fmt_iso(f.taken), "from_journal": f.from_journal})).collect::<Vec<_>>(),
+           "skipped": skipped, "proposals": proposals, "pictures_dir": pics.to_string_lossy(), "snapshot_window_min": s.window_min, "learned_shapes": learned_n});
+    if handoff && !proposals.is_empty() { *HANDOFF.lock().unwrap_or_else(|e| e.into_inner()) = Some(out.clone()); }
+    out
+}
+
+/// The answer of a scan that was started from the menu over the game: it waits here until the GRAVITAS window takes it (once) to show the confirm table.
+static HANDOFF: Mutex<Option<Value>> = Mutex::new(None);
+
+pub fn handoff_take() -> Value {
+    match HANDOFF.lock().unwrap_or_else(|e| e.into_inner()).take() {
+        Some(v) => v,
+        None => json!({"ok": false, "error": "nothing is waiting"}),
+    }
 }
 
 /// Stores the snapshot the player confirmed (rows as edited in the confirm table). Numbers only.
@@ -403,5 +421,6 @@ pub fn forget() -> Value {
     let n = store().map(|s| s.forget()).unwrap_or(0);
     if let Some(d) = names_dir() { names::forget(&d); learn::forget(&d); }
     *LAST.lock().unwrap_or_else(|e| e.into_inner()) = None;
+    *HANDOFF.lock().unwrap_or_else(|e| e.into_inner()) = None;
     json!({"ok": true, "files_removed": n})
 }

@@ -438,6 +438,11 @@
   /* ---------- state from the Rust side ---------- */
   function onState(s) { state = s; renderHello(); renderChip(); renderLog(); }
   if (listen) listen("journal-state", function (e) { onState(e.payload); });
+  // the menu over the game asks the window to open on a page and tab (for example the BGS confirm table)
+  if (listen) listen("go-view", function (e) {
+    var p = e.payload || {}; go(p.view || "hub");
+    if (p.tab) { var tb = document.querySelector('.tabs[data-scope="' + p.view + '"] .tab[data-tab="' + p.tab + '"]'); if (tb) tb.click(); setTimeout(function () { var sc = document.querySelector(".bg-scan"); if (sc && sc.scrollIntoView) sc.scrollIntoView({ block: "start" }); }, 400); }
+  });
   if (invoke) invoke("get_state").then(onState).catch(function () {});
   if (T.app && T.app.getVersion) T.app.getVersion().then(function (v) { version = v; $("#ver").textContent = t("about.version", { v: version }); $("#ribbon").textContent = t("ribbon") + " \u00b7 v" + version; }).catch(function () {});
 

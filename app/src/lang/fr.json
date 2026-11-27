@@ -1572,5 +1572,10 @@
   "bgs.pop": "Pop : {n}",
   "bgs.pop.sw": "Afficher la population à côté des systèmes",
   "bgs.pop.d": "Si activé, l'app demande à Spansh (spansh.co.uk) la population des systèmes de votre dernier instantané, au plus toutes les 6 heures. Seuls les noms des systèmes sont envoyés : ni nom de CMDR, ni données du Journal, ni valeurs d'influence. Désactivé signifie aucun appel.",
-  "tip.bgs.pop": "Affiche (Pop : nombre) à côté de chaque système. Les chiffres viennent de Spansh et sont mis à jour toutes les quelques heures. Seuls les noms des systèmes sortent."
+  "tip.bgs.pop": "Affiche (Pop : nombre) à côté de chaque système. Les chiffres viennent de Spansh et sont mis à jour toutes les quelques heures. Seuls les noms des systèmes sortent.",
+  "bgs.menu.waiting": "Les valeurs vous attendent dans la fenêtre GRAVITAS : vérifiez-les là-bas et appuyez sur Enregistrer.",
+  "bgs.menu.openapp": "Ouvrir la fenêtre GRAVITAS",
+  "tip.bgs.menu.openapp": "Amène la fenêtre GRAVITAS au premier plan sur la page BGS, où se trouve le tableau pour vérifier et enregistrer les valeurs.",
+  "bgs.dq.checked": "Vérifié {t}",
+  "tip.bgs.dq.checked": "Quand les captures du dernier instantané ont été prises : votre dernière vérification (votre horloge, UTC entre parenthèses). Les chiffres datent de l'heure affichée avant."
 }

@@ -16,9 +16,12 @@
     var go = h.tip(mk("button", "btn go", tr("bgs.scan.btn")), "tip.bgs.scan"); go.type = "button";
     go.onclick = function () {
       if (busy) return; busy = true; err = ""; last = null; draw();
-      invoke("bgs_scan").then(function (r) { busy = false; if (!r || !r.ok) err = (BG.errText ? BG.errText(r && r.error) : "") || tr("bgs.scan.fail"); else last = r; draw(); }).catch(function (e) { busy = false; err = String(e); draw(); });
+      invoke("bgs_scan", { handoff: true }).then(function (r) { busy = false; if (!r || !r.ok) err = (BG.errText ? BG.errText(r && r.error) : "") || tr("bgs.scan.fail"); else last = r; draw(); }).catch(function (e) { busy = false; err = String(e); draw(); });
     };
-    var bx = mk("div", "bg-btns"); bx.style.marginTop = "8px"; bx.appendChild(go); c.appendChild(bx); c.appendChild(sum);
+    // 0.9.53: after a scan the values wait for you in the GRAVITAS window: say so, and give the button that goes there (it never opens by itself: it must not take the game's focus)
+    var openB = h.tip(mk("button", "btn", tr("bgs.menu.openapp")), "tip.bgs.menu.openapp"); openB.type = "button"; openB.style.display = "none";
+    openB.onclick = function () { invoke("show_main_bgs"); };
+    var bx = mk("div", "bg-btns"); bx.style.marginTop = "8px"; bx.appendChild(go); bx.appendChild(openB); c.appendChild(bx); c.appendChild(sum);
     c.appendChild(mk("p", "note", tr("bgs.menu.note")));
     function show() { if (g && g.settings && document.activeElement !== nIn) nIn.value = g.settings.n; }
     function draw() {
@@ -28,8 +31,11 @@
         var ps = last.proposals || [], p = ps[0];
         if (!last.files || !last.files.length) txt = last.pictures_dir ? tr("bgs.scan.nofiles") : tr("bgs.scan.nodir");
         else if (!p) txt = tr("bgs.scan.noprop");
-        else { var u = p.uncertain_rows || 0; txt = tr("bgs.menu.sum", { p: (p.pages_found || []).length, q: p.pages_total, s: p.systems_read, a: (p.rows || []).length - u, u: u }) + " " + tr(u || !p.can_save ? "bgs.menu.open" : "bgs.menu.open2"); sum.className = "bg-msg " + (u ? "" : "ok"); }
+        else { var u = p.uncertain_rows || 0; txt = tr("bgs.menu.sum", { p: (p.pages_found || []).length, q: p.pages_total, s: p.systems_read, a: (p.rows || []).length - u, u: u }); sum.className = "bg-msg " + (u ? "" : "ok"); }
       } else if (g && g.last_scan) txt = tr("bgs.menu.last", { f: g.last_scan.files, p: g.last_scan.proposals });
+      var waiting = !!(on && !busy && !err && last && (last.proposals || []).length);
+      if (waiting) txt += " " + tr("bgs.menu.waiting");
+      openB.style.display = waiting ? "" : "none";
       sum.textContent = txt;
     }
     function refresh() { invoke("bgs_get").then(function (r) { g = r; show(); draw(); if (window.GVC) GVC.poll(); }).catch(function () {}); }

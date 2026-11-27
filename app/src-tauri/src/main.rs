@@ -438,7 +438,16 @@ fn visits_keep_set(on: bool) { visits::keep_set(on) }
 #[tauri::command]
 fn bgs_get() -> serde_json::Value { bgs::get() }
 #[tauri::command(async)]
-fn bgs_scan() -> serde_json::Value { bgs::scan() }
+fn bgs_scan(handoff: Option<bool>) -> serde_json::Value { bgs::scan(handoff.unwrap_or(false)) }
+/// The window takes the scan the menu over the game made (once).
+#[tauri::command]
+fn bgs_handoff_take() -> serde_json::Value { bgs::handoff_take() }
+/// The GRAVITAS window comes to the front on the BGS page, Setup tab (where the confirm table is). Asked from the menu over the game.
+#[tauri::command]
+fn show_main_bgs(app: tauri::AppHandle) {
+    menu::request_show_main();
+    let _ = app.emit_to("main", "go-view", serde_json::json!({"view": "bgs", "tab": "setup"}));
+}
 #[tauri::command(async)]
 fn bgs_commit(snapshot: serde_json::Value, accept_flagged: Option<bool>) -> serde_json::Value { bgs::commit(&snapshot, accept_flagged.unwrap_or(false)) }
 #[tauri::command(async)]
@@ -838,7 +847,7 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, hotkeys_capture, save_text_file, save_png_file, bgs_import_csv, bgs_edit, bgs_delete_snapshot, combat_op, combat_extra, editor_rects, editor_ping, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, bgs_get, bgs_scan, bgs_commit, bgs_snapshots, bgs_snapshot, bgs_names_import_csv, bgs_names_set, bgs_names_get, bgs_settings_set, bgs_pop_refresh, bgs_export_csv, bgs_forget, diagnostic_report, send_feedback, prefs_get, theme_get, theme_set, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
+        .invoke_handler(tauri::generate_handler![get_state, overlay_info, overlay_set_test, overlay_set_hover_hide, combat_set, mode_set, combat_preview, combat_info, combat_settings, combat_setting, combat_action, menu_toggle, menu_close, hotkeys_get, whatsnew_state, whatsnew_seen, update_status, store_build, update_check, update_install, set_auto_update, hotkey_conflicts, hotkeys_capture, save_text_file, save_png_file, bgs_import_csv, bgs_edit, bgs_delete_snapshot, combat_op, combat_extra, editor_rects, editor_ping, ship_names_list, set_hud_language, hide_to_tray, edit_hud, edit_hud_state, menu_raise, menu_collapse, past_list, past_report, past_show, past_delete, past_undo, past_fav, th_list, th_report, th_show, th_delete, th_undo, th_fav, db_list, db_get, db_show, db_delete, db_undo, db_fav, db_binds, pvp_list, pvp_get, pvp_folder, pvp_text, pvp_pairs, pvp_pair_get, map_get, map_set, map_open_site, pair_status, pair_kick, pair_stop, pair_open_browser, pair_link_code, visits_list, visits_index, visits_month, visits_find, visits_forget, visits_keep_set, bgs_get, bgs_scan, bgs_commit, bgs_snapshots, bgs_snapshot, bgs_names_import_csv, bgs_names_set, bgs_names_get, bgs_settings_set, bgs_pop_refresh, bgs_handoff_take, show_main_bgs, bgs_export_csv, bgs_forget, diagnostic_report, send_feedback, prefs_get, theme_get, theme_set, autostart_set, tray_pref_set, settings_export, settings_import, folder_open, drift_flag, open_licences])
         .run(tauri::generate_context!())
         .expect("error while running GRAVITAS");
 }
