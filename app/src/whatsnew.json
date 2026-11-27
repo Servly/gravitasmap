@@ -1,6 +1,27 @@
 {
   "versions": [
     {
+      "v": "0.9.57",
+      "en": [
+        "The System map over the game now shows a small legend under the map with the keys that move it (pan, zoom, fit), exactly the keys you set. Fixed: a planet or star picture that the graphics card lost could show as an empty, ghost-like body on the System map. The map now keeps its normal shaded disc instead."
+      ],
+      "de": [
+        "Die Systemkarte im Spiel zeigt jetzt unter der Karte eine kleine Legende mit den Tasten, die sie bewegen (Verschieben, Zoom, Einpassen), genau die Tasten, die du gesetzt hast. Behoben: Ein Planeten- oder Sternbild, das die Grafikkarte verloren hatte, konnte als leerer, geisterhafter Körper auf der Systemkarte erscheinen. Die Karte behält nun stattdessen ihre normale schattierte Scheibe."
+      ],
+      "es": [
+        "El mapa del sistema sobre el juego ahora muestra bajo el mapa una pequeña leyenda con las teclas que lo mueven (desplazar, zoom, ajustar), exactamente las teclas que configuraste. Corregido: una imagen de planeta o estrella que la tarjeta gráfica perdió podía verse como un cuerpo vacío y fantasmal en el mapa. Ahora el mapa mantiene su disco sombreado normal."
+      ],
+      "fr": [
+        "La carte du système sur le jeu affiche maintenant sous la carte une petite légende avec les touches qui la déplacent (déplacer, zoom, ajuster), exactement les touches que vous avez réglées. Corrigé : une image de planète ou d'étoile perdue par la carte graphique pouvait apparaître comme un corps vide et fantomatique. La carte garde désormais son disque ombré normal."
+      ],
+      "pt-br": [
+        "O mapa do sistema sobre o jogo agora mostra sob o mapa uma pequena legenda com as teclas que o movem (deslocar, zoom, ajustar), exatamente as teclas que você definiu. Corrigido: uma imagem de planeta ou estrela perdida pela placa de vídeo podia aparecer como um corpo vazio e fantasmagórico. O mapa agora mantém seu disco sombreado normal."
+      ],
+      "ru": [
+        "Карта системы поверх игры теперь показывает под картой небольшую легенду с клавишами, которые её двигают (сдвиг, масштаб, по размеру), именно те клавиши, что вы задали. Исправлено: картинка планеты или звезды, потерянная видеокартой, могла выглядеть пустым призрачным телом на карте. Теперь карта сохраняет обычный затенённый диск."
+      ]
+    },
+    {
       "v": "0.9.56",
       "en": [
         "SYSTEM MAP OVER THE GAME can now sit on any game panel, like the Combat windows. On the Map page and in the GRAVITAS menu, the new card 'Where the System map shows' has Shows with, Perspective, Colour and Default position. The GRAVITAS MAP window no longer says 'stopped unexpectedly' after the app closed it or updated it."

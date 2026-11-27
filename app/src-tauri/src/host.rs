@@ -495,6 +495,24 @@ impl Host {
     }
 
     /// load.py's draw(), the part that makes the windows: which ones show, and each one's card and place.
+    /// 0.9.57: the legend under the System map: the keys the player really set for panning, zooming and fitting ("" when none is set).
+    fn map_keys_line(&self) -> String {
+        let k = |j: &str| self.key_texts.get(j).cloned().unwrap_or_default();
+        let mut parts: Vec<String> = Vec::new();
+        let pan: Vec<String> = ["map_up", "map_left", "map_down", "map_right"].iter().map(|j| k(j)).collect();
+        if pan.iter().all(|t| !t.is_empty()) {
+            let sp: Vec<(&str, &str)> = pan.iter().map(|t| t.rsplit_once('+').unwrap_or(("", t.as_str()))).collect();
+            if sp.iter().all(|p| p.0 == sp[0].0) {
+                let keys: Vec<&str> = sp.iter().map(|p| p.1).collect();
+                parts.push(format!("PAN {}{}{}", sp[0].0, if sp[0].0.is_empty() { "" } else { "+" }, keys.join("/")));
+            } else { parts.push(format!("PAN {}", pan.join(" "))); }
+        }
+        let (zi, zo, ft) = (k("map_zin"), k("map_zout"), k("map_fit"));
+        if !zi.is_empty() && !zo.is_empty() { parts.push(format!("ZOOM {zi} / {zo}")); }
+        if !ft.is_empty() { parts.push(format!("FIT {ft}")); }
+        parts.join("  ·  ")
+    }
+
     fn windows(&mut self, v: Option<&Value>, scan: Option<&Value>, gone: &Value, now: f64, shown: bool) -> Option<Vec<Value>> {
         let now_ms = (now * 1000.0).trunc();
         let preview = self.preview;
@@ -554,7 +572,7 @@ impl Host {
                 // the System map: a picture of the site's map (mapcap.rs); nothing until the first picture has come
                 if w.on || editing {
                     if let Some(sh) = crate::mapcap::current() {
-                        m = Some(json!({"title": "SYSTEM MAP", "head2": sh.system, "mapw": crate::mapwin::cfg().w, "map": {"id": sh.id, "w": sh.w, "h": sh.h}}));
+                        m = Some(json!({"title": "SYSTEM MAP", "head2": sh.system, "mapw": crate::mapwin::cfg().w, "map": {"id": sh.id, "w": sh.w, "h": sh.h}, "mapkeys": self.map_keys_line()}));
                     }
                 }
             } else if *key == "modecard" {

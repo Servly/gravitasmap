@@ -449,6 +449,7 @@ function thumbRead(done) {                        // [[body, cell], ...] -> a ca
   const px = new Uint8Array(512 * 512 * 4); renderer.readRenderTargetPixels(THUMB.sheet, 0, 0, 512, 512, px);
   return done.map(([o, cell]) => {
     const cx = (cell % 4) * 128, cy = Math.floor(cell / 4) * 128;
+    if (!px[((cy + 64) * 512 + cx + 64) * 4 + 3]) return [o, null];   // v0.99.26: a blank cell (the graphics card lost the picture, e.g. in a hidden window) is no picture: the map then keeps its gradient disc
     const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"), im = g.createImageData(128, 128);
     for (let r = 0; r < 128; r++) { const o0 = ((cy + 127 - r) * 512 + cx) * 4; im.data.set(px.subarray(o0, o0 + 512), r * 512); }
     g.putImageData(im, 0, 0); return [o, c];
@@ -480,6 +481,7 @@ function thumbStar(b) {
     const px = new Uint8Array(256 * 256 * 4); renderer.readRenderTargetPixels(STHUMB.out, 0, 0, 256, 256, px);
     renderer.setRenderTarget(prev); renderer.autoClear = auto; renderer.setClearColor(0x000000, 1);
     mesh.geometry.dispose(); mesh.material.dispose();
+    if (!px[(128 * 256 + 128) * 4 + 3]) return null;   // v0.99.26: blank = no picture (see thumbRead)
     const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"), im = g.createImageData(256, 256);
     for (let y = 0; y < 256; y++) im.data.set(px.subarray((255 - y) * 1024, (256 - y) * 1024), y * 1024);
     g.putImageData(im, 0, 0); return c;
@@ -505,6 +507,7 @@ function thumbRequest(b, done) {                  // a few per frame, so the pag
     }
     if (sheet.length) try { out.push(...thumbRead(sheet)); } catch (e) { for (const [o] of sheet) o._thumb = ""; }
     for (const [o, c] of out) {
+      if (!c) { o._thumb = ""; continue; }
       THUMB.enc++;
       c.toBlob(bl => { THUMB.enc--; o._thumb = bl ? URL.createObjectURL(bl) : ""; if (o._thumb) THUMB.urls.push(o._thumb); show();
       }, "image/png");

@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.26 · minor · 27 Nov 2026
+- Fix: a planet or star picture that the graphics card lost (it showed as an empty, ghost-like body on the System map, seen in the GRAVITAS app's panel over the game) is now noticed and the map keeps its normal shaded disc instead.
+
 ### v0.99.25 · minor · 27 Nov 2026
 - Fix: the GRAVITAS app's own windows no longer show the note "Last time GRAVITAS stopped unexpectedly" and no longer drop to Low quality after the app was closed or updated. The app closes its windows from outside without a goodbye, which looked like a crash to the page. A browser still gets the note when it really stops unexpectedly.
 

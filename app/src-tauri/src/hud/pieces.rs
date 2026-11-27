@@ -290,6 +290,13 @@ pub fn g_card(cv: &mut Canvas, m: &Value, x: f64, y: f64, s: f64, col: &str) {
         let ih = (w * ph / pw).round();
         cv.push(Shape::Image { x, y: cy, w, h: ih, id }, false);
         cy += ih + 6.0 * s;
+        // 0.9.57: the legend of the keys that move the map (the keys the player set)
+        let mk = get_s(m, "mapkeys");
+        if !mk.is_empty() {
+            let two = px(&mk, 9.5 * s, false, false) > w;
+            cv.g_text(x, cy, &mk, 9.5 * s, &c.dim, &c.glow, false, "nw", w, false);
+            cy += (if two { 28.0 } else { 15.0 }) * s;
+        }
     }
     for b in m.get("bars").and_then(|b| b.as_array()).into_iter().flatten() {
         let (lab, v) = (sv(&b[0]), b.get(1).filter(|v| !v.is_null()).and_then(|v| crate::pyval::as_float(Some(v))));

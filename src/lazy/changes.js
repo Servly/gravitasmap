@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.26", k: "minor", d: "27 Nov 2026", t: [
+      "Fix: a planet or star picture that the graphics card lost (it showed as an empty, ghost-like body on the System map, seen in the GRAVITAS app's panel over the game) is now noticed and the map keeps its normal shaded disc instead."
+    ] },
     { v: "v0.99.25", k: "minor", d: "27 Nov 2026", t: [
       "Fix: the GRAVITAS app's own windows no longer show the note \"Last time GRAVITAS stopped unexpectedly\" and no longer drop to Low quality after the app was closed or updated. The app closes its windows from outside without a goodbye, which looked like a crash to the page. A browser still gets the note when it really stops unexpectedly."
     ] },

@@ -145,7 +145,7 @@ impl Keys {
 
     /// The keys the HUD's footers name, as the player set them now (job -> text, only the jobs that have a key): the same text the Keys page shows.
     pub fn hint_texts(&self) -> HashMap<String, String> {
-        HINT_JOBS.iter().filter_map(|j| { let t = self.text_of(j); if t.is_empty() { None } else { Some((j.to_string(), t)) } }).collect()
+        HINT_JOBS.iter().chain(["map_up", "map_left", "map_down", "map_right", "map_zin", "map_zout", "map_fit"].iter()).filter_map(|j| { let t = self.text_of(j); if t.is_empty() { None } else { Some((j.to_string(), t)) } }).collect()
     }
 
     pub fn text_of(&self, name: &str) -> String {

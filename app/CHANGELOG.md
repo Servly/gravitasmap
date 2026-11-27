@@ -2,6 +2,9 @@
 
 Every version of the GRAVITAS Windows app, newest first. These are the same notes the app shows in its What's new window (English; the app also has them in German, Spanish, French, Portuguese and Russian). The website's history is in [../CHANGELOG.md](../CHANGELOG.md).
 
+## 0.9.57
+- The System map over the game now shows a small legend under the map with the keys that move it (pan, zoom, fit), exactly the keys you set. Fixed: a planet or star picture that the graphics card lost could show as an empty, ghost-like body on the System map. The map now keeps its normal shaded disc instead.
+
 ## 0.9.56
 - SYSTEM MAP OVER THE GAME can now sit on any game panel, like the Combat windows. On the Map page and in the GRAVITAS menu, the new card 'Where the System map shows' has Shows with, Perspective, Colour and Default position. The GRAVITAS MAP window no longer says 'stopped unexpectedly' after the app closed it or updated it.
 
