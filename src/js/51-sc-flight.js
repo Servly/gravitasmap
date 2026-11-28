@@ -140,8 +140,9 @@ function scfJump(on, time) {
     const g = $("scfJg"); for (let i = 0; i < 3; i++) { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", SCF_SHAPE); p.setAttribute("transform", `translate(${11 + i * 16} 8) scale(6.5)`); g.appendChild(p); SCF.jpaths.push(p); }
   }
   if ($("scfJn").textContent !== next) $("scfJn").textContent = next;
-  const box = $("smap").getBoundingClientRect(), low = (QUALITY === PRESETS.low || SCF_RM.matches);
-  SCF.jb.style.display = "flex"; SCF.jb.style.left = "auto"; SCF.jb.style.right = Math.round(innerWidth - box.right + 56) + "px"; SCF.jb.style.top = Math.round(box.top + 9) + "px";
+  const low = (QUALITY === PRESETS.low || SCF_RM.matches);
+  const v = $("smapView") || $("smap"), r = v.getBoundingClientRect();
+  SCF.jb.style.display = "flex"; SCF.jb.style.right = "auto"; SCF.jb.style.left = Math.round(r.left + r.width / 2) + "px"; SCF.jb.style.top = Math.round(r.top + 8) + "px";      // the top middle of the map picture
   SCF.jpaths.forEach((p, i) => { p.style.opacity = (low ? 0.4 + 0.3 * i : 0.25 + 0.75 * Math.max(0, Math.cos(2 * Math.PI * (i / 3 - time / 1.6)))).toFixed(2); });      // a gentle left-to-right run
 }
 
@@ -151,7 +152,6 @@ function scfTick(mapMode) {
     const vr = $("vRoute"), on = !(vr && !vr.checked), time = performance.now() / 1000;
     if (mapMode) scfJump(on && SYNC.on, time); else if (SCF.jb) SCF.jb.style.display = "none";
     const E = on ? scfEnds() : null; SCF.E = E;
-    try { jnyTick(mapMode); } catch (e) { jnyStop(); }                      // the journey preview (52-sc-journey.js) moves the camera first, the chevrons turn to face it
     if (!E) { if (SCF.key) { SCF.key = ""; scfHide(); } return; }
     const key = `${E.a.body.bodyId}${E.a.st ? E.a.st.name : ""}>${E.b.body.bodyId}${E.b.st ? E.b.st.name : ""}`;
     if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); SCF.pa = SCF.pb = null; }
@@ -165,4 +165,4 @@ function scfTick(mapMode) {
   } catch (e) { if (!SCF.err) { SCF.err = true; logErr(`route arrows: ${e.message}`); } scfHide(); }
 }
 // the test door: only with ?scftest=1 in the address (nothing else ever sees it)
-if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, S: () => S, YAH, TGT, camera, controls, scfV3, scfEnds, yahUpdate, tgtUpdate, jrnHops, JNY: () => JNY };
+if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, S: () => S, YAH, TGT, camera, controls, scfV3, scfEnds, yahUpdate, tgtUpdate, jrnHops };

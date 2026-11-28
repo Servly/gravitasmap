@@ -1495,24 +1495,9 @@ html.calm *, html.calm *::before, html.calm *::after { animation-play-state: pau
 #scfG path{fill:none;stroke:#39ff88;stroke-width:1.7px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 #scfG{filter:drop-shadow(0 0 3px #39ff88) drop-shadow(0 0 8px rgba(57,255,136,.5))}
 #scfSq.lowq #scfG{filter:none}
-#scfJb{position:fixed;z-index:7;pointer-events:none;display:none;align-items:center;gap:8px;padding:3px 12px 3px 8px;border-radius:14px;background:rgba(8,16,14,.78);border:1px solid rgba(57,255,136,.35);color:#d8ffe8;font-size:12px;white-space:nowrap}
+#scfJb{position:fixed;z-index:7;pointer-events:none;display:none;align-items:center;gap:8px;transform:translateX(-50%);padding:3px 12px 3px 8px;border-radius:14px;background:rgba(8,16,14,.78);border:1px solid rgba(57,255,136,.35);color:#d8ffe8;font-size:12px;white-space:nowrap}
 #scfJb path{fill:none;stroke:#39ff88;stroke-width:1.6px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 #scfJb svg{filter:drop-shadow(0 0 3px #39ff88)}
 #scfJb .jk{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
 #scfJb b{letter-spacing:.02em}
 body.pfull #scfJb,html.appsmap #scfJb{display:none!important}
-#jnyBtn{position:fixed;z-index:8;display:none;padding:5px 12px;border-radius:16px;background:rgba(8,16,14,.85);border:1px solid rgba(57,255,136,.55);color:#d8ffe8;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 0 10px rgba(57,255,136,.25)}
-#jnyBtn:hover{background:rgba(20,48,34,.92);box-shadow:0 0 14px rgba(57,255,136,.5)}
-#jnyOv{position:fixed;left:50%;bottom:130px;transform:translateX(-50%);z-index:9;display:none;flex-direction:column;align-items:center;gap:6px;padding:12px 20px;border-radius:12px;background:rgba(8,16,14,.86);border:1px solid rgba(57,255,136,.45);color:#d8ffe8;text-align:center;max-width:min(92vw,460px);box-shadow:0 0 18px rgba(57,255,136,.25)}
-#jnyOv .jt{font-size:15px;font-weight:700;letter-spacing:.04em;color:#39ff88}
-#jnyOv .js{font-size:12px;opacity:.85}
-#jnyOv .jb1{margin-top:4px;padding:6px 16px;border-radius:16px;background:rgba(57,255,136,.16);border:1px solid rgba(57,255,136,.6);color:#eafff2;font-weight:700;cursor:pointer}
-#jnyOv .jb1:hover{background:rgba(57,255,136,.3)}
-body.pfull #jnyBtn,body.pfull #jnyOv,html.appsmap #jnyBtn,html.appsmap #jnyOv{display:none!important}
-#jnyHud{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9;display:none;flex-direction:column;align-items:center;gap:4px;padding:6px 18px 8px;border-radius:12px;background:rgba(8,16,14,.7);border:1px solid rgba(57,255,136,.35);color:#d8ffe8;pointer-events:none;min-width:220px}
-#jnyHud .hk{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
-#jnyHud b{font-size:14px;letter-spacing:.03em;color:#39ff88}
-#jnyHud i{display:block;width:100%;height:3px;border-radius:2px;background:rgba(57,255,136,.18);overflow:hidden}
-#jnyHud u{display:block;height:100%;width:0;background:#39ff88;box-shadow:0 0 6px #39ff88}
-body.jnyOn .panel{opacity:0!important;pointer-events:none!important;transition:opacity .4s}
-body.jnyOn #smapView,body.jnyOn .smz{pointer-events:none}

@@ -4,6 +4,10 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.34 · minor · 28 Nov 2026
+- Removed: the Journey preview (the ship, the camera show and the Watch the journey button) is gone for good. The route arrows stay.
+- Changed: the Next jump strip that shows while a jump route is plotted now sits at the top middle of the System map's picture, right under the filter buttons.
+
 ### v0.99.33 · minor · 28 Nov 2026
 - Paused: the Journey preview is switched off for everyone. In the last two versions the ship did not always sit on the arrows and the camera could make the 3D map slow. It comes back only after it is rebuilt and tested on a real graphics card.
 - Fix: the route arrows are no longer drawn while the 3D map is still preparing itself (its shaders), so opening the 3D map is as before, and the arrows cost less work per frame.
