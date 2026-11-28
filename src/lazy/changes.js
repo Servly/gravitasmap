@@ -3,6 +3,10 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.32", k: "minor", d: "28 Nov 2026", t: [
+      "Fix: the Journey preview could make the picture jump back and forth between two camera angles, like a strobe. The start and the target of the arrows flickered between a station's own place and its body as the game's file updated, which turned the ship and the camera with them. The ends are now steady (the station's place is kept for a few seconds and the ends move gently), the way of the show is frozen when it starts, and nothing else can move the camera during the show.",
+      "Changed: the Journey preview is calmer and clearer. The side panels fade out during the show, a small bar at the top says where you are going and how far along the show is, the head looks around slower and less, the ship becomes see-through while you sit in it, and the camera starts farther from the ship. If your system asks for reduced motion, the arrows stand still and the head does not turn."
+    ] },
     { v: "v0.99.31", k: "major", d: "28 Nov 2026", t: [
       "New: Journey preview. When the route arrows show on the System map, a button \"Watch the journey\" appears at the top left of the map. It opens the 3D map with a small ship (a box with a canopy and a seat) at the start of the arrows. \"Start the journey\" runs a short show of about 10 seconds: two seconds from outside into the cockpit, the way along the arc seen from inside with a head that looks around, two seconds back outside at the target, and a line of text. It is a show, not your real position. Esc leaves at any time.",
       "Changed: the route arrows now appear as soon as you set a target in the system and the map knows where your ship is, for example when you are docked, not only in supercruise. They start at the station's own place and end at the target's own place. The arc is a fixed, simple curve that does not change when you zoom, and on the System map the arrows keep one size. The flight report, the times and the model are gone: the arrows are all that is shown.",

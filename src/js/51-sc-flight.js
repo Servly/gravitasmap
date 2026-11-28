@@ -5,7 +5,8 @@
 // A second small thing: while a jump route is plotted, a flat ">>>" with the next system's name at the top of the System map.
 // Words on screen are the game's own: ship, start, target, route.
 const SCF_P = { SAG: 0.15, MAXC: 44, NMAX: 40, SP3: 46, SZ2: 11, COL: [0.22, 1, 0.53] };
-const SCF = { E: null, mesh: null, sq: null, jb: null, err: false, paths: [], jpaths: [], t0: 0, key: "", last: null, arc3: null };
+const SCF_RM = matchMedia("(prefers-reduced-motion: reduce)");                     // a person who asks for less motion gets still arrows, no flow and no head turning
+const SCF = { stk: null, pa: null, pb: null, E: null, mesh: null, sq: null, jb: null, err: false, paths: [], jpaths: [], t0: 0, key: "", last: null, arc3: null };
 try { localStorage.removeItem("gvScf"); } catch (e) {}                          // 0.99.29 and 0.99.30 kept flight reports here: gone
 
 // ---- the start and the target ---------------------------------------------------------------------------------------------------
@@ -15,6 +16,9 @@ function scfEnds() {                                       // { a, b }: each { b
   if (!SYNC.on || !S || !syncViewing()) return null;
   const tg = TGT && TGT.t; if (!tg || !tg.b) return null;
   let st = YAH.b ? { body: YAH.b, t: YAH.t } : YAH.ab ? { body: YAH.ab, t: null } : null;
+  const now = performance.now(), stk = SCF.stk;
+  if (st && st.t && st.t.o && st.t.o.obj) SCF.stk = { body: st.body, t: st.t, at: now };
+  else if (st && stk && stk.body === st.body && now - stk.at < 6000) st = { body: stk.body, t: stk.t };      // the station's own place flickers away for a moment as the game's file updates: keep it
   if (st) SCF.last = st; else st = SCF.last && S.bodies.includes(SCF.last.body) ? SCF.last : null;    // in supercruise the last place stays the start
   if (!st) return null;
   const a = { body: st.body, o: st.t && st.t.o && st.t.o.obj ? st.t.o : null, st: st.t && st.t.st ? st.t.st : null, t: st.t };
@@ -60,10 +64,15 @@ function scfMesh3() {
   const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, side: THREE.DoubleSide }));
   m.frustumCulled = false; m.renderOrder = 8; m.visible = false; scene.add(m); SCF.mesh = m; return m;
 }
+function scfSmooth(k, p) {                                 // an end point moves to a new place gently, never in one jump
+  const q = SCF[k]; if (!q) return (SCF[k] = p.slice());
+  const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); if (!(d > 0)) return q;
+  const f = 0.2; q[0] += (p[0] - q[0]) * f; q[1] += (p[1] - q[1]) * f; q[2] += (p[2] - q[2]) * f; return q;
+}
 function scfDraw3(E, fade, time) {
-  const a = scfPos3(E.a), b = scfPos3(E.b), s = scfV3(S.main), T = scfTable(a, scfCtrl(a, b, [s.x, s.y, s.z]), b, 24);
+  const a = scfSmooth("pa", scfPos3(E.a)), b = scfSmooth("pb", scfPos3(E.b)), s = scfV3(S.main), T = scfTable(a, scfCtrl(a, b, [s.x, s.y, s.z]), b, 24);
   SCF.arc3 = T;
-  const m = scfMesh3(), low = QUALITY === PRESETS.low, cam = camera.position, g = m.geometry, pos = g.attributes.position.array, col = g.attributes.color.array;
+  const m = scfMesh3(), low = (QUALITY === PRESETS.low || SCF_RM.matches), cam = camera.position, g = m.geometry, pos = g.attributes.position.array, col = g.attributes.color.array;
   const cv = new THREE.Vector3(); let px = 0, prev = null;                       // the arc's length on the screen, to choose how many chevrons
   for (let i = 0; i <= 12; i++) { const f = scfAt(T, i / 12).p; cv.set(f[0], f[1], f[2]).project(camera); const q = [(cv.x * 0.5 + 0.5) * innerWidth, (0.5 - cv.y * 0.5) * innerHeight]; if (prev) px += Math.hypot(q[0] - prev[0], q[1] - prev[1]); prev = q; }
   const N = Math.max(3, Math.min(SCF_P.NMAX, Math.round(px / SCF_P.SP3))), tf = Math.tan(camera.fov * DEG / 2) * 2 / innerHeight, C = SCF_P.COL;
@@ -106,7 +115,7 @@ function scfSq() {
 }
 function scfDraw2(E, fade, time) {
   const a = scfElPos(E.a), b = scfElPos(E.b); if (!a || !b) { scfHide(); return; }
-  const d = scfSq(), A = [a.x, a.y, 0], B = [b.x, b.y, 0], T = scfTable(A, scfCtrl(A, B, null), B, 24), s = SCF_P.SZ2, low = QUALITY === PRESETS.low;
+  const d = scfSq(), A = [a.x, a.y, 0], B = [b.x, b.y, 0], T = scfTable(A, scfCtrl(A, B, null), B, 24), s = SCF_P.SZ2, low = (QUALITY === PRESETS.low || SCF_RM.matches);
   const N = Math.max(3, Math.min(SCF_P.NMAX, Math.round(T.L / (s * 2.9)))), ph = low ? 0 : (time / 2.4) % 1, cnt = low ? N : N + 1;
   d.classList.toggle("lowq", low);
   for (let i = 0; i < SCF.paths.length; i++) {                                 // a fixed size: the arrows do not grow or shrink with the map's zoom
@@ -131,7 +140,7 @@ function scfJump(on, time) {
     const g = $("scfJg"); for (let i = 0; i < 3; i++) { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", SCF_SHAPE); p.setAttribute("transform", `translate(${11 + i * 16} 8) scale(6.5)`); g.appendChild(p); SCF.jpaths.push(p); }
   }
   if ($("scfJn").textContent !== next) $("scfJn").textContent = next;
-  const box = $("smap").getBoundingClientRect(), low = QUALITY === PRESETS.low;
+  const box = $("smap").getBoundingClientRect(), low = (QUALITY === PRESETS.low || SCF_RM.matches);
   SCF.jb.style.display = "flex"; SCF.jb.style.left = "auto"; SCF.jb.style.right = Math.round(innerWidth - box.right + 56) + "px"; SCF.jb.style.top = Math.round(box.top + 9) + "px";
   SCF.jpaths.forEach((p, i) => { p.style.opacity = (low ? 0.4 + 0.3 * i : 0.25 + 0.75 * Math.max(0, Math.cos(2 * Math.PI * (i / 3 - time / 1.6)))).toFixed(2); });      // a gentle left-to-right run
 }
@@ -145,11 +154,11 @@ function scfTick(mapMode) {
     try { jnyTick(mapMode); } catch (e) { jnyStop(); }                      // the journey preview (52-sc-journey.js) moves the camera first, the chevrons turn to face it
     if (!E) { if (SCF.key) { SCF.key = ""; scfHide(); } return; }
     const key = `${E.a.body.bodyId}${E.a.st ? E.a.st.name : ""}>${E.b.body.bodyId}${E.b.st ? E.b.st.name : ""}`;
-    if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); }
+    if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); SCF.pa = SCF.pb = null; }
     const fade = Math.min(1, (performance.now() - SCF.t0) / 900);
     if (mapMode) { if (SCF.mesh) SCF.mesh.visible = false; scfDraw2(E, fade, time); }
     else { if (SCF.sq) SCF.sq.style.display = "none"; scfDraw3(E, fade, time); }
   } catch (e) { if (!SCF.err) { SCF.err = true; logErr(`route arrows: ${e.message}`); } scfHide(); }
 }
 // the test door: only with ?scftest=1 in the address (nothing else ever sees it)
-if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, S: () => S, YAH, TGT, camera, controls, scfV3, scfEnds, yahUpdate, tgtUpdate, jrnHops };
+if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, S: () => S, YAH, TGT, camera, controls, scfV3, scfEnds, yahUpdate, tgtUpdate, jrnHops, JNY: () => JNY };
