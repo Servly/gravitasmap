@@ -4,6 +4,11 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.31 · major · 28 Nov 2026
+- New: Journey preview. When the route arrows show on the System map, a button "Watch the journey" appears at the top left of the map. It opens the 3D map with a small ship (a box with a canopy and a seat) at the start of the arrows. "Start the journey" runs a short show of about 10 seconds: two seconds from outside into the cockpit, the way along the arc seen from inside with a head that looks around, two seconds back outside at the target, and a line of text. It is a show, not your real position. Esc leaves at any time.
+- Changed: the route arrows now appear as soon as you set a target in the system and the map knows where your ship is, for example when you are docked, not only in supercruise. They start at the station's own place and end at the target's own place. The arc is a fixed, simple curve that does not change when you zoom, and on the System map the arrows keep one size. The flight report, the times and the model are gone: the arrows are all that is shown.
+- New: while a jump route is plotted, the top of the System map shows a flat ">>>" and the name of the next system to jump to. The in-system target (the arc) and the jump route are separate: the game keeps the target in the system apart from the plotted route. The View menu switch is now called "Route arrows".
+
 ### v0.99.30 · major · 28 Nov 2026
 - Changed: the SC flight now shows only the route, not a ship. No file tells where the ship is, so the cube and the square are gone. While you are in supercruise with a target set, the map draws ONE ARC from where you started to the target, lined with neon green ">" chevrons that get brighter toward the target and drift slowly toward it (a light, calm flow; on Low quality they stand still). In 3D the arc bulges away from the star and bends further around any body in the way; the chevrons keep their size as you zoom and turn to face the camera. On the System map the arc goes through the empty space, clear of the planets and their names. The arc ends at the target station's own place when it has one.
 - New in the View menu: "SC flight route" switches the route on or off (on by default, remembered).

@@ -7,7 +7,7 @@ GRAVITAS's code does not upload or store your Elite Dangerous journal. This page
 - Your browser reads the journal files itself. The files are not uploaded.
 - GRAVITAS asks the browser for **read-only** access to the folder you choose. It cannot write, change or delete anything there.
 - What goes out because of your journal is the **name of a star system**, so the map can show it. That is the same request as typing the name in the search box.
-- Combat reports, the SC flight reports (start, target, distance, times of your last 30 supercruise flights) and settings stay in your own browser. GRAVITAS's server does not receive them, except the parts you choose to share (below).
+- Combat reports and settings stay in your own browser. GRAVITAS's server does not receive them, except the parts you choose to share (below).
 - Sharing with your own phone, or with your team, happens only when you switch it on. What goes where is listed below.
 
 ## What Sync and Combat Mode read

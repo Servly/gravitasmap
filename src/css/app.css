@@ -1490,19 +1490,22 @@ body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; p
 /* v0.99.24: calm page (js/50-calm.js): the endless small animations stand still while nobody looks at them */
 html.calm *, html.calm *::before, html.calm *::after { animation-play-state: paused !important; }
 
-/* v0.99.30: SC flight report and the neon route on the system map */
-#scfRep{position:fixed;left:14px;bottom:14px;z-index:30;width:292px;max-width:calc(100vw - 28px);background:rgba(14,20,30,.92);border:1px solid rgba(120,170,220,.28);border-radius:10px;color:#dbe6f2;font-size:12px;line-height:1.45;padding:8px 10px;backdrop-filter:blur(6px)}
-#scfRep .sh{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-#scfRep .sh b{letter-spacing:.08em;font-size:11px}
-#scfRep .sh span{font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,209,102,.16);color:#ffd166}
-#scfRep .sh button{margin-left:auto;background:none;border:0;color:inherit;font-size:16px;cursor:pointer;line-height:1}
-#scfRep .sr{margin:2px 0}#scfRep .dim{opacity:.65}#scfRep .fx{color:#9be7a3}
-#scfRep .sl{margin:6px 0 2px;font-size:10px;letter-spacing:.08em;opacity:.7;text-transform:uppercase}
-#scfRep .sf{display:flex;align-items:center;gap:6px;margin-top:6px}
-#scfRep .sf button,#scfRep .sf select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:inherit;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer}
+/* v0.99.31: route arrows (neon green chevrons from your start to your target) and the next-jump banner on the system map */
 #scfSq{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:6;pointer-events:none;display:none}
 #scfG path{fill:none;stroke:#39ff88;stroke-width:1.7px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 #scfG{filter:drop-shadow(0 0 3px #39ff88) drop-shadow(0 0 8px rgba(57,255,136,.5))}
 #scfSq.lowq #scfG{filter:none}
-html.appsmap #scfRep,body.pfull #scfRep{display:none!important}
-@media (max-height:700px),(max-width:760px){#scfRep{display:none!important}}
+#scfJb{position:fixed;z-index:7;pointer-events:none;display:none;align-items:center;gap:8px;padding:3px 12px 3px 8px;border-radius:14px;background:rgba(8,16,14,.78);border:1px solid rgba(57,255,136,.35);color:#d8ffe8;font-size:12px;white-space:nowrap}
+#scfJb path{fill:none;stroke:#39ff88;stroke-width:1.6px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+#scfJb svg{filter:drop-shadow(0 0 3px #39ff88)}
+#scfJb .jk{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+#scfJb b{letter-spacing:.02em}
+body.pfull #scfJb,html.appsmap #scfJb{display:none!important}
+#jnyBtn{position:fixed;z-index:8;display:none;padding:5px 12px;border-radius:16px;background:rgba(8,16,14,.85);border:1px solid rgba(57,255,136,.55);color:#d8ffe8;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 0 10px rgba(57,255,136,.25)}
+#jnyBtn:hover{background:rgba(20,48,34,.92);box-shadow:0 0 14px rgba(57,255,136,.5)}
+#jnyOv{position:fixed;left:50%;bottom:130px;transform:translateX(-50%);z-index:9;display:none;flex-direction:column;align-items:center;gap:6px;padding:12px 20px;border-radius:12px;background:rgba(8,16,14,.86);border:1px solid rgba(57,255,136,.45);color:#d8ffe8;text-align:center;max-width:min(92vw,460px);box-shadow:0 0 18px rgba(57,255,136,.25)}
+#jnyOv .jt{font-size:15px;font-weight:700;letter-spacing:.04em;color:#39ff88}
+#jnyOv .js{font-size:12px;opacity:.85}
+#jnyOv .jb1{margin-top:4px;padding:6px 16px;border-radius:16px;background:rgba(57,255,136,.16);border:1px solid rgba(57,255,136,.6);color:#eafff2;font-weight:700;cursor:pointer}
+#jnyOv .jb1:hover{background:rgba(57,255,136,.3)}
+body.pfull #jnyBtn,body.pfull #jnyOv,html.appsmap #jnyBtn,html.appsmap #jnyOv{display:none!important}
