@@ -1,103 +1,38 @@
-// v0.99.29: SC FLIGHT (experimental). While the game says supercruise, the map shows an ESTIMATED ship (a cube on the 3D map, a square on the system map)
-// moving along the route from the start to the target, and a small report compares the estimate with the real flight (Entry to Exit).
-// Words on screen are the game's own: ship, start, target, route. Everything modelled here is an estimate and is called one.
-// The route follows the road logic of research/sc-route: the centre is the primary star, a ROUNDABOUT (kavsak) ring of one gate per province (a planet)
-// sits on the star's keepout clearance (kacinma bolgesi), districts (moons) hang on their province, and a flight takes the shortest road.
-// Time model (two equations, research/sc-route/video/model_eq2.py): without SCO and with a short SCO burst at the start.
+// v0.99.30: SC FLIGHT (experimental). While the game says supercruise and Sync is on, the map shows the ROUTE from the start to the target:
+// ONE ARC (never a straight line) lined with a corridor of neon green ">" chevrons, dim at the start and brighter toward the target; they drift slowly toward the target (a light, calm flow).
+// The ship's own position is NOT shown: no file tells it. A small report keeps the estimated total time next to the real supercruise time (Entry to Exit).
+// Words on screen are the game's own: ship, start, target, route. Everything modelled is called an estimate.
+// Arc: 3D, in the plane of the start, the target and the primary star, bulging AWAY from the star (15 % of the chord), deeper when a body's keepout clearance
+// (kacinma bolgesi) is in the way. 2D (the System map is a schematic): the same arc, bulging toward the EMPTY side, clear of every body and name.
+// Time model (research/sc-route/video/model_eq2.py): without SCO (a range) and with a short SCO burst at the start; used only for the report.
 const SCF_P = {
   K: [0.22, 0.13, 0.094], G: 0.0145, R0: 8.1, VMAX: 2001, VMAXS: 3300, KA: 0.094, DEND: 10, D0: 1,
   SCO: [[0, 8], [0.6, 26], [1, 70], [1.4, 109], [2, 184], [2.6, 277], [3.8, 300], [3000, 300]],
-  EXPRESS: 600
+  SAG: 0.15, MAXC: 44, NMAX: 40, SP3: 46, COL: [0.22, 1, 0.53]
 };
-const SCF = { fl: null, reps: [], sco: 0, hidden: false, el: null, cube: null, line: null, lineN: 0, err: false, rt: 0, lastSig: "" };
+const SCF = { fl: null, reps: [], hidden: false, el: null, mesh: null, sq: null, err: false, rt: 0, lastSig: "", arc: null, arcT: 0, arcKey: "", arc2: null, arcT2: 0, arcKey2: "", paths: [] };
 try { SCF.reps = JSON.parse(localStorage.getItem("gvScf") || "[]").slice(-30); } catch (e) { SCF.reps = []; }
 const scfSave = () => { try { localStorage.setItem("gvScf", JSON.stringify(SCF.reps.slice(-30))); } catch (e) {} };
 const scfDur = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
 const scfLs = v => v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1);
 
-// ---- the model: distance covered by the ship, second by second, in ls (1 c = 1 ls per s) -------------------------------
-function scfSim(D, kind, o) {
-  const P = SCF_P, dt = 0.05, t0 = o && o.t0 || 0, s0 = o && o.s0 || 0, arr = [s0];
-  let s = s0, t = t0, n = 0;
-  if (!(D > P.DEND * 1.5)) return { T: 0, D, arr, at: () => 0, v: () => 0 };
-  while (D - s > P.DEND && t < 4000) {
-    let v;
-    if (kind === "B" && t <= o.Tb) v = scfCurve(t);
-    else if (kind === "B") v = Math.min(P.K[1] * (P.D0 + s), P.KA * (D - s), P.VMAXS);
-    else v = Math.min(P.R0 * o.r * Math.exp(P.G * t), P.VMAX, o.K * ((o.dd0 != null ? o.dd0 : P.D0) + s - s0), o.K * (D - s));
-    s += Math.max(v, 1e-4) * dt; t += dt; n++;
-    if (n % 5 === 0) arr.push(s);
-  }
-  arr.push(s);
-  const at = x => { const q = Math.max(0, x - t0) / 0.25, i = Math.floor(q); if (i >= arr.length - 1) return arr[arr.length - 1]; return arr[i] + (arr[i + 1] - arr[i]) * (q - i); };
-  return { T: t, D, arr, at, v: x => (at(x + 0.5) - at(Math.max(t0, x - 0.5))) / (x - t0 < 0.5 ? x - t0 + 0.5 : 1) };
-}
+// ---- the time model (for the report only) -----------------------------------------------------------------------------------
 function scfCurve(t) {
   const c = SCF_P.SCO; if (t <= 0) return c[0][1];
   for (let i = 1; i < c.length; i++) if (t <= c[i][0]) return c[i - 1][1] + (c[i][1] - c[i - 1][1]) * (t - c[i - 1][0]) / (c[i][0] - c[i - 1][0]);
   return c[c.length - 1][1];
 }
-// all the equations for one distance: A is without SCO (K 0.13, and the fast and slow ends), B is with a burst of 3, 4 or 5 s
-function scfModels(D, r = 1) {
-  const K = SCF_P.K;
-  return { a: scfSim(D, "A", { K: K[1], r }), lo: scfSim(D, "A", { K: K[0], r }), hi: scfSim(D, "A", { K: K[2], r }), b3: scfSim(D, "B", { Tb: 3 }), b4: scfSim(D, "B", { Tb: 4 }), b5: scfSim(D, "B", { Tb: 5 }) };
+function scfSim(D, kind, o) {                                  // seconds to cover D ls (1 c = 1 ls per s): A without SCO, B with a burst of o.Tb seconds
+  const P = SCF_P, dt = 0.05; let s = 0, t = 0;
+  if (!(D > P.DEND * 1.5)) return 0;
+  while (D - s > P.DEND && t < 4000) {
+    const v = kind === "B" ? (t <= o.Tb ? scfCurve(t) : Math.min(P.K[1] * (P.D0 + s), P.KA * (D - s), P.VMAXS))
+      : Math.min(P.R0 * Math.exp(P.G * t), P.VMAX, o.K * (P.D0 + s), o.K * (D - s));
+    s += Math.max(v, 1e-4) * dt; t += dt;
+  }
+  return t;
 }
-const scfEst = m => ({ a: m.a.T, lo: m.lo.T, hi: m.hi.T, b3: m.b3.T, b4: m.b4.T, b5: m.b5.T });
-
-// ---- the roads (true positions, ls) ---------------------------------------------------------------------------------
-function scfPlanetOf(b) {                              // the province (planet) a district (moon) hangs on, or null for a province itself
-  let id = S.parentOf.get(b.bodyId);
-  while (id !== undefined && id !== null) { const q = S.byId.get(id); if (q && q.type === "Planet") return q.bodyId; id = S.parentOf.get(id); }
-  return null;
-}
-function scfGraph(tMs) {
-  if (!S || !S.main || S.stars.length !== 1) return null;                          // one primary star only: more stars, no roads (a straight route)
-  const W = worldAt(tMs), pos = id => { const p = W.get(id); return p ? [p.x / LS_MM, p.y / LS_MM, p.z / LS_MM] : null; };
-  const N = new Map(), E = [], star = S.main, sp = pos(star.bodyId);
-  const belt = (star.belts || []).reduce((m, x) => Math.max(m, x.outerRadius / 1e6), 0);
-  const RING = Math.max(3 * star._r, belt) / LS_MM;
-  N.set("S", { id: "S", kind: "hub", pos: sp, body: star });
-  const provinces = [], districts = [];
-  for (const b of S.bodies) {
-    if (b.type !== "Planet" || !pos(b.bodyId)) continue;
-    const par = scfPlanetOf(b), nd = { id: "p" + b.bodyId, kind: par == null ? "province" : "district", pos: pos(b.bodyId), body: b, parent: par };
-    N.set(nd.id, nd); (par == null ? provinces : districts).push(nd);
-  }
-  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-  const edge = (a, b, len, kind) => E.push({ a, b, len, kind });
-  for (const p of provinces) {                                                     // the roundabout: a gate on the ring in the direction of each province
-    const v = [p.pos[0] - sp[0], p.pos[1] - sp[1], p.pos[2] - sp[2]], n = Math.hypot(...v) || 1, u = v.map(x => x / n);
-    const g = { id: "g" + p.body.bodyId, kind: "gate", pos: [sp[0] + u[0] * RING, sp[1] + u[1] * RING, sp[2] + u[2] * RING], dir: u, of: p };
-    N.set(g.id, g); p.gate = g; edge(g.id, p.id, dist(g.pos, p.pos), "spoke");
-  }
-  for (let i = 0; i < provinces.length; i++) for (let j = i + 1; j < provinces.length; j++) {
-    const a = provinces[i], b = provinces[j], ga = a.gate, gb = b.gate;
-    const c = Math.max(-1, Math.min(1, ga.dir[0] * gb.dir[0] + ga.dir[1] * gb.dir[1] + ga.dir[2] * gb.dir[2]));
-    edge(ga.id, gb.id, RING * Math.acos(c), "ring");
-    const d = dist(a.pos, b.pos); if (d <= SCF_P.EXPRESS) edge(a.id, b.id, d, "express");   // optional shortcuts between close provinces
-  }
-  for (const m of districts) {
-    const host = N.get("p" + m.parent); if (!host) continue;
-    edge(host.id, m.id, dist(host.pos, m.pos), "local");
-    for (const o of districts) if (o.parent === m.parent && o.id > m.id) edge(m.id, o.id, dist(m.pos, o.pos), "local");
-  }
-  return { N, E, RING, sp };
-}
-function scfRoad(G, fromBody, toBody) {                                           // shortest road, node ids from start to target, or null
-  const a = fromBody.bodyId === S.main.bodyId ? "S" : "p" + fromBody.bodyId, z = toBody.bodyId === S.main.bodyId ? "S" : "p" + toBody.bodyId;
-  if (!G.N.has(a) || !G.N.has(z) || a === z) return null;
-  const adj = new Map();                                                           // the centre (the star) is a place only when it is the start or the target: never a way through
-  const edges = a === "S" || z === "S" ? G.E.concat([...G.N.values()].filter(n => n.kind === "gate").map(g => ({ a: "S", b: g.id, len: G.RING, kind: "centre" }))) : G.E;
-  for (const e of edges) { (adj.get(e.a) || adj.set(e.a, []).get(e.a)).push([e.b, e.len]); (adj.get(e.b) || adj.set(e.b, []).get(e.b)).push([e.a, e.len]); }
-  const dist = new Map([[a, 0]]), prev = new Map(), done = new Set();
-  for (;;) {
-    let u = null, du = Infinity; for (const [k, v] of dist) if (!done.has(k) && v < du) { u = k; du = v; }
-    if (u === null) return null; if (u === z) break; done.add(u);
-    for (const [w, l] of adj.get(u) || []) if (!(dist.has(w) && dist.get(w) <= du + l)) { dist.set(w, du + l); prev.set(w, u); }
-  }
-  const path = [z]; while (path[0] !== a) path.unshift(prev.get(path[0]));
-  return path;
-}
+const scfEst = D => ({ a: scfSim(D, "A", { K: SCF_P.K[1] }), lo: scfSim(D, "A", { K: SCF_P.K[0] }), hi: scfSim(D, "A", { K: SCF_P.K[2] }), b3: scfSim(D, "B", { Tb: 3 }), b4: scfSim(D, "B", { Tb: 4 }), b5: scfSim(D, "B", { Tb: 5 }) });
 
 // ---- events from the journal (called by syncLine) ----------------------------------------------------------------------
 function scfEvent(j, replay) {
@@ -105,7 +40,7 @@ function scfEvent(j, replay) {
   if (ev === "SupercruiseEntry") {
     if (APP_SMAP) return;
     const a = SYNC.at || {};
-    SCF.fl = { t0: Date.parse(j.timestamp) || Date.now(), sys: j.StarSystem || SYNC.here, from: a.bodyId != null ? a.bodyId : YAH && YAH.lastB ? YAH.lastB.bodyId : null, live: !replay, bt: null, sig: "", fixes: [] };
+    SCF.fl = { t0: Date.parse(j.timestamp) || Date.now(), sys: j.StarSystem || SYNC.here, from: a.bodyId != null ? a.bodyId : YAH && YAH.lastB ? YAH.lastB.bodyId : null, bt: null, sig: "", shown: 0 };
     SCF.hidden = false; return;
   }
   if (!SCF.fl) return;
@@ -120,187 +55,204 @@ function scfEnd(j, replay) {
   const eb = j.BodyType === "Station" ? b.to : S.byId.get(+j.BodyID) || null;
   let D = b.D;
   try { if (eb && eb !== b.to) { const W = worldAt(fl.t0), p = W.get(b.from.bodyId), q = W.get(eb.bodyId); D = Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) / LS_MM; } } catch (e) {}
-  const R = { sys: fl.sys, t0: fl.t0, t1: tEnd, actual: (tEnd - fl.t0) / 1000, from: shortName(b.from, S.sys.name), to: eb ? shortName(eb, S.sys.name) : String(j.Body || "?"), station: j.BodyType === "Station" ? jl(j, "Body") : "", dist: D, est: scfEst(scfModels(D)), fix: fl.fixes.slice(), sco: SCF.sco };
+  const R = { sys: fl.sys, t0: fl.t0, t1: tEnd, actual: (tEnd - fl.t0) / 1000, from: shortName(b.from, S.sys.name), to: eb ? shortName(eb, S.sys.name) : String(j.Body || "?"), station: j.BodyType === "Station" ? jl(j, "Body") : "", dist: D, est: scfEst(D) };
   SCF.reps.push(R); SCF.reps = SCF.reps.slice(-30); scfSave(); scfRepDraw(true);
 }
-
-// ---- building the flight once the map knows the start and the target ---------------------------------------------------------
+// the start and the target, once the map knows them (the target comes from the game's own Destination)
 function scfBuild(fl) {
   if (!S || !syncViewing() || String(S.sys.name).toLowerCase() !== String(fl.sys || "").toLowerCase()) return null;
   const from = fl.from != null ? S.byId.get(+fl.from) : null, tg = typeof tgtResolve === "function" ? tgtResolve() : null, to = tg && tg.b ? tg.b : null;
   if (!from || !to || from === to) return null;
-  const sig = `${from.bodyId}>${to.bodyId}`; if (fl.bt && fl.sig === sig) return fl.bt;
-  const now = Date.now(), W = worldAt(now), p = W.get(from.bodyId), q = W.get(to.bodyId);
-  const D = Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) / LS_MM;
-  let path = null; try { const G = scfGraph(now); path = G ? scfRoad(G, from, to) : null; fl.G = G; } catch (e) { path = null; }
-  fl.sig = sig; fl.bt = { from, to, toName: tg.name || shortName(to, S.sys.name), D, m: scfModels(D), path, G: fl.G || null };
-  fl.fixes = []; return fl.bt;
-}
-// the latitude and longitude the game gives near a body: a real position. At the target the ship is there; beside another body the route bends through it
-function scfFixCheck(fl, bt) {
-  const L = SYNC.live; if (!L || !L.body) return;
-  const x = S.bodies.find(o => syncSame(o.name, L.body)); if (!x) return;
-  const age = (Date.now() - fl.t0) / 1000;
-  if (x === bt.from && age < 120) return;
-  if (fl.fixes.some(f => f.id === x.bodyId)) return;
-  fl.fixes.push({ id: x.bodyId, name: shortName(x, S.sys.name), at: Math.round(age), est: Math.round(100 * Math.min(1, bt.m.a.at(age) / bt.D)) });
-  if (x === bt.to) { bt.arrived = true; return; }
-  if (x === bt.from) return;
-  const W = worldAt(Date.now()), p = W.get(x.bodyId), q = W.get(bt.to.bodyId), D2 = Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) / LS_MM;
-  const s0 = Math.max(0, bt.D - D2);
-  bt.leg2 = { via: x, t: age, D: D2, s0, m: scfSim(s0 + D2, "A", { K: SCF_P.K[1], r: 1, s0, t0: age, dd0: 10 }), path: null };
-  try { const G = bt.G || scfGraph(Date.now()); bt.leg2.path = G ? scfRoad(G, x, bt.to) : null; if (G && !bt.path1) bt.path1 = scfRoad(G, bt.from, x); } catch (e) {}
-}
-// where along the route the ship is estimated to be: 0..1, and the model that tells it
-function scfProgress(fl, bt) {
-  const age = (Date.now() - fl.t0) / 1000;
-  if (bt.arrived) return { f: 1, age, v: 0, T: bt.m.a.T, left: 0, model: "a" };
-  const M = [bt.m.a, bt.m.b3, bt.m.b4, bt.m.b5][SCF.sco === 3 ? 1 : SCF.sco === 4 ? 2 : SCF.sco === 5 ? 3 : 0];
-  if (bt.leg2) {
-    const l = bt.leg2, m = l.m, f2 = Math.min(1, Math.max(0, (m.at(age) - l.s0) / Math.max(l.D, 1e-6)));
-    return { f: f2, pos: f2, age, v: m.v(age), T: m.T, left: Math.max(0, m.T - age), leg2: true };
-  }
-  return { f: Math.min(1, M.at(age) / bt.D), age, v: M.v(age), T: M.T, left: Math.max(0, M.T - age) };
+  const sig = `${from.bodyId}>${to.bodyId}`; if (fl.bt && fl.sig === sig) { fl.bt.tg = tg; return fl.bt; }
+  const W = worldAt(Date.now()), p = W.get(from.bodyId), q = W.get(to.bodyId), D = Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) / LS_MM;
+  fl.sig = sig; fl.shown = performance.now(); fl.bt = { tg, from, to, toName: tg.name || shortName(to, S.sys.name), D, est: scfEst(D) };
+  return fl.bt;
 }
 
-// ---- display ------------------------------------------------------------------------------------------------------------------
-function scfV3(b) { const v = new THREE.Vector3(); b._obj.getWorldPosition(v); return v; }
-// 3D: the route through the bodies' own places in the view; a gate sits on a ring around the star, between the star and its province
-function scfPoints3(bt, path, G) {
-  const out = []; if (!path || !G) { out.push(scfV3(bt.from), scfV3(bt.to)); return out; }
-  const sd = scfV3(S.main); let rg = Infinity;
-  for (const nd of G.N.values()) if (nd.kind === "province" && nd.body._obj) rg = Math.min(rg, scfV3(nd.body).distanceTo(sd));
-  rg = isFinite(rg) ? rg * 0.5 : 1;
-  const disp = id => {
-    const nd = G.N.get(id);
-    if (nd.kind === "hub") return sd.clone();
-    if (nd.kind === "gate") return scfV3(nd.of.body).sub(sd).normalize().multiplyScalar(rg).add(sd);
-    return scfV3(nd.body);
-  };
-  for (let i = 0; i < path.length; i++) {
-    const nd = G.N.get(path[i]), p = disp(path[i]);
-    if (i > 0 && nd.kind === "gate" && G.N.get(path[i - 1]).kind === "gate") {      // a stretch of the ring: an arc around the star
-      const a = out[out.length - 1].clone().sub(sd), b = p.clone().sub(sd), ang = a.angleTo(b);
-      for (let k = 1; k < 8; k++) { const t = k / 8, q = a.clone().multiplyScalar(Math.sin((1 - t) * ang) / Math.sin(ang || 1)).add(b.clone().multiplyScalar(Math.sin(t * ang) / Math.sin(ang || 1))); out.push(q.add(sd)); }
-    }
-    out.push(p);
+// ---- the arc ----------------------------------------------------------------------------------------------------------------------
+// a quadratic arc A-C-B: the control point C pushes the middle of the chord sideways, the arc's top is half way to C
+const scfBez = (a, c, b, t) => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1], u * u * a[2] + 2 * u * t * c[2] + t * t * b[2]]; };
+function scfTable(a, c, b, n) {                          // points, cumulative length, total
+  const P = [], cum = [0]; for (let i = 0; i <= n; i++) P.push(scfBez(a, c, b, i / n));
+  for (let i = 1; i <= n; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1], P[i][2] - P[i - 1][2]));
+  return { P, cum, L: cum[n] };
+}
+function scfAt(T, f) {                                    // the point and the direction at a fraction f of the arc's length
+  const x = Math.max(0, Math.min(1, f)) * T.L; let j = 1; while (j < T.cum.length - 1 && T.cum[j] < x) j++;
+  const s = T.cum[j] - T.cum[j - 1], t = s ? (x - T.cum[j - 1]) / s : 0, p = T.P[j - 1], q = T.P[j];
+  const d = [q[0] - p[0], q[1] - p[1], q[2] - p[2]], n = Math.hypot(...d) || 1;
+  return { p: [p[0] + d[0] * t, p[1] + d[1] * t, p[2] + d[2] * t], t: [d[0] / n, d[1] / n, d[2] / n] };
+}
+// the side away from 'away' (the star) and the sag: the first clean one among a few, else the least bad. pen(points) = how much of the arc is inside what it must avoid
+function scfPick(a, b, away, pen, firstSide) {
+  const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], c = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = Math.hypot(...c) || 1, u = c.map(x => x / L);
+  let w = [m[0] - away[0], m[1] - away[1], m[2] - away[2]]; const wu = w[0] * u[0] + w[1] * u[1] + w[2] * u[2]; w = [w[0] - u[0] * wu, w[1] - u[1] * wu, w[2] - u[2] * wu];
+  let wn = Math.hypot(...w);
+  if (wn < 1e-9) { w = Math.abs(u[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]; const d = w[0] * u[0] + w[1] * u[1] + w[2] * u[2]; w = [w[0] - u[0] * d, w[1] - u[1] * d, w[2] - u[2] * d]; wn = Math.hypot(...w); }
+  const n = w.map(x => x / wn), side = firstSide || 1; let best = null;
+  for (const f of [SCF_P.SAG, 0.22, 0.3, 0.4, 0.5, 0.65]) for (const sg of [side, -side]) {
+    const sag = f * L * sg, ctrl = [m[0] + n[0] * 2 * sag, m[1] + n[1] * 2 * sag, m[2] + n[2] * 2 * sag], T = scfTable(a, ctrl, b, 24), p = pen(T.P);
+    if (!best || p < best.p - 1e-9) best = { p, ctrl, T };
+    if (p <= 0) return best;
   }
+  return best;
+}
+
+// ---- 3D: the chevron corridor ------------------------------------------------------------------------------------------------------
+function scfV3(b) { const v = new THREE.Vector3(); b._obj.getWorldPosition(v); return v; }
+const SCF_SH = [[0, 1], [0.45, 1], [1, 0], [0.45, -1], [0, -1], [0.55, 0]];        // the outline of one ">" (x forward, y sideways)
+function scfMesh3() {
+  if (SCF.mesh) return SCF.mesh;
+  const n = SCF_P.MAXC * 48, pos = new Float32Array(n * 3), col = new Float32Array(n * 3), idx = new Uint16Array(SCF_P.MAXC * 72);
+  for (let q = 0; q < SCF_P.MAXC * 12; q++) { const v = q * 4; idx.set([v, v + 1, v + 2, v + 2, v + 1, v + 3], q * 6); }
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage)); g.setAttribute("color", new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage)); g.setIndex(new THREE.BufferAttribute(idx, 1));
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, side: THREE.DoubleSide }));
+  m.frustumCulled = false; m.renderOrder = 8; m.visible = false; scene.add(m); SCF.mesh = m; return m;
+}
+function scfObst3(bt) {                                   // the keepout spheres on the way: every other body (2 radii, a star 3), the start and the target and their parents left out
+  const skip = new Set([bt.from.bodyId, bt.to.bodyId]);
+  for (const b of [bt.from, bt.to]) { let id = S.parentOf.get(b.bodyId); while (id != null) { skip.add(id); id = S.parentOf.get(id); } }
+  const out = []; for (const b of S.bodies) if (!skip.has(b.bodyId) && b._obj && b._r) { const c = scfV3(b); out.push({ c: [c.x, c.y, c.z], r: b._r * k(b) * (b.type === "Star" ? 3 : 2) }); }
   return out;
 }
-function scfAlong(pts, f) {
-  let L = 0; const seg = []; for (let i = 1; i < pts.length; i++) { const d = pts[i].distanceTo(pts[i - 1]); seg.push(d); L += d; }
-  let r = Math.max(0, Math.min(1, f)) * L; for (let i = 0; i < seg.length; i++) { if (r <= seg[i] || i === seg.length - 1) return pts[i].clone().lerp(pts[i + 1], seg[i] ? Math.min(1, r / seg[i]) : 0); r -= seg[i]; }
-  return pts[0].clone();
+function scfArc3(bt, now) {
+  const key = `${bt.from.bodyId}>${bt.to.bodyId}`;
+  if (SCF.arc && SCF.arcKey === key && now - SCF.arcT < 250) return SCF.arc;
+  const tgo = bt.tg && bt.tg.o && bt.tg.o.obj, a = scfV3(bt.from), b = tgo ? tgo.getWorldPosition(new THREE.Vector3()) : scfV3(bt.to), s = scfV3(S.main), obs = scfObst3(bt);
+  const pen = P => { let t = 0; for (const p of P) for (const o of obs) { const d = Math.hypot(p[0] - o.c[0], p[1] - o.c[1], p[2] - o.c[2]); if (d < o.r) t += o.r - d; } return t; };
+  const r = scfPick([a.x, a.y, a.z], [b.x, b.y, b.z], [s.x, s.y, s.z], pen, 1);
+  SCF.arc = r.T; SCF.arcKey = key; SCF.arcT = now; return r.T;
 }
-function scfMarks3() {
-  if (!SCF.cube) {
-    SCF.cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffd166, depthTest: false, transparent: true, opacity: 0.95 }));
-    SCF.cube.renderOrder = 9; SCF.cube.frustumCulled = false; scene.add(SCF.cube);
-    SCF.line = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x4cc9f0, depthTest: false, transparent: true, opacity: 0.8 }));
-    SCF.line.renderOrder = 8; SCF.line.frustumCulled = false; scene.add(SCF.line);
-    SCF.dots = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: 0x4cc9f0, size: 4, sizeAttenuation: false, depthTest: false, transparent: true, opacity: 0.9 }));
-    SCF.dots.renderOrder = 8; SCF.dots.frustumCulled = false; scene.add(SCF.dots);
+const scfSm = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+const scfLook = (f, low) => (0.3 + 0.7 * Math.pow(f, 1.2)) * (low ? 1 : scfSm(f / 0.1) * scfSm((1 - f) / 0.08));      // dim at the start, brighter toward the target, fading in and out at the two ends
+function scfDraw3(bt, fade, time) {
+  const T = scfArc3(bt, performance.now()), m = scfMesh3(), low = QUALITY === PRESETS.low, cam = camera.position, g = m.geometry, pos = g.attributes.position.array, col = g.attributes.color.array;
+  const cv = new THREE.Vector3(); let px = 0, prev = null;                       // the arc's length on the screen, to choose how many chevrons
+  for (let i = 0; i <= 12; i++) { const f = scfAt(T, i / 12).p; cv.set(f[0], f[1], f[2]).project(camera); const q = [(cv.x * 0.5 + 0.5) * innerWidth, (0.5 - cv.y * 0.5) * innerHeight]; if (prev) px += Math.hypot(q[0] - prev[0], q[1] - prev[1]); prev = q; }
+  const N = Math.max(3, Math.min(SCF_P.NMAX, Math.round(px / SCF_P.SP3))), tf = Math.tan(camera.fov * DEG / 2) * 2 / innerHeight, C = SCF_P.COL;
+  let v = 0; const ph = low ? 0 : (time / 2.4) % 1, cnt = low ? N : N + 1;        // the chevrons slide toward the target by one gap every 2.4 s
+  for (let i = 0; i < cnt; i++) {
+    const f = low ? (i + 0.5) / N : (i + ph) / N; if (f >= 1) continue;
+    const at = scfAt(T, f), P = at.p, d = Math.hypot(cam.x - P[0], cam.y - P[1], cam.z - P[2]) || 1, wpp = d * tf, sz = 15 * wpp;
+    const vw = [(cam.x - P[0]) / d, (cam.y - P[1]) / d, (cam.z - P[2]) / d], t = at.t;
+    let ux = t[1] * vw[2] - t[2] * vw[1], uy = t[2] * vw[0] - t[0] * vw[2], uz = t[0] * vw[1] - t[1] * vw[0]; const un = Math.hypot(ux, uy, uz) || 1; ux /= un; uy /= un; uz /= un;
+    const br = scfLook(f, low) * fade;
+    for (let layer = 0; layer < 2; layer++) {
+      const th = (layer ? 7 : 2.4) * wpp * 0.5, mul = layer ? 0.3 : 1;
+      for (let e = 0; e < 6; e++) {
+        const A = SCF_SH[e], B = SCF_SH[(e + 1) % 6], ax = (A[0] - 0.5) * sz * 1.2, ay = A[1] * sz, bx = (B[0] - 0.5) * sz * 1.2, by = B[1] * sz, dx = bx - ax, dy = by - ay, dl = Math.hypot(dx, dy) || 1, ox = -dy / dl * th, oy = dx / dl * th;
+        const q4 = [[ax + ox, ay + oy], [ax - ox, ay - oy], [bx + ox, by + oy], [bx - ox, by - oy]];
+        for (const q of q4) {
+          pos[v * 3] = P[0] + t[0] * q[0] + ux * q[1]; pos[v * 3 + 1] = P[1] + t[1] * q[0] + uy * q[1]; pos[v * 3 + 2] = P[2] + t[2] * q[0] + uz * q[1];
+          col[v * 3] = C[0] * br * mul; col[v * 3 + 1] = C[1] * br * mul; col[v * 3 + 2] = C[2] * br * mul; v++;
+        }
+      }
+    }
   }
+  g.setDrawRange(0, Math.round(v * 1.5)); g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; m.visible = true;
 }
-function scfHideMarks() {
-  if (SCF.cube) { SCF.cube.visible = false; SCF.line.visible = false; SCF.dots.visible = false; }
-  if (SCF.sq) SCF.sq.style.display = "none";
-}
+
+// ---- 2D: the same corridor on the System map, in the empty space ---------------------------------------------------------------------
 function scfElPos(b) {
   const g = document.querySelector(`#smapSvg .smo[data-id="${b.bodyId}"]`); if (!g) return null;
   const r = g.getBoundingClientRect(); return r.width || r.height ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
 }
-// the bodies the route passes, for the system map: a gate or the centre is the star's place (the map has no ring)
-function scfSeq2(from, to, path, G) {
-  const seq = [from];
-  if (path && G) for (const id of path) { const nd = G.N.get(id), b = nd.kind === "hub" || nd.kind === "gate" ? S.main : nd.body; if (seq[seq.length - 1] !== b) seq.push(b); }
-  if (seq[seq.length - 1] !== to) seq.push(to);
-  return seq;
+function scfElPos2(bt) {                                   // the target: the station's own icon when it has one, else its body
+  try { const tg = bt.tg; if (tg && tg.st && typeof yahMapEl === "function") { const e = yahMapEl(document, tg, tg.b); if (e) { const r = e.getBoundingClientRect(); if (r.width || r.height) return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; } } } catch (e) {}
+  return scfElPos(bt.to);
 }
-const scfLen = pts => { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); return L; };
-function scfMark2(bt, pr) {
-  if (!SCF.sq) {
-    SCF.sq = document.createElement("div"); SCF.sq.id = "scfSq"; SCF.sq.title = "Estimated ship (supercruise)";
-    SCF.sq.innerHTML = '<svg id="scfSvg" width="100%" height="100%"><polyline id="scfPl" fill="none"/></svg><i id="scfBox"></i>'; document.body.appendChild(SCF.sq);
+function scfSq() {
+  if (SCF.sq) return SCF.sq;
+  const d = document.createElement("div"); d.id = "scfSq"; d.setAttribute("aria-hidden", "true");
+  d.innerHTML = '<svg width="100%" height="100%"><g id="scfG"></g></svg>'; document.body.appendChild(d); SCF.sq = d;
+  const g = $("scfG"); for (let i = 0; i < SCF_P.MAXC; i++) { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", "M-.6 -1 L-.15 -1 L.4 0 L-.15 1 L-.6 1 L-.05 0 Z"); g.appendChild(p); SCF.paths.push(p); }
+  return d;
+}
+function scfObst2(bt) {                                    // what the arc must keep out of: every body icon and every name on the map, but not the start or the target
+  const a = scfElPos(bt.from), b = scfElPos(bt.to), out = [];
+  for (const e of document.querySelectorAll("#smapSvg .smo, #smapSvg text, #smapSvg .smp, #smapSvg .sfm")) {
+    const r = e.getBoundingClientRect(); if (!r.width && !r.height) continue;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if ((a && Math.hypot(cx - a.x, cy - a.y) < 46) || (b && Math.hypot(cx - b.x, cy - b.y) < 46)) continue;
+    out.push([r.left - 7, r.top - 7, r.right + 7, r.bottom + 7]);
   }
-  const l2 = bt.leg2, legs = l2 ? [[bt.from, l2.via, bt.path1], [l2.via, bt.to, l2.path]] : [[bt.from, bt.to, bt.path]];
-  const parts = legs.map(([a, z, p]) => scfSeq2(a, z, p, bt.G).map(scfElPos).filter(Boolean));
-  if (parts.some(q => q.length < 2)) { SCF.sq.style.display = "none"; return; }
-  const want = parts[0].concat(parts[1] ? parts[1].slice(1) : []), L = scfLen(want), x1 = parts[1] ? scfLen(parts[0]) / (L || 1) : 0;
-  const seg = []; for (let i = 1; i < want.length; i++) seg.push(Math.hypot(want[i].x - want[i - 1].x, want[i].y - want[i - 1].y));
-  let r = Math.max(0, Math.min(1, x1 + (1 - x1) * pr.f)) * L, pt = want[want.length - 1];
-  for (let i = 0; i < seg.length; i++) { if (r <= seg[i] || i === seg.length - 1) { const t = seg[i] ? Math.min(1, r / seg[i]) : 0; pt = { x: want[i].x + (want[i + 1].x - want[i].x) * t, y: want[i].y + (want[i + 1].y - want[i].y) * t }; break; } r -= seg[i]; }
-  SCF.sq.style.display = "block";
-  $("scfPl").setAttribute("points", want.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "));
-  $("scfBox").style.transform = `translate(${Math.round(pt.x)}px, ${Math.round(pt.y)}px) translate(-50%, -50%)`;
+  return out;
+}
+function scfDraw2(bt, fade, time) {
+  const a = scfElPos(bt.from), b = scfElPos2(bt); if (!a || !b) { scfHideMarks(); return; }
+  const d = scfSq(), now = performance.now(), A = [a.x, a.y, 0], B = [b.x, b.y, 0], key = `${bt.from.bodyId}>${bt.to.bodyId}`;
+  if (!SCF.arc2 || SCF.arcKey2 !== key || now - SCF.arcT2 > 250) {
+    const obs = scfObst2(bt), pen = P => { let t = 0; for (const p of P) for (const o of obs) if (p[0] > o[0] && p[0] < o[2] && p[1] > o[1] && p[1] < o[3]) t += 1; return t; };
+    const S0 = scfElPos(S.main) || { x: a.x, y: a.y - 100 };
+    const up = scfPick(A, B, [S0.x, S0.y, 0], pen, 1), dn = scfPick(A, B, [S0.x, S0.y, 0], pen, -1);       // either side: the emptier one wins, a tie goes below
+    const r = up.p < dn.p ? up : dn.p < up.p ? dn : (up.ctrl[1] > dn.ctrl[1] ? up : dn);
+    SCF.arc2 = { ctrl: r.ctrl }; SCF.arcKey2 = key; SCF.arcT2 = now;
+  }
+  const T = scfTable(A, SCF.arc2.ctrl, B, 24), chord = Math.hypot(B[0] - A[0], B[1] - A[1]), s = Math.max(9, Math.min(19, chord / 38)), N = Math.max(3, Math.min(SCF_P.NMAX, Math.round(T.L / (s * 2.7)))), low = QUALITY === PRESETS.low;
+  d.classList.toggle("lowq", low);
+  const ph = low ? 0 : (time / 2.4) % 1, cnt = low ? N : N + 1;
+  for (let i = 0; i < SCF.paths.length; i++) {
+    const p = SCF.paths[i], f = low ? (i + 0.5) / N : (i + ph) / N;
+    if (i >= cnt || f >= 1) { p.style.display = "none"; continue; }
+    const at = scfAt(T, f), br = scfLook(f, low) * fade;
+    p.style.display = ""; p.setAttribute("transform", `translate(${at.p[0].toFixed(1)} ${at.p[1].toFixed(1)}) rotate(${(Math.atan2(at.t[1], at.t[0]) * 180 / Math.PI).toFixed(1)}) scale(${s.toFixed(2)})`); p.style.opacity = br.toFixed(2);
+  }
+  d.style.display = "block";
+}
+function scfHideMarks() {
+  if (SCF.mesh) SCF.mesh.visible = false;
+  if (SCF.sq) SCF.sq.style.display = "none";
+  SCF.arc = null; SCF.arc2 = null;
 }
 function scfTick(mapMode) {
   const fl = SCF.fl;
   if (!fl) { scfRepTick(); return; }
   try {
+    const vr = $("vRoute"); if (vr && !vr.checked) { scfHideMarks(); scfRepTick(); return; }                    // switched off in the View menu
     const bt = scfBuild(fl);
     if (!bt) { scfHideMarks(); scfRepTick(); return; }
-    scfFixCheck(fl, bt);
-    const pr = scfProgress(fl, bt), l2 = bt.leg2;
-    if (mapMode) {
-      if (SCF.cube) { SCF.cube.visible = false; SCF.line.visible = false; SCF.dots.visible = false; }
-      scfMark2(bt, pr);
-    } else {
-      if (SCF.sq) SCF.sq.style.display = "none";
-      scfMarks3();
-      let pts = scfPoints3(l2 ? { from: bt.from, to: l2.via } : bt, l2 ? bt.path1 : bt.path, bt.G), x1 = 0;
-      if (l2) { const L1 = scfLen3(pts), q = scfPoints3({ from: l2.via, to: bt.to }, l2.path, bt.G); pts = pts.concat(q.slice(1)); x1 = L1 / (scfLen3(pts) || 1); }
-      const pos = scfAlong(pts, x1 + (1 - x1) * pr.f);
-      SCF.line.geometry.setFromPoints(pts); SCF.line.visible = true;
-      const dense = []; for (let i = 1; i < pts.length; i++) for (let k = 0; k < 14; k++) dense.push(pts[i - 1].clone().lerp(pts[i], k / 14));
-      dense.push(pts[pts.length - 1]); SCF.dots.geometry.setFromPoints(dense); SCF.dots.visible = true;
-      SCF.cube.position.copy(pos); SCF.cube.visible = true;
-      SCF.cube.scale.setScalar(Math.max(1e-6, camera.position.distanceTo(pos) * 0.012));
-    }
+    const time = performance.now() / 1000, fade = Math.min(1, (performance.now() - fl.shown) / 900);
+    if (mapMode) { if (SCF.mesh) SCF.mesh.visible = false; scfDraw2(bt, fade, time); }
+    else { if (SCF.sq) SCF.sq.style.display = "none"; scfDraw3(bt, fade, time); }
     scfRepTick();
   } catch (e) { if (!SCF.err) { SCF.err = true; logErr(`sc flight: ${e.message}`); } scfHideMarks(); }
 }
-const scfLen3 = pts => { let L = 0; for (let i = 1; i < pts.length; i++) L += pts[i].distanceTo(pts[i - 1]); return L; };
 
 // ---- the report ----------------------------------------------------------------------------------------------------------------
 function scfRepEl() {
   if (SCF.el) return SCF.el;
   const d = document.createElement("div"); d.id = "scfRep"; d.style.display = "none";
-  d.innerHTML = '<div class="sh"><b title="Supercruise flights: the ship is estimated, not read from the game">SC FLIGHT</b><span>estimated</span><button id="scfX" title="Hide this report until the next flight" aria-label="Hide the flight report">×</button></div><div id="scfBody"></div>' +
-    '<div class="sf"><label title="Which equation moves the ship: no SCO, or a short SCO burst at the start. The game does not tell, so you say it.">SCO <select id="scfSco"><option value="0">off</option><option value="3">3 s</option><option value="4">4 s</option><option value="5">5 s</option></select></label>' +
-    '<button id="scfCopy" title="Copy the flights as text, to compare them with your own times">Copy</button><button id="scfClr" title="Forget the saved flights (they are only in this browser)">Clear</button></div>';
+  d.innerHTML = '<div class="sh"><b title="Supercruise flights: the route is drawn from the start to the target, the times are estimates">SC FLIGHT</b><span>estimated</span><button id="scfX" title="Hide this report until the next flight" aria-label="Hide the flight report">×</button></div><div id="scfBody"></div>' +
+    '<div class="sf"><button id="scfCopy" title="Copy the flights as text, to compare them with your own times">Copy</button><button id="scfClr" title="Forget the saved flights (they are only in this browser)">Clear</button></div>';
   document.body.appendChild(d); SCF.el = d;
   $("scfX").onclick = () => { SCF.hidden = true; scfRepDraw(true); };
-  $("scfSco").onchange = e => { SCF.sco = +e.target.value; scfRepDraw(true); };
   $("scfCopy").onclick = () => { const t = scfText(); try { navigator.clipboard.writeText(t); toast("Flights copied"); } catch (e) { toast("Could not copy"); } };
   $("scfClr").onclick = () => { SCF.reps = []; scfSave(); scfRepDraw(true); };
   return d;
 }
-function scfTimes(e) { return `${scfDur(e.a)} (${scfDur(e.lo)} to ${scfDur(e.hi)})`; }
+const scfTimes = e => `${scfDur(e.a)} (${scfDur(e.lo)} to ${scfDur(e.hi)})`;
 function scfRepHtml() {
   const fl = SCF.fl, bt = fl && fl.bt; let h = "";
   if (fl) {
     if (bt) {
-      const pr = scfProgress(fl, bt), e = scfEst(bt.m);
+      const e = bt.est;
       h += `<div class="sr"><b>${esc(shortName(bt.from, S.sys.name))} → ${esc(bt.toName)}</b></div>` +
-        `<div class="sr">Distance <b>${scfLs(bt.D)} ls</b> · elapsed <b>${scfDur(pr.age)}</b></div>` +
+        `<div class="sr">Distance <b>${scfLs(bt.D)} ls</b> · elapsed <b>${scfDur((Date.now() - fl.t0) / 1000)}</b></div>` +
         `<div class="sr">Estimated total <b>${scfTimes(e)}</b></div>` +
-        `<div class="sr">With a short SCO burst (3, 4, 5 s): <b>${scfDur(e.b3)} · ${scfDur(e.b4)} · ${scfDur(e.b5)}</b></div>` +
-        `<div class="sr">Estimated now: <b>${Math.round(100 * (pr.leg2 ? pr.pos : pr.f))} %</b> · about <b>${scfLs(pr.v)} c</b> · arrival in about <b>${scfDur(pr.left)}</b>${SCF.sco ? ` (SCO ${SCF.sco} s)` : ""}</div>`;
-      if (fl.fixes.length) h += `<div class="sr fx">Fix: ${fl.fixes.map(f => `${esc(f.name)} at ${scfDur(f.at)} (estimate said ${f.est} %)`).join(", ")}</div>`;
-    } else h += `<div class="sr"><b>In supercruise</b> · elapsed ${scfDur((Date.now() - fl.t0) / 1000)}</div><div class="sr dim">Set a target in the game to see the estimate.</div>`;
+        `<div class="sr">With a short SCO burst (3, 4, 5 s): <b>${scfDur(e.b3)} · ${scfDur(e.b4)} · ${scfDur(e.b5)}</b></div>`;
+    } else h += `<div class="sr"><b>In supercruise</b> · elapsed ${scfDur((Date.now() - fl.t0) / 1000)}</div><div class="sr dim">Set a target in the game to see the route.</div>`;
   }
   const L = SCF.reps.slice(-4).reverse();
   if (L.length) h += `<div class="sl">${fl ? "Last flights" : "Flights"}</div>` + L.map(r => {
-    const m = [r.est.a, r.est.b3, r.est.b4, r.est.b5][r.sco === 3 ? 1 : r.sco === 4 ? 2 : r.sco === 5 ? 3 : 0], df = r.actual ? Math.round(100 * (m - r.actual) / r.actual) : 0;
-    return `<div class="sr"><b>${esc(r.from)} → ${esc(r.station || r.to)}</b> · ${scfLs(r.dist)} ls<br>SC time <b>${scfDur(r.actual)}</b> · estimate ${scfDur(m)} (${df > 0 ? "+" : ""}${df} %)${r.sco ? ` · SCO ${r.sco} s` : ""}</div>`;
+    const df = r.actual ? Math.round(100 * (r.est.a - r.actual) / r.actual) : 0;
+    return `<div class="sr"><b>${esc(r.from)} → ${esc(r.station || r.to)}</b> · ${scfLs(r.dist)} ls<br>SC time <b>${scfDur(r.actual)}</b> · estimate ${scfDur(r.est.a)} (${df > 0 ? "+" : ""}${df} %)</div>`;
   }).join("");
   return h;
 }
 function scfText() {
   return "GRAVITAS SC flights (estimated)\n" + SCF.reps.map(r => {
     const t = ts => new Date(ts).toISOString().slice(11, 19);
-    return `${r.sys} | start ${r.from} | target ${r.station || r.to} | ${r.dist.toFixed(1)} ls | SC ${t(r.t0)} to ${t(r.t1)} UTC = ${scfDur(r.actual)} (${Math.round(r.actual)} s) | estimate no SCO ${Math.round(r.est.a)} s (${Math.round(r.est.lo)} to ${Math.round(r.est.hi)}) | SCO 3/4/5 s: ${Math.round(r.est.b3)}/${Math.round(r.est.b4)}/${Math.round(r.est.b5)} s${r.sco ? ` | SCO marked ${r.sco} s` : ""}${r.fix && r.fix.length ? ` | fix ${r.fix.map(f => `${f.name}@${f.at}s`).join(",")}` : ""}`;
+    return `${r.sys} | start ${r.from} | target ${r.station || r.to} | ${r.dist.toFixed(1)} ls | SC ${t(r.t0)} to ${t(r.t1)} UTC = ${scfDur(r.actual)} (${Math.round(r.actual)} s) | estimate no SCO ${Math.round(r.est.a)} s (${Math.round(r.est.lo)} to ${Math.round(r.est.hi)}) | SCO 3/4/5 s: ${Math.round(r.est.b3)}/${Math.round(r.est.b4)}/${Math.round(r.est.b5)} s`;
   }).join("\n");
 }
 function scfRepDraw(force) {
@@ -308,9 +260,8 @@ function scfRepDraw(force) {
   const el = scfRepEl(), on = SYNC.on && !SCF.hidden && (SCF.fl || SCF.reps.length);
   if (!on) { el.style.display = "none"; return; }
   const html = scfRepHtml(); if (force || SCF.lastSig !== html) { SCF.lastSig = html; $("scfBody").innerHTML = html; }
-  if ($("scfSco").value !== String(SCF.sco)) $("scfSco").value = String(SCF.sco);
   el.style.display = "block";
 }
 function scfRepTick() { const n = performance.now(); if (n - SCF.rt < 500) return; SCF.rt = n; scfRepDraw(false); }
 // the test door: only with ?scftest=1 in the address (nothing else ever sees it)
-if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, scfEvent, scfModels, scfGraph, scfRoad, scfBuild, scfRepDraw, S: () => S, tgtResolve: () => tgtResolve(), YAH };
+if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, scfEvent, scfBuild, scfRepDraw, scfEst, S: () => S, tgtResolve: () => tgtResolve(), YAH, camera, controls, scfV3 };
