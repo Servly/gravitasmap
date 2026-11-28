@@ -4,6 +4,10 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.40 · minor · 28 Nov 2026
+- Tip: to clear your target in the system you are in, target the Nav Beacon and let it go.
+- Fix: only the Nav Beacon and the Compromised Navigation Beacon clear the target now. Resource Extraction Sites and wreckage are targets like any other place again.
+
 ### v0.99.39 · minor · 28 Nov 2026
 - New: the game does not say when you let go of a target in the system you are in, so the map cannot know. To clear the Target tag and the route arrows, target a Nav Beacon (or a Compromised Navigation Beacon) and let it go: the map now reads that as no target. Targeting any other place works as before.
 

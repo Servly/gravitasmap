@@ -494,7 +494,7 @@ function yahMapTick() {
 const TGT = { el: null, holder: null, t: null };
 function tgtResolve() {
   const d = SYNC.dest; if (!d || !S || !syncViewing()) return null;
-  if (/^\$MULTIPLAYER_SCENARIO/i.test(d.Raw || "")) return null;   // v0.99.39: targeting a Nav Beacon (or a Compromised Navigation Beacon) is the player's way to clear the target
+  if (/^\$MULTIPLAYER_SCENARIO(42|80)_TITLE;?$/i.test(d.Raw || "")) return null;   // v0.99.39: targeting a Nav Beacon (42) or a Compromised Navigation Beacon (80) is the player's way to clear the target; the other scenarios (Resource Extraction Sites 14 and 77-79, Salvageable Wreckage 81) are real places to go to
   if (d.System != null && S.sys.id64 != null && String(d.System) !== String(S.sys.id64)) return null;   // a target in another system: the next jump
   const nm = d.Name && !/^\$/.test(d.Name) ? d.Name : "", hit = st => st && nm && syncSame(st.name, nm);
   if (nm) {
