@@ -2,6 +2,9 @@
 // (a box with a canopy and a seat) at the start of the arrows and the camera beside it. "Start the journey" runs a short show (about 10 s, a little longer for a
 // longer way): 2 s from outside into the cockpit, the way along the arc seen from inside with a head that looks around, 2 s back outside at the target, then a
 // line of text. It is a show, NOT the real position of the ship: nothing in the game's files tells that. Esc leaves at any time.
+// PAUSED (0.99.33): the show moved the camera in a scene that is still settling (the ship did not sit on the arrows) and may start heavy surface work near planets.
+// It stays off for everyone until it is rebuilt and tested on a real graphics card; ?journey=1 in the address turns it on for a test.
+const JNY_ON = /[?&]journey=1(&|$)/.test(location.search);                                   // off for everyone: only an address with ?journey=1 turns it on, for testing
 const JNY = { arc: null, focus: null, hud: null, ph: "idle", T: 10, t0: 0, ship: null, btn: null, ov: null, saved: null };
 const JNY_LINES = [
   "Preview complete. No fuel was burned and no space was crossed.",
@@ -88,6 +91,7 @@ function jnyPose(t) {                                      // the ship and the c
   camera.fov = 50 + 22 * inside; camera.updateProjectionMatrix(); controls.target.copy(P);
 }
 function jnyTick(mapMode) {
+  if (!JNY_ON) { if (JNY.btn) JNY.btn.style.display = "none"; if (JNY.ph !== "idle") jnyStop(); return; }
   if (!JNY.btn) { if (!SCF.E) return; jnyUi(); }
   const route = !!(SCF.E && SCF.key), can = route && jnyOK();
   if (JNY.ph === "idle") {                                 // the button on the System map, at the top left of the picture

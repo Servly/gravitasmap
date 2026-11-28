@@ -87,10 +87,10 @@ function scfDraw3(E, fade, time) {
       const th = (layer ? 7 : 2.4) * wpp * 0.5, mul = layer ? 0.3 : 1;
       for (let e = 0; e < 6; e++) {
         const A = SCF_SH[e], B = SCF_SH[(e + 1) % 6], ax = (A[0] - 0.5) * sz * 1.2, ay = A[1] * sz, bx = (B[0] - 0.5) * sz * 1.2, by = B[1] * sz, dx = bx - ax, dy = by - ay, dl = Math.hypot(dx, dy) || 1, ox = -dy / dl * th, oy = dx / dl * th;
-        const q4 = [[ax + ox, ay + oy], [ax - ox, ay - oy], [bx + ox, by + oy], [bx - ox, by - oy]];
-        for (const q of q4) {
-          pos[v * 3] = P[0] + t[0] * q[0] + ux * q[1]; pos[v * 3 + 1] = P[1] + t[1] * q[0] + uy * q[1]; pos[v * 3 + 2] = P[2] + t[2] * q[0] + uz * q[1];
-          col[v * 3] = C[0] * br * mul; col[v * 3 + 1] = C[1] * br * mul; col[v * 3 + 2] = C[2] * br * mul; v++;
+        for (let k = 0; k < 4; k++) {                                                    // the four corners of this edge's strip, written straight into the buffer
+          const lx = (k < 2 ? ax : bx) + (k % 2 ? -ox : ox), ly = (k < 2 ? ay : by) + (k % 2 ? -oy : oy), o = v * 3;
+          pos[o] = P[0] + t[0] * lx + ux * ly; pos[o + 1] = P[1] + t[1] * lx + uy * ly; pos[o + 2] = P[2] + t[2] * lx + uz * ly;
+          col[o] = C[0] * br * mul; col[o + 1] = C[1] * br * mul; col[o + 2] = C[2] * br * mul; v++;
         }
       }
     }
@@ -157,7 +157,11 @@ function scfTick(mapMode) {
     if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); SCF.pa = SCF.pb = null; }
     const fade = Math.min(1, (performance.now() - SCF.t0) / 900);
     if (mapMode) { if (SCF.mesh) SCF.mesh.visible = false; scfDraw2(E, fade, time); }
-    else { if (SCF.sq) SCF.sq.style.display = "none"; scfDraw3(E, fade, time); }
+    else {
+      if (SCF.sq) SCF.sq.style.display = "none";
+      if (typeof PREP !== "undefined" && (PREP.on || !PREP.compiled)) { scfHide(); return; }       // the 3D map prepares itself first (its shaders): nothing of ours is added to the scene until that is done
+      scfDraw3(E, fade, time);
+    }
   } catch (e) { if (!SCF.err) { SCF.err = true; logErr(`route arrows: ${e.message}`); } scfHide(); }
 }
 // the test door: only with ?scftest=1 in the address (nothing else ever sees it)
