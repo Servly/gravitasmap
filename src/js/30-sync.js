@@ -272,6 +272,7 @@ function syncLine(ln, replay) {
   if (!SYNC_EV.test(ln)) return;
   let j; try { j = JSON.parse(ln); } catch (e) { return; }
   const ev = j.event;
+  try { scfPlace(j); } catch (e) {}                                          // v0.99.37: remembers the last place of the ship for the route arrows (it only reads the line)
   if (ev === "Scan") { try { scanSeen(j, replay); } catch (e) {} return; }   // v0.96: where a body is on its orbit, from your own scan
   if (CB_EV.test(ev)) try { cbEvent(j, replay); } catch (e) {}           // v0.91: Combat Mode
   if (/^(Music|ShipTargeted|UnderAttack|Bounty|FactionKillBond|CapShipBond|HeatWarning|HeatDamage|ShieldState|HullDamage|Interdicted|Interdiction|EscapeInterdiction|Died|Resurrect|GameModeChange|WingJoin|WingAdd|WingLeave|SupercruiseDestinationDrop|FighterDestroyed|LaunchFighter|SupercruiseEntry|Missions|Statistics|ReceiveText|CommitCrime|Rank|Progress)$/.test(ev)) return;   // nothing else to do with these

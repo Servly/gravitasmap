@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.37", k: "minor", d: "28 Nov 2026", t: [
+      "Fix: the route arrows did not show at all when the map was opened while your ship was already in supercruise, for example when the GRAVITAS app's map window starts or the page is reloaded. In supercruise the game says nothing about where you are, and the page had forgotten where you started. It now keeps the last place your ship was at in this system from the journal lines (a drop at a body, a landing approach, a login), also the ones it reads when the page opens, and starts the arrows there."
+    ] },
     { v: "v0.99.36", k: "minor", d: "28 Nov 2026", t: [
       "Fix: on the 3D map the route arrows could jump or slide to a new place while you moved the mouse. The arrow ends were being eased toward their place, and when the 3D map moves its own origin as you turn and zoom, that easing showed as a sudden shift. The ends now follow the bodies exactly, every frame.",
       "New: on the 3D map the target now has the same orange Target tag at the end of the arrows as on the System map, with its name."

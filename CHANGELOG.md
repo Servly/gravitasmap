@@ -4,6 +4,9 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.37 · minor · 28 Nov 2026
+- Fix: the route arrows did not show at all when the map was opened while your ship was already in supercruise, for example when the GRAVITAS app's map window starts or the page is reloaded. In supercruise the game says nothing about where you are, and the page had forgotten where you started. It now keeps the last place your ship was at in this system from the journal lines (a drop at a body, a landing approach, a login), also the ones it reads when the page opens, and starts the arrows there.
+
 ### v0.99.36 · minor · 28 Nov 2026
 - Fix: on the 3D map the route arrows could jump or slide to a new place while you moved the mouse. The arrow ends were being eased toward their place, and when the 3D map moves its own origin as you turn and zoom, that easing showed as a sudden shift. The ends now follow the bodies exactly, every frame.
 - New: on the 3D map the target now has the same orange Target tag at the end of the arrows as on the System map, with its name.

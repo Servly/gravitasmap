@@ -6,9 +6,16 @@
 // Words on screen are the game's own: ship, start, target, route.
 const SCF_P = { SAG: 0.15, MAXC: 44, NMAX: 40, SP3: 46, SZ2: 11, COL: [0.22, 1, 0.53] };
 const SCF_RM = matchMedia("(prefers-reduced-motion: reduce)");                     // a person who asks for less motion gets still arrows, no flow and no head turning
-const SCF = { tg: null, stk: null, E: null, mesh: null, sq: null, jb: null, err: false, paths: [], jpaths: [], t0: 0, key: "", last: null, arc3: null };
+const SCF = { place: null, tg: null, stk: null, E: null, mesh: null, sq: null, jb: null, err: false, paths: [], jpaths: [], t0: 0, key: "", last: null, arc3: null };
 try { localStorage.removeItem("gvScf"); } catch (e) {}                          // 0.99.29 and 0.99.30 kept flight reports here: gone
 
+// the last place the ship was at in this system, from the journal lines (also the ones read when the page opens): a body of a landing approach, a drop, a login.
+// In supercruise the game says nothing more, so this is the start of the arrows when the map has no 'You are here'.
+function scfPlace(j) {
+  const ev = j.event, sys = j.StarSystem || null;
+  if (ev === "FSDJump" || ev === "CarrierJump") { SCF.place = j.BodyID != null ? { id: +j.BodyID, sys } : null; return; }
+  if ((ev === "Location" || ev === "ApproachBody" || ev === "LeaveBody" || ev === "SupercruiseExit") && j.BodyID != null && j.BodyType !== "Station" && sys) SCF.place = { id: +j.BodyID, sys };
+}
 // ---- the start and the target ---------------------------------------------------------------------------------------------------
 const scfSm = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
 const scfLook = (f, low) => (0.3 + 0.7 * Math.pow(f, 1.2)) * (low ? 1 : scfSm(f / 0.1) * scfSm((1 - f) / 0.08));      // dim at the start, brighter toward the target, fading in and out at the two ends
@@ -20,6 +27,7 @@ function scfEnds() {                                       // { a, b }: each { b
   if (st && st.t && st.t.o && st.t.o.obj) SCF.stk = { body: st.body, t: st.t, at: now };
   else if (st && stk && stk.body === st.body && now - stk.at < 6000) st = { body: stk.body, t: stk.t };      // the station's own place flickers away for a moment as the game's file updates: keep it
   if (st) SCF.last = st; else st = SCF.last && S.bodies.includes(SCF.last.body) ? SCF.last : null;    // in supercruise the last place stays the start
+  if (!st && SCF.place && String(SCF.place.sys || "").toLowerCase() === String(S.sys.name).toLowerCase()) { const pb = S.byId.get(SCF.place.id); if (pb) st = { body: pb, t: null }; }      // after a page open in supercruise: the last place from the journal
   if (!st) return null;
   const a = { body: st.body, o: st.t && st.t.o && st.t.o.obj ? st.t.o : null, st: st.t && st.t.st ? st.t.st : null, t: st.t };
   const b = { body: tg.b, o: tg.o && tg.o.obj ? tg.o : null, st: tg.st || null, t: tg };
@@ -173,4 +181,4 @@ function scfTick(mapMode) {
   } catch (e) { if (!SCF.err) { SCF.err = true; logErr(`route arrows: ${e.message}`); } scfHide(); }
 }
 // the test door: only with ?scftest=1 in the address (nothing else ever sees it)
-if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, S: () => S, YAH, TGT, camera, controls, scfV3, scfEnds, yahUpdate, tgtUpdate, jrnHops };
+if (/[?&]scftest=1(&|$)/.test(location.search)) window.__scf = { SCF, SYNC, S: () => S, YAH, TGT, camera, controls, scfV3, scfEnds, yahUpdate, tgtUpdate, jrnHops, scfPlace };
