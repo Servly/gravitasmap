@@ -1489,3 +1489,20 @@ body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; p
 
 /* v0.99.24: calm page (js/50-calm.js): the endless small animations stand still while nobody looks at them */
 html.calm *, html.calm *::before, html.calm *::after { animation-play-state: paused !important; }
+
+/* v0.99.29: SC flight report and the estimated ship on the system map */
+#scfRep{position:fixed;left:14px;bottom:14px;z-index:30;width:292px;max-width:calc(100vw - 28px);background:rgba(14,20,30,.92);border:1px solid rgba(120,170,220,.28);border-radius:10px;color:#dbe6f2;font-size:12px;line-height:1.45;padding:8px 10px;backdrop-filter:blur(6px)}
+#scfRep .sh{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+#scfRep .sh b{letter-spacing:.08em;font-size:11px}
+#scfRep .sh span{font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,209,102,.16);color:#ffd166}
+#scfRep .sh button{margin-left:auto;background:none;border:0;color:inherit;font-size:16px;cursor:pointer;line-height:1}
+#scfRep .sr{margin:2px 0}#scfRep .dim{opacity:.65}#scfRep .fx{color:#9be7a3}
+#scfRep .sl{margin:6px 0 2px;font-size:10px;letter-spacing:.08em;opacity:.7;text-transform:uppercase}
+#scfRep .sf{display:flex;align-items:center;gap:6px;margin-top:6px}
+#scfRep .sf button,#scfRep .sf select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:inherit;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer}
+#scfRep .sf label{margin-right:auto}
+#scfSq{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:6;pointer-events:none;display:none}
+#scfPl{stroke:#4cc9f0;stroke-width:2.5;stroke-dasharray:7 5;stroke-linejoin:round;opacity:1}
+#scfBox{position:absolute;left:0;top:0;width:11px;height:11px;background:#ffd166;border:1px solid #1a1a1a;box-shadow:0 0 0 1px rgba(255,209,102,.5)}
+html.appsmap #scfRep,body.pfull #scfRep{display:none!important}
+@media (max-height:700px){#scfRep{display:none!important}}

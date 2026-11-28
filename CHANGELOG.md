@@ -4,6 +4,10 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.29 · major · 28 Nov 2026
+- New (experimental): SC flight. While your ship is in supercruise and Sync is on, the map shows an ESTIMATED ship: a cube on the 3D map and a square on the System map. It moves along a route from where you started to the target you set in the game. The route follows the system's roads: the ring around the primary star, a gate for each planet, and the moons hanging on their planet. A small report in the lower left shows the start, the target, the distance, the elapsed time and the estimated total time (with a range), and an estimate for a short SCO burst of 3, 4 or 5 seconds. The game does not tell whether SCO is on, so you can mark it in the report.
+- When the game gives a real position (the latitude and longitude it shows near a body), the estimate snaps to it and the route bends through that body. When the flight ends, the report keeps the real SC time (from entering to leaving supercruise) next to the estimate, so you can see how close it was. "Copy" copies the last flights as text. Everything modelled is called an estimate: speed, acceleration and distance covered are not read from the game. The last 30 flights are kept only in your browser ("Clear" forgets them).
+
 ### v0.99.28 · minor · 27 Nov 2026
 - Fix: in the GRAVITAS app's System map panel over the game, the planets and stars vanished (only rings and labels stayed) whenever the quality was not Low. The map's "live" mode, which draws the bodies from the 3D view under the map, was switched on in that panel, where the 3D view is hidden. It stays off there now.
 

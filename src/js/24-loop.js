@@ -117,6 +117,7 @@ function frame(now) {
       if (selected && LIVE_TABS.has(infoTab) && now - panelT > panelGap && Math.abs(simTime - panelSim) > 200 && $("info").style.display !== "none") renderTab(infoTab);
       smapTick(false);
       yahMapTick();
+      scfTick(true);
       try { maplTick(); REDRAW = false; if (MAPL.on) fencePush(now); } catch (e) { if (!frame._mlErr) { frame._mlErr = true; logErr(`live map: ${e.message}`); } }
       setText("gametime", gameTime(simTime)); setText("localtime", localTime(simTime)); if (PFULL) pfullClock();
       liveFlag();
@@ -150,7 +151,8 @@ function frame(now) {
     try { bakeTick(); } catch (e) { if (!frame._bakeErr) { frame._bakeErr = true; logErr(`surface bake: ${e.message}`); } }
     if (slow) WORK.scale = ws;
   }
-  if (S && !SURF && !S._ready3d) prep3D();                           // v0.78.1: the loading screen (v0.9: before the first draw)
+  if (!SURF) scfTick(false);                                          // v0.99.29: the estimated ship (cube) on the 3D map, only during a supercruise flight
+  if (S && !SURF && !S._ready3d) prep3D();                        // v0.78.1: the loading screen (v0.9: before the first draw)
   // v0.9: no 3D drawing until its shaders (the scene's and the glow's) are compiled: using one earlier would make the
   // browser wait for the driver, and on Windows every Chrome tab with it
   if (!PREP.compiled && warmed(PREP.key)) PREP.compiled = true;        // (also when the loading screen was skipped)
