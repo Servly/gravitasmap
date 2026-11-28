@@ -3,6 +3,10 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.36", k: "minor", d: "28 Nov 2026", t: [
+      "Fix: on the 3D map the route arrows could jump or slide to a new place while you moved the mouse. The arrow ends were being eased toward their place, and when the 3D map moves its own origin as you turn and zoom, that easing showed as a sudden shift. The ends now follow the bodies exactly, every frame.",
+      "New: on the 3D map the target now has the same orange Target tag at the end of the arrows as on the System map, with its name."
+    ] },
     { v: "v0.99.35", k: "minor", d: "28 Nov 2026", t: [
       "Fix: in the GRAVITAS app's map window, route mode messages such as ROUTE RECALCULATED and ROUTE CLEARED never went away, and the System map could open with an empty gap on the right as if a panel were half open. The page's calm mode (which stops the endless little animations) also stopped the one-shot ones: a panel opening or closing, the route bars sliding in and out, the route messages fading. Now it stops only the endless ones, so those one-shot animations finish as they should and the app's savings stay.",
       "Fix: the Next jump strip no longer sits on top of the route messages (it waits for them to fade) and goes away together with route mode."

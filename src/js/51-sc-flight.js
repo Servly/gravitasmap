@@ -6,7 +6,7 @@
 // Words on screen are the game's own: ship, start, target, route.
 const SCF_P = { SAG: 0.15, MAXC: 44, NMAX: 40, SP3: 46, SZ2: 11, COL: [0.22, 1, 0.53] };
 const SCF_RM = matchMedia("(prefers-reduced-motion: reduce)");                     // a person who asks for less motion gets still arrows, no flow and no head turning
-const SCF = { stk: null, pa: null, pb: null, E: null, mesh: null, sq: null, jb: null, err: false, paths: [], jpaths: [], t0: 0, key: "", last: null, arc3: null };
+const SCF = { tg: null, stk: null, E: null, mesh: null, sq: null, jb: null, err: false, paths: [], jpaths: [], t0: 0, key: "", last: null, arc3: null };
 try { localStorage.removeItem("gvScf"); } catch (e) {}                          // 0.99.29 and 0.99.30 kept flight reports here: gone
 
 // ---- the start and the target ---------------------------------------------------------------------------------------------------
@@ -64,13 +64,8 @@ function scfMesh3() {
   const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, side: THREE.DoubleSide }));
   m.frustumCulled = false; m.renderOrder = 8; m.visible = false; scene.add(m); SCF.mesh = m; return m;
 }
-function scfSmooth(k, p) {                                 // an end point moves to a new place gently, never in one jump
-  const q = SCF[k]; if (!q) return (SCF[k] = p.slice());
-  const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); if (!(d > 0)) return q;
-  const f = 0.2; q[0] += (p[0] - q[0]) * f; q[1] += (p[1] - q[1]) * f; q[2] += (p[2] - q[2]) * f; return q;
-}
 function scfDraw3(E, fade, time) {
-  const a = scfSmooth("pa", scfPos3(E.a)), b = scfSmooth("pb", scfPos3(E.b)), s = scfV3(S.main), T = scfTable(a, scfCtrl(a, b, [s.x, s.y, s.z]), b, 24);
+  const a = scfPos3(E.a), b = scfPos3(E.b), s = scfV3(S.main), T = scfTable(a, scfCtrl(a, b, [s.x, s.y, s.z]), b, 24);
   SCF.arc3 = T;
   const m = scfMesh3(), low = (QUALITY === PRESETS.low || SCF_RM.matches), cam = camera.position, g = m.geometry, pos = g.attributes.position.array, col = g.attributes.color.array;
   const cv = new THREE.Vector3(); let px = 0, prev = null;                       // the arc's length on the screen, to choose how many chevrons
@@ -95,9 +90,19 @@ function scfDraw3(E, fade, time) {
       }
     }
   }
+  scfTgTag(E, T);
   g.setDrawRange(0, Math.round(v * 1.5)); g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; m.visible = true;
 }
 
+// the target's name at the end of the arc, in the same orange as the System map's Target tag (the map's own tag hides when a moon's marker is small)
+function scfTgTag(E, T) {
+  if (!SCF.tg) { const d = document.createElement("div"); d.id = "scfTg"; d.setAttribute("aria-hidden", "true"); document.body.appendChild(d); SCF.tg = d; }
+  const e = T.P[T.P.length - 1], v = new THREE.Vector3(e[0], e[1], e[2]).project(camera), d = SCF.tg;
+  if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { d.style.display = "none"; return; }
+  const nm = E.b.t && E.b.t.name ? E.b.t.name : shortName(E.b.body, S.sys.name);
+  if (d.dataset.n !== nm) { d.dataset.n = nm; d.innerHTML = `<i>▲</i>Target<em></em>`; d.querySelector("em").textContent = nm; }
+  d.style.display = "block"; d.style.left = Math.round((v.x * 0.5 + 0.5) * innerWidth) + "px"; d.style.top = Math.round((0.5 - v.y * 0.5) * innerHeight + 8) + "px";
+}
 // ---- 2D: the same corridor on the System map -----------------------------------------------------------------------------------------
 function scfElPos(e) {                                      // the centre of a place's icon on the map: a station's own icon, else its body
   let g = null;
@@ -127,6 +132,7 @@ function scfDraw2(E, fade, time) {
   d.style.display = "block";
 }
 function scfHide() {
+  if (SCF.tg) SCF.tg.style.display = "none";
   if (SCF.mesh) SCF.mesh.visible = false;
   if (SCF.sq) SCF.sq.style.display = "none";
 }
@@ -156,7 +162,7 @@ function scfTick(mapMode) {
     const E = on ? scfEnds() : null; SCF.E = E;
     if (!E) { if (SCF.key) { SCF.key = ""; scfHide(); } return; }
     const key = `${E.a.body.bodyId}${E.a.st ? E.a.st.name : ""}>${E.b.body.bodyId}${E.b.st ? E.b.st.name : ""}`;
-    if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); SCF.pa = SCF.pb = null; }
+    if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); }
     const fade = Math.min(1, (performance.now() - SCF.t0) / 900);
     if (mapMode) { if (SCF.mesh) SCF.mesh.visible = false; scfDraw2(E, fade, time); }
     else {

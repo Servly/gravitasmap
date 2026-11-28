@@ -1502,3 +1502,7 @@ body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; p
 #scfJb b{letter-spacing:.02em}
 body.pfull #scfJb,html.appsmap #scfJb{display:none!important}
 
+#scfTg{position:fixed;z-index:7;pointer-events:none;display:none;transform:translateX(-50%);padding:2px 9px 3px;border-radius:6px;background:#ff9f1a;color:#1a1000;font-size:10.5px;font-weight:700;letter-spacing:.03em;white-space:nowrap;text-align:center;line-height:1.25;box-shadow:0 2px 10px #0008}
+#scfTg i{display:block;font-style:normal;font-size:9px;line-height:1;margin-bottom:1px}
+#scfTg em{display:block;font-style:normal;font-weight:600;font-size:9.5px;opacity:.85}
+body.pfull #scfTg,html.appsmap #scfTg{display:none!important}
