@@ -3,6 +3,9 @@
 // Add a new release at the top of the newest quarter.
 export const CHANGES = [
   { q: "2026 Q4", rel: [
+    { v: "v0.99.39", k: "minor", d: "28 Nov 2026", t: [
+      "New: the game does not say when you let go of a target in the system you are in, so the map cannot know. To clear the Target tag and the route arrows, target a Nav Beacon (or a Compromised Navigation Beacon) and let it go: the map now reads that as no target. Targeting any other place works as before."
+    ] },
     { v: "v0.99.38", k: "minor", d: "28 Nov 2026", t: [
       "Fix: the orange Target tag I added to the 3D map stayed hanging in the middle of the System map after you switched from the 3D map. It now shows only on the 3D map, and only while the arrows show.",
       "Fix: there could be two Target tags on the 3D map (the map's own and mine). Mine now shows only when the map's own tag is not on screen.",

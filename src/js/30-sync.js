@@ -257,7 +257,7 @@ function syncStatusApply(j) {
     const sc = !!(F & 16);                                           // v0.76: supercruise
     if (sc !== SYNC.sc) { SYNC.sc = sc; SYNC.newsT = Date.now(); yahUpdate(); syncShow(); }
     // v0.74: which game panel is open (GuiFocus: 2 is the left panel the 1 key opens) and the ship's current target
-    const d = j.Destination ? Object.assign({}, j.Destination, { Name: jl(j.Destination, "Name") }) : null, dk = d ? `${d.System}|${d.Body}|${d.Name || ""}` : "";   // v0.91.7: readable names
+    const d = j.Destination ? Object.assign({}, j.Destination, { Name: jl(j.Destination, "Name"), Raw: j.Destination.Name }) : null, dk = d ? `${d.System}|${d.Body}|${d.Name || ""}` : "";   // v0.91.7: readable names
     if (j.GuiFocus !== SYNC.gui || dk !== SYNC.destK) { const ch = dk !== SYNC.destK; SYNC.gui = j.GuiFocus ?? 0; SYNC.destK = dk; SYNC.dest = d || null; if (ch) { SYNC.newsT = Date.now(); tgtUpdate(); } }   // v0.82.4: the target marker
   }
 }
@@ -494,6 +494,7 @@ function yahMapTick() {
 const TGT = { el: null, holder: null, t: null };
 function tgtResolve() {
   const d = SYNC.dest; if (!d || !S || !syncViewing()) return null;
+  if (/^\$MULTIPLAYER_SCENARIO/i.test(d.Raw || "")) return null;   // v0.99.39: targeting a Nav Beacon (or a Compromised Navigation Beacon) is the player's way to clear the target
   if (d.System != null && S.sys.id64 != null && String(d.System) !== String(S.sys.id64)) return null;   // a target in another system: the next jump
   const nm = d.Name && !/^\$/.test(d.Name) ? d.Name : "", hit = st => st && nm && syncSame(st.name, nm);
   if (nm) {
