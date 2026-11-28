@@ -104,12 +104,16 @@ function scfDraw3(E, fade, time) {
 
 // the target's name at the end of the arc, in the same orange as the System map's Target tag (the map's own tag hides when a moon's marker is small)
 function scfTgTag(E, T) {
-  if (!SCF.tg) { const d = document.createElement("div"); d.id = "scfTg"; d.setAttribute("aria-hidden", "true"); document.body.appendChild(d); SCF.tg = d; }
-  const e = T.P[T.P.length - 1], v = new THREE.Vector3(e[0], e[1], e[2]).project(camera), d = SCF.tg;
+  if (!SCF.tg) { const d = document.createElement("div"); d.id = "scfTg"; d.setAttribute("aria-hidden", "true"); d.style.left = "0"; d.style.top = "0"; document.body.appendChild(d); SCF.tg = d; }
+  const d = SCF.tg;
+  // the map has its own Target tag when the target's label is on screen: then ours would be a second one
+  const own = document.querySelector(".tgtTag"); if (own && own.offsetParent !== null) { const r = own.getBoundingClientRect(); if (r.width > 0 && r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight) { d.style.display = "none"; return; } }
+  camera.updateMatrixWorld();                                           // the camera of THIS frame (the page moves it just before), not the one of the last picture: no trailing, no shaking
+  const e = T.P[T.P.length - 1], v = new THREE.Vector3(e[0], e[1], e[2]).project(camera);
   if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { d.style.display = "none"; return; }
   const nm = E.b.t && E.b.t.name ? E.b.t.name : shortName(E.b.body, S.sys.name);
   if (d.dataset.n !== nm) { d.dataset.n = nm; d.innerHTML = `<i>▲</i>Target<em></em>`; d.querySelector("em").textContent = nm; }
-  d.style.display = "block"; d.style.left = Math.round((v.x * 0.5 + 0.5) * innerWidth) + "px"; d.style.top = Math.round((0.5 - v.y * 0.5) * innerHeight + 8) + "px";
+  d.style.display = "block"; d.style.transform = `translate(${((v.x * 0.5 + 0.5) * innerWidth).toFixed(2)}px, ${((0.5 - v.y * 0.5) * innerHeight + 8).toFixed(2)}px) translateX(-50%)`;
 }
 // ---- 2D: the same corridor on the System map -----------------------------------------------------------------------------------------
 function scfElPos(e) {                                      // the centre of a place's icon on the map: a station's own icon, else its body
@@ -166,9 +170,10 @@ function scfJump(on, time) {
 function scfTick(mapMode) {
   try {
     const vr = $("vRoute"), on = !(vr && !vr.checked), time = performance.now() / 1000;
+    if (mapMode && SCF.tg && SCF.tg.style.display !== "none") SCF.tg.style.display = "none";        // the 3D tag never stays on the System map
     if (mapMode) scfJump(on && SYNC.on, time); else if (SCF.jb) SCF.jb.style.display = "none";
     const E = on ? scfEnds() : null; SCF.E = E;
-    if (!E) { if (SCF.key) { SCF.key = ""; scfHide(); } return; }
+    if (!E) { SCF.key = ""; scfHide(); return; }
     const key = `${E.a.body.bodyId}${E.a.st ? E.a.st.name : ""}>${E.b.body.bodyId}${E.b.st ? E.b.st.name : ""}`;
     if (key !== SCF.key) { SCF.key = key; SCF.t0 = performance.now(); }
     const fade = Math.min(1, (performance.now() - SCF.t0) / 900);

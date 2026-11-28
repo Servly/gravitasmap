@@ -4,6 +4,11 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.38 · minor · 28 Nov 2026
+- Fix: the orange Target tag I added to the 3D map stayed hanging in the middle of the System map after you switched from the 3D map. It now shows only on the 3D map, and only while the arrows show.
+- Fix: there could be two Target tags on the 3D map (the map's own and mine). Mine now shows only when the map's own tag is not on screen.
+- Fix: my Target tag trailed the camera by a frame and shook while you moved. It now uses the camera of the current frame.
+
 ### v0.99.37 · minor · 28 Nov 2026
 - Fix: the route arrows did not show at all when the map was opened while your ship was already in supercruise, for example when the GRAVITAS app's map window starts or the page is reloaded. In supercruise the game says nothing about where you are, and the page had forgotten where you started. It now keeps the last place your ship was at in this system from the journal lines (a drop at a body, a landing approach, a login), also the ones it reads when the page opens, and starts the arrows there.
 
