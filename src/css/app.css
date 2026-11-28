@@ -1488,16 +1488,17 @@ body.pfull #apRow { display:flex; align-items:center; gap:9px; margin-top:8px; p
 #syncDlg .act { flex-wrap:wrap; } #syncDlg .again { border-color:#6ae8ff; color:#6ae8ff; }
 
 /* v0.99.24: calm page (js/50-calm.js): the endless small animations stand still while nobody looks at them */
-html.calm *, html.calm *::before, html.calm *::after { animation-play-state: paused !important; }
+/* (the blanket 'pause every animation' rule was here: replaced by the script in 50-calm.js, 0.99.35) */
 
 /* v0.99.31: route arrows (neon green chevrons from your start to your target) and the next-jump banner on the system map */
 #scfSq{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:6;pointer-events:none;display:none}
 #scfG path{fill:none;stroke:#39ff88;stroke-width:1.7px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 #scfG{filter:drop-shadow(0 0 3px #39ff88) drop-shadow(0 0 8px rgba(57,255,136,.5))}
 #scfSq.lowq #scfG{filter:none}
-#scfJb{position:fixed;z-index:7;pointer-events:none;display:none;align-items:center;gap:8px;transform:translateX(-50%);padding:3px 12px 3px 8px;border-radius:14px;background:rgba(8,16,14,.78);border:1px solid rgba(57,255,136,.35);color:#d8ffe8;font-size:12px;white-space:nowrap}
+#scfJb{transition:opacity .25s;position:fixed;z-index:7;pointer-events:none;display:none;align-items:center;gap:8px;transform:translateX(-50%);padding:3px 12px 3px 8px;border-radius:14px;background:rgba(8,16,14,.78);border:1px solid rgba(57,255,136,.35);color:#d8ffe8;font-size:12px;white-space:nowrap}
 #scfJb path{fill:none;stroke:#39ff88;stroke-width:1.6px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 #scfJb svg{filter:drop-shadow(0 0 3px #39ff88)}
 #scfJb .jk{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
 #scfJb b{letter-spacing:.02em}
 body.pfull #scfJb,html.appsmap #scfJb{display:none!important}
+

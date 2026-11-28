@@ -133,7 +133,7 @@ function scfHide() {
 
 // ---- the jump banner: a flat ">>>" and the next system's name, at the top of the System map while a jump route is plotted -------------------------------
 function scfJump(on, time) {
-  const hops = on ? jrnHops() : [], next = hops.length ? hops[0][0] : "";
+  const hops = on && typeof JRN !== "undefined" && JRN.rOn === "on" ? jrnHops() : [], next = hops.length ? hops[0][0] : "";        // only while the map is really in route mode: it goes with the 'route cleared' message
   if (!next || !MAPMODE) { if (SCF.jb) SCF.jb.style.display = "none"; return; }
   if (!SCF.jb) {
     const d = document.createElement("div"); d.id = "scfJb"; d.innerHTML = '<svg width="54" height="16" viewBox="0 0 54 16"><g id="scfJg"></g></svg><span class="jk">Next jump</span><b id="scfJn"></b>'; document.body.appendChild(d); SCF.jb = d;
@@ -142,6 +142,8 @@ function scfJump(on, time) {
   if ($("scfJn").textContent !== next) $("scfJn").textContent = next;
   const low = (QUALITY === PRESETS.low || SCF_RM.matches);
   const v = $("smapView") || $("smap"), r = v.getBoundingClientRect();
+  const msg = $("jrnMsg"), busy = !!(msg && /(^|\s)show(\s|$)/.test(msg.className));            // the map's own route messages come first: the strip waits a moment
+  SCF.jb.style.opacity = busy ? "0" : "1";
   SCF.jb.style.display = "flex"; SCF.jb.style.right = "auto"; SCF.jb.style.left = Math.round(r.left + r.width / 2) + "px"; SCF.jb.style.top = Math.round(r.top + 8) + "px";      // the top middle of the map picture
   SCF.jpaths.forEach((p, i) => { p.style.opacity = (low ? 0.4 + 0.3 * i : 0.25 + 0.75 * Math.max(0, Math.cos(2 * Math.PI * (i / 3 - time / 1.6)))).toFixed(2); });      // a gentle left-to-right run
 }

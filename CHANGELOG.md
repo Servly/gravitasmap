@@ -4,6 +4,10 @@ Every GRAVITAS release, newest first. The same notes are in the site's **About G
 
 ## 2026 Q4
 
+### v0.99.35 · minor · 28 Nov 2026
+- Fix: in the GRAVITAS app's map window, route mode messages such as ROUTE RECALCULATED and ROUTE CLEARED never went away, and the System map could open with an empty gap on the right as if a panel were half open. The page's calm mode (which stops the endless little animations) also stopped the one-shot ones: a panel opening or closing, the route bars sliding in and out, the route messages fading. Now it stops only the endless ones, so those one-shot animations finish as they should and the app's savings stay.
+- Fix: the Next jump strip no longer sits on top of the route messages (it waits for them to fade) and goes away together with route mode.
+
 ### v0.99.34 · minor · 28 Nov 2026
 - Removed: the Journey preview (the ship, the camera show and the Watch the journey button) is gone for good. The route arrows stay.
 - Changed: the Next jump strip that shows while a jump route is plotted now sits at the top middle of the System map's picture, right under the filter buttons.
